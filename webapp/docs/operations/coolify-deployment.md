@@ -55,16 +55,39 @@ For a new installation, create a resource from `Powermama/hush` and select Docke
 Coolify resolves the Compose location and build context from the base directory.
 These settings follow its [Docker Compose documentation](https://coolify.io/docs/applications/builds/docker-compose).
 
-Select the intended Git branch in Coolify's resource settings. Automatic
-deployment on push is configured in Coolify and its Git integration, not in the
-Compose file. After pushing, verify the deployed page and `/health/ready` before
-calling the website update live.
+Select `main` and `HEAD` in Git Source. Keep `main` protected by the required
+pull-request checks; merge tested changes before deploying them.
 
 Do not add a custom Docker network. Coolify attaches the Compose services to its managed network and routes the domain to the exposed web port.
 
 No update-bucket credentials belong in Coolify. Release automation uploads to
 R2 through its private S3 endpoint. The web build contains only public,
 versioned download URLs.
+
+### Automatic website deployments
+
+Automatic deployment is configured in Coolify and its Git integration, not in
+the Compose file. Follow Coolify's
+[automatic-deployment guide](https://coolify.io/docs/applications/deployments/automatic-deployments):
+
+1. Confirm the connected GitHub App can access `Powermama/hush`. A new repository
+   with an old name still has a new repository identity; recheck its installation
+   access after a migration.
+2. In **Advanced > Deployment > Auto deploy**, select **Deploy on push
+   (webhooks)**. Pull-request previews are separate from production.
+3. In **General > Build > Watch Paths**, save `webapp/**`. This pattern is relative
+   to the repository root, even though the build base directory is `/webapp`.
+   Website changes, including deployment documentation, trigger a deployment;
+   native-app and root README changes do not.
+4. Merge a website change and confirm **Webhook** and the merged commit in
+   **Deployment Logs**. A branch push before merge must not deploy production.
+5. Confirm `/health/ready` and the changed public page before calling the update
+   live. Also check that a root documentation-only merge does not deploy.
+
+Use one pattern per line if the website later depends on more shared paths.
+Manual redeployments bypass the watch-path filter. This setup uses the existing
+GitHub App webhook and Coolify server; it needs no additional deployment runner,
+personal access token, or scheduled job.
 
 ## 2. Configure DNS
 
