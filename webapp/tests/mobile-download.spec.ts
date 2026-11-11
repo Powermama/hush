@@ -65,6 +65,10 @@ test("mobile handoff handles unavailable sharing and denied clipboard access", a
   await expect(page.getByRole("button", { name: "Close navigation" })).toBeInViewport();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: "Open navigation" })).toBeFocused();
+  await expect(page.locator("body")).not.toHaveCSS("position", "fixed");
+  // Start a new gesture over the page. WebKit otherwise keeps the wheel
+  // sequence latched to the menu that just stopped being scrollable.
+  await page.mouse.move(180, 450);
   await page.mouse.wheel(0, 600);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(100);
 });
