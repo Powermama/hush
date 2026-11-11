@@ -7,6 +7,7 @@
 | --- | --- |
 | Find behaviour and browser tests | [Shared journey index](../../docs/reference/user-journeys.md) |
 | Understand proof verification | [Recipient contract](user-journeys/proof-recipient.md) |
+| Maintain search and social previews | [Search discovery](search-discovery.md) |
 | Deploy or move the service | [Coolify deployment](operations/coolify-deployment.md) |
 | Understand private short links | [Short-link operation](operations/proof-short-links.md) |
 | Inspect the API | [OpenAPI contract](../openapi/hush-provenance.json) |

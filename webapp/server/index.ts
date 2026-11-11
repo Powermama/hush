@@ -1,5 +1,4 @@
 import { serveStatic } from "hono/bun";
-import type { Context } from "hono";
 import { mkdir } from "node:fs/promises";
 import { createApp, registerRootProofAlias } from "./app";
 import { loadConfig, loadServiceKey } from "./config";
@@ -8,8 +7,8 @@ import { PostgresProofRepository } from "./repositories/postgres-proof-repositor
 import { SQLiteProofRepository } from "./repositories/sqlite-proof-repository";
 import { LocalProofObjectStore } from "./storage/local-object-store";
 import { S3ProofObjectStore } from "./storage/s3-object-store";
-import { findRelease, releases } from "../shared/releases";
-import { legalConfig } from "../shared/legal";
+import { latestRelease, releasePath } from "../shared/releases";
+import { sitePages } from "../shared/site";
 import {
   HTML_CACHE_CONTROL,
   cacheControlForStaticPath,
@@ -41,15 +40,19 @@ const app = createApp({
   registerRootAlias: false,
 });
 
-app.use(
-  "*",
-  serveStatic({
-    root: "./dist",
-    onFound: (path, context) => {
-      context.header("cache-control", cacheControlForStaticPath(path));
-    },
-  }),
-);
+const pageFile = Bun.file("./dist-pages/pages.json");
+const renderedPages: Record<string, string> = await pageFile.exists() ? await pageFile.json() : {};
+for (const [path, metadata] of Object.entries(sitePages)) {
+  app.get(path, (context) => {
+    const html = renderedPages[path];
+    if (!html) return context.text("Web build unavailable", 503);
+    context.header("cache-control", metadata.indexable ? HTML_CACHE_CONTROL : "no-store");
+    if (!metadata.indexable) context.header("x-robots-tag", "noindex, nofollow");
+    return context.html(html);
+  });
+}
+// A moving alias must not create an independently indexed duplicate.
+app.get("/releases/latest", context => context.redirect(latestRelease ? releasePath(latestRelease) : "/releases", 302));
 app.get("/p/*", async (context) => {
   const html = Bun.file("./dist/index.html");
   if (!(await html.exists())) {
@@ -59,60 +62,21 @@ app.get("/p/*", async (context) => {
   context.header("x-robots-tag", "noindex, nofollow");
   return context.html(await html.text());
 });
-const serveReleasePage = async (context: Context) => {
+app.get("/releases/*", async (context) => {
   const html = Bun.file("./dist/index.html");
   if (!(await html.exists())) {
     return context.text("Web build unavailable", 503);
   }
 
-  const slug = context.req.path.split("/").filter(Boolean).at(-1);
-  const isReleaseDetail = Boolean(slug && slug !== "releases" && slug !== "latest");
-  const release =
-    slug && slug !== "releases" && slug !== "latest"
-      ? findRelease(slug)
-      : slug === "latest"
-        ? releases[0]
-        : undefined;
-  const hasPublicRelease = releases.some(
-    (candidate) => candidate.visibility === "public",
-  );
-  const indexable = release
-    ? release.visibility === "public"
-    : !isReleaseDetail && hasPublicRelease;
-
-  context.header("cache-control", indexable ? HTML_CACHE_CONTROL : "no-store");
-  if (!indexable) context.header("x-robots-tag", "noindex, nofollow");
-  return context.html(await html.text(), isReleaseDetail && !release ? 404 : 200);
-};
-app.get("/releases", serveReleasePage);
-app.get("/releases/*", serveReleasePage);
-const serveLegalPage = async (context: Context) => {
-  const html = Bun.file("./dist/index.html");
-  if (!(await html.exists())) {
-    return context.text("Web build unavailable", 503);
-  }
-  context.header(
-    "cache-control",
-    legalConfig.isPlaceholder ? "no-store" : HTML_CACHE_CONTROL,
-  );
-  if (legalConfig.isPlaceholder) {
-    context.header("x-robots-tag", "noindex, nofollow");
-  }
-  return context.html(await html.text());
-};
-app.get("/impressum", serveLegalPage);
-app.get("/datenschutz", serveLegalPage);
-app.get("/de/impressum", serveLegalPage);
-app.get("/de/datenschutz", serveLegalPage);
-app.get("/verified-messages", async (context) => {
-  const html = Bun.file("./dist/index.html");
-  if (!(await html.exists())) {
-    return context.text("Web build unavailable", 503);
-  }
-  context.header("cache-control", HTML_CACHE_CONTROL);
-  return context.html(await html.text());
+  context.header("cache-control", "no-store");
+  context.header("x-robots-tag", "noindex, nofollow");
+  return context.html(await html.text(), 404);
 });
-app.get("/", serveStatic({ root: "./dist", path: "index.html" }));
+app.get("/index.html", context => context.redirect("/", 308));
+app.use("*", serveStatic({
+  root: "./dist",
+  onFound: (path, context) => context.header("cache-control", cacheControlForStaticPath(path)),
+}));
 registerRootProofAlias(app, proofService);
 
 const server = Bun.serve({

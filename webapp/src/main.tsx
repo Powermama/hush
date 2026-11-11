@@ -1,7 +1,12 @@
-import { createRoot } from "react-dom/client";
-import { AppRouter } from "./app/router";
+import { createRoot, hydrateRoot } from "react-dom/client";
+import { RouterClient } from "@tanstack/react-router/ssr/client";
+import { AppRouter, createAppRouter } from "./app/router";
 import "./styles.css";
 
-createRoot(document.getElementById("root")!).render(
-  <AppRouter />,
-);
+const root = document.getElementById("root")!;
+const router = createAppRouter();
+if (root.hasChildNodes()) {
+  hydrateRoot(root, <RouterClient router={router} />);
+} else {
+  createRoot(root).render(<AppRouter router={router} />);
+}

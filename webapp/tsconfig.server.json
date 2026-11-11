@@ -11,6 +11,7 @@
     "noUnusedParameters": true,
     "skipLibCheck": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "types": ["bun"]
   },
   "include": ["server", "shared", "drizzle.config.ts"]

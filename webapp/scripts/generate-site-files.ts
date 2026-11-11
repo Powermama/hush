@@ -1,31 +1,7 @@
-import { releases } from "../shared/releases";
-import { publicLegalPaths } from "../shared/legal";
+import { sitePages, siteOrigin } from "../shared/site";
 
-const siteOrigin = (process.env.HUSH_SITE_ORIGIN ?? "https://behu.sh").replace(
-  /\/$/,
-  "",
-);
-const publicReleases = releases.filter(
-  (release) => release.visibility === "public",
-);
-
-const urls = [
-  { location: `${siteOrigin}/` },
-  { location: `${siteOrigin}/verified-messages` },
-  ...publicLegalPaths.map((path) => ({ location: `${siteOrigin}${path}` })),
-  ...(publicReleases.length > 0
-    ? [
-        {
-          location: `${siteOrigin}/releases`,
-          modified: publicReleases[0].releasedAt,
-        },
-      ]
-    : []),
-  ...publicReleases.map((release) => ({
-    location: `${siteOrigin}/releases/${release.slug}`,
-    modified: release.releasedAt,
-  })),
-];
+const publicPages = Object.values(sitePages).filter(page => page.indexable);
+const urls = publicPages.map(page => ({ location: `${siteOrigin}${page.canonicalPath}`, modified: page.modified }));
 
 const escapeXML = (value: string) =>
   value
@@ -49,6 +25,21 @@ const sitemap = [
 ].join("\n");
 
 await Bun.write("public/sitemap.xml", sitemap);
+await Bun.write("public/llms.txt", [
+  "# hush", "",
+  "> Free, open-source voice dictation and local AI for Apple silicon Macs.", "",
+  "hush transcribes speech, refines writing with optional personas and offers a beta assistant. macOS 15 or later is required. An 8 GB Mac can run transcription; 16 GB is recommended for the optional assistant.", "",
+  "After model downloads, transcription and AI inference run locally. Model downloads, updates, web actions and publishing optional Verified Messages use network connections.", "",
+  "Verified Messages share encrypted signed capture and edit history. They do not establish identity, human presence or truth. Private proof links and their fragment keys are not public documentation and must not be indexed or included in summaries.", "",
+  "## Product", "",
+  ...publicPages.map(page => `- [${page.title}](${siteOrigin}${page.canonicalPath}): ${page.description}`), "",
+  "## Source and contribution", "",
+  "- [hush on GitHub](https://github.com/Powermama/hush): macOS app and website monorepo.",
+  "- [Licensing](https://github.com/Powermama/hush/blob/main/LICENSING.md): AGPL-3.0-only for original code; separately licensed components and assets retain their terms.",
+  "- [Contributing](https://github.com/Powermama/hush/blob/main/CONTRIBUTING.md): development and contribution workflow.", "",
+  "## Optional", "",
+  `- [Sitemap](${siteOrigin}/sitemap.xml): Public URLs intended for indexing.`, "",
+].join("\n"));
 console.info(
   `Generated public/sitemap.xml with ${urls.length} indexable URL${urls.length === 1 ? "" : "s"}.`,
 );
