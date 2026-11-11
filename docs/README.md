@@ -14,6 +14,7 @@
 | Work on the website or proof service | [Web development](../webapp/README.md) |
 | Understand what stays on the Mac | [Architecture and data boundaries](explanation/architecture.md) |
 | Understand which CI checks run | [Component checks and runner usage](explanation/continuous-integration.md) |
+| Maintain GitHub protections and security reporting | [Repository security settings](reference/repository-security.md) |
 | Find expected behaviour and its tests | [User journeys](reference/user-journeys.md) |
 | Diagnose a freeze | [Responsiveness checks](../macos/docs/operations/responsiveness.md) |
 | Prepare a signed release | [Notarization](../macos/docs/operations/notarization.md) and [updates](../macos/docs/operations/app-updates.md) |
