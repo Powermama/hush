@@ -25,6 +25,7 @@ export function LocalUniverse() {
     let dispose: (() => void) | null = null;
     const entry = host.current?.closest<HTMLElement>(".hush-landing");
     const release = () => { if (entry?.dataset.opening === "pending") entry.dataset.opening = "complete"; };
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || scrollY >= 100 || location.hash || document.hidden) release();
     const recovery = window.setTimeout(release, 2200);
     window.addEventListener("wheel", release, { passive: true });
     window.addEventListener("keydown", release);

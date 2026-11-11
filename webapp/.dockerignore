@@ -6,6 +6,9 @@
 .github
 dist
 dist-server
+dist-ssr
+dist-pages
+.lighthouseci
 node_modules
 playwright-report
 test-results

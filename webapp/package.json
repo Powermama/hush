@@ -9,7 +9,9 @@
     "dev:web": "vite",
     "dev:api": "bun --watch server/index.ts",
     "site:generate": "bun scripts/generate-site-files.ts",
-    "build": "bun run site:generate && tsc -b && vite build",
+    "site:social": "bun scripts/generate-social-images.ts",
+    "test:seo": "bun run build && lhci collect && lhci assert",
+    "build": "bun run site:generate && tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && bun scripts/prerender.ts",
     "build:api": "bun build server/index.ts --target=bun --outdir=dist-server",
     "serve:e2e": "NODE_ENV=test PORT=4173 HUSH_PUBLIC_BASE_URL=http://127.0.0.1:4173 bun server/index.ts",
     "api:openapi": "bun server/export-openapi.ts",
@@ -40,6 +42,7 @@
     "zod": "4.1.5"
   },
   "devDependencies": {
+    "@lhci/cli": "0.16.0",
     "@playwright/test": "1.62.1",
     "@tailwindcss/vite": "4.3.3",
     "@types/bun": "1.3.9",

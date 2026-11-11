@@ -2,6 +2,9 @@ dist
 node_modules
 .data
 dist-server
+dist-ssr
+dist-pages
+.lighthouseci
 playwright-report
 test-results
 *.tsbuildinfo

@@ -1,15 +1,24 @@
-# Hush
+# hush
 
-> Hush is a private macOS writing tool that turns speech into polished text using local transcription and local AI.
+> Free, open-source voice dictation and local AI for Apple silicon Macs.
 
-Hush is designed so dictated content and AI refinement stay on the user's Mac. It works across Mac apps, supports reusable writing personas, and lets a user publish an optional encrypted proof link for a message.
+hush transcribes speech, refines writing with optional personas and offers a beta assistant. macOS 15 or later is required. An 8 GB Mac can run transcription; 16 GB is recommended for the optional assistant.
 
-Hush proof links describe signed capture origin and refinement history. They do not prove biological identity or determine whether spoken audio was AI-generated. Proof contents are encrypted, require the private key in the URL fragment, and are intentionally excluded from public discovery.
+After model downloads, transcription and AI inference run locally. Model downloads, updates, web actions and publishing optional Verified Messages use network connections.
+
+Verified Messages share encrypted signed capture and edit history. They do not establish identity, human presence or truth. Private proof links and their fragment keys are not public documentation and must not be indexed or included in summaries.
 
 ## Product
 
-- [Hush](https://behu.sh/): Product overview, privacy model, features, and macOS experience.
+- [hush - Local voice dictation and AI for Mac](https://behu.sh/): Free, open-source voice dictation for Mac. Write across your apps with local AI, personal writing styles and a beta assistant. Built for Apple silicon.
+- [Verified Messages - Signed message history with hush](https://behu.sh/verified-messages): Record in hush. Keep the recorded time and edits. Share a private encrypted link so readers can verify the signed message history in their browser.
+
+## Source and contribution
+
+- [hush on GitHub](https://github.com/Powermama/hush): macOS app and website monorepo.
+- [Licensing](https://github.com/Powermama/hush/blob/main/LICENSING.md): AGPL-3.0-only for original code; separately licensed components and assets retain their terms.
+- [Contributing](https://github.com/Powermama/hush/blob/main/CONTRIBUTING.md): development and contribution workflow.
 
 ## Optional
 
-- [Sitemap](https://behu.sh/sitemap.xml): Canonical public pages intended for search indexing.
+- [Sitemap](https://behu.sh/sitemap.xml): Public URLs intended for indexing.
