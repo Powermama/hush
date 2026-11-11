@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { and, eq, gt, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull, isNotNull, lte, or, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import {
   sqliteChallenges,
@@ -13,6 +13,7 @@ import type {
   ProofAliasRecord,
   ProofRecord,
 } from "../domain/models";
+import { PROOF_RETENTION_MS } from "../services/retention-policy";
 import type {
   CreateInstallation,
   CreateProof,
@@ -184,10 +185,51 @@ export class SQLiteProofRepository implements ProofRepository {
       this.db
         .update(sqliteProofs)
         .set(input)
-        .where(and(eq(sqliteProofs.id, input.id), isNull(sqliteProofs.completedAt)))
+        .where(and(
+          eq(sqliteProofs.id, input.id), isNull(sqliteProofs.completedAt),
+          isNull(sqliteProofs.revokedAt), isNull(sqliteProofs.deletedAt),
+          gt(sqliteProofs.expiresAt, input.completedAt),
+        ))
         .returning()
         .get() ?? null
     );
+  }
+
+
+  // Claim before object I/O so an abandoned reservation cannot complete while
+  // its bytes are being removed. Failed deletions remain claimed for retry.
+  async claimProofsForDeletion(now: Date, limit: number): Promise<ProofRecord[]> {
+    const cutoff = new Date(now.getTime() - PROOF_RETENTION_MS);
+    const eligible = or(
+      isNotNull(sqliteProofs.deletedAt),
+      lte(sqliteProofs.expiresAt, cutoff),
+      lte(sqliteProofs.revokedAt, cutoff),
+      and(isNull(sqliteProofs.completedAt), lte(sqliteProofs.createdAt, cutoff)),
+    );
+    const candidates = this.db.select({ id: sqliteProofs.id })
+      .from(sqliteProofs).where(eligible)
+      .orderBy(sql`coalesce(${sqliteProofs.deletedAt}, ${sqliteProofs.createdAt})`, sqliteProofs.id)
+      .limit(limit).all();
+    if (!candidates.length) return [];
+    return this.db.update(sqliteProofs).set({ deletedAt: now })
+      .where(and(inArray(sqliteProofs.id, candidates.map((row) => row.id)), eligible))
+      .returning().all();
+  }
+
+  async deleteClaimedProof(id: string): Promise<void> {
+    this.db.delete(sqliteProofs)
+      .where(and(eq(sqliteProofs.id, id), isNotNull(sqliteProofs.deletedAt))).run();
+  }
+
+  async deleteExpiredChallenges(now: Date, limit: number): Promise<number> {
+    const candidates = this.db.select({ id: sqliteChallenges.id })
+      .from(sqliteChallenges).where(lte(sqliteChallenges.expiresAt, now))
+      .orderBy(sqliteChallenges.expiresAt).limit(limit).all();
+    if (!candidates.length) return 0;
+    const removed = this.db.delete(sqliteChallenges)
+      .where(inArray(sqliteChallenges.id, candidates.map((row) => row.id)))
+      .returning({ id: sqliteChallenges.id }).all();
+    return removed.length;
   }
 
   async revokeProof(id: string, revokedAt: Date): Promise<ProofRecord | null> {

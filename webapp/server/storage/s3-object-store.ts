@@ -79,6 +79,7 @@ export class S3ProofObjectStore implements ProofObjectStore {
   async delete(objectKey: string): Promise<void> {
     await this.client.send(
       new DeleteObjectCommand({ Bucket: this.bucket, Key: objectKey }),
+      { abortSignal: AbortSignal.timeout(10_000) },
     );
   }
 }

@@ -95,3 +95,30 @@ Given a valid private proof, the recipient can distinguish recorded voice, clean
 ## Change rule
 
 Reproduce recipient bugs in Playwright with the exact malformed or cross-platform representation first. Fix the narrow verification rule, then run type checking, backend tests, OpenAPI drift checks, and all browser projects.
+
+### VM-011 - End access and remove retained proof data
+
+Revocation and expiry immediately block encrypted-content retrieval and new
+completion or upload attempts. A cleanup worker runs at startup and every minute
+in non-overlapping batches of at most 100 proofs and 100 challenges. Once a
+proof has been expired or revoked for 24 hours, it claims the record, deletes
+the encrypted object, then removes the metadata and cascading short alias.
+Uncompleted reservations are eligible 24 hours after creation. Active completed
+proofs are preserved. The terminal-state interval outlives five-minute presigned
+uploads and briefly lets recipients see an explicit revoked/expired state.
+After physical cleanup, requests return the existing unavailable/not-found state.
+
+A failed storage deletion leaves a claimed, inaccessible record for retry.
+Storage outages or a backlog can delay physical deletion. Installation public
+keys remain registered so an existing Mac can publish again; they are not
+message content. Expired enrollment/publication challenges are removed in the
+same worker. In-memory IP rate limits expire independently of incoming requests,
+within two minutes for the current one-minute windows, with a 10,000-entry cap
+per limiter. Backups and recipient copies are outside live-storage deletion.
+
+Evidence: `server/app.test.ts` exercises publication, revocation, rejected
+completion, cleanup and unavailable aliases through the API.
+`server/services/proof-cleanup.test.ts` uses real SQLite/local files and optionally
+Postgres to verify expiry, abandonment, bounded batches, retries and completion
+races. `server/http/rate-limiter.test.ts` verifies HTTP limits, capacity and idle
+expiry. Existing `tests/proof.spec.ts` covers unavailable recipient presentation.

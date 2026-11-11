@@ -14,6 +14,8 @@ import {
 } from "../shared/provenance/canonical";
 import type { ReserveProofInput } from "../shared/contracts/proof";
 import { SQLiteProofRepository } from "./repositories/sqlite-proof-repository";
+import { cleanupProofs } from "./services/proof-cleanup";
+import { PROOF_RETENTION_MS } from "./services/retention-policy";
 import { ProofService } from "./services/proof-service";
 import type {
   ProofObjectStore,
@@ -245,7 +247,21 @@ describe("Hush provenance API", () => {
       200,
     );
     expect(revokedMetadata.status).toBe("revoked");
+    expect(objects.values.size).toBe(1);
     expect((await app.request(`/v1/proofs/${reservation.slug}/content`)).status).toBe(410);
+    const completeAfterRevoke = await app.request(
+      `/v1/proofs/${reservation.id}/complete`,
+      jsonRequest({ completionToken: reservation.completionToken }),
+    );
+    expect(completeAfterRevoke.status).toBe(410);
+    // Revocation first blocks access; cleanup later removes bytes, metadata and aliases.
+    expect((await cleanupProofs(repository, objects)).deleted).toBe(0);
+    const later = new Date(Date.now() + PROOF_RETENTION_MS + 1);
+    expect((await cleanupProofs(repository, objects, later)).deleted).toBe(1);
+    expect(objects.values.size).toBe(0);
+    expect(await repository.findProofById(reservation.id)).toBeNull();
+    expect((await app.request(shortProofUrl.pathname)).status).toBe(404);
+    expect((await app.request(`/v1/proofs/${reservation.slug}/content`)).status).toBe(404);
   });
 
   test("rejects a replayed enrollment challenge", async () => {
