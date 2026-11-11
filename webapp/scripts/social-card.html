@@ -17,11 +17,9 @@
     .orbit.second { width: 520px; height: 610px; left: 740px; top: -100px; transform: rotate(33deg); opacity: .5; }
     .brand { position: absolute; top: 48px; left: 62px; display: flex; align-items: center; gap: 12px; font-size: 33px; font-weight: 700; letter-spacing: -1.6px; }
     .brand .mark { width: 45px; height: 45px; padding: 10px; border-radius: 13px; background: #25292b; color: white; }
-    .copy { position: absolute; left: 62px; top: 155px; width: 590px; }
-    h1 { margin: 0; font-size: 87px; line-height: .98; font-weight: 600; letter-spacing: -5.8px; }
-    .description { margin: 28px 0 0; color: var(--muted); font-size: 23px; line-height: 1.4; letter-spacing: -.5px; }
-    .footer { position: absolute; left: 64px; right: 64px; bottom: 36px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; color: #606b79; }
-    .footer strong { font-weight: 600; color: var(--ink); }
+    .copy { position: absolute; left: 62px; top: 196px; width: 535px; }
+    h1 { margin: 0; font-size: 74px; line-height: 1.04; font-weight: 600; letter-spacing: -4.4px; }
+    .description { margin: 26px 0 0; color: var(--muted); font-size: 23px; line-height: 1.4; letter-spacing: -.5px; }
     .sculpture { position: absolute; top: 83px; right: 88px; width: 185px; height: 185px; transform: perspective(650px) rotateY(-15deg) rotateZ(11deg); }
     .layer, .face { position: absolute; inset: 0; border-radius: 47px; }
     .layer.back { transform: translate(29px, -16px); background: #d4e8e1; border: 1px solid #faffff; box-shadow: inset -3px 0 2px #98b9b549; }
@@ -55,9 +53,6 @@
     body[data-page="verified"] .home { display: none; }
     body[data-page="verified"] .proof { display: block; }
     body[data-page="verified"] .private-link.proof { display: flex; }
-    body[data-page="verified"] h1 { font-size: 80px; line-height: 1.01; letter-spacing: -5px; }
-    body[data-page="verified"] .copy { top: 167px; }
-    body[data-page="verified"] .description { margin-top: 26px; }
   </style>
 </head>
 <body data-page="home">
@@ -67,8 +62,8 @@
   <main class="card">
     <div class="atmosphere"></div><div class="dots"></div><div class="orbit"></div><div class="orbit second"></div>
     <div class="brand"><svg class="mark"><use href="#hush-mark"/></svg>hush.</div>
-    <div class="copy home"><h1>The voice<br>layer for<br>your Mac.</h1><p class="description">Speak naturally. Write anywhere.<br>Powered by local AI.</p></div>
-    <div class="copy proof"><h1>Give your words<br>their story<br>back.</h1><p class="description">Share a private link.<br>Keep the signed history.</p></div>
+    <div class="copy home"><h1>The voice layer<br>for your Mac.</h1><p class="description">Speak naturally. Write anywhere.<br>Powered by local AI.</p></div>
+    <div class="copy proof"><h1>Give your words<br>their story back.</h1><p class="description">Share a private link.<br>Keep the signed history.</p></div>
     <div class="sculpture"><div class="layer back"></div><div class="layer middle"></div><div class="face"><svg><use href="#hush-mark"/></svg></div></div>
     <div class="note home">
       <div class="note-toolbar"><i class="window-dot"></i><i class="window-dot"></i><i class="window-dot"></i><span>A thought in motion</span></div>
@@ -87,7 +82,6 @@
       <div class="history"><span><b>✓</b> Voice captured</span><span><b>✓</b> Edits recorded</span><span><b>✓</b> Signed</span></div>
     </div>
     <div class="private-link proof"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>A private link. A signed story.</div>
-    <div class="footer"><span class="home">Free. Open source. Built for Mac.</span><span class="proof">Verified Messages by hush</span><strong>behu.sh</strong></div>
   </main>
 </body>
 </html>
