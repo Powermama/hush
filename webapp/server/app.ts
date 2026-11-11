@@ -26,6 +26,7 @@ const errorResponses = {
   400: { description: "Invalid request", content: { "application/json": { schema: errorResponseSchema } } },
   401: { description: "Invalid signature or capability", content: { "application/json": { schema: errorResponseSchema } } },
   404: { description: "Not found", content: { "application/json": { schema: errorResponseSchema } } },
+  410: { description: "Expired or revoked proof", content: { "application/json": { schema: errorResponseSchema } } },
   409: { description: "State conflict", content: { "application/json": { schema: errorResponseSchema } } },
   422: { description: "Semantically invalid", content: { "application/json": { schema: errorResponseSchema } } },
 } as const;

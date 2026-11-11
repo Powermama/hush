@@ -48,5 +48,8 @@ export interface ProofRepository {
     receiptSignature: string;
     completedAt: Date;
   }): Promise<ProofRecord | null>;
+  claimProofsForDeletion(now: Date, limit: number): Promise<ProofRecord[]>;
+  deleteClaimedProof(id: string): Promise<void>;
+  deleteExpiredChallenges(now: Date, limit: number): Promise<number>;
   revokeProof(id: string, revokedAt: Date): Promise<ProofRecord | null>;
 }

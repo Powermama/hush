@@ -238,6 +238,12 @@ export class ProofService {
       );
     }
     await this.objects.put(proof.objectKey, bytes);
+    // Revocation or cleanup may have occurred while the object store was writing.
+    const current = await this.repository.findProofById(id);
+    if (!current || current.deletedAt || current.revokedAt || current.expiresAt <= this.now()) {
+      await this.objects.delete(proof.objectKey);
+      throw new ServiceError("proof_unavailable", "This proof is no longer available.", 410);
+    }
   }
 
   async completeProof(id: string, completionToken: string) {
@@ -250,10 +256,8 @@ export class ProofService {
       proof.completionTokenHash,
       "completion token",
     );
+    this.requireAvailableProof(proof);
     if (proof.completedAt) return this.completedResponse(proof);
-    if (proof.expiresAt <= this.now()) {
-      throw new ServiceError("proof_expired", "Proof reservation expired.", 410);
-    }
     const bytes = await this.objects.get(proof.objectKey);
     if (!bytes) {
       throw new ServiceError(
@@ -311,6 +315,7 @@ export class ProofService {
           409,
         );
       }
+      this.requireAvailableProof(current);
       return this.completedResponse(current);
     }
     return this.completedResponse(completed);
@@ -385,13 +390,17 @@ export class ProofService {
     if (!proof || proof.deletedAt) {
       throw new ServiceError("proof_not_found", "Proof not found.", 404);
     }
+    this.requireAvailableProof(proof);
     if (proof.completedAt) {
       throw new ServiceError("proof_completed", "Proof is already complete.", 409);
     }
-    if (proof.expiresAt <= this.now()) {
-      throw new ServiceError("proof_expired", "Proof reservation expired.", 410);
-    }
     return proof;
+  }
+
+  private requireAvailableProof(proof: ProofRecord) {
+    if (proof.deletedAt || proof.revokedAt || proof.expiresAt <= this.now()) {
+      throw new ServiceError("proof_unavailable", "This proof is expired or revoked.", 410);
+    }
   }
 
   private async requirePublishedProof(slug: string) {
