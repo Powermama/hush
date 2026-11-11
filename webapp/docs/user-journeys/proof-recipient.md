@@ -122,3 +122,13 @@ completion, cleanup and unavailable aliases through the API.
 Postgres to verify expiry, abandonment, bounded batches, retries and completion
 races. `server/http/rate-limiter.test.ts` verifies HTTP limits, capacity and idle
 expiry. Existing `tests/proof.spec.ts` covers unavailable recipient presentation.
+
+
+## Upload and storage compatibility
+
+Encrypted uploads remain limited to 8,000,000 bytes. Both fixed-length and
+chunked oversized HTTP bodies must return `413` with `body_too_large` without
+storing an object. `server/app.test.ts` covers both wire formats over loopback.
+`server/storage/s3-object-store.test.ts` checks presigned upload parameters,
+byte-preserving storage, deletion and missing-object XML responses against a
+local S3-compatible fixture using dummy credentials. No live bucket is accessed.

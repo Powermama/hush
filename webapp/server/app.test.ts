@@ -1,3 +1,4 @@
+import { request as httpRequest } from "node:http";
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { createApp } from "./app";
 import {
@@ -70,6 +71,42 @@ describe("Hush provenance API", () => {
   });
 
   afterEach(() => repository.close());
+
+  test("rejects oversized encrypted uploads over HTTP, including chunked bodies", async () => {
+    const server = Bun.serve({ hostname: "127.0.0.1", port: 0, fetch: app.fetch });
+    try {
+      const url = new URL("/v1/proofs/00000000-0000-4000-8000-000000000000/content", server.url);
+      for (const chunked of [false, true]) {
+        const oversized = new Uint8Array(8_000_001);
+        const response = await new Promise<{ status: number; body: string }>((resolve, reject) => {
+          const request = httpRequest(url, {
+            method: "PUT",
+            // A rejection may arrive before the request body is drained.
+            // Do not reuse that connection for the next framing variant.
+            agent: false,
+            headers: {
+              "content-type": "application/vnd.hush.proof+encrypted",
+              ...(chunked ? { "transfer-encoding": "chunked" } : { "content-length": String(oversized.length) }),
+            },
+          }, response => {
+            let body = "";
+            response.setEncoding("utf8");
+            response.on("data", chunk => { body += chunk; });
+            response.on("end", () => resolve({ status: response.statusCode!, body }));
+            response.on("error", reject);
+          });
+          request.on("error", reject);
+          request.write(oversized.subarray(0, 4_000_000));
+          request.end(oversized.subarray(4_000_000));
+        });
+        expect(response.status).toBe(413);
+        expect(JSON.parse(response.body).error.code).toBe("body_too_large");
+        expect(objects.values.size).toBe(0);
+      }
+    } finally {
+      await server.stop(true);
+    }
+  });
 
   test("enrolls, publishes, verifies, serves, and revokes an encrypted proof", async () => {
     const installationPair = (await crypto.subtle.generateKey(
