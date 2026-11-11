@@ -1,6 +1,6 @@
 import { CompressedCubeTexture, HalfFloatType, LinearSRGBColorSpace } from "three";
 import { read, VK_FORMAT_R16G16B16A16_SFLOAT } from "ktx-parse";
-import environmentURL from "./assets/studio-environment.ktx2.gz?url";
+import environmentURL from "./assets/studio-lighting.ktx2.gz?url";
 
 let data: Promise<ReturnType<typeof read>> | undefined;
 
@@ -10,13 +10,16 @@ export async function loadStudioEnvironment() {
     const response = await fetch(environmentURL, { signal: AbortSignal.timeout(8000) });
     if (!response.ok || !response.body) throw new Error("Studio lighting unavailable");
     const buffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    // Fetch already decodes HTTP Content-Encoding (including Vite's .gz assets).
-    // Static hosts may instead serve the gzip file as bytes. Inspect the payload
-    // so both delivery paths decode exactly once, then validate the KTX below.
-    const decoded = bytes[0] === 0x1f && bytes[1] === 0x8b
-      ? new Uint8Array(await new Response(new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer())
-      : bytes;
+    let decoded = new Uint8Array(buffer);
+    // Vite can deliver decoded KTX2; static hosts deliver our gzip archive.
+    // WebKit can also expose an edge gzip wrapper around that archive. Decode
+    // only those two known layers, then require the exact KTX2 format below.
+    // Do not trust Content-Encoding as a description of Fetch's decoded body.
+    for (let layer = 0; layer < 2 && decoded[0] === 0x1f && decoded[1] === 0x8b; layer++) {
+      decoded = new Uint8Array(await new Response(
+        new Blob([decoded]).stream().pipeThrough(new DecompressionStream("gzip")),
+      ).arrayBuffer());
+    }
     const container = read(decoded);
     if (container.vkFormat !== VK_FORMAT_R16G16B16A16_SFLOAT || container.faceCount !== 6 ||
         container.pixelWidth !== 128 || container.pixelHeight !== 128 || container.levels.length !== 6) {

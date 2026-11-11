@@ -70,7 +70,7 @@ try {
     return btoa(binary);
   });
   const bytes = gzipSync(Buffer.from(encoded, "base64"), { level: 9 });
-  await writeFile("src/landing/assets/studio-environment.ktx2.gz", bytes);
+  await writeFile("src/landing/assets/studio-lighting.ktx2.gz", bytes);
   console.log(`Baked studio environment: ${bytes.length} bytes`);
 } finally {
   await browser?.close();
