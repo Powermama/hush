@@ -29,6 +29,11 @@ Browser tests launch their own local test service on port 4173. Read
 [the proof-recipient contract](docs/user-journeys/proof-recipient.md) before
 changing verification, cryptography or private-link behaviour.
 
+Public pages are prerendered through TanStack Router during the Vite build.
+See [search and link previews](docs/search-discovery.md) for the shared metadata
+catalogue, generated sitemap/llms.txt, Open Graph artwork and Search Console
+follow-through. Private proofs remain client-only.
+
 ## Deployment
 
 From the monorepo root, the existing local Compose stack remains available:

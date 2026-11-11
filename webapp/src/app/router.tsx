@@ -69,8 +69,7 @@ const germanPrivacyPolicyRoute = createRoute({
   path: "/de/datenschutz",
   component: () => <PrivacyPolicyPage language="de" />,
 });
-const router = createRouter({
-  routeTree: rootRoute.addChildren([
+const routeTree = rootRoute.addChildren([
     landingRoute,
     verifiedMessagesRoute,
     proofRoute,
@@ -81,8 +80,11 @@ const router = createRouter({
     privacyPolicyRoute,
     germanImprintRoute,
     germanPrivacyPolicyRoute,
-  ]),
-});
+  ]);
+
+export function createAppRouter() {
+  return createRouter({ routeTree });
+}
 
 function ProofRoute() {
   const { slug } = useParams({ from: "/p/$slug" });
@@ -101,10 +103,10 @@ function ReleaseRoute() {
 
 declare module "@tanstack/react-router" {
   interface Register {
-    router: typeof router;
+    router: ReturnType<typeof createAppRouter>;
   }
 }
 
-export function AppRouter() {
+export function AppRouter({ router }: { router: ReturnType<typeof createAppRouter> }) {
   return <RouterProvider router={router} />;
 }

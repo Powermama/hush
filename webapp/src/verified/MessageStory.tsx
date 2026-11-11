@@ -16,12 +16,12 @@ export function MessageStory() {
   const windowRef = useRef<HTMLDivElement>(null);
   const proofRef = useRef<HTMLElement>(null);
   const focusProof = useRef(false);
-  const [reducedMotion, setReducedMotion] = useState(() => matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const [reducedMotion, setReducedMotion] = useState(false);
   const [elapsed, setElapsed] = useState(reducedMotion ? DURATION : 0);
   const elapsedRef = useRef(elapsed);
   const [playing, setPlaying] = useState(!reducedMotion);
   const [visible, setVisible] = useState(false);
-  const [pageVisible, setPageVisible] = useState(!document.hidden);
+  const [pageVisible, setPageVisible] = useState(true);
   const phase = Math.min(2, Math.floor(elapsed / 5_000));
   const running = playing && visible && pageVisible && !reducedMotion;
 
@@ -40,6 +40,8 @@ export function MessageStory() {
       }
     }
     function visibility() { setPageVisible(!document.hidden); }
+    preference();
+    visibility();
     motion.addEventListener("change", preference);
     document.addEventListener("visibilitychange", visibility);
     return () => {

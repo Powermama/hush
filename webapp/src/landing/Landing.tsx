@@ -5,6 +5,8 @@ import { Header } from "../layout/Header";
 import { Footer } from "../layout/Footer";
 import { LocalUniverse, WaveMark } from "./LocalUniverse";
 import { VisionStory } from "./VisionStory";
+import { DocumentMetadata } from "../components/DocumentMetadata";
+import { sitePages } from "../../shared/site";
 import "./landing.css";
 import "./story.css";
 
@@ -21,8 +23,9 @@ function MacDownload() {
 
 export function Landing() {
   // Present in the first React commit, before effects or the deferred scene load.
-  const [initialOpening] = useState(() => matchMedia("(prefers-reduced-motion: reduce)").matches || scrollY >= 100 || location.hash || document.hidden ? "complete" : "pending");
+  const [initialOpening] = useState("pending");
   return <div className="hush-landing" id="top" data-opening={initialOpening}>
+    <DocumentMetadata {...sitePages["/"]} />
     <a className="landing-skip" href="#main">Skip to content</a>
     <Header />
     <main id="main">

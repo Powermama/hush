@@ -26,6 +26,7 @@ references, not a list of marketing claims.
 | Understand the signed-message story | [Verified Messages landing](../../webapp/docs/user-journeys/verified-messages-landing.md) |
 | Open, decrypt and verify a private proof | [Proof recipient](../../webapp/docs/user-journeys/proof-recipient.md) |
 | Read legal and privacy information | [Legal information](../../webapp/docs/user-journeys/legal-information.md) |
+| Find public pages in search and preview shared links | [Public discovery](../../webapp/docs/user-journeys/search-discovery.md) |
 
 ## Change a journey
 

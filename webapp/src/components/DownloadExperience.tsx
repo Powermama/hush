@@ -12,6 +12,7 @@ import {
 } from "../../shared/releases";
 import { ButtonLink, buttonClassName } from "./ButtonLink";
 import { DownloadHandoff } from "./DownloadHandoff";
+import { useBrowserValue } from "./useBrowserValue";
 
 type DownloadLinkProps = Omit<
   ComponentProps<typeof ButtonLink>,
@@ -19,10 +20,10 @@ type DownloadLinkProps = Omit<
 > & { mobileLabel?: ReactNode };
 
 export function DownloadLink({ mobileLabel = "Get hush for Mac", ...props }: DownloadLinkProps) {
-  const [mobile] = useState(() => typeof navigator !== "undefined" && (
+  const mobile = useBrowserValue(() => typeof navigator !== "undefined" && (
     /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  ));
+  ), false);
   const [handoffOpen, setHandoffOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const release = latestRelease;
