@@ -20,7 +20,7 @@ test("Vite preview renders the 3D hero and rose with HTTP-decoded lighting", asy
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: "reduce" });
-  const lightingResponse = page.waitForResponse(response => response.url().endsWith("studio-environment.ktx2.gz"));
+  const lightingResponse = page.waitForResponse(response => response.url().endsWith("studio-lighting.ktx2.gz"));
   await page.goto(origin);
   const response = await lightingResponse;
   expect(response.headers()["content-encoding"]).toBe("gzip");
