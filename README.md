@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="macos/icon.svg" width="80" height="80" alt="hush">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hush-wordmark-dark.svg">
+    <img src="docs/assets/hush-wordmark.svg" width="248" height="72" alt="hush">
+  </picture>
 </p>
 
 <h1 align="center">The voice layer for your Mac.</h1>
@@ -16,7 +19,7 @@
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
-<p align="center">Apple silicon · macOS 15+ · Free alpha</p>
+<p align="center">Apple silicon · macOS 15+<br>Free and open source. Currently in alpha.</p>
 
 ![The hush dashboard showing dictation activity, time saved, and local models. Real app interface with demo data.](macos/docs/assets/readme-cover.png)
 

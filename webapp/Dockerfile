@@ -11,7 +11,7 @@ COPY public ./public
 COPY server ./server
 COPY shared ./shared
 COPY src ./src
-COPY scripts/generate-site-files.ts ./scripts/generate-site-files.ts
+COPY scripts/generate-site-files.ts scripts/prerender.ts ./scripts/
 RUN bun run build
 
 FROM oven/bun:1.3.9-alpine AS runtime
@@ -24,6 +24,7 @@ ENV NODE_ENV=production \
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/dist-pages ./dist-pages
 COPY server ./server
 COPY shared ./shared
 COPY scripts/healthcheck.ts ./scripts/healthcheck.ts
