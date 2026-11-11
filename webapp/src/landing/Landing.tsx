@@ -1,9 +1,10 @@
 import { DownloadLink } from "../components/DownloadExperience";
-import { useState } from "react";
+import { useRef } from "react";
 import { siApple } from "simple-icons";
 import { Header } from "../layout/Header";
 import { Footer } from "../layout/Footer";
 import { LocalUniverse, WaveMark } from "./LocalUniverse";
+import { useLandingEntrance } from "./useLandingEntrance";
 import { VisionStory } from "./VisionStory";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { sitePages } from "../../shared/site";
@@ -22,9 +23,9 @@ function MacDownload() {
 }
 
 export function Landing() {
-  // Present in the first React commit, before effects or the deferred scene load.
-  const [initialOpening] = useState("pending");
-  return <div className="hush-landing" id="top" data-opening={initialOpening}>
+  const root = useRef<HTMLDivElement>(null);
+  useLandingEntrance(root);
+  return <div className="hush-landing" id="top" data-opening="pending" ref={root}>
     <DocumentMetadata {...sitePages["/"]} />
     <a className="landing-skip" href="#main">Skip to content</a>
     <Header />

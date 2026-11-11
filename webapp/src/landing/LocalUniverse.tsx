@@ -23,37 +23,29 @@ export function LocalUniverse() {
     let cancelled = false;
     const controller = new AbortController();
     let dispose: (() => void) | null = null;
-    const entry = host.current?.closest<HTMLElement>(".hush-landing");
-    const release = () => { if (entry?.dataset.opening === "pending") entry.dataset.opening = "complete"; };
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches || scrollY >= 100 || location.hash || document.hidden) release();
-    const recovery = window.setTimeout(release, 2200);
-    window.addEventListener("wheel", release, { passive: true });
-    window.addEventListener("keydown", release);
-    window.addEventListener("touchstart", release, { passive: true });
-    window.addEventListener("pointerdown", release, { passive: true });
-    // Keep the initial canvas blank until the scene and its CSS timeline are ready.
-    const timer = window.setTimeout(() => {
-      void import("./HushScene").then(async ({ mountHushScene }) => {
-        if (!cancelled && host.current) {
-          dispose = await mountHushScene(host.current, controller.signal);
-          if (cancelled) { dispose?.(); return; }
-          if (!dispose) { host.current.dataset.scene = "fallback"; release(); }
-        }
-      }).catch(() => {
-        if (cancelled) return;
-        if (host.current) host.current.dataset.scene = "fallback";
-        release();
-      });
-    }, 150);
+    // These optional hints only accelerate the fallback. Safari and browsers
+    // without them use the same bounded CSS window and actual scene readiness.
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    if (host.current && (connection?.saveData || /^(slow-)?2g$/.test(connection?.effectiveType ?? ""))) {
+      host.current.dataset.fallback = "immediate";
+    }
+    // Vite loads the optional scene and its shared chunks after the HTML/CSS
+    // entrance has begun. Artwork never owns page visibility.
+    void import("./HushScene").then(async ({ mountHushScene }) => {
+      if (!cancelled && host.current) {
+        dispose = await mountHushScene(host.current, controller.signal);
+        if (cancelled) { dispose?.(); return; }
+        if (!dispose) host.current.dataset.scene = "fallback";
+      }
+    }).catch(() => {
+      if (cancelled) return;
+      if (host.current) host.current.dataset.scene = "fallback";
+    });
     return () => {
       cancelled = true;
       controller.abort();
-      clearTimeout(timer);
-      clearTimeout(recovery);
-      window.removeEventListener("wheel", release);
-      window.removeEventListener("keydown", release);
-      window.removeEventListener("touchstart", release);
-      window.removeEventListener("pointerdown", release);
       dispose?.();
     };
   }, []);

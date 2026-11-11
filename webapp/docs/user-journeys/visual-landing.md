@@ -73,9 +73,15 @@ Desktop retains its brand, Product and Legal layout. Links remain readable
 without horizontal overflow at 320px. Covered in `tests/footer.spec.ts` across
 Chromium, mobile Chromium and WebKit.
 
-LANDING-ENTRY-001: on initial load at the top, the header, fallback model, background, connections, heading, icons and download start hidden in the first paint. A deferred scene starts the common reveal, without blur or a static-logo flash. The header and complete scene settle within three seconds of scene readiness.
+LANDING-ENTRY-001: prerendered HTML and CSS start the finite entrance at first paint. The header fades and moves into place without blur or layout shifts; the headline and download finish appearing within 0.85 seconds of CSS readiness. Decorative details settle within 1.8 seconds. Neither hydration nor WebGL controls content visibility. JavaScript observes the CSS animation's completion instead of starting another timer.
 
-LANDING-ENTRY-002: a slow scene is released to the complete CSS fallback within 2.2 seconds. A late WebGL scene does not replay or hide the header. WebGL failure, reduced motion, anchor navigation and user interaction keep navigation and downloads available. Tests: tests/entrance.spec.ts plus the existing failure/reduced-motion/keyboard journeys in tests/landing.spec.ts.
+LANDING-ENTRY-002: 3D artwork is a separate, dynamically imported enhancement. A slow or failed scene retains visible CSS artwork and usable content. Fast WebGL owns the initial model reveal. Static artwork waits at most 1.2 seconds from CSS readiness, avoiding a 2D flash on fast visits; save-data or 2G hints remove that fallback delay. Late WebGL upgrades the artwork without hiding content or replaying the page entrance. Browser support for network hints is optional; actual scene readiness is authoritative. Reduced motion, anchor navigation and interaction skip the entrance. The scene retains its bounded rendering, visibility suspension and resource cleanup.
+
+LANDING-ENTRY-003: with every application JavaScript request held back, the production page still shows navigation, headline, artwork and download. Releasing the bundle must not replay the entrance. The browser test requires the headline to finish appearing within 1.8 seconds of observing the production CSS, allowing scheduling margin beyond its 0.8-second animation.
+
+LANDING-ENTRY-004: failed application JavaScript leaves the prerendered page readable, and ordinary links still navigate. Interactive enhancements require JavaScript; the public content does not. Tests: `tests/entrance.spec.ts`, plus failure, reduced-motion and keyboard journeys in `tests/landing.spec.ts`.
+
+Implementation follows [Vite's async chunk loading](https://vite.dev/guide/features#async-chunk-loading-optimization): retain dynamic scene imports, extracted CSS and automatic dependency preloads. No additional loading framework or global animation loop is introduced.
 
 LANDING-010: the rose opens and closes with actual wheel scrolling; reduced motion presents its open pose, and a missing local model keeps the vector fallback. Covered in tests/flower.spec.ts.
 
