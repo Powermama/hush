@@ -129,7 +129,14 @@ clear explanations, thoughtful design feedback and people learning along the way
 
 If hush is useful to you, **star the repository** to help others discover it.
 
-<!-- Star History: activate the theme-aware embed in macos/docs/research/2026-11-10-github-front-page.md after public launch and endpoint validation. Never embed a private-repository token. -->
+## Star history
+
+<a href="https://www.star-history.com/?repos=Powermama%2Fhush&amp;type=date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Powermama/hush&amp;type=date&amp;theme=dark">
+    <img src="https://api.star-history.com/chart?repos=Powermama/hush&amp;type=date" alt="GitHub star history for hush. The graph grows as people star the repository." width="800" height="533">
+  </picture>
+</a>
 
 ## License and credits
 
