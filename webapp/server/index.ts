@@ -2,6 +2,7 @@ import { serveStatic } from "hono/bun";
 import { mkdir } from "node:fs/promises";
 import { createApp, registerRootProofAlias } from "./app";
 import { loadConfig, loadServiceKey } from "./config";
+import { startProofCleanup } from "./services/proof-cleanup";
 import { ProofService } from "./services/proof-service";
 import { PostgresProofRepository } from "./repositories/postgres-proof-repository";
 import { SQLiteProofRepository } from "./repositories/sqlite-proof-repository";
@@ -79,6 +80,7 @@ app.use("*", serveStatic({
 }));
 registerRootProofAlias(app, proofService);
 
+const cleanup = startProofCleanup(repository, objects);
 const server = Bun.serve({
   port: config.port,
   fetch: app.fetch,
@@ -96,3 +98,14 @@ console.info(
     shortBaseUrl: config.shortBaseUrl,
   }),
 );
+
+let stopping = false;
+async function shutdown() {
+  if (stopping) return;
+  stopping = true;
+  await server.stop(true);
+  await cleanup.stop();
+  await repository.close();
+}
+process.once("SIGTERM", () => void shutdown());
+process.once("SIGINT", () => void shutdown());

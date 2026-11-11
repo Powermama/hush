@@ -1,4 +1,4 @@
-import { and, eq, gt, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull, isNotNull, lte, or, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { challenges, installationKeys, proofAliases, proofs } from "../db/schema";
@@ -8,6 +8,7 @@ import type {
   ProofAliasRecord,
   ProofRecord,
 } from "../domain/models";
+import { PROOF_RETENTION_MS } from "../services/retention-policy";
 import type {
   CreateInstallation,
   CreateProof,
@@ -182,9 +183,50 @@ export class PostgresProofRepository implements ProofRepository {
     const [record] = await this.db
       .update(proofs)
       .set(input)
-      .where(and(eq(proofs.id, input.id), isNull(proofs.completedAt)))
+      .where(and(
+          eq(proofs.id, input.id), isNull(proofs.completedAt),
+          isNull(proofs.revokedAt), isNull(proofs.deletedAt),
+          gt(proofs.expiresAt, input.completedAt),
+        ))
       .returning();
     return record ?? null;
+  }
+
+
+  // Claim before object I/O so an abandoned reservation cannot complete while
+  // its bytes are being removed. Failed deletions remain claimed for retry.
+  async claimProofsForDeletion(now: Date, limit: number): Promise<ProofRecord[]> {
+    const cutoff = new Date(now.getTime() - PROOF_RETENTION_MS);
+    const eligible = or(
+      isNotNull(proofs.deletedAt),
+      lte(proofs.expiresAt, cutoff),
+      lte(proofs.revokedAt, cutoff),
+      and(isNull(proofs.completedAt), lte(proofs.createdAt, cutoff)),
+    );
+    const candidates = await this.db.select({ id: proofs.id })
+      .from(proofs).where(eligible)
+      .orderBy(sql`coalesce(${proofs.deletedAt}, ${proofs.createdAt})`, proofs.id)
+      .limit(limit);
+    if (!candidates.length) return [];
+    return await this.db.update(proofs).set({ deletedAt: now })
+      .where(and(inArray(proofs.id, candidates.map((row) => row.id)), eligible))
+      .returning();
+  }
+
+  async deleteClaimedProof(id: string): Promise<void> {
+    await this.db.delete(proofs)
+      .where(and(eq(proofs.id, id), isNotNull(proofs.deletedAt)));
+  }
+
+  async deleteExpiredChallenges(now: Date, limit: number): Promise<number> {
+    const candidates = await this.db.select({ id: challenges.id })
+      .from(challenges).where(lte(challenges.expiresAt, now))
+      .orderBy(challenges.expiresAt).limit(limit);
+    if (!candidates.length) return 0;
+    const removed = await this.db.delete(challenges)
+      .where(inArray(challenges.id, candidates.map((row) => row.id)))
+      .returning({ id: challenges.id });
+    return removed.length;
   }
 
   async revokeProof(id: string, revokedAt: Date): Promise<ProofRecord | null> {
