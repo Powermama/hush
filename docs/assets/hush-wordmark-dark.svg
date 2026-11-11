@@ -1,0 +1,11 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-only
+     Copyright 2026 Clemens Kressmann -->
+<svg xmlns="http://www.w3.org/2000/svg" width="248" height="72" viewBox="0 0 248 72" role="img" aria-label="hush">
+  <g transform="translate(0 4)">
+    <rect width="64" height="64" rx="15" fill="#1f201e" stroke="#555653"/>
+    <g fill="none" stroke="#f8f8f6" stroke-width="7" stroke-linecap="round">
+      <path d="M14.75 25.2v13.6M26.25 12v40M37.75 20v24M49.25 27.2v9.6"/>
+    </g>
+  </g>
+  <text x="82" y="56" fill="#f8f8f6" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="700" letter-spacing="-3">hush.</text>
+</svg>
