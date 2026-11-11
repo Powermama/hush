@@ -1,0 +1,6 @@
+.page-progress { --page-progress: 0; position: fixed; inset: 0 0 auto; height: 3px; z-index: 60; pointer-events: none; background: #78909c20; opacity: 0; transition: opacity .18s; }
+.page-progress[data-started="true"] { opacity: 1; }
+.page-progress-fill { height: 100%; background: linear-gradient(90deg, #6ba5ad, #91c8c5 62%, #e7a39c); transform: scaleX(var(--page-progress)); transform-origin: left; transition: transform .12s linear; box-shadow: 0 1px 7px #8ec4c538; }
+@media (prefers-reduced-motion: reduce) {
+  .page-progress, .page-progress-fill { transition: none; }
+}

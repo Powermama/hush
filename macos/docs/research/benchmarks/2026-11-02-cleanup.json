@@ -1,0 +1,28 @@
+{
+  "removed_utc": "2026-11-02T21:48:45Z",
+  "removed": [
+    {
+      "path": "/private/tmp/hush-model-eval-data",
+      "file_bytes": 11234930094
+    },
+    {
+      "path": "/private/tmp/hush-model-eval-20261102",
+      "file_bytes": 1023965846
+    },
+    {
+      "path": "/private/tmp/hush-source-review-20261102",
+      "file_bytes": 248421466
+    },
+    {
+      "path": "/private/tmp/hush-operation-native-traces",
+      "file_bytes": 41257
+    },
+    {
+      "path": "/private/tmp/hush-provenance-model-eval-service-20261102",
+      "file_bytes": 1513
+    }
+  ],
+  "total_file_bytes": 12507360176,
+  "installed_qwen_present": true,
+  "scope": "Only task-owned temporary downloads, environment, source clones, synthetic traces and local service data. Installed models and user data untouched. Reports and reproduction scripts retained."
+}

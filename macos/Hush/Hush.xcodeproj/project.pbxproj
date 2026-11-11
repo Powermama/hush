@@ -1,0 +1,764 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A56000012FF0000100000001 /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = A56000032FF0000100000001 /* MLXVLM */; };
+		A55000012FF0000100000001 /* MLXStructured in Frameworks */ = {isa = PBXBuildFile; productRef = A55000032FF0000100000001 /* MLXStructured */; };
+		1AF6C4DE2FAC9C6000E7E55B /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1AF6C4DD2FAC9C6000E7E55B /* WhisperKit */; };
+		2FC30CB099BC47B3915BB4B1 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 60B7B66826C042859B61D2FA /* MLXLLM */; };
+		54E4BE90D15444B3B9EF67B5 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = BC43FC8C5C8D4FB0B562DEC6 /* Tokenizers */; };
+		7A58425A6E5B4291A26CB0A9 /* MLXHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = 4D9CAA01A35345169FDD624D /* MLXHuggingFace */; };
+		A430F9092D6E481793B7A800 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 5CE5A423C48745E18679A295 /* MLXLMCommon */; };
+		CDFCC30D2FC4DDD1007B6C6F /* HuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = CDFCC30C2FC4DDD1007B6C6F /* HuggingFace */; };
+		D40000012FF0000100000001 /* HushProvenance in Frameworks */ = {isa = PBXBuildFile; productRef = D40000032FF0000100000001 /* HushProvenance */; };
+		E50000012FF0000100000001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E50000032FF0000100000001 /* Sparkle */; };
+		F1A0D0032FF0000100000001 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = F1A0D0022FF0000100000001 /* FluidAudio */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1AF6C4902FAC951000E7E55B /* hush.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hush.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000001 /* HushTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HushTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000000000000000000001 /* HushUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HushUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8A6FBA012FD1000100A1B2C3 /* Exceptions for "Hush" folder in "Hush" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1AF6C48F2FAC951000E7E55B /* Hush */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		1AF6C4922FAC951000E7E55B /* Hush */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8A6FBA012FD1000100A1B2C3 /* Exceptions for "Hush" folder in "Hush" target */,
+			);
+			path = Hush;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000002 /* HushTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HushTests;
+			sourceTree = "<group>";
+		};
+		A20000000000000000000002 /* HushUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HushUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1AF6C48D2FAC951000E7E55B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D40000012FF0000100000001 /* HushProvenance in Frameworks */,
+				A55000012FF0000100000001 /* MLXStructured in Frameworks */,
+				E50000012FF0000100000001 /* Sparkle in Frameworks */,
+				1AF6C4DE2FAC9C6000E7E55B /* WhisperKit in Frameworks */,
+				F1A0D0032FF0000100000001 /* FluidAudio in Frameworks */,
+				CDFCC30D2FC4DDD1007B6C6F /* HuggingFace in Frameworks */,
+				2FC30CB099BC47B3915BB4B1 /* MLXLLM in Frameworks */,
+				A56000012FF0000100000001 /* MLXVLM in Frameworks */,
+				A430F9092D6E481793B7A800 /* MLXLMCommon in Frameworks */,
+				7A58425A6E5B4291A26CB0A9 /* MLXHuggingFace in Frameworks */,
+				54E4BE90D15444B3B9EF67B5 /* Tokenizers in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A20000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		A10000000000000000000004 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1AF6C4882FAC951000E7E55B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1AF6C48F2FAC951000E7E55B;
+			remoteInfo = Hush;
+		};
+		A20000000000000000000004 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1AF6C4882FAC951000E7E55B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1AF6C48F2FAC951000E7E55B;
+			remoteInfo = Hush;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXGroup section */
+		1AF6C4872FAC951000E7E55B = {
+			isa = PBXGroup;
+			children = (
+				1AF6C4922FAC951000E7E55B /* Hush */,
+				A10000000000000000000002 /* HushTests */,
+				A20000000000000000000002 /* HushUITests */,
+				1AF6C4912FAC951000E7E55B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1AF6C4912FAC951000E7E55B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1AF6C4902FAC951000E7E55B /* hush.app */,
+				A10000000000000000000001 /* HushTests.xctest */,
+				A20000000000000000000001 /* HushUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1AF6C48F2FAC951000E7E55B /* Hush */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1AF6C49E2FAC951200E7E55B /* Build configuration list for PBXNativeTarget "Hush" */;
+			buildPhases = (
+				1AF6C48C2FAC951000E7E55B /* Sources */,
+				1AF6C48D2FAC951000E7E55B /* Frameworks */,
+				1AF6C48E2FAC951000E7E55B /* Resources */,
+				1AF6CB012FAD000100E7E55B /* Copy bundled models */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1AF6C4922FAC951000E7E55B /* Hush */,
+			);
+			name = Hush;
+			packageProductDependencies = (
+				D40000032FF0000100000001 /* HushProvenance */,
+				A55000032FF0000100000001 /* MLXStructured */,
+				E50000032FF0000100000001 /* Sparkle */,
+				1AF6C4DD2FAC9C6000E7E55B /* WhisperKit */,
+				F1A0D0022FF0000100000001 /* FluidAudio */,
+				CDFCC30C2FC4DDD1007B6C6F /* HuggingFace */,
+				60B7B66826C042859B61D2FA /* MLXLLM */,
+				A56000032FF0000100000001 /* MLXVLM */,
+				5CE5A423C48745E18679A295 /* MLXLMCommon */,
+				4D9CAA01A35345169FDD624D /* MLXHuggingFace */,
+				BC43FC8C5C8D4FB0B562DEC6 /* Tokenizers */,
+			);
+			productName = Hush;
+			productReference = 1AF6C4902FAC951000E7E55B /* hush.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A10000000000000000000005 /* HushTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000006 /* Build configuration list for PBXNativeTarget "HushTests" */;
+			buildPhases = (
+				A10000000000000000000007 /* Sources */,
+				A10000000000000000000003 /* Frameworks */,
+				A10000000000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A10000000000000000000009 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000002 /* HushTests */,
+			);
+			name = HushTests;
+			productName = HushTests;
+			productReference = A10000000000000000000001 /* HushTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A20000000000000000000005 /* HushUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A20000000000000000000006 /* Build configuration list for PBXNativeTarget "HushUITests" */;
+			buildPhases = (
+				A20000000000000000000007 /* Sources */,
+				A20000000000000000000003 /* Frameworks */,
+				A20000000000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A20000000000000000000009 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A20000000000000000000002 /* HushUITests */,
+			);
+			name = HushUITests;
+			productName = HushUITests;
+			productReference = A20000000000000000000001 /* HushUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1AF6C4882FAC951000E7E55B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2640;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					1AF6C48F2FAC951000E7E55B = {
+						CreatedOnToolsVersion = 26.4;
+					};
+				};
+			};
+			buildConfigurationList = 1AF6C48B2FAC951000E7E55B /* Build configuration list for PBXProject "Hush" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1AF6C4872FAC951000E7E55B;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A55000022FF0000100000001 /* XCRemoteSwiftPackageReference "mlx-swift-structured" */,
+				D40000022FF0000100000001 /* XCLocalSwiftPackageReference "../Packages/HushProvenance" */,
+				E50000022FF0000100000001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				1AF6C4DC2FAC9C6000E7E55B /* XCRemoteSwiftPackageReference "argmax-oss-swift" */,
+				F1A0D0012FF0000100000001 /* XCRemoteSwiftPackageReference "FluidAudio" */,
+				CDFCC30A2FC4DD9A007B6C6F /* XCRemoteSwiftPackageReference "mlx-swift-lm" */,
+				CDFCC30B2FC4DDD1007B6C6F /* XCRemoteSwiftPackageReference "swift-huggingface" */,
+				3510C28BD371499C93E39BD5 /* XCRemoteSwiftPackageReference "swift-transformers" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 1AF6C4912FAC951000E7E55B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1AF6C48F2FAC951000E7E55B /* Hush */,
+				A10000000000000000000005 /* HushTests */,
+				A20000000000000000000005 /* HushUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1AF6C48E2FAC951000E7E55B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A20000000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1AF6CB012FAD000100E7E55B /* Copy bundled models */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy bundled models";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nSRC=\"$PROJECT_DIR/BundledModels\"\nDST=\"$TARGET_BUILD_DIR/$WRAPPER_NAME/Contents/Resources/BundledModels\"\nif [ -d \"$SRC\" ]; then\n  mkdir -p \"$DST\"\n  rsync -a --delete \"$SRC/\" \"$DST/\"\n  echo \"Bundled $(du -sh \"$DST\" | awk '{print $1}') of models into $WRAPPER_NAME\"\nelse\n  echo \"warning: $SRC not found, skipping bundled-models copy\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1AF6C48C2FAC951000E7E55B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A20000000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A10000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1AF6C48F2FAC951000E7E55B /* Hush */;
+			targetProxy = A10000000000000000000004 /* PBXContainerItemProxy */;
+		};
+		A20000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1AF6C48F2FAC951000E7E55B /* Hush */;
+			targetProxy = A20000000000000000000004 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A10000000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.decentralfreedom.hush.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hush.app/Contents/MacOS/hush";
+			};
+			name = Debug;
+		};
+		A10000000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.decentralfreedom.hush.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hush.app/Contents/MacOS/hush";
+			};
+			name = Release;
+		};
+		A20000000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.decentralfreedom.hush.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Hush;
+			};
+			name = Debug;
+		};
+		A20000000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.decentralfreedom.hush.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Hush;
+			};
+			name = Release;
+		};
+		1AF6C49C2FAC951200E7E55B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1AF6C49D2FAC951200E7E55B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		1AF6C49F2FAC951200E7E55B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Hush/Hush.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 14;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = NO;
+				HUSH_RELEASE_CHANNEL = "Alpha 5";
+				HUSH_RELEASE_SLUG = alpha.5;
+				HUSH_UPDATE_FEED_URL = "https://updates.behu.sh/alpha/appcast.xml";
+				HUSH_PROOF_SERVICE_URL = "http://127.0.0.1:3000";
+				HUSH_PROOF_SHORT_URL = "http://127.0.0.1:3000/s/";
+				INFOPLIST_FILE = Hush/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.decentralfreedom.hush;
+				PRODUCT_MODULE_NAME = Hush;
+				PRODUCT_NAME = hush;
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1AF6C4A02FAC951200E7E55B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Hush/Hush.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 14;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = NO;
+				HUSH_RELEASE_CHANNEL = "Alpha 5";
+				HUSH_RELEASE_SLUG = alpha.5;
+				HUSH_UPDATE_FEED_URL = "https://updates.behu.sh/alpha/appcast.xml";
+				HUSH_PROOF_SERVICE_URL = "https://behu.sh";
+				HUSH_PROOF_SHORT_URL = "https://behu.sh/s/";
+				INFOPLIST_FILE = Hush/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.decentralfreedom.hush;
+				PRODUCT_MODULE_NAME = Hush;
+				PRODUCT_NAME = hush;
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A10000000000000000000006 /* Build configuration list for PBXNativeTarget "HushTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000010 /* Debug */,
+				A10000000000000000000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A20000000000000000000006 /* Build configuration list for PBXNativeTarget "HushUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A20000000000000000000010 /* Debug */,
+				A20000000000000000000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1AF6C48B2FAC951000E7E55B /* Build configuration list for PBXProject "Hush" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1AF6C49C2FAC951200E7E55B /* Debug */,
+				1AF6C49D2FAC951200E7E55B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1AF6C49E2FAC951200E7E55B /* Build configuration list for PBXNativeTarget "Hush" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1AF6C49F2FAC951200E7E55B /* Debug */,
+				1AF6C4A02FAC951200E7E55B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		D40000022FF0000100000001 /* XCLocalSwiftPackageReference "../Packages/HushProvenance" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/HushProvenance;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A55000022FF0000100000001 /* XCRemoteSwiftPackageReference "mlx-swift-structured" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/petrukha-ivan/mlx-swift-structured";
+			requirement = {
+				kind = revision;
+				revision = b1a1a78f1d61a745f8ba3278c9c99c00316d2c82;
+			};
+		};
+		F1A0D0012FF0000100000001 /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FluidInference/FluidAudio.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.18.0;
+			};
+		};
+		E50000022FF0000100000001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.9.5;
+			};
+		};
+		1AF6C4DC2FAC9C6000E7E55B /* XCRemoteSwiftPackageReference "argmax-oss-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/argmax-oss-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		3510C28BD371499C93E39BD5 /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-transformers";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.3;
+			};
+		};
+		CDFCC30A2FC4DD9A007B6C6F /* XCRemoteSwiftPackageReference "mlx-swift-lm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift-lm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.31.3;
+			};
+		};
+		CDFCC30B2FC4DDD1007B6C6F /* XCRemoteSwiftPackageReference "swift-huggingface" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-huggingface";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A56000032FF0000100000001 /* MLXVLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CDFCC30A2FC4DD9A007B6C6F /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXVLM;
+		};
+		A55000032FF0000100000001 /* MLXStructured */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A55000022FF0000100000001 /* XCRemoteSwiftPackageReference "mlx-swift-structured" */;
+			productName = MLXStructured;
+		};
+		F1A0D0022FF0000100000001 /* FluidAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F1A0D0012FF0000100000001 /* XCRemoteSwiftPackageReference "FluidAudio" */;
+			productName = FluidAudio;
+		};
+		E50000032FF0000100000001 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E50000022FF0000100000001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+		1AF6C4DD2FAC9C6000E7E55B /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1AF6C4DC2FAC9C6000E7E55B /* XCRemoteSwiftPackageReference "argmax-oss-swift" */;
+			productName = WhisperKit;
+		};
+		4D9CAA01A35345169FDD624D /* MLXHuggingFace */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CDFCC30A2FC4DD9A007B6C6F /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXHuggingFace;
+		};
+		5CE5A423C48745E18679A295 /* MLXLMCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CDFCC30A2FC4DD9A007B6C6F /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXLMCommon;
+		};
+		60B7B66826C042859B61D2FA /* MLXLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CDFCC30A2FC4DD9A007B6C6F /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXLLM;
+		};
+		BC43FC8C5C8D4FB0B562DEC6 /* Tokenizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3510C28BD371499C93E39BD5 /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			productName = Tokenizers;
+		};
+		CDFCC30C2FC4DDD1007B6C6F /* HuggingFace */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CDFCC30B2FC4DDD1007B6C6F /* XCRemoteSwiftPackageReference "swift-huggingface" */;
+			productName = HuggingFace;
+		};
+		D40000032FF0000100000001 /* HushProvenance */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D40000022FF0000100000001 /* XCLocalSwiftPackageReference "../Packages/HushProvenance" */;
+			productName = HushProvenance;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 1AF6C4882FAC951000E7E55B /* Project object */;
+}

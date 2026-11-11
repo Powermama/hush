@@ -1,0 +1,22 @@
+{
+  "accessibility" : true,
+  "description" : "I can't read this app yet. Allow Accessibility in System Settings, or tell me what you need.",
+  "duration" : "8.271926958 seconds",
+  "error" : "missingContext",
+  "page_found" : true,
+  "steps" : [
+    {
+      "action" : "newTab",
+      "duration" : "0.552405708 seconds",
+      "result" : "Opened a new tab in Safari.",
+      "verified" : true
+    },
+    {
+      "action" : "navigate",
+      "duration" : "0.57069875 seconds",
+      "result" : "The requested page is open in this tab.",
+      "verified" : true
+    }
+  ],
+  "tabs_before" : 37
+}

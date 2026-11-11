@@ -1,0 +1,112 @@
+.hush-landing {
+  --landing-ink: #24272b;
+  --landing-muted: #626973;
+  background: #fafbfc;
+  color: var(--landing-ink);
+  overflow: clip;
+}
+.hush-landing :focus-visible { outline: 2px solid #247a57; outline-offset: 5px; }
+.landing-skip { position: fixed; top: 12px; left: 20px; z-index: 100; padding: 12px 18px; background: white; border-radius: 10px; clip-path: inset(50%); }
+.landing-skip:focus-visible { clip-path: none; }
+.landing-hero { text-align: center; padding: 28px 20px 0; position: relative; }
+.hero-introduction { position: relative; z-index: 2; }
+.hero-introduction h1 { font-size: clamp(36px, 4.3vw, 56px); line-height: 1.08; font-weight: 550; letter-spacing: -.055em; margin: 0; }
+.hero-introduction > p:first-of-type { font-size: 15px; line-height: 1.6; color: var(--landing-muted); margin: 15px auto 0; }
+.hero-actions { display: flex; gap: 25px; align-items: center; justify-content: center; }
+.hush-landing .landing-download { gap: 11px; min-height: 54px; min-width: 218px; padding: 0 26px; font-size: 14px; border-radius: 16px; color: #fff; background-color: #24272b; background-image: linear-gradient(180deg, #ffffff0a, #ffffff00); border: 1px solid #22262c; box-shadow: 0 4px 8px #28394412, 0 1px 2px #0003, inset 0 1px 0 #ffffff2b; transition-property: background-color, box-shadow; }
+.landing-download svg { width: 17px; height: 20px; }
+.hush-landing .landing-download:hover, .hush-landing .landing-download:active { translate: none; transform: none; }
+.download-requirements { font-size: 11px; color: var(--landing-muted); margin: 15px 0 0; }
+.hero-download-area { position: relative; z-index: 4; margin: 52px 0 72px; }
+.local-universe { position: relative; height: 430px; width: min(100%, 1050px); margin: 12px auto 0; isolation: isolate; }
+.universe-illustration { position: absolute; inset: 0; }
+.universe-texture { position: absolute; inset: -80px -35% -50px; pointer-events: none; mask-image: radial-gradient(ellipse at center, transparent 13%, #0008 45%, transparent 72%); }
+.universe-field { display: block; width: 100%; height: 100%; opacity: .38; }
+.universe-halo { position: absolute; width: 110%; height: 100%; top: 0; left: -5%; border-radius: 50%; background: radial-gradient(ellipse at 39% 50%, #bce1d540, transparent 55%), radial-gradient(ellipse at 66% 50%, #b5dced40, transparent 55%); }
+.universe-paths { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; stroke: #cdd5dc; stroke-width: .9; }
+.universe-paths ellipse { stroke: #e4e9ec; stroke-dasharray: 2 6; }
+.universe-paths .inner-orbit { stroke: #e7edf0; stroke-dasharray: none; }
+.universe-paths path { opacity: .6; }
+.hush-core { position: absolute; left: 50%; top: 47%; width: 460px; height: 460px; transform: translate(-50%, -50%); z-index: 2; }
+.hush-core canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .4s; }
+.hush-core[data-scene="ready"] canvas { opacity: 1; }
+.hush-core[data-scene="ready"] .core-fallback { opacity: 0; }
+.core-fallback { position: absolute; width: 235px; height: 235px; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-7deg); }
+.core-fallback > i, .core-fallback > div { position: absolute; inset: 0; border-radius: 40px; }
+.core-fallback > i { background: #c7e4eaa1; border: 1px solid #ffffff; box-shadow: 0 8px 16px #5b8b9814; transform: translate(22px, -18px); }
+.core-fallback > i:nth-child(2) { transform: translate(11px, -9px); }
+.core-fallback > div { color: #f6f8fa; background: linear-gradient(135deg, #4c5157, #24272b 60%); border: 2px solid #c0cbd2; box-shadow: 0 18px 30px #3a526626, inset 0 1px 2px #fff6; display: grid; place-items: center; }
+.core-fallback svg { width: 70%; }
+.status-dot { display: inline-block; width: 5px; height: 5px; background: #247a57; border-radius: 50%; }
+.orbit-app { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 9px; z-index: 3; }
+.orbit-tile { width: 70px; height: 70px; padding: 11px; display: grid; place-items: center; background: linear-gradient(150deg, #fff, #fafcfd); border: 1px solid white; border-radius: 20px; box-shadow: 0 3px 3px #35445406, 0 12px 28px #3544540a, inset 0 0 0 1px #dfe4e54d; transform: rotate(-7deg); transition: transform .3s; }
+.orbit-app:nth-of-type(even) .orbit-tile { transform: rotate(7deg); }
+.orbit-tile img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 2px #0001); }
+.orbit-app > span { font-size: 11px; color: #626973; }
+.orbit-app:hover .orbit-tile { transform: translateY(-4px); }
+/* One first-paint state owns the entire entrance, including the header and fallback. */
+.hush-landing[data-opening="pending"] :is(.site-header, .hero-introduction, .hush-core, .core-fallback, .orbit-app, .universe-paths, .universe-halo, .universe-texture, .hero-download-area) { opacity: 0; }
+.hush-landing[data-opening="playing"] > .site-header { animation: header-arrive 1.05s .12s cubic-bezier(.22,.68,.22,1) both; }
+.hush-landing[data-opening="playing"] .hero-introduction { animation: introduction-arrive .9s .55s both; }
+.hush-landing[data-opening="playing"] .hush-core { animation: core-arrive .65s .1s both; }
+.hush-landing[data-opening="playing"] .core-fallback { opacity: 0; }
+.hush-landing[data-opening="playing"] .orbit-app { animation: orbit-arrive 1.15s both cubic-bezier(.2,.8,.2,1); animation-delay: calc(1s + var(--app-delay, 0s)); }
+.hush-landing[data-opening="playing"] .universe-paths { animation: paths-arrive 1.5s .85s both; }
+.hush-landing[data-opening="playing"] .universe-texture { animation: texture-arrive 2.4s both; }
+.hush-landing[data-opening="playing"] .universe-halo { animation: core-arrive 1.4s .3s both; }
+.hush-landing[data-opening="playing"] .hero-download-area { animation: download-arrive .7s 1.65s both; }
+.verified-link { display: inline-flex; gap: 8px; font-size: 12px; margin-top: 15px; text-underline-offset: 4px; }
+.verified-link:hover { text-decoration: underline; }
+.story-afterword { position: relative; overflow: clip; background: linear-gradient(#f8fafb 20%, #edf0fa 65%, #f5f4f1); }
+.landing-faq { max-width: 1160px; padding: 80px 32px 100px; margin: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 90px; }
+.landing-faq h2 { font-size: clamp(35px, 4.5vw, 62px); font-weight: 500; line-height: 1.05; letter-spacing: -.055em; margin: 8px 0 0; max-width: 400px; color: #273463; }
+.landing-faq details { border-bottom: 1px solid #e1e5e8; }
+.landing-faq summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; list-style: none; padding: 18px 0; cursor: pointer; font-size: 14px; }
+.landing-faq summary > span { font-size: 20px; font-weight: 300; color: var(--landing-muted); transition: transform .2s; }
+.landing-faq details[open] summary > span { transform: rotate(45deg); }
+.landing-faq details p { font-size: 13px; line-height: 1.8; color: var(--landing-muted); margin: 0 20px 22px 0; }
+.landing-final { position: relative; isolation: isolate; padding: 55px 24px 110px; text-align: center; }
+.final-imprint { position: absolute; top: -25px; left: 50%; translate: -50% 0; font-size: clamp(250px, 42vw, 650px); line-height: 1; font-weight: 600; letter-spacing: -.09em; color: transparent; -webkit-text-stroke: 1px #8992bc36; z-index: -1; pointer-events: none; }
+.final-mark { width: 64px; height: 64px; margin: 0 auto 25px; border-radius: 18px; background: linear-gradient(145deg, #42474c, #24272b); color: white; box-shadow: 0 6px 12px #24272b18, inset 0 1px 1px #fff6; }
+.final-mark svg { width: 100%; }
+.landing-final h2 { font-size: clamp(48px, 6.5vw, 92px); line-height: 1.03; font-weight: 500; letter-spacing: -.055em; margin: 0 0 40px; color: #273463; }
+.release-link { display: block; width: fit-content; margin: 16px auto 0; font-size: 11px; color: var(--landing-muted); }
+.release-link:hover { text-decoration: underline; }
+.hush-landing > footer { background: #f1f3f5; }
+@keyframes header-arrive { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes core-arrive { from { opacity: 0; } to { opacity: 1; } }
+@keyframes orbit-arrive { from { opacity: 0; translate: 0 18px; scale: .9; } to { opacity: 1; translate: 0 0; scale: 1; } }
+@keyframes introduction-arrive { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+@keyframes paths-arrive { from { opacity: 0; scale: .75; } to { opacity: 1; scale: 1; } }
+@keyframes texture-arrive { from { opacity: 0; scale: .6; } to { opacity: 1; scale: 1; } }
+@keyframes download-arrive { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 760px) {
+  .landing-hero { padding-top: 33px; }
+  .hero-introduction > p:first-of-type { font-size: 15px; }
+  .local-universe { height: 350px; width: 100%; margin-top: 12px; }
+  .hush-core { width: 330px; height: 330px; top: 49%; }
+  .core-fallback { width: 145px; height: 145px; }
+  .orbit-tile { width: 54px; height: 54px; padding: 8px; border-radius: 15px; }
+  .orbit-tile img { width: 38px; height: 38px; }
+  .orbit-app > span { font-size: 9px; }
+  .orbit-app { gap: 6px; }
+  .hero-download-area { margin-top: 38px; }
+  .landing-faq { padding: 60px 24px; grid-template-columns: 1fr; gap: 22px; }
+  .landing-faq h2 { max-width: none; font-size: 28px; }
+  .landing-final { padding: 30px 24px 70px; }
+}
+@media (max-width: 420px) {
+  .hero-introduction h1 { font-size: 36px; }
+  .local-universe { height: 310px; }
+  .hush-core { width: 270px; height: 290px; }
+  .core-fallback { width: 125px; height: 125px; }
+  .core-fallback > i, .core-fallback > div { border-radius: 28px; }
+  .orbit-tile { width: 44px; height: 44px; padding: 6px; border-radius: 13px; }
+  .orbit-tile img { width: 32px; height: 32px; }
+  .hero-actions { gap: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hush-landing *, .hush-landing *::before, .hush-landing *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .hush-landing[data-opening="pending"] :is(.site-header, .hero-introduction, .hush-core, .core-fallback, .orbit-app, .universe-paths, .universe-halo, .universe-texture, .hero-download-area) { opacity: 1; }
+  .hush-landing[data-opening="pending"] .hush-core[data-scene="ready"] .core-fallback { opacity: 0; }
+}

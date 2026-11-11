@@ -1,0 +1,24 @@
+{
+  "utc": "2026-11-01T00:27:11Z",
+  "reason": "User-requested cleanup after completed benchmarks and artifact hashing",
+  "removed": [
+    {
+      "path": "/private/tmp/hush-model-bench-20261031",
+      "allocated_kib_before": 12576060,
+      "exists_after": false
+    },
+    {
+      "path": "/private/tmp/hush-clicky-research",
+      "allocated_kib_before": 448,
+      "exists_after": false
+    },
+    {
+      "path": "/Users/clemenskressmannn/Vibing/hush/macos/docs/research/benchmarks/__pycache__",
+      "allocated_kib_before": 36,
+      "exists_after": false
+    }
+  ],
+  "scope": "Only task-owned temporary model/environment/build/source directories and benchmark bytecode. Existing Hush models and shared or OS-managed caches were not purged.",
+  "removed_allocated_gib": 11.993927001953125,
+  "cumulative_removed_allocated_gib": 23.737728118896484
+}

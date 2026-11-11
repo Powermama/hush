@@ -1,0 +1,627 @@
+{
+  "model" : "Installed Qwen3.5-4B Q4, MLX Swift, temperature 0, top_p 1; 1536 direct \/ 2048 thinking total tokens",
+  "results" : [
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-tab",
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.794160792,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "music-tab",
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.775432834,
+      "variant" : "bundled"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "music-tab",
+      "seconds" : 50.947808833,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+        "action",
+        "target"
+      ],
+      "id" : "music-fill",
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.066434709,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-fill",
+      "reply" : {
+        "action" : "searchPage",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta on YouTube",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 8.479265958,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "music-fill",
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 2.926519083,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-result",
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "Navigating to the first David Guetta result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 33
+      },
+      "seconds" : 10.956076958,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+        "target",
+        "url_grounding"
+      ],
+      "id" : "music-result",
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "Opening the first result for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 1
+      },
+      "seconds" : 3.5103579160000002,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action",
+        "target",
+        "url_grounding"
+      ],
+      "id" : "music-result",
+      "reply" : {
+        "action" : "openPage",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "Opening the first David Guetta result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.413226291,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-tab",
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.745280458,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "docs-tab",
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.872518625,
+      "variant" : "bundled"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "docs-tab",
+      "seconds" : 54.535982542,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+        "action",
+        "target"
+      ],
+      "id" : "docs-fill",
+      "reply" : {
+        "action" : "search",
+        "content" : "offline maps",
+        "message" : "Searching for offline maps.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.106785458,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-fill",
+      "reply" : {
+        "action" : "searchPage",
+        "content" : "offline maps",
+        "message" : "Searching for offline maps in the current tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 72
+      },
+      "seconds" : 9.909404,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "docs-fill",
+      "reply" : {
+        "action" : "search",
+        "content" : "offline maps",
+        "message" : "Searching for offline maps.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 72
+      },
+      "seconds" : 2.923066375,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "settings-sequence",
+      "seconds" : 54.305154625,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "settings-sequence",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Sound to open its settings.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.946196667,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-sequence",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening Sound settings.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.94524525,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The settings window is closed, so I cannot choose the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.953884334,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The settings window is closed, so I cannot choose the Output tab. Would you like me to open System Settings instead?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.5114534170000002,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The settings window shows it's closed with no target exposed. Could you clarify which Output tab you're referring to, or would you like me to open System Settings first?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 8.004835292,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+        "action",
+        "target",
+        "url_grounding"
+      ],
+      "id" : "second-result",
+      "reply" : {
+        "action" : "openPage",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Opening the second result (Museums).",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.217428,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "second-result",
+      "reply" : {
+        "action" : "openPage",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Opening Museums - the second result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 11.972966125,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "second-result",
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Navigating to the Museums result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 2.969648959,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Search field updated to 'climate policy'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 8.520318292,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Updated the search field to 'climate policy'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 2.900666167,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Updated the search field to 'climate policy'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 3.02707725,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin wurde in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 2.97703125,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin wurde in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 2.9939435420000002,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin wurde in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 12.323400459,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "no-rank-evidence",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "I can't verify ratings here since no ratings are shown. Would you like me to search for the highest-rated restaurant instead?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.466266375,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "no-rank-evidence",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The visible text shows 'Restaurant links without any ratings' - can you clarify which rating source you'd like me to verify?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 8.778141416,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "no-rank-evidence",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "I can't verify ratings here; I can only open links or search. Would you like me to open the Cafe One link, or search for the highest-rated restaurant instead?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.525739417,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "uncertain-action",
+      "seconds" : 51.600831291,
+      "variant" : "thinking"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "uncertain-action",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The search is already submitted. Would you like me to navigate to the first result?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.115938625,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action",
+        "continuation"
+      ],
+      "id" : "uncertain-action",
+      "reply" : {
+        "action" : "searchPage",
+        "content" : "city maps",
+        "message" : "Searching for city maps and opening the first result.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 21
+      },
+      "seconds" : 3.049846333,
+      "variant" : "bundled"
+    }
+  ],
+  "scope" : "12 paired synthetic next-decision regression states, one sample per variant; rotated order. No desktop actions or screenshots. Not end-to-end accuracy or an independent benchmark. Thinking uses the native template and a structural grammar permitting reasoning before JSON. Latency includes prefill and cold grammar preparation. Truncation is failure.",
+  "warmup" : "6.071315792 seconds"
+}

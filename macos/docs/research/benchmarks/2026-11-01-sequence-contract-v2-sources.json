@@ -1,0 +1,7 @@
+{
+  "Hush/Hush/Assistant/CoworkerContract.swift": "9ebcae74dda2ececa6db0d0415df9203f48740311d7393f11dd417cb86d7e230",
+  "Hush/Hush/Assistant/CoworkerProgress.swift": "d1d0c2e86c944bd75214ac093ec1086dc28bac7f12cd1c3bf5d2e3380e328458",
+  "Hush/Hush/PostProcessing/LLMRuntime.swift": "5b38f7d9ef84131c206483404883682336d69414e191c9fe0b32bfc0338b1da4",
+  "Hush/HushTests/CoworkerSequenceBaseline.swift": "8b8c678b96840c1d08a562707c4d48d5c5316f250f421ab3081c2af18dffed7f",
+  "Hush/HushTests/CoworkerSequenceEvaluation.swift": "29fd7e58aa7ccc4f8ecf694d2991c2bce030791727b11cf6d4617a62a2a590b2"
+}

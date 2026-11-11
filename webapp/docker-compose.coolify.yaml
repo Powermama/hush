@@ -1,0 +1,39 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HUSH_PUBLIC_BASE_URL: https://behu.sh
+      HUSH_DATA_DIR: /app/data
+      HUSH_SERVICE_KEY_ID: ${HUSH_SERVICE_KEY_ID:-hush-production-1}
+      DATABASE_URL: postgresql://hush:${SERVICE_PASSWORD_64_POSTGRES}@postgres:5432/hush
+    expose:
+      - "3000"
+    volumes:
+      - hush_objects:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: hush
+      POSTGRES_USER: hush
+      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_64_POSTGRES}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hush -d hush"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - hush_postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  hush_objects:
+  hush_postgres:

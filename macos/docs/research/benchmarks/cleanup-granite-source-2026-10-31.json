@@ -1,0 +1,8 @@
+{
+  "utc": "2026-11-01T00:14:09Z",
+  "path": "/tmp/hush-model-bench-20261031/models/granite42-source",
+  "reason": "Temporary BF16 source after successful local conversion and SHA256 manifest capture",
+  "logical_bytes": 7328344763,
+  "allocated_bytes": 7328419840,
+  "removed": true
+}

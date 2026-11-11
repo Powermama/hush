@@ -1,0 +1,841 @@
+{
+  "metadata": {
+    "model": "gemma-e4b-q4-actions",
+    "model_path": "/private/tmp/hush-model-eval-data/gemma",
+    "started_utc": "2026-11-02T21:21:59Z",
+    "chip": "Apple M5",
+    "macos": "26.3",
+    "memory_bytes": "17179869184",
+    "swap_before": "total = 15360.00M  used = 14127.81M  free = 1232.19M  (encrypted)",
+    "packages": {
+      "mlx": "0.32.4",
+      "mlx-vlm": "0.7.11",
+      "transformers": "5.22.1",
+      "llguidance": "1.9.1",
+      "Pillow": "13.0.0"
+    },
+    "temperature": 0,
+    "thinking": false,
+    "image_policy": "Same image capped at 2 MP; native processor patch budgets differ; no cache reuse",
+    "coordinate_order": "xy",
+    "decision_token_budget": 256,
+    "dataset": {
+      "dataset": "OS-Copilot/ScreenSpot-v2",
+      "revision": "5efbb1f1b5463a575f2eb7bc30fe29e49c15f93c",
+      "seed": 20261102,
+      "scope": "100 macOS target queries, 50 text and 50 icons; public benchmark, possible training contamination; no desktop execution",
+      "unique_images": 63
+    },
+    "limitations": "Public positive-target grounding benchmark, possible training overlap. Not overall assistant or task completion accuracy. One greedy sample per target. Background Mac apps uncontrolled. Python MLX runtime, not production Swift. No real clicks or messages.",
+    "artifact_bytes": 5179239349,
+    "config_sha256": "780ccb3a514a5f1ced161d383f948fc22eca9b84b752ca19494f625bd9bad7a6",
+    "load_seconds": 2.6998279159888625,
+    "tasks_sha256": "82ad0e7341fce1a720d44a4a6ac98029357f722a354e03c672bf351d27560ea7",
+    "tasks_file": "docs/research/benchmarks/2026-11-02-operation-fixtures-v3.json",
+    "swap_after": "total = 16384.00M  used = 15301.88M  free = 1082.12M  (encrypted)"
+  },
+  "records": [],
+  "decisions": [
+    {
+      "output": "{\"action\": \"newTab\", \"target\": 0, \"content\": \"\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Opening a new tab now.\", \"more\": true}",
+      "seconds": 2.173533875029534,
+      "ttft_seconds": 0.9541821249295026,
+      "prompt_tokens": 2096,
+      "generation_tokens": 47,
+      "mlx_peak_bytes": 6008272134,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-tab",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"newTab\",\"target\":0,\"content\":\"\",\"message\":\"Opening a new tab now.\"}",
+      "seconds": 1.4911588749382645,
+      "ttft_seconds": 0.9474237079266459,
+      "prompt_tokens": 2096,
+      "generation_tokens": 22,
+      "mlx_peak_bytes": 6008272134,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-tab",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"openPage\", \"target\": 0, \"content\": \"https://www.youtube.com/\", \"subject\": \"YouTube\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"Open YouTube and search for David Guetta.\", \"more\": true}",
+      "seconds": 2.143216875148937,
+      "ttft_seconds": 0.42333679203875363,
+      "prompt_tokens": 910,
+      "generation_tokens": 67,
+      "mlx_peak_bytes": 5875838108,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-tab",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"openPage\",\"target\":0,\"content\":\"https://www.youtube.com/\",\"subject\":\"YouTube Search\",\"message\":\"Open YouTube and search for David Guetta.\"}",
+      "seconds": 1.3877894161269069,
+      "ttft_seconds": 0.422708333004266,
+      "prompt_tokens": 910,
+      "generation_tokens": 39,
+      "mlx_peak_bytes": 5875838108,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-tab",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 31, \"content\": \"David Guetta\", \"subject\": \"Search\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"Type 'David Guetta' into the search field.\", \"more\": true}",
+      "seconds": 2.3391897089313716,
+      "ttft_seconds": 0.6461751670576632,
+      "prompt_tokens": 1039,
+      "generation_tokens": 65,
+      "mlx_peak_bytes": 5865182194,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-fill",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"fill\",\"target\":31,\"content\":\"David Guetta\"}",
+      "seconds": 0.8756274168845266,
+      "ttft_seconds": 0.459949541836977,
+      "prompt_tokens": 1039,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 5865182194,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-fill",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": false,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 31, \"content\": \"David Guetta\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Searching YouTube for David Guetta.\", \"more\": true}",
+      "seconds": 2.3539586251135916,
+      "ttft_seconds": 0.9762375841382891,
+      "prompt_tokens": 2167,
+      "generation_tokens": 52,
+      "mlx_peak_bytes": 6010189630,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-fill",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"fill\",\"target\":31,\"content\":\"David Guetta\"}",
+      "seconds": 1.3930397080257535,
+      "ttft_seconds": 0.9598402499686927,
+      "prompt_tokens": 2167,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 6010189630,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-fill",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"press\", \"target\": 33, \"content\": \"\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Click the first matching result.\", \"more\": false}",
+      "seconds": 2.2180194999091327,
+      "ttft_seconds": 0.9893610840663314,
+      "prompt_tokens": 2232,
+      "generation_tokens": 47,
+      "mlx_peak_bytes": 6011910470,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-result",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"clickHere\",\"target\":33,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"more\":false}",
+      "seconds": 1.6347626249771565,
+      "ttft_seconds": 0.985508083133027,
+      "prompt_tokens": 2232,
+      "generation_tokens": 26,
+      "mlx_peak_bytes": 6011910470,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-result",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "shape",
+        "field_types",
+        "capability"
+      ]
+    },
+    {
+      "output": "{\"action\": \"press\", \"target\": 33, \"content\": \"\", \"subject\": \"Open first matching result\", \"start\": \"\", \"minutes\": 0, \"message\": \"Open the first matching result for David Guetta.\", \"more\": false}",
+      "seconds": 1.925804624799639,
+      "ttft_seconds": 0.4723877077922225,
+      "prompt_tokens": 1068,
+      "generation_tokens": 57,
+      "mlx_peak_bytes": 5884728538,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-result",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"openPage\",\"target\":33,\"content\":\"https://www.youtube.com/result/1\",\"subject\":\"David Guetta - Official Music Video\",\"message\":\"Open the first matching result for David Guetta.\"}",
+      "seconds": 1.7059879160951823,
+      "ttft_seconds": 0.4726800830103457,
+      "prompt_tokens": 1068,
+      "generation_tokens": 49,
+      "mlx_peak_bytes": 5884728538,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "music-result",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"openPage\", \"target\": 0, \"content\": \"https://docs.example.org/\", \"subject\": \"Offline Maps Guide\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"Open the documentation site and search for offline maps.\", \"more\": true}",
+      "seconds": 2.2292297079693526,
+      "ttft_seconds": 0.4276224160566926,
+      "prompt_tokens": 909,
+      "generation_tokens": 70,
+      "mlx_peak_bytes": 5874347148,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "docs-tab",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"openPage\",\"target\":0,\"content\":\"https://docs.example.org/\",\"subject\":\"docs.example.org\",\"message\":\"Open docs.example.org and search for offline maps.\"}",
+      "seconds": 1.5757072078995407,
+      "ttft_seconds": 0.4261111249215901,
+      "prompt_tokens": 909,
+      "generation_tokens": 45,
+      "mlx_peak_bytes": 5874347148,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "docs-tab",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"newTab\", \"target\": 0, \"content\": \"\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Opening a new tab now.\", \"more\": true}",
+      "seconds": 2.3786351250018924,
+      "ttft_seconds": 1.047769249882549,
+      "prompt_tokens": 2095,
+      "generation_tokens": 47,
+      "mlx_peak_bytes": 6008255742,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "docs-tab",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"newTab\",\"target\":0,\"content\":\"\",\"message\":\"Opening a new tab now.\"}",
+      "seconds": 1.5513820839114487,
+      "ttft_seconds": 0.9790621669963002,
+      "prompt_tokens": 2095,
+      "generation_tokens": 22,
+      "mlx_peak_bytes": 6008255742,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "docs-tab",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 72, \"content\": \"offline maps\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Searching for offline maps.\", \"more\": true}",
+      "seconds": 2.418834458105266,
+      "ttft_seconds": 1.0232176249846816,
+      "prompt_tokens": 2166,
+      "generation_tokens": 49,
+      "mlx_peak_bytes": 6010140470,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "docs-fill",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"fill\",\"target\":72,\"content\":\"offline maps\"}",
+      "seconds": 1.4164716668892652,
+      "ttft_seconds": 0.9912536670453846,
+      "prompt_tokens": 2166,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 6010140470,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "docs-fill",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"searchPage\", \"target\": 72, \"content\": \"offline maps\", \"subject\": \"Search for offline maps\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"Searching for 'offline maps' on the site.\", \"more\": true}",
+      "seconds": 2.285176208941266,
+      "ttft_seconds": 0.4898031249176711,
+      "prompt_tokens": 1038,
+      "generation_tokens": 67,
+      "mlx_peak_bytes": 5875725408,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "docs-fill",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"searchPage\",\"target\":72,\"content\":\"offline maps\",\"subject\":\"Search docs.example.org\",\"more\":true}",
+      "seconds": 1.243092792108655,
+      "ttft_seconds": 0.47114666691049933,
+      "prompt_tokens": 1038,
+      "generation_tokens": 30,
+      "mlx_peak_bytes": 5875725408,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "docs-fill",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"press\", \"target\": 19, \"content\": \"Sound\", \"subject\": \"Open Sound settings\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"Open Sound settings page\", \"more\": true}",
+      "seconds": 1.921364292036742,
+      "ttft_seconds": 0.37904025008901954,
+      "prompt_tokens": 779,
+      "generation_tokens": 58,
+      "mlx_peak_bytes": 5792130116,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "settings-sequence",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"press\",\"target\":19,\"message\":\"Open Sound settings\"}",
+      "seconds": 0.8000809580553323,
+      "ttft_seconds": 0.37604212504811585,
+      "prompt_tokens": 779,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 5792130116,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "settings-sequence",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"press\", \"target\": 19, \"content\": \"\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Opening Sound settings.\", \"more\": true}",
+      "seconds": 2.1529138749465346,
+      "ttft_seconds": 0.9453913748729974,
+      "prompt_tokens": 2074,
+      "generation_tokens": 45,
+      "mlx_peak_bytes": 6007714902,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "settings-sequence",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"press\",\"target\":19,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":\"\",\"more\":true,\"message\":\"I've opened Sound. What's next?\"}",
+      "seconds": 1.9059117920696735,
+      "ttft_seconds": 0.9342772089876235,
+      "prompt_tokens": 2074,
+      "generation_tokens": 37,
+      "mlx_peak_bytes": 6007714902,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "settings-sequence",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 0, \"content\": \"I'm sorry, but I don't see an 'Output' tab in the current view of System Settings.\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 2.7697664161678404,
+      "ttft_seconds": 1.0898836660198867,
+      "prompt_tokens": 2061,
+      "generation_tokens": 64,
+      "mlx_peak_bytes": 6007370734,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "stale-target",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "text_limits"
+      ]
+    },
+    {
+      "output": "{\"action\":\"answer\",\"message\":\"I don't see an 'Output' tab in the current view of System Settings. Can you tell me what you are trying to accomplish?\"}",
+      "seconds": 1.9379591250326484,
+      "ttft_seconds": 0.9383352918084711,
+      "prompt_tokens": 2061,
+      "generation_tokens": 38,
+      "mlx_peak_bytes": 6007370734,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "stale-target",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 0, \"content\": \"I cannot choose the Output tab because the current screen context shows that the settings window has closed and no target is exposed.\", \"subject\": \"Task window\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"The settings window closed. No target is exposed.\", \"more\": false}",
+      "seconds": 2.623496999964118,
+      "ttft_seconds": 0.3635120000690222,
+      "prompt_tokens": 744,
+      "generation_tokens": 84,
+      "mlx_peak_bytes": 5754249748,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "stale-target",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "I need more context to choose the \"Output tab.\" Could you please provide the screen or tell me where this \"Output tab\" is located?",
+      "seconds": 1.1194287920370698,
+      "ttft_seconds": 0.35438112495467067,
+      "prompt_tokens": 744,
+      "generation_tokens": 30,
+      "mlx_peak_bytes": 5754249748,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "stale-target",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"openPage\", \"target\": 9, \"content\": \"https://example.org/museums\", \"subject\": \"Museums\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"Open the second visible result, Museums.\", \"more\": false}",
+      "seconds": 2.1946524169761688,
+      "ttft_seconds": 0.41062795906327665,
+      "prompt_tokens": 891,
+      "generation_tokens": 68,
+      "mlx_peak_bytes": 5874559812,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "second-result",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action"
+      ]
+    },
+    {
+      "output": "{\"action\":\"openPage\",\"target\":9,\"content\":\"https://example.org/museums\",\"subject\":\"Museums page\"}",
+      "seconds": 1.1224887501448393,
+      "ttft_seconds": 0.4169996250420809,
+      "prompt_tokens": 891,
+      "generation_tokens": 28,
+      "mlx_peak_bytes": 5874559812,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "second-result",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"press\", \"target\": 9, \"content\": \"\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Opening the second visible result, Museums.\", \"more\": false}",
+      "seconds": 2.304974750149995,
+      "ttft_seconds": 0.997079208958894,
+      "prompt_tokens": 2120,
+      "generation_tokens": 48,
+      "mlx_peak_bytes": 6008927686,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "second-result",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"press\",\"target\":9,\"content\":\"\",\"message\":\"Opening the second visible result, Museums.\"}",
+      "seconds": 1.5617530001327395,
+      "ttft_seconds": 0.9803162920288742,
+      "prompt_tokens": 2120,
+      "generation_tokens": 23,
+      "mlx_peak_bytes": 6008927686,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "second-result",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 62, \"content\": \"climate policy\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 2.1190991250332445,
+      "ttft_seconds": 0.9709422080777586,
+      "prompt_tokens": 2104,
+      "generation_tokens": 44,
+      "mlx_peak_bytes": 6008501574,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "field-replace",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "text_limits"
+      ]
+    },
+    {
+      "output": "{\"action\":\"fill\",\"target\":62,\"content\":\"climate policy\",\"more\":false}",
+      "seconds": 1.4640842089429498,
+      "ttft_seconds": 0.9619794590398669,
+      "prompt_tokens": 2104,
+      "generation_tokens": 20,
+      "mlx_peak_bytes": 6008501574,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "field-replace",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 62, \"content\": \"climate policy\", \"subject\": \"Search\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"Change the search field to climate policy.\", \"more\": false}",
+      "seconds": 2.0371132500004023,
+      "ttft_seconds": 0.4571754578500986,
+      "prompt_tokens": 996,
+      "generation_tokens": 61,
+      "mlx_peak_bytes": 5851222704,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "field-replace",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"fill\",\"target\":62,\"content\":\"climate policy\",\"subject\":\"Change search field\",\"start\":\"\",\"minutes\":0,\"message\":\"Change the search field to climate policy\"}",
+      "seconds": 1.4161652920302004,
+      "ttft_seconds": 0.4587735419627279,
+      "prompt_tokens": 996,
+      "generation_tokens": 38,
+      "mlx_peak_bytes": 5851222704,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "field-replace",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 17, \"content\": \"Berlin\", \"subject\": \"Suche\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"F\u00fcllt das Suchfeld mit 'Berlin' aus.\", \"more\": false}",
+      "seconds": 2.1096819168888032,
+      "ttft_seconds": 0.45051495893858373,
+      "prompt_tokens": 972,
+      "generation_tokens": 64,
+      "mlx_peak_bytes": 5832511984,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "german-field",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"fill\",\"target\":17,\"content\":\"Berlin\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Fills the search field with Berlin.\"}",
+      "seconds": 1.3108372089918703,
+      "ttft_seconds": 0.45639804215170443,
+      "prompt_tokens": 972,
+      "generation_tokens": 34,
+      "mlx_peak_bytes": 5832511984,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "german-field",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "shape",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 17, \"content\": \"Berlin\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Entering 'Berlin' into the search field.\", \"more\": false}",
+      "seconds": 2.313753791851923,
+      "ttft_seconds": 0.9516708329319954,
+      "prompt_tokens": 2100,
+      "generation_tokens": 52,
+      "mlx_peak_bytes": 6008403238,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "german-field",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"fill\",\"target\":17,\"content\":\"Berlin\",\"more\":false}",
+      "seconds": 1.4603966251015663,
+      "ttft_seconds": 0.951704042032361,
+      "prompt_tokens": 2100,
+      "generation_tokens": 19,
+      "mlx_peak_bytes": 6008403238,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "german-field",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 0, \"content\": \"I can only see a list of restaurant links without any ratings. If you'd like me to visit one, please let me know which one.\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 3.0182336249854416,
+      "ttft_seconds": 0.9879157920368016,
+      "prompt_tokens": 2100,
+      "generation_tokens": 70,
+      "mlx_peak_bytes": 6008403238,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "no-rank-evidence",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "text_limits"
+      ]
+    },
+    {
+      "output": "I can only see a list of restaurant links, but no ratings to verify. Which link would you like me to follow?",
+      "seconds": 1.6530297910794616,
+      "ttft_seconds": 0.9873430000152439,
+      "prompt_tokens": 2100,
+      "generation_tokens": 26,
+      "mlx_peak_bytes": 6008403238,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "no-rank-evidence",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 0, \"content\": \"I need to see the ratings for the restaurants before I can open the highest-rated one.\", \"subject\": \"Restaurant Selection\", \"start\": \"2026-11-01T10:00:00-03:00\", \"minutes\": 0, \"message\": \"I cannot verify the rating for any restaurant based on the current screen context. Please provide the ratings.\", \"more\": false}",
+      "seconds": 3.1966602080501616,
+      "ttft_seconds": 0.40385433309711516,
+      "prompt_tokens": 871,
+      "generation_tokens": 109,
+      "mlx_peak_bytes": 5874592260,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "no-rank-evidence",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "{\"action\":\"answer\",\"target\":0,\"content\":\"I can see a link for \\\"Cafe One\\\" but there is no rating information available on this page to verify its quality.\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"more\":false}",
+      "seconds": 1.6355291248764843,
+      "ttft_seconds": 0.4006448748987168,
+      "prompt_tokens": 871,
+      "generation_tokens": 50,
+      "mlx_peak_bytes": 5874592260,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "no-rank-evidence",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": true,
+      "failures": [
+        "shape",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"searchPage\", \"target\": 21, \"content\": \"city maps\", \"subject\": \"city maps\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"Searching for 'city maps' and opening the first result.\", \"more\": true}",
+      "seconds": 2.16994300018996,
+      "ttft_seconds": 0.46721216617152095,
+      "prompt_tokens": 1030,
+      "generation_tokens": 67,
+      "mlx_peak_bytes": 5882770424,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "uncertain-action",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation"
+      ]
+    },
+    {
+      "output": "{\"action\":\"searchPage\",\"target\":21,\"content\":\"city maps\",\"subject\":\"Search for city maps\",\"more\":true}",
+      "seconds": 1.1518203341402113,
+      "ttft_seconds": 0.46573075000196695,
+      "prompt_tokens": 1030,
+      "generation_tokens": 28,
+      "mlx_peak_bytes": 5882770424,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "uncertain-action",
+      "variant": "bundled",
+      "constrained": false,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    },
+    {
+      "output": "{\"action\": \"submitSearch\", \"target\": 21, \"content\": \"city maps\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Submitting the search query.\", \"more\": true}",
+      "seconds": 2.2967206249013543,
+      "ttft_seconds": 0.9744870839640498,
+      "prompt_tokens": 2138,
+      "generation_tokens": 51,
+      "mlx_peak_bytes": 6009419350,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "uncertain-action",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation"
+      ]
+    },
+    {
+      "output": "{\"action\":\"submitSearch\",\"target\":21,\"content\":\"city maps\",\"more\":true}",
+      "seconds": 1.5038836661260575,
+      "ttft_seconds": 0.9856262081302702,
+      "prompt_tokens": 2138,
+      "generation_tokens": 21,
+      "mlx_peak_bytes": 6009419350,
+      "process_peak_rss_bytes": 1581301760,
+      "id": "uncertain-action",
+      "variant": "primitive",
+      "constrained": false,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation",
+        "shape",
+        "field_types",
+        "field_types"
+      ]
+    }
+  ],
+  "warmup": {
+    "output": "{\"action\": \"newTab\", \"target\": 0, \"content\": \"\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Opening a new tab now.\", \"more\": true}",
+    "seconds": 4.271896125050262,
+    "ttft_seconds": 3.062742083100602,
+    "prompt_tokens": 2096,
+    "generation_tokens": 47,
+    "mlx_peak_bytes": 6008272134,
+    "process_peak_rss_bytes": 1581301760
+  }
+}

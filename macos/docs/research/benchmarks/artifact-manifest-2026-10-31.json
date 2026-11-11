@@ -1,0 +1,804 @@
+{
+  "captured_utc": "2026-10-31T23:58:04.252599+00:00",
+  "chip": "Apple M5",
+  "files": [
+    {
+      "path": "models/lfm3-text/chat_template.jinja",
+      "bytes": 12129,
+      "sha256": "f45005c50cd2a97329722bf3a2dee9f16c04cdf825a589b280fb7e99e6827818"
+    },
+    {
+      "path": "models/lfm3-text/config.json",
+      "bytes": 2423,
+      "sha256": "7df2ea819f9a31b770192a0a9dc1b7953a7dd8c41b816cc3905bbec99ef332bd"
+    },
+    {
+      "path": "models/lfm3-text/generation_config.json",
+      "bytes": 328,
+      "sha256": "0095ba7158e938b1e2d3082d412f00d8be85e42cbbd7608b63866f7a081cf270"
+    },
+    {
+      "path": "models/lfm3-text/model.safetensors",
+      "bytes": 973083386,
+      "sha256": "1be5bf672013cd91aa62148f77c5eea8d2784a95845d5fe826e08c7b84823815"
+    },
+    {
+      "path": "models/lfm3-text/model.safetensors.index.json",
+      "bytes": 50700,
+      "sha256": "2c8b88e25f6a1055164dd051436b170872200047bce4b3ec5f2a58f6ef929a75"
+    },
+    {
+      "path": "models/lfm3-text/special_tokens_map.json",
+      "bytes": 92,
+      "sha256": "7946f864cbfb62a1b041bda937244210a1a87f4a6cab3a48b791131b2cd57f88"
+    },
+    {
+      "path": "models/lfm3-text/tokenizer.json",
+      "bytes": 17908634,
+      "sha256": "41927bd314d17d7d7fadb44e10cd0919f7b71528d7741596d8cbd15c6945ec44"
+    },
+    {
+      "path": "models/lfm3-text/tokenizer_config.json",
+      "bytes": 1859,
+      "sha256": "b77214b9f12be74b9e5e1dab35d7dace077a31be969314bf38866fd6c8163853"
+    },
+    {
+      "path": "models/lfm3-vl/chat_template.jinja",
+      "bytes": 12129,
+      "sha256": "f45005c50cd2a97329722bf3a2dee9f16c04cdf825a589b280fb7e99e6827818"
+    },
+    {
+      "path": "models/lfm3-vl/config.json",
+      "bytes": 4419,
+      "sha256": "0efb7708e0771e3e104ac628954cdc71070dd436e0b7974615bd1b9eb836f9d9"
+    },
+    {
+      "path": "models/lfm3-vl/generation_config.json",
+      "bytes": 355,
+      "sha256": "08622a2580962f8ca4b15acaf85c9ddf6a3d8de1be132e5572f40c433b53dbf9"
+    },
+    {
+      "path": "models/lfm3-vl/model.safetensors",
+      "bytes": 1590959088,
+      "sha256": "58268dfdf441ae4020d2a52fc97a814645e8a9624946e2d490403d4dcd71a255"
+    },
+    {
+      "path": "models/lfm3-vl/model.safetensors.index.json",
+      "bytes": 61256,
+      "sha256": "38b756dbde167ab7c60756af7d5652414c31afdf4e77700b8d3c99395515d639"
+    },
+    {
+      "path": "models/lfm3-vl/processor_config.json",
+      "bytes": 1254,
+      "sha256": "f183f5a5e5b3a32e666fce05033e6cb7ca496d26e709a2cee611a13eb7d6b610"
+    },
+    {
+      "path": "models/lfm3-vl/tokenizer.json",
+      "bytes": 17908258,
+      "sha256": "a39eed58008cbcbc09e5b629b81338a654269c64cd13348aaa6090f4db75c7e7"
+    },
+    {
+      "path": "models/lfm3-vl/tokenizer_config.json",
+      "bytes": 1759,
+      "sha256": "d63d1ce2f332047e398764b4170352b96629a5194643105bfd6d70c90b750396"
+    },
+    {
+      "path": "models/minicpm5/chat_template.jinja",
+      "bytes": 9060,
+      "sha256": "cc945752db555d60949b16989df4ccfeb52a313d6b4b5c5229dd786e2e9fcf1c"
+    },
+    {
+      "path": "models/minicpm5/config.json",
+      "bytes": 886,
+      "sha256": "deb9ca33e863cbc84a9ab7209cd924fc05505dc33270c807d47f1b78fbd53a50"
+    },
+    {
+      "path": "models/minicpm5/generation_config.json",
+      "bytes": 213,
+      "sha256": "9ac4f32e5f32358697a9f438a3ea89ef80e6ba786c72c49e932f9f21c122fdb1"
+    },
+    {
+      "path": "models/minicpm5/model.safetensors",
+      "bytes": 1416035216,
+      "sha256": "c207798696a4a454e7ac211b25227625466c693335941cee8904fb922f295cc1"
+    },
+    {
+      "path": "models/minicpm5/model.safetensors.index.json",
+      "bytes": 68721,
+      "sha256": "ccf202e0a06fe3c7eb8f354cfb29412a5e64956ad895413d4d9267ae4b3a6045"
+    },
+    {
+      "path": "models/minicpm5/tokenizer.json",
+      "bytes": 9894271,
+      "sha256": "3e065a558a034185fe299917b398685c1facd0169a9eea1e629eb30c171fed81"
+    },
+    {
+      "path": "models/minicpm5/tokenizer_config.json",
+      "bytes": 435,
+      "sha256": "b89503c3e5070c6b6d33daf2e20cb4a5c88537c1670d9b7e0cfb4506a61448a9"
+    },
+    {
+      "path": "models/qwen35-4b/chat_template.jinja",
+      "bytes": 7756,
+      "sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+    },
+    {
+      "path": "models/qwen35-4b/config.json",
+      "bytes": 3366,
+      "sha256": "f3efc81b2ea8d96a45301037d3ccccbcccdef44a961845c87f286aaddbc6eaaa"
+    },
+    {
+      "path": "models/qwen35-4b/model.safetensors",
+      "bytes": 3034300695,
+      "sha256": "5fb9acd0246866381cf8c5c354c6db1019f6498eec4ccb4f5edcc71ffeacb2db"
+    },
+    {
+      "path": "models/qwen35-4b/model.safetensors.index.json",
+      "bytes": 101944,
+      "sha256": "52e534c41f7b97708329c85f762e5882bf48bd5955a422c6ae74eba321e6048a"
+    },
+    {
+      "path": "models/qwen35-4b/preprocessor_config.json",
+      "bytes": 390,
+      "sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516"
+    },
+    {
+      "path": "models/qwen35-4b/processor_config.json",
+      "bytes": 1300,
+      "sha256": "14932921ca485d458a04dafd8069fbb0a4505622a48208d19ed247115801385b"
+    },
+    {
+      "path": "models/qwen35-4b/tokenizer.json",
+      "bytes": 19989343,
+      "sha256": "87a7830d63fcf43bf241c3c5242e96e62dd3fdc29224ca26fed8ea333db72de4"
+    },
+    {
+      "path": "models/qwen35-4b/tokenizer_config.json",
+      "bytes": 1139,
+      "sha256": "e98f1901ac6f0adff67b1d540bfa0c36ac1a0cf59eb72ed78146ef89aafa1182"
+    },
+    {
+      "path": "models/qwen35-4b/video_preprocessor_config.json",
+      "bytes": 385,
+      "sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13"
+    },
+    {
+      "path": "models/qwen35-4b/vocab.json",
+      "bytes": 6722759,
+      "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+    },
+    {
+      "path": "tts-models/kokoro/G2PDecoder.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "dbf1767747fdc188222d467a45b04608b396c76c71db3abb18a5fb3680ef9827"
+    },
+    {
+      "path": "tts-models/kokoro/G2PDecoder.mlmodelc/coremldata.bin",
+      "bytes": 545,
+      "sha256": "607e960f19b4d9a30317a5a11869fcce84b300a909fcab2cc756c0d98e2dacd9"
+    },
+    {
+      "path": "tts-models/kokoro/G2PDecoder.mlmodelc/metadata.json",
+      "bytes": 3064,
+      "sha256": "e54e98484fd60d26f22fd3c4e7fe87b0d92a5d2de1f958cc3c4bb36d4ae06a44"
+    },
+    {
+      "path": "tts-models/kokoro/G2PDecoder.mlmodelc/model.mil",
+      "bytes": 19737,
+      "sha256": "fe647c598e0d9454d360b8ee49a59ae57ca147fc5330863ba84ccb90dce482ad"
+    },
+    {
+      "path": "tts-models/kokoro/G2PDecoder.mlmodelc/weights/weight.bin",
+      "bytes": 828030,
+      "sha256": "cbaeb4e743359f607ab161af0c6d8a817462fdaec622ee788ef8ef952c5f8214"
+    },
+    {
+      "path": "tts-models/kokoro/G2PEncoder.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "cf7fbd7e7a65529b2d2bf3941e458a0ab6dff7a298bf48e205a1727c81c26a99"
+    },
+    {
+      "path": "tts-models/kokoro/G2PEncoder.mlmodelc/coremldata.bin",
+      "bytes": 398,
+      "sha256": "0f14d46ca9fd06c68b4717294575b2b99449e67d40b7a2c56f926bf05cd90b11"
+    },
+    {
+      "path": "tts-models/kokoro/G2PEncoder.mlmodelc/metadata.json",
+      "bytes": 2034,
+      "sha256": "c8e0cfd7f494ac1b3662ff8f1914b2b45f79ffb2791724cdc0576981996732e1"
+    },
+    {
+      "path": "tts-models/kokoro/G2PEncoder.mlmodelc/model.mil",
+      "bytes": 20392,
+      "sha256": "8c617e569f37286b056dad800d862dc145be9a95fa9ed43857bb646ba199d7da"
+    },
+    {
+      "path": "tts-models/kokoro/G2PEncoder.mlmodelc/weights/weight.bin",
+      "bytes": 694592,
+      "sha256": "6926bcd2827d21fec82839487b987e06f85fd8a6a5bb896bc4f6062461d014ec"
+    },
+    {
+      "path": "tts-models/kokoro/g2p_vocab.json",
+      "bytes": 1665,
+      "sha256": "295ed64b86c2820cd665b0602ae50c6947c0e82ac643082873e0be87dca282ce"
+    },
+    {
+      "path": "tts-models/kokoro/us_lexicon_cache.json",
+      "bytes": 10444631,
+      "sha256": "6b36ba313202227d6914ad32cd684a0304bd2757e9ec4158ea7bc36ec40e224e"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlbert.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "14a61873d8759a38b79c93f9021ae865f408f56301209a0168dbfc2283265ccd"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlbert.mlmodelc/coremldata.bin",
+      "bytes": 433,
+      "sha256": "b3d7786a7338f341221d3f01b59d3f357e240507aacb072cfba6f62f1a409c8e"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlbert.mlmodelc/model.mil",
+      "bytes": 101485,
+      "sha256": "93be7d96cb218ec3fde5837adf70a1eeaa39323d1e074d8b0abddae89c7e6a0b"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlbert.mlmodelc/weights/weight.bin",
+      "bytes": 5718848,
+      "sha256": "36089a39359b800d3e2c60e5e8ac9217d8f2d1010a8b9273192290e621f1fabc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlbert.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 92156,
+      "sha256": "1efeed89cf916ee5fd38a7b4aef8d79a6444eef6b5521514c5ab34e7164f36a2"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlbert.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 5718848,
+      "sha256": "36089a39359b800d3e2c60e5e8ac9217d8f2d1010a8b9273192290e621f1fabc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlbert.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "10df12c725ef649894bb0b6e2094348fc5571c846322889cffc59f2e255241e7"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlignment.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "f6074d1039a9151d0f97dc6ec9ee0cd9c7b865f1af646d718ab38b659fa84f3f"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlignment.mlmodelc/coremldata.bin",
+      "bytes": 484,
+      "sha256": "1560747fdd82845907b13aea528c99f4c3a972c4cb47afdf6eeee772aa69c20a"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlignment.mlmodelc/model.mil",
+      "bytes": 8194,
+      "sha256": "cf69499f48fcfec137784bdf308e3250d82c29fe65d3cc2f61ccbeb9aff1d2e6"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlignment.mlmodelc/weights/weight.bin",
+      "bytes": 4128,
+      "sha256": "2e7d69128b59d615fc3d3cf85637a687235fc086b1eb136359adb11a61615f6b"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlignment.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 6971,
+      "sha256": "2d87764d55eb2bdf4ea9ced45b63ff51b4a0e139d5440b2d52c03076f06d8512"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlignment.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 4128,
+      "sha256": "2e7d69128b59d615fc3d3cf85637a687235fc086b1eb136359adb11a61615f6b"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroAlignment.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "1c98efe4432ea2d8a53ccc0af34dbde1c99e1c959bfb9c648b1f14550e3348e6"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroNoise_v2.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "53af6bf61482f6002bdb6e3a62f30774cde6e96411aebd888222a34b369f3d04"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroNoise_v2.mlmodelc/coremldata.bin",
+      "bytes": 440,
+      "sha256": "940fb47726fe3238319ed671f851a2324fb091024bd1b9076e66e704b78ed318"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroNoise_v2.mlmodelc/model.mil",
+      "bytes": 93152,
+      "sha256": "316e290a4e9535f93908f66572cbdcb016cbe685cbc8620058eb1694da183395"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroNoise_v2.mlmodelc/weights/weight.bin",
+      "bytes": 4580160,
+      "sha256": "1102fc2d31dfcfe3de3978a4c78b65202ff8b0a4d55a9304213bd4e8bda66bc2"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroNoise_v2.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 76250,
+      "sha256": "894168c950938e0b776f010b4278b1aae65aa1ce3dd8bdfa4c4170ca80362d0d"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroNoise_v2.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 4580160,
+      "sha256": "1102fc2d31dfcfe3de3978a4c78b65202ff8b0a4d55a9304213bd4e8bda66bc2"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroNoise_v2.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "143586c48da49b399761e0b40371dba6191d6060a9a238cbbcec7ed81cc35d73"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroPostAlbert.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "6640044c875505382edbc361cdd56f3f1c30f082953e0f9473a31ae3f71e6c43"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroPostAlbert.mlmodelc/coremldata.bin",
+      "bytes": 556,
+      "sha256": "d81150a28c75a0b384a91d029e31ef07787f64f6791062b57317d3e1b50734a0"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroPostAlbert.mlmodelc/model.mil",
+      "bytes": 60047,
+      "sha256": "51f7210158d2b8d5f8020fd3b864109ce6c0217bb290cd9520d450446f6e9cac"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroPostAlbert.mlmodelc/weights/weight.bin",
+      "bytes": 13806464,
+      "sha256": "e4f300a23cc2e05d38680d9fc94681cc722d445076d1d248f83255122ba091c8"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroPostAlbert.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 49183,
+      "sha256": "5b1ec258a17ca6419da5c90c66e147a7c3699ea3ed620c4b0db715f6b3f5aa26"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroPostAlbert.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 13806464,
+      "sha256": "e4f300a23cc2e05d38680d9fc94681cc722d445076d1d248f83255122ba091c8"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroPostAlbert.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "2d0fd3c94d21d690dbad0e96a395cd02dc8dbb4e04f4f814963173973d48ef25"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroProsody_v2.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "804d7d2e9a8fed345cedb57da61bd27fdd95db22a070cfa7d42ccd4f8e80a443"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroProsody_v2.mlmodelc/coremldata.bin",
+      "bytes": 421,
+      "sha256": "db8776a4896f690fd254cdb68a4551c168411c9b3fb98219630215bc3c357986"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroProsody_v2.mlmodelc/model.mil",
+      "bytes": 73353,
+      "sha256": "e6acad9f44d70b1dba0aea6a5d25ee4edf68fe8f2933399ee81f70ace61cbc8b"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroProsody_v2.mlmodelc/weights/weight.bin",
+      "bytes": 8513664,
+      "sha256": "70eea4cd2523992fa1fea840e31ab6f4fdd69c1598e220985a2ae6ea5da1e944"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroTail_v2.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "a06e4b91c2b8a8be3ff701558a5f1f6484921f948202663fe6df78f248d42222"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroTail_v2.mlmodelc/coremldata.bin",
+      "bytes": 392,
+      "sha256": "527271f6df56cc308a5f89374c92108aef7b837ab15f0ba4900d555588dbd905"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroTail_v2.mlmodelc/metadata.json",
+      "bytes": 1872,
+      "sha256": "7708ecc145eecf8e3ef5ef8979ea7a4f77d04c8da787454c6d9190e5300fc50b"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroTail_v2.mlmodelc/model.mil",
+      "bytes": 7014,
+      "sha256": "b0b8fd573bac76ba7eb85730eeb25538fc7f1c666ecbf939fd4b3a4ad4495ad7"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroTail_v2.mlmodelc/weights/weight.bin",
+      "bytes": 81088,
+      "sha256": "8ede31ec20df7d86a124287ac12d13507651e2a693e9d4f35f0e7f92cba422c7"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroVocoder.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "1cc4f1e6436597c6d458a845570d9d0ace458813ff90f225d08e0e713496b463"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroVocoder.mlmodelc/coremldata.bin",
+      "bytes": 626,
+      "sha256": "8d1e26c205a00d9d43b82f987ecaf66e0731746b92067a95d8c5441ee86f2651"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroVocoder.mlmodelc/model.mil",
+      "bytes": 308998,
+      "sha256": "84cb751cf20b2ec1b008ceca00b433370a2aa8967a2d6c73d5ad4781f0f55da5"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroVocoder.mlmodelc/weights/weight.bin",
+      "bytes": 48889920,
+      "sha256": "6d1f96eb50218ab687b12d6d862d2ae854c12b7165c3cd9b6b5cef261ef02ff1"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroVocoder.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 255741,
+      "sha256": "18481f9531abd0d01cf6fe6b8837b98263e8a63d87db56324d49ed57cc5c75fa"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroVocoder.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 48889920,
+      "sha256": "6d1f96eb50218ab687b12d6d862d2ae854c12b7165c3cd9b6b5cef261ef02ff1"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base/KokoroVocoder.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "83fc9c3c356e0c4022f9547519a2e0919d0e0e40727a0829d60bb69212e28855"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/base-index-v3.json",
+      "bytes": 4750,
+      "sha256": "dadb689cccef2afd0c246ebf5581344d3b8a23b18a82ccd2100322b7d9d2a00d"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_120.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "7f88d44eb2522d1406cfc78b5ca8cc5a880607c43f1d4e9e96272e76141aaa20"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_120.mlmodelc/coremldata.bin",
+      "bytes": 472,
+      "sha256": "8cbc49abb823e95723068121dd5f87f2b502aad5e79dfd6dba59bced39228c78"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_120.mlmodelc/model.mil",
+      "bytes": 101908,
+      "sha256": "f54abb47042488d40c7fd982fb016cec139030a5019414b5402a440ad26ac50e"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_120.mlmodelc/weights/weight.bin",
+      "bytes": 33642176,
+      "sha256": "7f4ba8ddae5d4b6e73bdd19f2d79489963ab41fc1a57d1606001f3cfe5fe82dc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_120.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 87461,
+      "sha256": "cd1fc5ed538f7fb6f57e38dc30c71cbe498344fde764720ec41d8d9b868887ba"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_120.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 33642176,
+      "sha256": "7f4ba8ddae5d4b6e73bdd19f2d79489963ab41fc1a57d1606001f3cfe5fe82dc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_120.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "72d8e9e63859d9df75d74692dd280ffb9f5a106d12f5d25980ab85ecb7a8aefa"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_200.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "06bfce77e973cdb8199e22feebcedcaba89eb3a7344f82752073dd91a1930ee5"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_200.mlmodelc/coremldata.bin",
+      "bytes": 474,
+      "sha256": "cd0ad11c5fcedebd96b153f57b0ccc39953810509f54d7561283a99102dc559c"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_200.mlmodelc/model.mil",
+      "bytes": 101908,
+      "sha256": "3b9dc223e93e4e49fda12aec86aecabb5068238e232e8a3d67304fe7051bacaf"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_200.mlmodelc/weights/weight.bin",
+      "bytes": 33642176,
+      "sha256": "0b758dd755a4fab0c1f4a0a16f302d59e8bb38b2200a8bd29f21acfa61e6547c"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_200.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 87594,
+      "sha256": "1f85ffa9dce80aee4a24392b41aa41d765e39dd55748b1e0b69df6c1b9d0fa60"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_200.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 33642176,
+      "sha256": "0b758dd755a4fab0c1f4a0a16f302d59e8bb38b2200a8bd29f21acfa61e6547c"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/decoder/KokoroDecoderPre_200.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "97d52d353b1229c955316a14e056688b1d742b27fe5736d3ff4e1fbe2189539a"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_32.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "6a43d81626e812ea51ac6b8caa7a80359cccaf06720f66356e89949f2c158a8f"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_32.mlmodelc/coremldata.bin",
+      "bytes": 183,
+      "sha256": "c13c1ea9aab7c553427df7550d26435b5271a51224748e84611ed26da934444f"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_32.mlmodelc/model.mil",
+      "bytes": 99175,
+      "sha256": "c8645208987c4c0bf1ea08dec9966dfc125b360938ce8dcfbe1bdb42d586595a"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_32.mlmodelc/weights/weight.bin",
+      "bytes": 5718848,
+      "sha256": "36089a39359b800d3e2c60e5e8ac9217d8f2d1010a8b9273192290e621f1fabc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_32.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 90614,
+      "sha256": "445dc9bcfa196da380a3b47bf602307cbec01a529b407df4ba31c34ba9980b86"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_32.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 5718848,
+      "sha256": "36089a39359b800d3e2c60e5e8ac9217d8f2d1010a8b9273192290e621f1fabc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_32.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "7275b5a061ed9a95dfa8b182a553e0e97c64d619000899f14a8d922d75d0b9e8"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_64.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "ad1d84971f45bf56fbc87cb6bdc9c7b1c1ad860fd751057b45c643ede008d2cc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_64.mlmodelc/coremldata.bin",
+      "bytes": 183,
+      "sha256": "8f5be20a6d5bbee10951712e5adfbc6fdc06a1d66c08eae1dbc40817b3f7cbd6"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_64.mlmodelc/model.mil",
+      "bytes": 99303,
+      "sha256": "0d8a5d5d29d9ce4c3027a10a610cb6c1900df39990ac2e1d20dd613502d0a04e"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_64.mlmodelc/weights/weight.bin",
+      "bytes": 5718848,
+      "sha256": "36089a39359b800d3e2c60e5e8ac9217d8f2d1010a8b9273192290e621f1fabc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_64.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 90646,
+      "sha256": "8dacdea951068efa8dd1370b4d8b7156fcdcef6c34f0f8d15e4d35070db8e645"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_64.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 5718848,
+      "sha256": "36089a39359b800d3e2c60e5e8ac9217d8f2d1010a8b9273192290e621f1fabc"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroAlbert_64.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "3a99d60a9b318f65caa4918799e69fe7a1548f15dbf38d0cdc3c95afa6f66561"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroSourceGenerator.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "8b2f16e5400347f1dcba9468d0e76cc782e9ef56723ecbe7d05247e0623eb479"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroSourceGenerator.mlmodelc/coremldata.bin",
+      "bytes": 752,
+      "sha256": "1b26a737ca931ab04fed6b5e11fefdef74f35d695396d8c643d6e8b85cc00117"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroSourceGenerator.mlmodelc/model.mil",
+      "bytes": 470090,
+      "sha256": "f598f3923ebf9834d13934459ef360ea0b5a14c3a6a647434ca746e50ec03c4a"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroSourceGenerator.mlmodelc/weights/weight.bin",
+      "bytes": 39353848,
+      "sha256": "e4ada8b28c56a4acda6a88e7c6d076aa65a39051841597bc0c4c07a60afe5ac2"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroSourceGenerator.mlpackage/Data/com.apple.CoreML/model.mlmodel",
+      "bytes": 357002,
+      "sha256": "e2fadc3aba5d8ff69b2473fcd69e9a4d988d4d6c7ca8c383e5902d2b68338cab"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroSourceGenerator.mlpackage/Data/com.apple.CoreML/weights/weight.bin",
+      "bytes": 39353848,
+      "sha256": "e4ada8b28c56a4acda6a88e7c6d076aa65a39051841597bc0c4c07a60afe5ac2"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/KokoroSourceGenerator.mlpackage/Manifest.json",
+      "bytes": 617,
+      "sha256": "c33fd43b96f425410f39d1b5b2fb805ddba985b543f04b6fa6b516bc96caeddb"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/fast/native-source.json",
+      "bytes": 8340,
+      "sha256": "8c673a8a177056db2a91f214b40ab9033f7a3221bd1be5ef4282c6403cff0de3"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/manifest.json",
+      "bytes": 20416,
+      "sha256": "445815d58ff6b3df588e154bc2ff72dd3cd1126d48d71d8050f683f1720259b6"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/vocab.json",
+      "bytes": 1416,
+      "sha256": "8d65b0188b77eafc60751dac42bbac7ab5f5685074af44db91d1877b42dc1d7c"
+    },
+    {
+      "path": "tts-models/kokoro-82m-coreml/ANE-v3/6c0750dd02ef9d981fb82f147d784a3f171755ee/en/voices/af_heart.bin",
+      "bytes": 522240,
+      "sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b"
+    },
+    {
+      "path": "tts-models/supertonic-3/Config.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "tts-models/supertonic-3/DurationPredictor_v2.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "d8bfa7996e1b4c0e26c9c1edc3861f28726bbd30f74d4a7519e69ef78c1b2d1c"
+    },
+    {
+      "path": "tts-models/supertonic-3/DurationPredictor_v2.mlmodelc/coremldata.bin",
+      "bytes": 426,
+      "sha256": "f4f1630670632dd149787fb6ea4f934ab915c390a88d87a4e825ca58f041b4b2"
+    },
+    {
+      "path": "tts-models/supertonic-3/DurationPredictor_v2.mlmodelc/model.mil",
+      "bytes": 105229,
+      "sha256": "0c9c67236d575b2b8f0077815e0b57a30cc7d770dead3ad068fc060c68e33920"
+    },
+    {
+      "path": "tts-models/supertonic-3/DurationPredictor_v2.mlmodelc/weights/weight.bin",
+      "bytes": 1797952,
+      "sha256": "7f709c544087966d6b2538ac50b7a4014d6e1049e21d713cf3bc71c4c5b9307c"
+    },
+    {
+      "path": "tts-models/supertonic-3/TextEncoder_v2.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "973b90afda5d837c037cef2dcbbda275f005eeeb55f2712ca6fbcfa68220f5b5"
+    },
+    {
+      "path": "tts-models/supertonic-3/TextEncoder_v2.mlmodelc/coremldata.bin",
+      "bytes": 432,
+      "sha256": "c1177e3e03cc4130e5dca18eb007f20573bf95d3938abf62ab2d3470b04cbe7f"
+    },
+    {
+      "path": "tts-models/supertonic-3/TextEncoder_v2.mlmodelc/model.mil",
+      "bytes": 158547,
+      "sha256": "b0fd5d9a34a301221194a90aa2ba9133b34ed981209f5e6c7b89733c1491074b"
+    },
+    {
+      "path": "tts-models/supertonic-3/TextEncoder_v2.mlmodelc/weights/weight.bin",
+      "bytes": 18022016,
+      "sha256": "7c7afa5d02426a8a363c9cef0e27ce64a5c57a67d1a59f60aac0ac58ffb9877f"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L128_int4.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "d86b6a6763b342d1e4921ea055e6dfbad082f76643d1a403cce66d2aa2974a2c"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L128_int4.mlmodelc/coremldata.bin",
+      "bytes": 553,
+      "sha256": "2e3b78de95e365609e870fe6af76c5f5e87c1a6787871cf3954d445af085f85f"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L128_int4.mlmodelc/model.mil",
+      "bytes": 373376,
+      "sha256": "889e69177fea30c276cbff98e752275fddb2a80085a5b30db128b20cad8773a7"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L128_int4.mlmodelc/weights/weight.bin",
+      "bytes": 32166112,
+      "sha256": "c6173731642fd2eb40f759a970d4cdea459c0368cc37a29d0b4c1d19fd1ca90a"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L256_int4.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "80775fe9f4b06a17dd7ac9454daf62181ac260df24f4e197bd1a9914d0ba24db"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L256_int4.mlmodelc/coremldata.bin",
+      "bytes": 553,
+      "sha256": "7cb6db0a28a0efa6e50248f9ecdb07b4ae8a7e078873eadb2a87f476a310d758"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L256_int4.mlmodelc/model.mil",
+      "bytes": 373595,
+      "sha256": "750a25ff6939e27506348a62b8ef14e34495356fb73ba4925f1f7be8d6b953fe"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L256_int4.mlmodelc/weights/weight.bin",
+      "bytes": 32167200,
+      "sha256": "e9574dcce25fd7d3f4a68b2257f74fea5227ccd9e6843d53f0e9f5476aa8dc87"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L512_int4.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "439f6850aff99365baae7651e0859e65fde08280fbb6ddb18a7d6fc5cc905d31"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L512_int4.mlmodelc/coremldata.bin",
+      "bytes": 553,
+      "sha256": "d8f370e473dafa80fdb00ba827eb87b46b123e5fab8c7c41f7e014140c4d9fce"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L512_int4.mlmodelc/model.mil",
+      "bytes": 373595,
+      "sha256": "9173a49f4489ac5317e750cc565a4919786052375031284c4216a55fc523c621"
+    },
+    {
+      "path": "tts-models/supertonic-3/VectorEstimatorVariants/VectorEstimator_v2_L512_int4.mlmodelc/weights/weight.bin",
+      "bytes": 32168224,
+      "sha256": "75621d8dcab2fb486fcf7424bf44f472c84f55fdabe5b9b9a5fa781447c7a860"
+    },
+    {
+      "path": "tts-models/supertonic-3/Vocoder.mlmodelc/analytics/coremldata.bin",
+      "bytes": 243,
+      "sha256": "4fe1b825137629a96dc58a1339bc4ece32041b755f99d638f21a153f2e7faed6"
+    },
+    {
+      "path": "tts-models/supertonic-3/Vocoder.mlmodelc/coremldata.bin",
+      "bytes": 388,
+      "sha256": "dbf54fc98879ee1c9a213452e16d09367f3c34ad489b175bcae7ef5f74f8d121"
+    },
+    {
+      "path": "tts-models/supertonic-3/Vocoder.mlmodelc/model.mil",
+      "bytes": 75626,
+      "sha256": "5f57d6b16a4ee7237e046a423c265aa2c487857eb0003bba1c89fa66e577353f"
+    },
+    {
+      "path": "tts-models/supertonic-3/Vocoder.mlmodelc/weights/weight.bin",
+      "bytes": 50672512,
+      "sha256": "b45e4c17a45cc4de30dcedae9f662548aa35f8f9763632c342b8bbef3089fcee"
+    },
+    {
+      "path": "tts-models/supertonic-3/manifest.json",
+      "bytes": 36486,
+      "sha256": "719170fcb59ae4c5616aff9e9d33f22459e9cc7a7bad7073c004b031d2c4bd60"
+    },
+    {
+      "path": "tts-models/supertonic-3/requirements.txt",
+      "bytes": 45,
+      "sha256": "6ab02522a838e95add22c2c1873aba58926b4a2720b00100bb107979ceaddfb1"
+    },
+    {
+      "path": "tts-models/supertonic-3/tts.json",
+      "bytes": 8253,
+      "sha256": "42078d3aef1cd43ab43021f3c54f47d2d75ceb4e75f627f118890128b06a0d09"
+    },
+    {
+      "path": "tts-models/supertonic-3/unicode_indexer.json",
+      "bytes": 277676,
+      "sha256": "9bf7346e43883a81f8645c81224f786d43c5b57f3641f6e7671a7d6c493cb24f"
+    },
+    {
+      "path": "tts-models/supertonic-3/voice_styles/F1.json",
+      "bytes": 292046,
+      "sha256": "bbdec6ee00231c2c742ad05483df5334cab3b52fda3ba38e6a07059c4563dbc2"
+    }
+  ],
+  "limitations": "File hashes captured after inference and before cleanup. Compiled Core ML cache accounting is limited to the task model directory; shared OS-managed caches are excluded.",
+  "total_file_bytes": 7662271742,
+  "temporary_allocated_kib": 9214808
+}

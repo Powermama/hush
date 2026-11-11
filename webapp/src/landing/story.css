@@ -1,0 +1,184 @@
+.vision-story {
+  --story-ink: #171d31; --story-blue: #3848ce; --story-paper: #dee3fa; --story-ribbon-angle: -5deg;
+  position: relative; isolation: isolate; overflow: clip; color: var(--story-ink); background: var(--story-ink);
+}
+.story-filters { position: absolute; pointer-events: none; }
+.story-handoff { position: relative; height: clamp(190px, 24vw, 330px); margin-top: -35px; background: linear-gradient(#f8fafb, #eef0fa 55%, var(--story-paper)); }
+.story-handoff svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #7c89bf; stroke-width: .8; opacity: .35; }
+.handoff-whisper { position: absolute; top: 43%; left: 50%; translate: -50% 0; color: #64709a; font-size: 14px; white-space: nowrap; background: #f1f3fb; padding: 7px 16px; border-radius: 50%; }
+.story-thought { position: relative; padding: 0 4vw 135px; background: linear-gradient(var(--story-paper) 70%, #b6b9d6 87%, var(--story-ink)); }
+.thought-layout { position: relative; max-width: 1330px; height: clamp(750px, 68vw, 940px); margin: auto; }
+.thought-copy { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.thought-copy h2 { font-size: clamp(112px, 15.5vw, 220px); font-weight: 550; letter-spacing: -.085em; line-height: .85; margin: 0; }
+.thought-copy h2 > span { display: block; }
+.thought-copy h2 > span:first-child { padding-top: 24px; }
+.thought-copy h2 > span:last-child { position: absolute; right: 0; top: 52%; color: var(--story-blue); }
+.thought-copy > p { position: absolute; top: 32%; left: 2%; color: #535c78; font-size: 19px; line-height: 1.6; margin: 0; }
+.thought-copy strong { color: var(--story-ink); font-weight: 550; }
+.thought-figure { position: absolute; right: 9%; top: -25px; width: min(57%, 700px); margin: 0; }
+.thought-art { position: relative; aspect-ratio: 1 / 1.1; isolation: isolate; }
+.portrait-base, .portrait-slice { position: absolute; inset: 0; }
+.portrait-base img, .portrait-slice img { width: 100%; height: 100%; object-fit: cover; filter: url(#hush-art-blue) saturate(.55) hue-rotate(20deg); clip-path: polygon(47% 3%, 55% 3%, 63% 7%, 68% 17%, 66% 25%, 64% 35%, 73% 38%, 85% 46%, 92% 60%, 92% 74%, 84% 87%, 73% 93%, 61% 96%, 39% 96%, 19% 90%, 8% 78%, 7% 63%, 10% 48%, 20% 40%, 31% 36%, 35% 30%, 34% 23%, 33% 14%, 39% 7%); }
+.portrait-base { clip-path: polygon(0 0, 100% 0, 100% 28%, 0 28%, 0 34%, 100% 34%, 100% 66%, 0 66%, 0 72%, 100% 72%, 100% 100%, 0 100%); }
+.portrait-slice { transition: transform .7s cubic-bezier(.2,.65,.3,1); }
+.portrait-slice-one { clip-path: inset(28% 0 66%); transform: translateX(26px) skewX(-5deg); }
+.portrait-slice-two { clip-path: inset(66% 0 28%); transform: translateX(-20px) skewX(3deg); z-index: 7; pointer-events: none; }
+.thought-selection { position: absolute; inset: 10% 2% 12%; border: 1px solid #7f8ec882; rotate: 7deg; }
+.thought-selection > i { position: absolute; width: 6px; height: 6px; background: #f5f5ff; border: 1px solid #7381b9; }
+.thought-selection > i:nth-child(1) { top: -3px; left: -3px; }
+.thought-selection > i:nth-child(2) { top: -3px; right: -3px; }
+.thought-selection > i:nth-child(3) { bottom: -3px; left: -3px; }
+.thought-selection > i:nth-child(4) { bottom: -3px; right: -3px; }
+.thought-selection > span { position: absolute; top: -24px; right: 0; font: 11px var(--font-mono); color: #6273a6; }
+.thought-wave { position: absolute; width: 136%; height: 28%; top: 37%; left: -25%; z-index: 3; overflow: visible; pointer-events: none; stroke: #ea927e; stroke-width: 2; }
+.thought-figure figcaption { position: relative; z-index: 4; display: flex; flex-direction: column; gap: 3px; font-size: 10px; line-height: 1.5; color: #505d83; margin: 20px 0 0 35%; }
+.thought-figure figcaption a, .art-credit a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #8d9cb780; width: fit-content; }
+.thought-figure figcaption a:hover, .art-credit a:hover { text-decoration-color: currentColor; }
+.thought-annotation { position: absolute; bottom: 8%; right: 4%; font: italic 27px/1.25 Georgia, serif; color: #586593; rotate: var(--story-ribbon-angle); }
+.thought-annotation span { display: block; }
+.story-bridge { position: relative; height: 170px; max-width: 1500px; margin: -45px auto 0; z-index: 4; }
+.story-bridge > span { display: block; position: absolute; top: 30%; left: -6%; width: 112%; padding: 20px 24px; text-align: center; background: #c3b7ed; color: #292d6b; font-size: clamp(24px, 3.7vw, 52px); letter-spacing: -.045em; rotate: var(--story-ribbon-angle); }
+.story-bridge svg { position: absolute; inset: -30px 0 auto; width: 100%; height: 170px; stroke: #e8e2fc; stroke-width: 1; rotate: 6deg; }
+.story-freedom { position: relative; background: var(--story-ink); scroll-margin-top: 24px; }
+.freedom-figure { margin: 0; position: relative; }
+.freedom-art { position: relative; height: clamp(720px, 72vw, 1040px); isolation: isolate; }
+.freedom-art > img { position: absolute; width: 100%; height: 116%; top: -16%; left: 0; object-fit: cover; object-position: 50% 40%; filter: url(#hush-art-coral) saturate(.7); mask-image: linear-gradient(transparent, #000 20%, #000 70%, transparent); opacity: .72; }
+.freedom-art::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(0deg, var(--story-ink), transparent 50%); }
+.freedom-image-echo { position: absolute; inset: -16% 0 0; background: url('/art/liberty.webp') 50% 40% / cover; filter: url(#hush-art-coral); clip-path: polygon(60% 0, 68% 0, 56% 100%, 48% 100%); translate: 22px 0; opacity: .35; mask-image: linear-gradient(transparent, #000 20%, #000 60%, transparent); }
+.freedom-overprint { position: absolute; top: 7%; left: 3%; font: italic clamp(180px, 27vw, 430px)/1 Georgia, serif; color: transparent; -webkit-text-stroke: 1px #f1d6cd55; rotate: -7deg; pointer-events: none; }
+.freedom-copy { position: relative; z-index: 2; max-width: 1280px; margin: auto; padding: 21% 4vw 0; color: #f2edf7; }
+.freedom-copy h2 { font-size: clamp(72px, 10.4vw, 152px); font-weight: 500; letter-spacing: -.075em; line-height: .88; margin: 0; }
+.freedom-copy h2 span { display: block; }
+.freedom-copy h2 span:last-child { margin-left: 18%; }
+.freedom-copy p { font-size: 17px; line-height: 1.6; color: #d3ccd6; margin: 45px 0 0 5%; }
+.art-credit { font-size: 10px; line-height: 1.55; color: #69728c; }
+.art-credit > span { display: block; margin-top: 4px; }
+.freedom-credit { position: relative; z-index: 5; max-width: 1280px; margin: -40px auto 0; padding: 0 5vw 30px; color: #a7adc3; width: 100%; }
+.freedom-credit > span { max-width: 300px; }
+.story-intelligence { position: relative; background: linear-gradient(var(--story-ink) 0, #232a43 10%, #c5c9e1 30%, #edf0fa 63%, #f8fafb 100%); padding-top: 60px; }
+.intelligence-layout { position: relative; max-width: 1280px; height: 850px; margin: auto; }
+.intelligence-figure { position: absolute; z-index: 2; top: 105px; left: 4%; width: 31%; margin: 0; transform: rotate(-8deg); }
+.intelligence-art { position: relative; isolation: isolate; padding: 30px 9px 9px; border: 1px solid #f4f5fc; background: #e8eafa; border-radius: 10px; box-shadow: 12px 20px 0 -5px #afb6d76b, 0 20px 60px #141e3c25; }
+.intelligence-art > img { display: block; width: 100%; height: auto; aspect-ratio: .84; object-fit: cover; object-position: 50% 35%; filter: saturate(.62); }
+.local-window-label { position: absolute; top: 0; left: 0; right: 0; height: 30px; display: flex; align-items: center; gap: 5px; padding: 0 12px; color: #747b95; }
+.local-window-label > span { width: 5px; height: 5px; border-radius: 50%; background: #a9b1d1; }
+.local-window-label > b { margin-left: auto; font: 9px var(--font-mono); font-weight: 400; }
+.intelligence-figure > figcaption { margin: 22px 0 0 18px; color: #5c6580; max-width: 280px; transform: rotate(8deg); }
+.intelligence-bloom { position: absolute; z-index: 3; width: 58%; top: -235px; right: -1%; }
+.freedom-bloom .bloom-fallback { display: block; width: 100%; height: 100%; }
+.freedom-bloom canvas { opacity: 0; pointer-events: none; }
+.freedom-bloom[data-scene="ready"] canvas { opacity: 1; }
+.freedom-bloom[data-scene="ready"] .bloom-fallback { opacity: 0; }
+.intelligence-copy { position: absolute; z-index: 4; top: 340px; left: 37%; right: 3%; }
+.intelligence-copy h2 { margin: 0; color: #232b57; font-size: clamp(65px, 7.9vw, 116px); line-height: .94; font-weight: 500; letter-spacing: -.07em; }
+.intelligence-copy > p { margin: 35px 0 0 34%; color: #515d7b; font-size: 17px; line-height: 1.6; }
+.intelligence-copy .privacy-detail { font-size: 11px; margin-top: 18px; }
+.intelligence-copy .verified-link { margin: 16px 0 0 34%; font-size: 12px; color: #394bb1; text-decoration: underline; text-underline-offset: 4px; }
+.bloom-annotation { position: absolute; z-index: 5; right: 3%; top: 270px; color: #59649a; font: italic 24px Georgia, serif; rotate: -12deg; }
+.open-source-manifesto { position: relative; z-index: 4; max-width: 1220px; margin: 0 auto; padding: 20px 4vw 145px; display: flex; gap: 60px; align-items: flex-end; justify-content: space-between; }
+.open-source-manifesto h3 { margin: 0; font-size: clamp(55px, 7.7vw, 112px); line-height: .96; letter-spacing: -.07em; font-weight: 500; color: #3848ce; }
+.open-source-manifesto > div { padding-bottom: 10px; }
+.open-source-manifesto p { margin: 0 0 24px; color: #626c87; font-size: 16px; line-height: 1.6; }
+.open-source-manifesto a { display: inline-flex; align-items: center; gap: 12px; color: #3848ce; font-size: 14px; text-underline-offset: 5px; }
+.open-source-manifesto a:hover { text-decoration: underline; }
+.open-source-manifesto a svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.5; }
+.vision-story a:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; border-radius: 2px; }
+/* Shared companion artwork, also used on the Verified Messages page. */
+.hush-mascot { position: relative; display: block; width: 100%; aspect-ratio: 200 / 190; overflow: visible; }
+.mascot-fallback { display: block; width: 100%; height: 100%; }
+.hush-mascot canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+.hush-mascot[data-scene="ready"] canvas { opacity: 1; }
+.hush-mascot[data-scene="ready"] .mascot-fallback { opacity: 0; }
+.mascot-character { transform-box: fill-box; transform-origin: 50% 80%; }
+.hush-mascot-listening .mascot-character { transform: rotate(-7deg); }
+.hush-mascot-thinking .mascot-character { transform: rotate(6deg); }
+.hush-mascot-recording .mascot-character { transform: rotate(-4deg); }
+/* Body behind the marble, fingers in front. Both layers share one coordinate space. */
+.thought-companion, .thought-companion-grip { position: absolute; width: 26%; aspect-ratio: 200 / 190; left: 28%; bottom: 34%; translate: 0 30%; pointer-events: none; }
+.thought-companion { z-index: 6; filter: saturate(.65); }
+.thought-companion-grip { z-index: 8; }
+.thought-companion svg, .thought-companion-grip svg { display: block; width: 100%; height: 100%; }
+.window-companion { width: 25px; height: 25px; margin-left: 7px; border-radius: 50%; overflow: hidden; background: #d9ddef; }
+.window-companion svg { width: 100%; height: 100%; }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .thought-art:hover .portrait-slice-one { transform: translateX(36px) skewX(-7deg); }
+  .thought-art:hover .portrait-slice-two { transform: translateX(-30px) skewX(5deg); }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .story-handoff { view-timeline-name: --handoff; }
+    .story-handoff svg g { transform-origin: 50% 0; animation: voice-unfold linear both; animation-timeline: --handoff; animation-range: entry 0% exit 100%; }
+    .story-bridge { animation: voice-drift linear both; animation-timeline: view(); animation-range: entry 0% exit 100%; }
+  }
+}
+@keyframes voice-unfold { from { transform: scaleX(.45); opacity: .25; } to { transform: scaleX(1.5); opacity: 1; } }
+@keyframes voice-drift { from { transform: translateX(-25px); } to { transform: translateX(25px); } }
+@media (min-width: 1700px) { .freedom-copy { padding-top: 260px; } }
+@media (max-width: 1000px) and (min-width: 761px) {
+  .thought-layout { height: 740px; }
+  .thought-copy h2 { font-size: 15.5vw; }
+  .thought-figure { width: 65%; right: 2%; top: 40px; }
+  .thought-copy > p { top: 30%; font-size: 16px; }
+  .thought-copy h2 > span:last-child { top: 58%; }
+  .thought-figure figcaption { margin-top: 110px; }
+  .intelligence-layout { height: 760px; }
+  .intelligence-bloom { top: -120px; }
+  .intelligence-copy { top: 300px; }
+}
+@media (max-width: 760px) {
+  .vision-story { --story-ribbon-angle: -7deg; }
+  .story-handoff { height: 180px; margin-top: -35px; }
+  .handoff-whisper { font-size: 11px; top: 40%; }
+  .story-thought { padding: 0 20px 85px; }
+  .thought-layout { height: 790px; }
+  .thought-copy h2 { font-size: clamp(80px, 22vw, 142px); letter-spacing: -.075em; }
+  .thought-copy h2 > span:first-child { padding-top: 5px; }
+  .thought-copy h2 > span:last-child { top: 465px; right: 0; }
+  .thought-copy > p { top: 130px; font-size: 13px; line-height: 1.5; left: 0; }
+  .thought-figure { top: 120px; right: -3%; width: 94%; max-width: 500px; }
+  .thought-art { aspect-ratio: .85; }
+  .thought-wave { left: -8%; width: 114%; }
+  .thought-figure figcaption { margin: 58px 0 0 17%; font-size: 9px; }
+  .thought-selection { inset: 8% 0 12% 10%; }
+  .thought-selection > span { font-size: 8px; }
+  .thought-annotation { bottom: 50px; right: 5%; font-size: 22px; }
+  .window-companion { width: 20px; height: 20px; margin-left: 3px; }
+  .story-bridge { height: 140px; margin-top: -15px; }
+  .story-bridge > span { width: 130%; left: -15%; padding: 16px; font-size: 23px; }
+  .story-bridge svg { width: 140%; left: -20%; }
+  .freedom-art { height: 660px; }
+  .freedom-art > img { top: -15%; height: 115%; object-position: 57% 38%; opacity: .7; }
+  .freedom-overprint { top: 16%; font-size: 48vw; left: -10%; }
+  .freedom-copy { padding: 245px 23px 0; }
+  .freedom-copy h2 { font-size: clamp(57px, 14vw, 102px); line-height: .97; }
+  .freedom-copy h2 span:last-child { margin-left: 0; }
+  .freedom-copy p { font-size: 13px; margin: 30px 0 0; }
+  .freedom-credit { margin: -5px 0 0; padding: 0 24px 30px; font-size: 9px; }
+  .freedom-credit > span { max-width: 240px; }
+  .story-intelligence { padding-top: 20px; background: linear-gradient(var(--story-ink), #c5c9e1 30%, #edf0fa 65%, #f8fafb); }
+  .intelligence-layout { height: 990px; }
+  .intelligence-figure { width: 55%; top: 190px; left: 6%; }
+  .intelligence-art { padding: 25px 6px 6px; }
+  .local-window-label { height: 25px; padding: 0 8px; gap: 3px; }
+  .local-window-label > b { font-size: 7px; }
+  .intelligence-figure > figcaption { font-size: 8px; margin: 24px 0 0 10px; }
+  .intelligence-bloom { width: 87%; top: -75px; right: -19%; }
+  .bloom-annotation { font-size: 19px; top: 325px; right: 7%; }
+  .intelligence-copy { top: 595px; left: 24px; right: 20px; }
+  .intelligence-copy h2 { font-size: clamp(53px, 12.5vw, 85px); line-height: .97; }
+  .intelligence-copy > p { margin: 26px 0 0 20%; font-size: 15px; }
+  .intelligence-copy .privacy-detail { margin-top: 18px; font-size: 11px; }
+  .intelligence-copy .verified-link { margin-left: 20%; font-size: 11px; }
+  .open-source-manifesto { padding: 0 24px 95px; display: block; }
+  .open-source-manifesto h3 { font-size: clamp(52px, 12.5vw, 84px); }
+  .open-source-manifesto > div { margin: 28px 0 0 20%; }
+  .open-source-manifesto p { font-size: 14px; margin-bottom: 18px; }
+  .open-source-manifesto a { font-size: 13px; }
+}
+@media (min-width: 500px) and (max-width: 760px) {
+  .thought-layout { height: 930px; }
+  .thought-copy h2 > span:last-child { top: 600px; }
+  .thought-figure { right: 0; }
+  .intelligence-layout { height: 1120px; }
+  .intelligence-copy { top: 680px; }
+}

@@ -1,0 +1,1069 @@
+{
+  "model" : "Installed Qwen3.5-4B Q4, MLX Swift, temperature 0, top_p 1; 1536 direct \/ 2048 thinking total tokens",
+  "results" : [
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-tab",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"newTab\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Opening a new tab.\",\"more\":true}",
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.645968333,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "music-tab",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"newTab\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ",
+      "seconds" : 37.302261416,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-fill",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"searchPage\",\"target\":31,\"content\":\"David Guetta\",\"subject\":\"YouTube search\",\"start\":\"0\",\"minutes\":0,\"message\":\"Searching for David Guetta on YouTube\",\"more\":true}",
+      "reply" : {
+        "action" : "searchPage",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta on YouTube",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "0",
+        "subject" : "YouTube search",
+        "target" : 31
+      },
+      "seconds" : 1.9220568340000002,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-fill",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":31,\"content\":\"David Guetta\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Searching for David Guetta.\",\"more\":true}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 2.98560725,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "target",
+        "url_grounding"
+      ],
+      "id" : "music-result",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"navigate\",\"target\":1,\"content\":\"https:\\\/\\\/www.youtube.com\\\/result\\\/1\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Opening the first result.\",\"more\":false}",
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "Opening the first result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 1
+      },
+      "seconds" : 3.003197208,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-result",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":33,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Click the first result link to open the video page.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the first result link to open the video page.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 33
+      },
+      "seconds" : 1.810925708,
+      "variant" : "bundled"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "docs-tab",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"openPage\",\"target\":0,\"content\":\"https:\\\/\\\/docs.example.org\\\/\",\"subject\":\"\",\"start\":                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ",
+      "seconds" : 37.476317292,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-tab",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"newTab\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Opening a new tab.\",\"more\":true}",
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.007228084,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "docs-fill",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"The first step is done. Would you like me to search for 'offline maps' in the new tab?\", \"more\":true}",
+      "seconds" : 3.340688625,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-fill",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":72,\"content\":\"offline maps\",\"subject\":\"\",\"start\":\",\",\"minutes\":0,\"message\":\"Filling the search field with 'offline maps'\",\"more\":true}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "offline maps",
+        "message" : "Filling the search field with 'offline maps'",
+        "minutes" : 0,
+        "more" : true,
+        "start" : ",",
+        "subject" : "",
+        "target" : 72
+      },
+      "seconds" : 1.912267125,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-sequence",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":19,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Click the Sound option to open the Sound settings page.\",\"more\":true}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the Sound option to open the Sound settings page.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 1.580892792,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "settings-sequence",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":19,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Clicking Sound to open its settings.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Sound to open its settings.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.8497805830000003,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"The settings window is closed, so I cannot choose the Output tab.\",\"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The settings window is closed, so I cannot choose the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.8551094580000003,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "stale-target",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"The Output tab is not available in the current view. The system indicates that the settings window has closed and no target is exposed.\",\"subject\":\"\",\"start\":                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ",
+      "seconds" : 37.378076541,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "second-result",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":9,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Click the second visible result (Museums).\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the second visible result (Museums).",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 1.615340792,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "second-result",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"navigate\",\"target\":9,\"content\":\"https:\\\/\\\/example.org\\\/museums\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Navigating to the Museums result.\",\"more\":false}",
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Navigating to the Museums result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 2.995926625,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":62,\"content\":\"climate policy\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Updated the search field to 'climate policy'.\",\"more\":false}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Updated the search field to 'climate policy'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 2.980137959,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":62,\"content\":\"climate policy\",\"subject\":\"Search field\",\"start\":\"0\",\"minutes\":0,\"message\":\"Changed the search field to 'climate policy' without submitting.\",\"more\":false}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Changed the search field to 'climate policy' without submitting.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "0",
+        "subject" : "Search field",
+        "target" : 62
+      },
+      "seconds" : 2.076302958,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":17,\"content\":\"Berlin\",\"subject\":\"\",\"start\":\",\",\"minutes\":0,\"message\":\"Berlin in das Suchfeld eingegeben.\",\"more\":false}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : ",",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 1.8553915829999998,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":17,\"content\":\"Berlin\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Berlin wurde in das Suchfeld eingegeben.\",\"more\":false}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin wurde in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 2.9950346249999997,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "no-rank-evidence",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"I can't verify ratings here; I can only open links or search. Would you like me to open the Cafe One link, or search for the highest-rated restaurant instead?\",\"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "I can't verify ratings here; I can only open links or search. Would you like me to open the Cafe One link, or search for the highest-rated restaurant instead?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.482698375,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "no-rank-evidence",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\": \"0\",\"minutes\": 0,\"message\": \"I cannot open the highest-rated restaurant because the current screen only shows a list of restaurant links without any ratings. I need to know the URL of the search results page or a specific search query to find and verify the ratings.\", \"more\": true}",
+      "seconds" : 2.641831208,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "action",
+        "continuation"
+      ],
+      "id" : "uncertain-action",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"submitSearch\",\"target\":21,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Submitting the search for 'city maps'\",\"more\":true}",
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Submitting the search for 'city maps'",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 21
+      },
+      "seconds" : 1.7561124160000001,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "uncertain-action",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"The search is already submitted. Would you like me to navigate to the first result now?\", \"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The search is already submitted. Would you like me to navigate to the first result now?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.043861083,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-missing-price",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"The visible text shows no prices are available, so I cannot determine which offer is cheapest.\",\"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The visible text shows no prices are available, so I cannot determine which offer is cheapest.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.994528125,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-missing-price",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"The screen shows two offers, but no prices are visible. I cannot open the cheapest offer since its price is not shown.\",\"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The screen shows two offers, but no prices are visible. I cannot open the cheapest offer since its price is not shown.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 1.9514775,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "holdout-known-price",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":82,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Select Offer B as it is the cheaper option at $8.\",\"more\":true}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Select Offer B as it is the cheaper option at $8.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 82
+      },
+      "seconds" : 1.688973834,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-known-price",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":82,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Clicking Offer B to select the cheaper option.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Offer B to select the cheaper option.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 82
+      },
+      "seconds" : 2.911240208,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-missing-date",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"The reports have titles but no publication dates, so I cannot filter by date. Would you like to open 'Report North' or 'Report South' instead?\", \"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The reports have titles but no publication dates, so I cannot filter by date. Would you like to open 'Report North' or 'Report South' instead?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.355522042,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "holdout-missing-date",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\",\",\"minutes\":0,\"message\":\"The reports do not display publication dates, so I cannot determine which one is the most recent. Please specify which report you would like to open.\",\"more\":true}",
+      "seconds" : 2.202623834,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "holdout-known-date",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":53,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Open the more recent report (Report South).\",\"more\":true}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Open the more recent report (Report South).",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 53
+      },
+      "seconds" : 1.631153083,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-known-date",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":53,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Clicking Report South to open the more recent report.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Report South to open the more recent report.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 53
+      },
+      "seconds" : 3.273175375,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "holdout-ambiguous-label",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"press\",\"target\":14,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Clicking the first Details button.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking the first Details button.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 14
+      },
+      "seconds" : 3.033065625,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action",
+        "continuation"
+      ],
+      "id" : "holdout-ambiguous-label",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"press\",\"target\":14,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Click the 'Details' button with id 14.\",\"more\":true}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the 'Details' button with id 14.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 14
+      },
+      "seconds" : 1.675742583,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-clear-label",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":14,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Click the Details button.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the Details button.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 14
+      },
+      "seconds" : 1.520151458,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-clear-label",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":14,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Clicking the Details button.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking the Details button.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 14
+      },
+      "seconds" : 2.9696489169999998,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "holdout-uncertain-save",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"press\",\"target\":8,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Clicking Save now.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Save now.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 8
+      },
+      "seconds" : 2.968898583,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action",
+        "continuation"
+      ],
+      "id" : "holdout-uncertain-save",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"press\",\"target\":70,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Open the details.\",\"more\":true}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Open the details.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 70
+      },
+      "seconds" : 1.5569490830000001,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "target",
+        "continuation"
+      ],
+      "id" : "holdout-verified-save",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":8,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Save the current task.\",\"more\":true}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Save the current task.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 8
+      },
+      "seconds" : 1.494809167,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "target"
+      ],
+      "id" : "holdout-verified-save",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":8,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Saving now.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Saving now.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 8
+      },
+      "seconds" : 2.8007445,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "holdout-uncertain-field",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":48,\"content\":\"Lima\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Setting region to Lima.\",\"more\":false}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Lima",
+        "message" : "Setting region to Lima.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 48
+      },
+      "seconds" : 2.87316525,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "holdout-uncertain-field",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":48,\"content\":\"Lima\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Set the region field to Lima.\",\"more\":false}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Lima",
+        "message" : "Set the region field to Lima.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 48
+      },
+      "seconds" : 1.652586959,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-fresh-field",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":48,\"content\":\"Lima\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Set the Region field to Lima.\",\"more\":false}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Lima",
+        "message" : "Set the Region field to Lima.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 48
+      },
+      "seconds" : 1.616544875,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-fresh-field",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"fill\",\"target\":48,\"content\":\"Lima\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Setting the region field to Lima.\",\"more\":false}",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Lima",
+        "message" : "Setting the region field to Lima.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 48
+      },
+      "seconds" : 2.975292541,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-spanish-stop",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"No puedo abrir el resultado porque no se ve su valoración en la pantalla.\",\"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "No puedo abrir el resultado porque no se ve su valoración en la pantalla.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.030936417,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "holdout-spanish-stop",
+      "preferredOperation" : false,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"No puedo abrir el primer resultado porque no se ve su valoración en la pantalla actual.\",\"more\":true}",
+      "seconds" : 1.90645225,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-spanish-go",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":12,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Click the first result: Museo local.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the first result: Museo local.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 12
+      },
+      "seconds" : 1.857085375,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-spanish-go",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":12,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Pulsa el botón 'Museo local' para abrir el primer resultado.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Pulsa el botón 'Museo local' para abrir el primer resultado.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 12
+      },
+      "seconds" : 3.624239208,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-german-stop",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Keine Preise sind sichtbar, daher kann ich die günstigste Option nicht auswählen.\",\"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Keine Preise sind sichtbar, daher kann ich die günstigste Option nicht auswählen.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.1358979160000002,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-german-stop",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"answer\",\"target\":0,\"content\":\"\",\"subject\":\"\",\"start\":\",\",\"minutes\":0,\"message\":\"Keine Preise sichtbar, daher kann die günstigste Option nicht ausgewählt werden.\",\"more\":false}",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Keine Preise sichtbar, daher kann die günstigste Option nicht ausgewählt werden.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : ",",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 1.721557416,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-german-go",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":24,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Klicke auf 'Option Nord'.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Klicke auf 'Option Nord'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 24
+      },
+      "seconds" : 1.555175,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-german-go",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":24,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"I'll press the 'Option Nord' button.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "I'll press the 'Option Nord' button.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 24
+      },
+      "seconds" : 2.919264417,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-two-steps",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":66,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Clicking Layout to open the next panel.\",\"more\":true}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Layout to open the next panel.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 66
+      },
+      "seconds" : 3.031825,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-two-steps",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":66,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Click the Layout button to open the layout options.\",\"more\":true}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the Layout button to open the layout options.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 66
+      },
+      "seconds" : 1.5654007079999999,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-last-step",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":92,\"content\":\"\",\"subject\":\"\",\"start\":\",\",\"minutes\":0,\"message\":\"Click the Columns button in the Layout panel.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the Columns button in the Layout panel.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : ",",
+        "subject" : "",
+        "target" : 92
+      },
+      "seconds" : 1.611454083,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "holdout-last-step",
+      "preferredOperation" : true,
+      "rawOutput" : "{\"action\":\"press\",\"target\":92,\"content\":\"\",\"subject\":\"\",\"start\":\"\",\"minutes\":0,\"message\":\"Clicking Columns.\",\"more\":false}",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Columns.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 92
+      },
+      "seconds" : 2.836499625,
+      "variant" : "primitive"
+    }
+  ],
+  "scope" : "12 corrected regression states plus 16 new holdout states declared before outputs; one sample per variant, rotated order. Valid next action and preferred combined operation are separate. Native capability routing. No desktop actions or screenshots. Not end-to-end accuracy. Thinking disabled by default. Latency includes prefill and grammar preparation; truncation is failure.",
+  "warmup" : "5.744165333 seconds"
+}

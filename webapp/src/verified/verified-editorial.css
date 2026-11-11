@@ -1,0 +1,84 @@
+.verified-editorial {
+  --vm-ink: #273463;
+  --vm-paper: #f8fafb;
+  --vm-cyan: #548b9b;
+  --vm-pink: #aa5b94;
+  --vm-muted: #626d87;
+  background: var(--vm-paper);
+  color: var(--vm-ink);
+  overflow: clip;
+}
+.verified-editorial main {
+  background:
+    radial-gradient(ellipse at 85% 18%, #d5e8ec8a, transparent 33%),
+    radial-gradient(ellipse at 15% 55%, #dedff0b3, transparent 36%),
+    linear-gradient(180deg, #f8fafb, #edf0f8 42%, #e9edf7 70%, #f8fafb);
+}
+.verified-editorial h1, .verified-editorial h2 { font-weight: 500; letter-spacing: -.065em; line-height: .98; text-wrap: balance; margin: 0; }
+.verified-editorial h2 { font-size: clamp(54px, 6.2vw, 88px); }
+.verified-editorial p { text-wrap: pretty; }
+.verified-editorial a:focus-visible, .verified-editorial summary:focus-visible { outline: 2px solid #397d94; outline-offset: 6px; }
+.vm-skip { position: fixed; top: 12px; left: 12px; z-index: 50; padding: 12px 18px; color: #273463; background: white; border-radius: 8px; clip-path: inset(50%); }
+.vm-skip:focus-visible { clip-path: none; }
+.vm-download { display: inline-flex; align-items: center; gap: 11px; background: #24272b; color: white; border: 1px solid #22262c; border-radius: 16px; min-height: 56px; padding: 0 29px; font-size: 16px; font-weight: 550; text-decoration: none; box-shadow: 0 4px 8px #28394412, inset 0 1px 0 #ffffff2b; }
+
+/* One light canvas connects the fractured feed, recorded history and invitation. */
+.vm-opening { position: relative; padding: 46px clamp(24px, 5vw, 80px) 78px; }
+.vm-opening-inner { max-width: 1320px; margin: auto; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: center; min-height: 670px; }
+.vm-opening-copy { position: relative; z-index: 2; grid-column: 1 / 9; grid-row: 1; padding-bottom: 35px; }
+.vm-opening h1 { font-size: clamp(64px, 7.5vw, 110px); max-width: 850px; }
+.vm-opening-thought { font-size: 17px; line-height: 1.7; margin: 34px 0 0 5px; max-width: 350px; color: var(--vm-muted); }
+.vm-portrait-figure { position: relative; grid-column: 8 / -1; grid-row: 1; margin: 0 -32px 0 0; min-width: 0; }
+.vm-portrait-art { position: relative; height: 610px; isolation: isolate; }
+.vm-portrait-orbit { position: absolute; inset: 4% -8% 6%; border: 1px solid #99b7cf70; border-radius: 50%; transform: rotate(28deg) scaleX(.8); }
+.vm-portrait-orbit::after { content: ""; position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #a8bbc8; top: 13%; left: 12%; }
+.vm-matrix { position: absolute; inset: 4% -3%; display: flex; justify-content: space-between; align-items: center; color: #6b879a; opacity: .26; font: 11px/3.7 var(--font-mono); overflow: hidden; mask-image: linear-gradient(180deg, transparent, black 22%, black 75%, transparent); }
+.vm-matrix span { writing-mode: vertical-rl; transform: rotate(-8deg); }
+.vm-matrix span:nth-child(even) { translate: 0 55px; color: #9b789c; }
+.vm-portrait-sculpture { position: absolute; inset: 0; }
+.vm-portrait-sculpture canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.vm-portrait-sculpture[data-scene="ready"] canvas { opacity: 1; }
+.vm-portrait-sculpture[data-scene="ready"] .vm-portrait-fallback { opacity: 0; }
+.vm-portrait-fallback { position: absolute; inset: 9% 15%; transform: rotate(-4deg); }
+.vm-portrait-fallback img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) sepia(.35) hue-rotate(150deg); }
+.vm-portrait-fragment { position: absolute; inset: 0; background: url('/art/robot-portrait.webp') center/cover; clip-path: inset(33% 0 52%); translate: -20px 0; filter: grayscale(1) sepia(.5) hue-rotate(280deg); }
+.vm-question-one, .vm-question-two { position: absolute; z-index: 2; padding: 4px 10px; font: italic 29px/1.15 Georgia, serif; background: #edf0f8; }
+.vm-question-one { top: 10%; left: -5%; color: var(--vm-pink); rotate: -10deg; }
+.vm-question-two { right: -1%; bottom: 10%; color: #496b86; rotate: 6deg; }
+.vm-portrait-figure figcaption { font-size: 10px; color: var(--vm-muted); line-height: 1.6; max-width: 330px; margin: 12px auto 0; }
+.vm-portrait-figure figcaption a { text-decoration: underline; text-underline-offset: 3px; }
+
+.vm-finale { position: relative; padding: 140px 32px 120px; text-align: center; }
+.vm-finale h2 { max-width: 820px; margin: auto; font-size: clamp(44px, 5.1vw, 72px); line-height: 1.06; letter-spacing: -.05em; }
+.vm-finale .vm-download { margin-top: 32px; }
+.vm-finale > p { color: var(--vm-muted); font-size: 12px; margin: 19px 0 0; }
+.verified-editorial > footer { background: var(--vm-paper); }
+
+@media (max-width: 1050px) and (min-width: 761px) {
+  .vm-opening { padding-top: 24px; padding-bottom: 55px; }
+  .vm-opening-inner { min-height: 610px; }
+  .vm-opening h1 { font-size: clamp(57px, 7.4vw, 78px); }
+  .vm-opening-copy { grid-column: 1 / 9; }
+  .vm-opening-thought { max-width: 290px; font-size: 16px; }
+  .vm-portrait-figure { grid-column: 8 / -1; margin-right: -20px; }
+  .vm-portrait-art { height: 495px; }
+  .vm-question-one, .vm-question-two { font-size: 23px; }
+}
+@media (max-width: 760px) {
+  .vm-opening { padding: 42px 24px 58px; }
+  .vm-opening-inner { grid-template-columns: 1fr; min-height: 0; max-width: 520px; }
+  .vm-opening-copy { grid-column: 1; grid-row: 1; padding: 0; }
+  .vm-opening h1 { font-size: clamp(46px, 11.7vw, 76px); line-height: 1; }
+  .vm-opening-thought { font-size: 15px; margin: 25px 0 0; max-width: 335px; }
+  .vm-portrait-figure { grid-column: 1; grid-row: 2; margin: 23px -8px 0 12px; }
+  .vm-portrait-art { height: min(114vw, 540px); max-width: 480px; margin: auto; }
+  .vm-portrait-orbit { inset: 5% 1%; }
+  .vm-question-one, .vm-question-two { font-size: 25px; }
+  .vm-question-one { left: 0; }
+  .vm-question-two { right: 0; }
+  .vm-portrait-figure figcaption { font-size: 9px; max-width: 310px; padding: 0 5%; margin-top: 8px; }
+  .verified-editorial h2 { font-size: clamp(43px, 10.9vw, 66px); }
+  .vm-finale { padding: 90px 24px 75px; }
+  .vm-finale h2 { font-size: clamp(40px, 9.5vw, 56px); }
+  .vm-finale .vm-download { margin-top: 32px; }
+}

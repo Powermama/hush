@@ -1,0 +1,15 @@
+{
+  "accessibility": true,
+  "document_loaded": true,
+  "document_ready": true,
+  "duration": "30.757326125 seconds",
+  "outcome": "Opened a new tab in Safari.\nThe browser action was sent, but I couldn't verify the destination. Please check the page.",
+  "page_found": true,
+  "response": "The browser action was sent, but I couldn't verify the destination. Please check the page.",
+  "status": "Please check the result",
+  "tabs_after": 20,
+  "tabs_before": 19,
+  "turn_id": "7C4B6F66-4DC5-4452-B022-3D67B3819ABB",
+  "video_page_verified": false,
+  "scope": "Fresh pre-change Safari run, installed app and Qwen, fixed transcript, no microphone or TTS. Failed after newTab and Google search; 12-second verification timeout."
+}

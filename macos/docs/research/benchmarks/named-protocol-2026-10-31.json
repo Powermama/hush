@@ -1,0 +1,16 @@
+{
+  "utc": "2026-11-01T00:15:06Z",
+  "harness_sha256": "47d468186b2e5aa0515aeb90996b6ae4ec97adbde9ea80630f3ed13a455107b4",
+  "purpose": "Secondary named-tool interface diagnostic after dispatcher failures; same 18 cases and 3 seeds; not held-out",
+  "models": [
+    "mlx-community/Qwen3.5-4B-4bit",
+    "ibm-granite/granite-4.2-3b-local-mlx-4bit",
+    "mlx-community/Qwen3.5-9B-4bit"
+  ],
+  "additional_flags": [
+    "--tool-layout",
+    "named",
+    "--actions-only"
+  ],
+  "no_prompt_tuning_within_protocol": true
+}

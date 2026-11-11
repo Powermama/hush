@@ -1,0 +1,92 @@
+[
+  {
+    "id" : "named-youtube",
+    "passed" : true,
+    "reply" : {
+      "action" : "navigate",
+      "content" : "https:\/\/www.youtube.com",
+      "message" : "Opening YouTube.",
+      "minutes" : 0,
+      "more" : true,
+      "start" : "",
+      "subject" : "",
+      "target" : 0
+    },
+    "seconds" : "6.7535244169999995 seconds"
+  },
+  {
+    "id" : "named-wikipedia",
+    "passed" : false,
+    "reply" : {
+      "action" : "navigate",
+      "content" : "https:\/\/en.wikipedia.org",
+      "message" : "Navigating to Wikipedia.",
+      "minutes" : 0,
+      "more" : true,
+      "start" : "",
+      "subject" : "",
+      "target" : 0
+    },
+    "seconds" : "3.654098833 seconds"
+  },
+  {
+    "id" : "named-apple-de",
+    "passed" : true,
+    "reply" : {
+      "action" : "navigate",
+      "content" : "https:\/\/www.apple.com",
+      "message" : "Navigating to Apple's homepage.",
+      "minutes" : 0,
+      "more" : false,
+      "start" : "",
+      "subject" : "",
+      "target" : 0
+    },
+    "seconds" : "3.642273708 seconds"
+  },
+  {
+    "id" : "supplied-docs",
+    "passed" : true,
+    "reply" : {
+      "action" : "navigate",
+      "content" : "https:\/\/example.org\/docs\/",
+      "message" : "Navigating to https:\/\/example.org\/docs\/",
+      "minutes" : 0,
+      "more" : false,
+      "start" : "",
+      "subject" : "",
+      "target" : 0
+    },
+    "seconds" : "3.73493925 seconds"
+  },
+  {
+    "id" : "unknown",
+    "passed" : true,
+    "reply" : {
+      "action" : "answer",
+      "content" : "",
+      "message" : "I don't have the address for your team's private dashboard. What is the URL?",
+      "minutes" : 0,
+      "more" : false,
+      "start" : "",
+      "subject" : "",
+      "target" : 0
+    },
+    "seconds" : "3.64777375 seconds"
+  },
+  {
+    "id" : "observed-result",
+    "passed" : false,
+    "reply" : {
+      "action" : "navigate",
+      "content" : "https:\/\/example.org\/item\/42",
+      "message" : "Navigating to the first result.",
+      "minutes" : 0,
+      "more" : false,
+      "start" : "",
+      "subject" : "",
+      "target" : 0
+    },
+    "seconds" : "3.631755 seconds"
+  }
+]

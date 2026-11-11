@@ -1,0 +1,47 @@
+[
+  {
+    "id" : "recorded-submit",
+    "passed" : true,
+    "reply" : {
+      "action" : "submitSearch",
+      "content" : "",
+      "message" : "Search submitted. Opening the first result.",
+      "minutes" : 0,
+      "more" : true,
+      "start" : "",
+      "subject" : "",
+      "target" : 3
+    },
+    "seconds" : "8.160092583 seconds"
+  },
+  {
+    "id" : "fresh-result",
+    "passed" : false,
+    "reply" : {
+      "action" : "navigate",
+      "content" : "https:\/\/www.youtube.com\/watch?v=fixture_first",
+      "message" : "Opening the first video.",
+      "minutes" : 0,
+      "more" : true,
+      "start" : "",
+      "subject" : "",
+      "target" : 0
+    },
+    "seconds" : "3.662278875 seconds"
+  },
+  {
+    "id" : "search-only",
+    "passed" : false,
+    "reply" : {
+      "action" : "submitSearch",
+      "content" : "",
+      "message" : "Submitting the search for Martin Garrix.",
+      "minutes" : 0,
+      "more" : true,
+      "start" : "",
+      "subject" : "",
+      "target" : 3
+    },
+    "seconds" : "5.181893458 seconds"
+  }
+]

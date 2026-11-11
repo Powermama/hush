@@ -1,0 +1,23 @@
+name: Suggest an improvement
+description: Explain the outcome you want and why it matters.
+title: "idea: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the person, situation and problem. A concrete example helps.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What should happen?
+      description: Describe the result and any existing behaviour it should preserve.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: References or tradeoffs
+      description: Optional examples, alternatives, privacy or accessibility considerations. Keep links relevant and avoid private data.

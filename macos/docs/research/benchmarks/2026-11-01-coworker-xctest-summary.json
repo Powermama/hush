@@ -1,0 +1,180 @@
+{
+  "date": "2026-11-01",
+  "platform": "macOS 26.3, Apple M5, 16 GiB",
+  "configuration": "Debug; HUSH_COWORKER_LIVE=1",
+  "scope": "Focused assistant suites only",
+  "passed": 34,
+  "failed": 0,
+  "tests": [
+    {
+      "test": "AssistantFoundationTests/malformedProposals()",
+      "result": "Passed",
+      "durationSeconds": 0.0433659553527832
+    },
+    {
+      "test": "AssistantFoundationTests/unicodeAndPromptIsolation()",
+      "result": "Passed",
+      "durationSeconds": 0.0008270740509033203
+    },
+    {
+      "test": "AssistantFoundationTests/numericFacts()",
+      "result": "Passed",
+      "durationSeconds": 0.002535104751586914
+    },
+    {
+      "test": "AssistantFoundationTests/clarification()",
+      "result": "Passed",
+      "durationSeconds": 0.03860020637512207
+    },
+    {
+      "test": "AssistantFoundationTests/staleBinding()",
+      "result": "Passed",
+      "durationSeconds": 0.005655050277709961
+    },
+    {
+      "test": "AssistantFoundationTests/cancelledGeneration()",
+      "result": "Passed",
+      "durationSeconds": 1.1428859233856201
+    },
+    {
+      "test": "AssistantFoundationTests/duplicateAndUnverifiedInsertion()",
+      "result": "Passed",
+      "durationSeconds": 0.31518983840942383
+    },
+    {
+      "test": "AssistantFoundationTests/clipboardLease()",
+      "result": "Passed",
+      "durationSeconds": 0.07489395141601562
+    },
+    {
+      "test": "AssistantFoundationTests/chordArbitration()",
+      "result": "Passed",
+      "durationSeconds": 0.016494035720825195
+    },
+    {
+      "test": "AssistantFoundationTests/voiceContextBinding()",
+      "result": "Passed",
+      "durationSeconds": 0.00019097328186035156
+    },
+    {
+      "test": "CoworkerTests/links()",
+      "result": "Passed",
+      "durationSeconds": 0.043406009674072266
+    },
+    {
+      "test": "CoworkerTests/calendarDraft()",
+      "result": "Passed",
+      "durationSeconds": 0.0013780593872070312
+    },
+    {
+      "test": "CoworkerTests/schema()",
+      "result": "Passed",
+      "durationSeconds": 0.002362966537475586
+    },
+    {
+      "test": "CoworkerTests/cancelledTurn()",
+      "result": "Passed",
+      "durationSeconds": 1.18402099609375
+    },
+    {
+      "test": "CoworkerTests/spokenClarification()",
+      "result": "Passed",
+      "durationSeconds": 0.39280104637145996
+    },
+    {
+      "test": "CoworkerTests/cancelBeforeEdit()",
+      "result": "Passed",
+      "durationSeconds": 0.5421829223632812
+    },
+    {
+      "test": "CoworkerTests/cancelAfterDispatch()",
+      "result": "Passed",
+      "durationSeconds": 0.6299300193786621
+    },
+    {
+      "test": "CoworkerTests/directCommands()",
+      "result": "Passed",
+      "durationSeconds": 0.0005748271942138672
+    },
+    {
+      "test": "CoworkerTests/directNavigation()",
+      "result": "Passed",
+      "durationSeconds": 0.3743460178375244
+    },
+    {
+      "test": "CoworkerTests/releaseChord()",
+      "result": "Passed",
+      "durationSeconds": 0.0005218982696533203
+    },
+    {
+      "test": "CoworkerLiveTests/nativeVision()",
+      "result": "Passed",
+      "durationSeconds": 8.84191608428955
+    },
+    {
+      "test": "CoworkerLiveTests/localConversation()",
+      "result": "Passed",
+      "durationSeconds": 24.397500038146973
+    },
+    {
+      "test": "AssistantGrammarTests/nativeTokenMask()",
+      "result": "Passed",
+      "durationSeconds": 1.163525104522705
+    },
+    {
+      "test": "AssistantJourneyTests/testClarificationContinuesByVoiceWithoutAForm()",
+      "result": "Passed",
+      "durationSeconds": 6.681909918785095
+    },
+    {
+      "test": "AssistantJourneyTests/testCoworkerEscapeCancelsLateReply()",
+      "result": "Passed",
+      "durationSeconds": 10.706806898117065
+    },
+    {
+      "test": "AssistantJourneyTests/testCursorFollowsMouseAndCompletionDisappears()",
+      "result": "Passed",
+      "durationSeconds": 11.474074959754944
+    },
+    {
+      "test": "AssistantJourneyTests/testCursorIsTheDefaultSurface()",
+      "result": "Passed",
+      "durationSeconds": 2.9518890380859375
+    },
+    {
+      "test": "AssistantJourneyTests/testEscapeDismissesStoppedCursorFromAnotherApp()",
+      "result": "Passed",
+      "durationSeconds": 5.938344955444336
+    },
+    {
+      "test": "AssistantJourneyTests/testEscapeStopsGenerationAndTruncatedOutputCannotBeInserted()",
+      "result": "Passed",
+      "durationSeconds": 11.786962032318115
+    },
+    {
+      "test": "AssistantJourneyTests/testGlobalEntryDoesNotRequireMail()",
+      "result": "Passed",
+      "durationSeconds": 2.9267680644989014
+    },
+    {
+      "test": "AssistantJourneyTests/testReviewAndFormattedInsertionPreserveSignatureInLightAppearance()",
+      "result": "Passed",
+      "durationSeconds": 7.421704053878784
+    },
+    {
+      "test": "AssistantJourneyTests/testSpeechBubbleIsReadOnlyAndEscapeStopsIt()",
+      "result": "Passed",
+      "durationSeconds": 6.848720073699951
+    },
+    {
+      "test": "AssistantJourneyTests/testSpokenTurnFollowUpAndInsertion()",
+      "result": "Passed",
+      "durationSeconds": 8.010635018348694
+    },
+    {
+      "test": "AssistantJourneyTests/testStaleDestinationNeverReceivesDraft()",
+      "result": "Passed",
+      "durationSeconds": 7.535588979721069
+    }
+  ]
+}

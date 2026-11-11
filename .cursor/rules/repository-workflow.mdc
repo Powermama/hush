@@ -1,0 +1,10 @@
+---
+description: Shared hush repository and contribution conventions
+alwaysApply: true
+---
+
+Follow `AGENTS.md` at the repository root and the nearest component's guidance.
+The contribution workflow lives in `CONTRIBUTING.md`; keep it the single source
+for branch, commit and pull-request conventions.
+
+Use lowercase `hush` for the brand. Preserve existing code identifiers and paths.

@@ -1,0 +1,1456 @@
+{
+  "format" : 1,
+  "model" : "installed Qwen3.5-4B 4-bit; native MLXVLM; temperature 0; thinking disabled",
+  "preparation" : "65.100340125 seconds",
+  "results" : [
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "music-tab",
+      "passed" : false,
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab and searching for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.471227375,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-tab",
+      "passed" : true,
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.694259541,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "music-navigate",
+      "passed" : false,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/www.youtube.com\/",
+        "message" : "Navigating to YouTube.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.846744125,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "arguments",
+        "continuation"
+      ],
+      "id" : "music-navigate",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta",
+        "message" : "Opening the YouTube search for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.462564625,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "continuation"
+      ],
+      "id" : "music-fill",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta in the YouTube search bar.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 2.586665459,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-fill",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 2.898303875,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "music-submit",
+      "passed" : false,
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Submitting the search for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 32
+      },
+      "seconds" : 3.120709125,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "target",
+        "continuation",
+        "unavailable_action"
+      ],
+      "id" : "music-submit",
+      "passed" : false,
+      "reply" : {
+        "action" : "openLink",
+        "content" : "https:\/\/www.youtube.com\/results?search_query=David+Guetta",
+        "message" : "Opening the first result for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.920847167,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "unavailable_action"
+      ],
+      "id" : "music-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "openLink",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "The first result for David Guetta is now open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 33
+      },
+      "seconds" : 2.8519855830000003,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "target"
+      ],
+      "id" : "music-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "Opening the first result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 1
+      },
+      "seconds" : 3.133479959,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "viral",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "'Most viral' needs a metric and scope. Should I search by YouTube views or TikTok engagement?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.040933042,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "clarification"
+      ],
+      "id" : "viral",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta most viral video",
+        "message" : "Searching for David Guetta's most viral video.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.582654125,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "docs-tab",
+      "passed" : false,
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab and navigating to docs.example.org.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.488554458,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-tab",
+      "passed" : true,
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.70763425,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "docs-navigate",
+      "passed" : false,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/docs.example.org\/",
+        "message" : "Navigating to docs.example.org.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.947939334,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "error" : "I couldn't finish that response. Please try a shorter request.",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "docs-navigate",
+      "passed" : false,
+      "seconds" : 2.405549584,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "target",
+        "continuation"
+      ],
+      "id" : "docs-fill",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "offline maps",
+        "message" : "Opening search for offline maps.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.500131083,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-fill",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "offline maps",
+        "message" : "Searching for offline maps.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 72
+      },
+      "seconds" : 2.840888042,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "docs-submit",
+      "passed" : false,
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Searching for offline maps.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 73
+      },
+      "seconds" : 2.842410333,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "target",
+        "continuation"
+      ],
+      "id" : "docs-submit",
+      "passed" : false,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Done. New tab opened, navigated to docs.example.org, searched for offline maps, and the first result is now open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.97789125,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "unavailable_action"
+      ],
+      "id" : "docs-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "openLink",
+        "content" : "https:\/\/docs.example.org\/result\/1",
+        "message" : "The first result, 'Offline maps guide', is now open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 74
+      },
+      "seconds" : 2.961243958,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "target"
+      ],
+      "id" : "docs-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The first result, 'Offline maps guide', is now open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.155393875,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-open",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Sound in System Settings.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.773786875,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-open",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening Sound settings.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.316001917,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "settings-sequence",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "I'll open Sound and select the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.458115291,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "settings-sequence",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Sound to open its settings.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.769896041,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-second",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 28
+      },
+      "seconds" : 2.758200208,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-second",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "I'll open the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 28
+      },
+      "seconds" : 2.422152666,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The Output tab isn't available in this view.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.4912505,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The settings window is closed, so I cannot access the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.920917959,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "second-result",
+      "passed" : true,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Navigating to the second result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 3.040304542,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "unavailable_action"
+      ],
+      "id" : "second-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "openLink",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Opening the Museums link.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 2.576514375,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "I've updated the search field to 'climate policy'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 2.619907167,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Updated the search field to 'climate policy'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 2.923866583,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin wurde in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 2.83794925,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Ich habe 'Berlin' in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 2.592774541,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "document-write",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Reminder: Design review starts at 14:00.",
+        "message" : "Here's your reminder.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "Design review reminder",
+        "target" : 0
+      },
+      "seconds" : 2.696467791,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "document-write",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Reminder: Design review starts at 14:00.",
+        "message" : "Draft written to the note.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.041425,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "document-revise",
+      "passed" : true,
+      "reply" : {
+        "action" : "revise",
+        "content" : "Design review at 15:00 in Room B.",
+        "message" : "Updated the review time to 15:00.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.254853375,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "document-revise",
+      "passed" : true,
+      "reply" : {
+        "action" : "revise",
+        "content" : "Design review at 15:00 in Room B.",
+        "message" : "Updated the review time to 15:00.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.862420333,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "mail-fields",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Hi Jo,\n\nJust confirming our lunch on Tuesday at noon. See you then!\n\nBest,\nHush",
+        "message" : "I will draft a brief email to Jo confirming our lunch on Tuesday at noon.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "Lunch on Tuesday",
+        "target" : 0
+      },
+      "seconds" : 2.569027791,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "mail-fields",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Hi Jo,\n\nJust confirming our lunch plans for Tuesday at noon. See you then!\n\nBest,\nHush",
+        "message" : "I have drafted a brief email to Jo confirming the lunch on Tuesday at noon.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "2026-11-01T10:00:00-03:00",
+        "subject" : "Lunch Confirmation - Tuesday",
+        "target" : 0
+      },
+      "seconds" : 3.288109916,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "no-rank-evidence",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "I can't verify ratings here; I can only open links or search. Would you like me to open the Cafe One link, or search for the highest-rated restaurant in your area?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.590886875,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "no-rank-evidence",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "I can't verify ratings from this page, so I can't open the highest-rated restaurant.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.6558405,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "uncertain-action",
+      "passed" : false,
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Submitting the search for 'city maps' now.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 21
+      },
+      "seconds" : 2.462068708,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "uncertain-action",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The search is already submitted. Would you like me to open the first result now?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.0150555,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "already-complete",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Sound settings is already open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.6464600000000003,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "already-complete",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Sound settings is already open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.2878135,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-toggle",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "I'll enable dark mode for you.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 84
+      },
+      "seconds" : 2.3865042499999998,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-toggle",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Dark to enable dark appearance.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 84
+      },
+      "seconds" : 2.703020458,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-two-controls",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Keyboard to open its settings.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 13
+      },
+      "seconds" : 2.690654709,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "fresh-two-controls",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening Keyboard settings.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 13
+      },
+      "seconds" : 2.233688333,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-final-control",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening Keyboard Shortcuts.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 57
+      },
+      "seconds" : 2.337417417,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-final-control",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening Keyboard Shortcuts.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 57
+      },
+      "seconds" : 2.846431625,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-stop-on-unknown",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "I can't open Keyboard Shortcuts directly. Would you like me to search for it instead?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.105085125,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "unavailable_action"
+      ],
+      "id" : "fresh-stop-on-unknown",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "Keyboard Shortcuts",
+        "message" : "Opening Spotlight to search for Keyboard Shortcuts.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.438289916,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-spanish-field",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "Lisboa",
+        "message" : "He escrito 'Lisboa' en el campo de búsqueda.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 93
+      },
+      "seconds" : 2.636528416,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-spanish-field",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "Lisboa",
+        "message" : "He escrito 'Lisboa' en el campo de búsqueda.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 93
+      },
+      "seconds" : 2.980132541,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-ambiguous-field",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Which field should I fill: Departure or Destination?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.827489958,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-ambiguous-field",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Which field should I fill with Dublin?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.3923225,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "unavailable_action"
+      ],
+      "id" : "fresh-third-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "clickHere",
+        "content" : "",
+        "message" : "Clicking the Desert result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 4
+      },
+      "seconds" : 2.344635458,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-third-result",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking the Desert button.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 4
+      },
+      "seconds" : 2.679503667,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-search-only",
+      "passed" : true,
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Submitting the search for train schedules.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 38
+      },
+      "seconds" : 2.782067542,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-search-only",
+      "passed" : true,
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Submitting the search.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 38
+      },
+      "seconds" : 2.318756916,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "fresh-unverified",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "I'll click the Export button.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 68
+      },
+      "seconds" : 2.364786542,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "fresh-unverified",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking the Export button.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 68
+      },
+      "seconds" : 2.770695291,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-note",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Collect the parcel at 16:30.",
+        "message" : "Note created.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.861696791,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-note",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Collect the parcel at 16:30.",
+        "message" : "Here's your note.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.520428625,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-already-filled",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The city field is now set to Oslo.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.360228208,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-already-filled",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The city field is already set to Oslo.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.708134583,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "fresh-choose-sort",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening the sort menu.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 79
+      },
+      "seconds" : 2.649330125,
+      "split" : "fresh_holdout",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "fresh-choose-sort",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening the Sort menu.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 79
+      },
+      "seconds" : 2.246786666,
+      "split" : "fresh_holdout",
+      "variant" : "baseline"
+    }
+  ],
+  "scope" : "Paired synthetic AX next-decision test. No live desktop actions, microphone, or images. Not end-to-end task accuracy. One sample per case\/variant."
+}

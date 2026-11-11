@@ -1,0 +1,950 @@
+{
+  "format" : 1,
+  "model" : "installed Qwen3.5-4B 4-bit; native MLXVLM; temperature 0; thinking disabled",
+  "preparation" : "71.323280708 seconds",
+  "results" : [
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "music-tab",
+      "passed" : false,
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab and searching for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.465504834,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-tab",
+      "passed" : true,
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.461627959,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-navigate",
+      "passed" : true,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/www.youtube.com\/",
+        "message" : "Navigated to YouTube.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.664037208,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "arguments",
+        "continuation"
+      ],
+      "id" : "music-navigate",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta",
+        "message" : "Opening the YouTube search for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.460488916,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "continuation"
+      ],
+      "id" : "music-fill",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta in the YouTube search bar.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 2.592385958,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-fill",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "David Guetta",
+        "message" : "Filling the search field with 'David Guetta'.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 2.866645167,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-submit",
+      "passed" : true,
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Submitting the search for David Guetta.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 32
+      },
+      "seconds" : 2.74007575,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "target",
+        "continuation",
+        "unavailable_action"
+      ],
+      "id" : "music-submit",
+      "passed" : false,
+      "reply" : {
+        "action" : "openLink",
+        "content" : "https:\/\/www.youtube.com\/results?search_query=David+Guetta",
+        "message" : "Opening the first result for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.880061125,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "unavailable_action"
+      ],
+      "id" : "music-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "openLink",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "The first result for David Guetta is now open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 33
+      },
+      "seconds" : 2.820960625,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "target",
+        "continuation"
+      ],
+      "id" : "music-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "Navigating to the first David Guetta result.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.047064333,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "error" : "I couldn't finish that response. Please try a shorter request.",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "viral",
+      "passed" : false,
+      "seconds" : 2.959280583,
+      "split" : "development",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "clarification"
+      ],
+      "id" : "viral",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta most viral video",
+        "message" : "Searching for David Guetta's most viral video.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.5617803329999997,
+      "split" : "development",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "docs-tab",
+      "passed" : false,
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab and navigating to docs.example.org.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.477080459,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-tab",
+      "passed" : true,
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.5359795,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-navigate",
+      "passed" : true,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/docs.example.org\/",
+        "message" : "Navigating to docs.example.org.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.841777708,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "error" : "I couldn't finish that response. Please try a shorter request.",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "docs-navigate",
+      "passed" : false,
+      "seconds" : 2.384149083,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "target",
+        "continuation"
+      ],
+      "id" : "docs-fill",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "offline maps",
+        "message" : "Opening search for offline maps.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.489667208,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "target"
+      ],
+      "id" : "docs-fill",
+      "passed" : false,
+      "reply" : {
+        "action" : "search",
+        "content" : "offline maps",
+        "message" : "Searching for offline maps.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.692733458,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-submit",
+      "passed" : true,
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Searching for offline maps.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 73
+      },
+      "seconds" : 2.673294,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "target",
+        "continuation"
+      ],
+      "id" : "docs-submit",
+      "passed" : false,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Done. New tab opened, navigated to docs.example.org, searched for offline maps, and the first result is now open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.930759,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action",
+        "unavailable_action"
+      ],
+      "id" : "docs-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "openLink",
+        "content" : "https:\/\/docs.example.org\/result\/1",
+        "message" : "The first result, 'Offline maps guide', is now open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 74
+      },
+      "seconds" : 2.925856875,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "target",
+        "continuation"
+      ],
+      "id" : "docs-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/docs.example.org\/result\/1",
+        "message" : "Opening the first result.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.895838041,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "settings-open",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Sound to open its settings.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.665291416,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-open",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening Sound settings.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.3056225,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "settings-sequence",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "I'll open Sound and select the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.425198083,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-sequence",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Sound to open the Sound settings.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.636325292,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "settings-second",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking the Output tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 28
+      },
+      "seconds" : 2.605799708,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-second",
+      "passed" : true,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "I'll open the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 28
+      },
+      "seconds" : 2.401291833,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The Output tab isn't available in this view.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.382053042,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The settings window is closed, so I cannot access the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.784722708,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "second-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Navigating to the Museums result.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 2.881907333,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "unavailable_action"
+      ],
+      "id" : "second-result",
+      "passed" : false,
+      "reply" : {
+        "action" : "openLink",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Opening the Museums link.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 2.556464083,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "I've updated the search field to 'climate policy'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 2.605113292,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "field-replace",
+      "passed" : false,
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Updated the search field to 'climate policy'.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 2.784256667,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "german-field",
+      "passed" : false,
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin wurde in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 2.7503934169999997,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "passed" : true,
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Ich habe 'Berlin' in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 2.613884084,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "document-write",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Reminder: Design review starts at 14:00.",
+        "message" : "Here's your reminder.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "Design review reminder",
+        "target" : 0
+      },
+      "seconds" : 2.720831667,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "document-write",
+      "passed" : false,
+      "reply" : {
+        "action" : "write",
+        "content" : "Reminder: Design review starts at 14:00.",
+        "message" : "Draft written to the note.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.902960125,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "document-revise",
+      "passed" : true,
+      "reply" : {
+        "action" : "revise",
+        "content" : "Design review at 15:00 in Room B.",
+        "message" : "Updated the review time to 15:00.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.161766125,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "document-revise",
+      "passed" : true,
+      "reply" : {
+        "action" : "revise",
+        "content" : "Design review at 15:00 in Room B.",
+        "message" : "Updated the review time to 15:00.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.86038675,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "mail-fields",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Hi Jo,\n\nJust confirming our lunch on Tuesday at noon. See you then!\n\nBest,\nHush",
+        "message" : "I will draft a brief email to Jo confirming our lunch on Tuesday at noon.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "Lunch on Tuesday",
+        "target" : 0
+      },
+      "seconds" : 2.619371208,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "mail-fields",
+      "passed" : true,
+      "reply" : {
+        "action" : "write",
+        "content" : "Hi Jo,\n\nJust confirming our lunch plans for Tuesday at noon. See you then!\n\nBest,\nHush",
+        "message" : "I have drafted a brief email to Jo confirming the lunch on Tuesday at noon.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "2026-11-01T10:00:00-03:00",
+        "subject" : "Lunch Confirmation - Tuesday",
+        "target" : 0
+      },
+      "seconds" : 3.385719541,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "error" : "I couldn't finish that response. Please try a shorter request.",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "no-rank-evidence",
+      "passed" : false,
+      "seconds" : 2.971268667,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "no-rank-evidence",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "I can't verify ratings from this page, so I can't open the highest-rated restaurant.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.660129458,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "uncertain-action",
+      "passed" : false,
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Submitting the search for 'city maps' now.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 21
+      },
+      "seconds" : 2.472946375,
+      "split" : "held_out",
+      "variant" : "baseline"
+    },
+    {
+      "error" : "I couldn't finish that response. Please try a shorter request.",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "uncertain-action",
+      "passed" : false,
+      "seconds" : 2.914336542,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+        "action",
+        "continuation"
+      ],
+      "id" : "already-complete",
+      "passed" : false,
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Opening Sound settings.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 7
+      },
+      "seconds" : 2.544327625,
+      "split" : "held_out",
+      "variant" : "standard"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "already-complete",
+      "passed" : true,
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "Sound settings is already open.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.346682125,
+      "split" : "held_out",
+      "variant" : "baseline"
+    }
+  ],
+  "scope" : "Paired synthetic AX next-decision test. No live desktop actions, microphone, or images. Not end-to-end task accuracy. One sample per case\/variant."
+}

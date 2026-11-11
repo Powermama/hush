@@ -1,0 +1,15 @@
+# Hush
+
+> Hush is a private macOS writing tool that turns speech into polished text using local transcription and local AI.
+
+Hush is designed so dictated content and AI refinement stay on the user's Mac. It works across Mac apps, supports reusable writing personas, and lets a user publish an optional encrypted proof link for a message.
+
+Hush proof links describe signed capture origin and refinement history. They do not prove biological identity or determine whether spoken audio was AI-generated. Proof contents are encrypted, require the private key in the URL fragment, and are intentionally excluded from public discovery.
+
+## Product
+
+- [Hush](https://behu.sh/): Product overview, privacy model, features, and macOS experience.
+
+## Optional
+
+- [Sitemap](https://behu.sh/sitemap.xml): Canonical public pages intended for search indexing.

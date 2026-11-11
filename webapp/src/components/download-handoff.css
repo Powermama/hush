@@ -1,0 +1,27 @@
+.download-handoff { position: fixed; inset: auto 0 0; box-sizing: border-box; width: min(100%, 480px); max-width: none; max-height: calc(100dvh - 24px); overflow: auto; margin: auto auto 0; padding: 36px 24px max(24px, env(safe-area-inset-bottom)); border: 1px solid #e0e4ec; border-radius: 28px 28px 0 0; color: #24272b; background: #f8fafb; box-shadow: 0 -16px 70px #11182718; text-align: center; animation: handoff-arrive .24s ease-out; }
+.download-handoff::backdrop { background: #11182770; }
+.handoff-close { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #e9edf2; color: #566174; cursor: pointer; }
+.download-handoff svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.handoff-close svg { width: 18px; height: 18px; }
+.handoff-device { display: grid; place-items: center; width: 76px; height: 76px; margin: 0 auto 22px; border-radius: 22px; color: #5b6797; background: linear-gradient(135deg, #e1e5fa, #e3eff0); }
+.handoff-device svg { width: 54px; height: 42px; }
+.download-handoff h2 { margin: 0; font-size: clamp(26px, 7vw, 32px); font-weight: 550; letter-spacing: -.045em; line-height: 1.12; }
+.download-handoff > p { margin: 14px auto 24px; max-width: 290px; font-size: 15px; line-height: 1.5; color: #626973; }
+.handoff-actions { display: grid; gap: 10px; }
+.handoff-actions > button, .handoff-actions > a { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 52px; padding: 12px 16px; border-radius: 16px; font-size: 15px; font-weight: 550; cursor: pointer; }
+.handoff-actions svg { width: 20px; height: 20px; }
+.handoff-primary { background: #24272b; color: white; border: 1px solid #24272b; }
+.handoff-primary:disabled { opacity: .6; cursor: wait; }
+.handoff-secondary { background: white; color: #24272b; border: 1px solid #dce1e8; }
+.handoff-copy { display: flex; align-items: center; gap: 8px; padding: 5px 5px 5px 14px; border: 1px solid #dce1e8; border-radius: 16px; background: #edf0f5; }
+.handoff-copy input { min-width: 0; width: 100%; font-size: 14px; color: #566174; background: none; border: 0; }
+.handoff-copy button { flex-shrink: 0; min-height: 44px; padding: 0 12px; border: 0; border-radius: 11px; background: white; color: #24272b; font-size: 13px; font-weight: 550; cursor: pointer; }
+.download-handoff > .handoff-status { margin: 12px 0 0; max-width: none; font-size: 13px; color: #35745a; }
+.download-handoff > .handoff-status:empty { display: none; }
+.download-handoff > .handoff-note { margin: 22px auto 0; font-size: 11px; line-height: 1.7; color: #697386; }
+.download-handoff :focus-visible { outline: 2px solid #536cc4; outline-offset: 3px; }
+@keyframes handoff-arrive { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@media (min-width: 620px) { .download-handoff { inset: 0; height: fit-content; margin: auto; border-radius: 28px; } }
+@media (prefers-reduced-motion: reduce) { .download-handoff { animation: none; } }
+.download-mobile { gap: 10px; }
+.download-apple { width: 18px; height: 20px; flex-shrink: 0; }

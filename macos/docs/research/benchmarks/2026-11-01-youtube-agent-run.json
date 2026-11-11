@@ -1,0 +1,15 @@
+{
+  "accessibility": true,
+  "document_loaded": true,
+  "document_ready": true,
+  "duration": "28.629556750000003 seconds",
+  "outcome": "Opened a new tab in Safari.\nThe browser action was sent, but I couldn't verify the destination. Please check the page.",
+  "page_found": true,
+  "response": "The browser action was sent, but I couldn't verify the destination. Please check the page.",
+  "status": "Please check the result",
+  "tabs_after": 51,
+  "tabs_before": 50,
+  "turn_id": "59238C4A-ACDF-40F0-8864-52966F8B5E35",
+  "video_page_verified": false,
+  "scope": "Installed Qwen and native controller/executor, live Safari; fixed transcript supplied by Debug helper, microphone and spoken output excluded."
+}

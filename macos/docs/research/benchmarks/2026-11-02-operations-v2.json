@@ -1,0 +1,405 @@
+{
+  "model" : "Installed Qwen3.5-4B Q4, MLX Swift, temperature 0, top_p 1; 1536 direct \/ 2048 thinking total tokens",
+  "results" : [
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-tab",
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.796614084,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "music-tab",
+      "seconds" : 39.217854667,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "music-fill",
+      "reply" : {
+        "action" : "fill",
+        "content" : "David Guetta",
+        "message" : "Filling the search field with 'David Guetta'",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 1.986196125,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "music-fill",
+      "reply" : {
+        "action" : "search",
+        "content" : "David Guetta",
+        "message" : "Searching for David Guetta.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 31
+      },
+      "seconds" : 3.044491584,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "target",
+        "url_grounding"
+      ],
+      "id" : "music-result",
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/www.youtube.com\/result\/1",
+        "message" : "Opening the first result for David Guetta.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 1
+      },
+      "seconds" : 3.36771225,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "music-result",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking the first result link for David Guetta's official music video.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 33
+      },
+      "seconds" : 1.9979825409999998,
+      "variant" : "bundled"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "docs-tab",
+      "seconds" : 39.409765541,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "docs-tab",
+      "reply" : {
+        "action" : "newTab",
+        "content" : "",
+        "message" : "Opening a new tab.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.9660757909999997,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "docs-fill",
+      "reply" : {
+        "action" : "search",
+        "content" : "offline maps",
+        "message" : "Searching for offline maps.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 72
+      },
+      "seconds" : 3.048871458,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+        "action"
+      ],
+      "id" : "docs-fill",
+      "reply" : {
+        "action" : "fill",
+        "content" : "offline maps",
+        "message" : "Filling the search field with 'offline maps'",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 72
+      },
+      "seconds" : 1.922666625,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "settings-sequence",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the Sound option to open the Sound settings page.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 1.610633167,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "continuation"
+      ],
+      "id" : "settings-sequence",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Clicking Sound to open its settings.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 19
+      },
+      "seconds" : 2.780453541,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "stale-target",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The settings window is closed, so I cannot choose the Output tab.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 2.909450542,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "stale-target",
+      "seconds" : 39.354459583,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "second-result",
+      "reply" : {
+        "action" : "press",
+        "content" : "",
+        "message" : "Click the second visible result (Museums).",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 1.681470209,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "second-result",
+      "reply" : {
+        "action" : "navigate",
+        "content" : "https:\/\/example.org\/museums",
+        "message" : "Navigating to the Museums result.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 9
+      },
+      "seconds" : 3.128404375,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Updated the search field to 'climate policy'.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 3.032024125,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "field-replace",
+      "reply" : {
+        "action" : "fill",
+        "content" : "climate policy",
+        "message" : "Changed the search field to 'climate policy' without submitting.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 62
+      },
+      "seconds" : 1.9139434579999999,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : ",",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 1.838748292,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "german-field",
+      "reply" : {
+        "action" : "fill",
+        "content" : "Berlin",
+        "message" : "Berlin wurde in das Suchfeld eingegeben.",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 17
+      },
+      "seconds" : 3.02248325,
+      "variant" : "primitive"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "no-rank-evidence",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "I can't verify ratings here; I can only open links or search. Would you like me to open the Cafe One link, or search for the highest-rated restaurant instead?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.6194537909999998,
+      "variant" : "primitive"
+    },
+    {
+      "error" : "invalidResponse",
+      "failures" : [
+        "generation"
+      ],
+      "id" : "no-rank-evidence",
+      "seconds" : 2.824050708,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+        "action",
+        "continuation"
+      ],
+      "id" : "uncertain-action",
+      "reply" : {
+        "action" : "submitSearch",
+        "content" : "",
+        "message" : "Submitting the search query 'city maps' and opening the first result.",
+        "minutes" : 0,
+        "more" : true,
+        "start" : "",
+        "subject" : "",
+        "target" : 21
+      },
+      "seconds" : 1.9453487090000001,
+      "variant" : "bundled"
+    },
+    {
+      "failures" : [
+
+      ],
+      "id" : "uncertain-action",
+      "reply" : {
+        "action" : "answer",
+        "content" : "",
+        "message" : "The search is already submitted. Would you like me to navigate to the first result?",
+        "minutes" : 0,
+        "more" : false,
+        "start" : "",
+        "subject" : "",
+        "target" : 0
+      },
+      "seconds" : 3.263777666,
+      "variant" : "primitive"
+    }
+  ],
+  "scope" : "12 paired synthetic next-decision regression states, one sample per variant; rotated order. No desktop actions or screenshots. Not end-to-end accuracy or an independent benchmark. Thinking uses the native template and a structural grammar permitting reasoning before JSON. Latency includes prefill and cold grammar preparation. Truncation is failure.",
+  "warmup" : "5.309855375000001 seconds"
+}

@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-01",
+  "hardware": "Apple M5, 16 GiB, macOS 26.3",
+  "runs": [
+    {
+      "artifact": "hush-mail-adapter-tests-20261101.xcresult",
+      "passed": 38,
+      "failed": 2,
+      "notes": "Caught a surrogate-boundary bug and error status remaining Speaking. Both corrected."
+    },
+    {
+      "artifact": "hush-document-tests-20261101.xcresult",
+      "passed": 41,
+      "failed": 1,
+      "notes": "Follow-up UI test timed out; targeted rerun with trace capture passed. This run did not select the live-model method because its Swift Testing method selector omitted parentheses."
+    },
+    {
+      "artifact": "hush-document-followup-check-20261101.xcresult",
+      "passed": 2,
+      "failed": 1,
+      "notes": "Both native follow-up journeys passed. Real Qwen test rejected recurring sender placeholder after one repair."
+    },
+    {
+      "artifact": "hush-document-model-final-20261101.xcresult",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "notes": "13 coworker checks and one two-turn installed-Qwen email test passed after scoped instructions and bounded presentation normalization."
+    }
+  ],
+  "package_tests": {
+    "passed": 27,
+    "failed": 0,
+    "includes": "Swift-to-Hono local integration"
+  },
+  "actual_mail_document_check": {
+    "accessibility": true,
+    "adapter": "mail_document",
+    "binding_valid": true,
+    "mail_body_count": 1,
+    "mail_subject_count": 1,
+    "insert_result": "verified",
+    "revision_result": "verified",
+    "subject_verified": true,
+    "body_verified": true,
+    "no_duplicate": true,
+    "repeat_write_result": "verified",
+    "repeat_write_no_duplicate": true,
+    "stale_snapshot_rejected": true
+  },
+  "release_build": "passed",
+  "limitations": [
+    "Native fixture journeys do not establish arbitrary cross-app accuracy.",
+    "A prior UI timeout did not recur in the targeted diagnostic rerun; broad test stability is not established.",
+    "No M2 hardware qualification or held-out task success rate."
+  ],
+  "release_diagnostics_exclusion": "passed with Debug positive control",
+  "cleanup": {
+    "bytes_removed": 1659187665,
+    "paths": [
+      "hush-dev-diagnostics-20261101.xcresult",
+      "hush-dev-diagnostics-final-20261101.xcresult",
+      "hush-dev-diagnostics-verified-20261101.xcresult",
+      "hush-mail-binding-baseline-20261101.xcresult",
+      "hush-mail-adapter-tests-20261101.xcresult",
+      "hush-document-tests-20261101.xcresult",
+      "hush-document-followup-check-20261101.xcresult",
+      "hush-document-model-final-20261101.xcresult",
+      "hush-before-webkit.app",
+      "hush-before-document-fix.app",
+      "hush-before-immersive-20261101.app",
+      "hush-email-failure-20261101.png",
+      "hush-followup-action.json",
+      "hush-dev-diagnostics-proof-data"
+    ],
+    "model_caches": "preserved",
+    "rollback": "previous Release app retained"
+  }
+}

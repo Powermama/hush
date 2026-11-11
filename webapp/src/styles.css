@@ -1,0 +1,551 @@
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: #f8f8f6;
+  --color-stone: #f0f0ed;
+  --color-ink: #1f201e;
+  --color-muted: #686963;
+  --color-soft: #a7a8a1;
+  --color-peach: #f78d6b;
+  --color-lilac: #ddd8ff;
+  --color-success: #33b36b;
+  --font-display: "SF Pro Display", "SF Pro Text", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+@layer base {
+  :root {
+    --section-padding-block: 6rem;
+    --section-heading-copy-gap: 1.5rem;
+    --section-heading-content-gap: 4rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  ::selection {
+    background: var(--color-ink);
+    color: white;
+  }
+}
+
+@media (min-width: 640px) {
+  :root {
+    --section-padding-block: 8rem;
+    --section-heading-content-gap: 5rem;
+  }
+}
+
+.section-shell {
+  padding-block: var(--section-padding-block);
+  padding-inline: 1.25rem;
+}
+
+.section-heading {
+  margin-bottom: var(--section-heading-content-gap);
+}
+
+.section-heading-copy {
+  margin-top: var(--section-heading-copy-gap);
+}
+
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 30%, rgb(221 216 255 / 0.42), transparent 25rem),
+    radial-gradient(circle at 30% 58%, rgb(247 141 107 / 0.12), transparent 22rem);
+}
+
+.final-glow {
+  position: absolute;
+  inset: 20% 0 0;
+  background:
+    radial-gradient(circle at 42% 75%, rgb(255 179 199 / 0.35), transparent 20rem),
+    radial-gradient(circle at 58% 75%, rgb(158 201 255 / 0.38), transparent 20rem);
+  filter: blur(18px);
+}
+
+.orb {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.orb::before {
+  position: absolute;
+  inset: -1rem;
+  content: "";
+  border-radius: inherit;
+  background: conic-gradient(
+    from 210deg,
+    #ffd6a5,
+    #ffb3c7,
+    #c9b8ff,
+    #9ec9ff,
+    #a8e6cf,
+    #ffd6a5
+  );
+  filter: blur(24px);
+  opacity: 0.5;
+  animation: orb-spin 16s linear infinite;
+}
+
+.orb-surface {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 210deg,
+    #ffd6a5,
+    #ffb3c7,
+    #c9b8ff,
+    #9ec9ff,
+    #a8e6cf,
+    #ffd6a5
+  );
+  box-shadow:
+    inset 0 10px 18px rgb(255 255 255 / 0.65),
+    inset 0 -12px 20px rgb(255 255 255 / 0.32),
+    0 12px 35px rgb(127 110 200 / 0.3);
+  animation: orb-spin 12s linear infinite;
+}
+
+.orb:hover {
+  transform: scale(1.05);
+}
+
+.orb.is-listening {
+  transform: scale(1.1);
+}
+
+.orb.is-listening::before {
+  opacity: 0.85;
+  animation-duration: 5s;
+}
+
+.orb.is-listening .orb-surface {
+  animation-duration: 3.5s;
+}
+
+.orb-ripple {
+  position: absolute;
+  inset: -0.25rem;
+  border: 1.5px solid rgb(31 32 30 / 0.16);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.orb.is-listening .orb-ripple {
+  animation: ripple 2.1s ease-out infinite;
+}
+
+.orb.is-listening .orb-ripple-2 {
+  animation-delay: 1.05s;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  animation: blink 1s steps(1) infinite;
+}
+
+.workflow-aurora {
+  background: conic-gradient(
+    from 210deg,
+    #a8e6cf,
+    #ffb3d1,
+    #c9b8ff,
+    #9ec9ff,
+    #a8e6cf
+  );
+  background-size: 160% 160%;
+  animation: workflow-aurora-shift 3.5s linear infinite;
+}
+
+.workflow-desktop {
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 0.48), transparent 46%),
+    linear-gradient(135deg, #dcebf3 0%, #d8d1ed 48%, #eadacb 100%);
+}
+
+.workflow-desktop::after {
+  position: absolute;
+  inset: auto -10% -44% 22%;
+  height: 78%;
+  content: "";
+  border-radius: 50% 45% 0 0;
+  background: linear-gradient(145deg, #7e8f9d, #3c4651 54%, #23292f);
+  box-shadow: -180px 45px 0 -42px rgb(73 91 100 / 0.72);
+  opacity: 0.36;
+  transform: rotate(-4deg);
+}
+
+.workflow-desktop-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 16%, rgb(158 201 255 / 0.58), transparent 24rem),
+    radial-gradient(circle at 78% 24%, rgb(255 179 209 / 0.35), transparent 22rem);
+  pointer-events: none;
+}
+
+.workflow-scene-enter {
+  animation: workflow-scene-enter 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.workflow-hud-enter {
+  animation: workflow-hud-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.workflow-hud-content-enter {
+  animation: workflow-hud-content-enter 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.workflow-notification-pop {
+  animation: workflow-notification-pop 0.5s cubic-bezier(0.2, 1.55, 0.38, 1) both;
+}
+
+.workflow-draft-arrive {
+  animation: workflow-draft-arrive 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.workflow-return-key {
+  animation: workflow-return-key 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+.workflow-composer-focus {
+  animation: workflow-composer-focus 1.8s ease-out forwards;
+}
+
+.workflow-composer-caret {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--color-ink);
+  animation: blink 1s steps(1) infinite;
+}
+
+.workflow-fn-key {
+  animation: workflow-key-press 0.72s ease-in-out infinite alternate;
+}
+
+.workflow-message-arrive {
+  transform-origin: left center;
+  animation: workflow-message-arrive 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.workflow-reaction-pop {
+  opacity: 0;
+  transform-origin: left bottom;
+  animation: workflow-reaction-pop 0.46s cubic-bezier(0.2, 1.55, 0.38, 1) forwards;
+}
+
+.workflow-reaction-count {
+  animation: workflow-reaction-count 0.2s cubic-bezier(0.2, 1.55, 0.38, 1) both;
+}
+
+.workflow-aurora-bar {
+  background: linear-gradient(#ffb3c7, #c9b8ff, #9ec9ff);
+}
+
+.workflow-wave.is-active {
+  transform-origin: center;
+  animation: workflow-wave 1.15s ease-in-out infinite alternate;
+}
+
+.workflow-proof-step {
+  animation: workflow-proof 0.9s ease-in-out infinite alternate;
+}
+
+.workflow-running-dot {
+  animation: workflow-dot 0.9s ease-in-out infinite;
+}
+
+.marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 1.25rem;
+  animation: marquee 36s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes orb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ripple {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes workflow-aurora-shift {
+  to {
+    background-position: 160% 160%;
+  }
+}
+
+@keyframes workflow-wave {
+  from {
+    transform: scaleY(0.45);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes workflow-proof {
+  from {
+    opacity: 0.45;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes workflow-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes workflow-scene-enter {
+  from {
+    opacity: 0.65;
+    transform: translateX(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes workflow-hud-enter {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes workflow-hud-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes workflow-notification-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes workflow-draft-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes workflow-return-key {
+  0%,
+  48% {
+    border-color: rgb(0 0 0 / 0.1);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    transform: translateY(0);
+  }
+
+  68% {
+    border-color: rgb(126 110 235 / 0.5);
+    box-shadow: 0 0 0 4px rgb(201 184 255 / 0.22);
+    transform: translateY(2px);
+  }
+
+  100% {
+    border-color: rgb(0 0 0 / 0.1);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    transform: translateY(0);
+  }
+}
+
+@keyframes workflow-composer-focus {
+  0%,
+  82% {
+    border-color: rgb(0 0 0 / 0.1);
+    box-shadow: 0 0 0 0 rgb(158 201 255 / 0);
+  }
+
+  92%,
+  100% {
+    border-color: rgb(158 201 255 / 0.85);
+    box-shadow: 0 0 0 3px rgb(158 201 255 / 0.18);
+  }
+}
+
+@keyframes workflow-key-press {
+  from {
+    border-color: rgb(255 255 255 / 0.72);
+    box-shadow:
+      0 10px 25px rgb(31 32 30 / 0.16),
+      inset 0 -3px 0 rgb(0 0 0 / 0.08);
+    transform: translateY(0);
+  }
+
+  to {
+    border-color: rgb(158 201 255 / 0.9);
+    box-shadow:
+      0 7px 18px rgb(31 32 30 / 0.12),
+      0 0 0 4px rgb(158 201 255 / 0.2),
+      inset 0 -1px 0 rgb(0 0 0 / 0.06);
+    transform: translateY(2px);
+  }
+}
+
+@keyframes workflow-message-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes workflow-reaction-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.5);
+  }
+
+  68% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes workflow-reaction-count {
+  from {
+    opacity: 0.55;
+    transform: translateY(1px) scale(0.72);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "date": "2026-11-01",
+  "scope": "Development diagnostics and affected assistant suites",
+  "passed": 38,
+  "failed": 0,
+  "skipped": 0,
+  "tests": [
+    {
+      "test": "CoworkerTests/links()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/calendarDraft()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/schema()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/cancelledTurn()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/spokenClarification()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/cancelBeforeEdit()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/cancelAfterDispatch()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/directCommands()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/directNavigation()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerTests/releaseChord()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/malformedProposals()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/unicodeAndPromptIsolation()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/numericFacts()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/clarification()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/staleBinding()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/cancelledGeneration()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/duplicateAndUnverifiedInsertion()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/clipboardLease()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/chordArbitration()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantFoundationTests/voiceContextBinding()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerDiagnosticsTests/disabled()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerDiagnosticsTests/failureEvidence()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerDiagnosticsTests/retention()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerDiagnosticsTests/disabling()",
+      "result": "Passed"
+    },
+    {
+      "test": "CoworkerDiagnosticsTests/replay()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantGrammarTests/nativeTokenMask()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testClarificationContinuesByVoiceWithoutAForm()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testCoworkerEscapeCancelsLateReply()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testCursorFollowsMouseAndCompletionDisappears()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testCursorIsTheDefaultSurface()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testDevelopmentTraceExplainsFailedInsertion()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testEscapeDismissesStoppedCursorFromAnotherApp()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testEscapeStopsGenerationAndTruncatedOutputCannotBeInserted()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testGlobalEntryDoesNotRequireMail()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testReviewAndFormattedInsertionPreserveSignatureInLightAppearance()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testSpeechBubbleIsReadOnlyAndEscapeStopsIt()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testSpokenTurnFollowUpAndInsertion()",
+      "result": "Passed"
+    },
+    {
+      "test": "AssistantJourneyTests/testStaleDestinationNeverReceivesDraft()",
+      "result": "Passed"
+    }
+  ]
+}

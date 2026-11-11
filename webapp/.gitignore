@@ -1,0 +1,10 @@
+dist
+node_modules
+.data
+dist-server
+playwright-report
+test-results
+*.tsbuildinfo
+.env
+.env.*
+!.env.production.example

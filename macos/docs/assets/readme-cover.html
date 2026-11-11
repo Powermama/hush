@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hush - README artwork</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1280px; height: 900px; overflow: hidden; }
+  body { background: #e8eaf8; }
+  .composition {
+    position: relative; width: 1280px; height: 900px; overflow: hidden;
+    background:
+      radial-gradient(ellipse at 3% 88%, #a9cdd4 0, transparent 49%),
+      radial-gradient(ellipse at 99% 1%, #d4c9f0 0, transparent 50%),
+      linear-gradient(125deg, #f1f5f7, #e4e4f3 72%, #d9dde9);
+  }
+  .orbit { position: absolute; width: 1500px; height: 750px; left: -120px; top: 80px; border: 1px solid #7c87b54a; border-radius: 50%; transform: rotate(-24deg); }
+  .orbit + .orbit { transform: rotate(24deg); border-color: #fff9; }
+  .window { position: absolute; width: 1120px; height: auto; left: 80px; top: 62px; border-radius: 18px; box-shadow: 0 34px 76px -28px #29345166, 0 0 0 1px #fff9; }
+  .caption { position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; color: #536078; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; letter-spacing: .02em; }
+</style>
+<main class="composition">
+  <div class="orbit" aria-hidden="true"></div><div class="orbit" aria-hidden="true"></div>
+  <img class="window" src="dashboard.png" width="2080" height="1440" alt="hush's native dashboard with sample activity">
+  <div class="caption">Native macOS app · Dashboard with demo data</div>
+</main>
+</html>

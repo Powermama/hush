@@ -1,0 +1,39 @@
+name: Report a bug
+description: Help reproduce something that did not work as expected.
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: "Use sample content. Do not attach private messages, audio, proof links or keys. For vulnerabilities, read SECURITY.md instead."
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where did it happen?
+      options:
+        - macOS app
+        - Website
+        - Verified Messages
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: What happened?
+      description: Include the steps, what you expected and what you saw instead.
+      placeholder: "1. Open…\n2. Choose…\nExpected…\nObserved…"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Your setup
+      description: App version/build or commit; macOS, chip and memory; selected model. For website issues, include browser and device. For audio issues, include the microphone.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Extra context
+      description: Optional screenshots with demo data, frequency, relevant journey ID or a workaround. Review attachments for private information first.

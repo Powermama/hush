@@ -1,0 +1,95 @@
+{
+  "date": "2026-11-01",
+  "branch": "docs/hey-hush-local-assistant-prd",
+  "hardware": {
+    "chip": "Apple M5",
+    "unified_memory_gb": 16,
+    "os": "macOS 26.3"
+  },
+  "model": {
+    "repository": "mlx-community/Qwen3.5-4B-4bit",
+    "snapshot": "0e7ffd5c629ef7719d4cbc04069232580bfa9d9c",
+    "temperature": 0,
+    "thinking": false,
+    "maximum_output_tokens": 1536
+  },
+  "runtime": {
+    "mlx_swift_lm_version": "3.31.4",
+    "mlx_swift_lm_revision": "bd4b7434e6bdb588c7ef55706ff8904cb7fd4c57",
+    "mlx_swift_structured_revision": "b1a1a78f1d61a745f8ba3278c9c99c00316d2c82"
+  },
+  "checks": {
+    "sequence_UI_before_fix": "failed: stopped after first injected action",
+    "final_native_domain_and_UI": {
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0
+    },
+    "truthful_history_guard_final_rerun": "passed",
+    "package_tests": {
+      "passed": 27
+    },
+    "live_swift_to_hono": {
+      "passed": 1,
+      "temporary_local_server_stopped": true
+    },
+    "installed_model_mail_followup": "passed",
+    "original_live_model_sequence": "failed; retained as quality gate, not claimed as passed",
+    "paired_evaluation_v1": {
+      "decisions": 48,
+      "measurement_complete": true
+    },
+    "paired_evaluation_v2": {
+      "decisions": 72,
+      "measurement_complete": true
+    },
+    "git_diff_check": "passed",
+    "python_syntax": "passed",
+    "release_build": "passed",
+    "release_diagnostics_scan": "passed, with Debug positive control"
+  },
+  "deployment": {
+    "installed_app_replaced": true,
+    "installed_app": "/Applications/hush.app",
+    "configuration": "Debug with explicitly enabled local development diagnostics",
+    "running_pid": 49871,
+    "only_one_copy_running": true,
+    "installed_debug_dylib_sha256": "de9c18507d1f4ad59c756739037a8f5f758d709c6dd0ecbaf1dbac9b9fd72d1f",
+    "live_safari_qualified": false,
+    "new_models_downloaded": false,
+    "permissions": "User resetting after install; not claimed granted."
+  },
+  "final_source_hashes": {
+    "Hush/Hush/Assistant/CoworkerContract.swift": "9ebcae74dda2ececa6db0d0415df9203f48740311d7393f11dd417cb86d7e230",
+    "Hush/Hush/Assistant/CoworkerProgress.swift": "d1d0c2e86c944bd75214ac093ec1086dc28bac7f12cd1c3bf5d2e3380e328458",
+    "Hush/Hush/Assistant/AssistantCompanionController.swift": "196c9a691cf68f934ab11b5f0cf771104488c40e8776f6aeacc41c7e687cbaab",
+    "Hush/Hush/Assistant/CoworkerDesktopControl.swift": "bc818cdf0ed79caafe9be010ed17bab44ee4fa289f7d38f157864e798d245b07",
+    "Hush/Hush/Assistant/CoworkerBrowserState.swift": "de1b3cd87a6c0a6c5df7c4fd5145176aaa1c0745910ece8c08013605a12644eb",
+    "Hush/Hush/Assistant/CoworkerContext.swift": "352126ea369ea42f377a2e7d58b9a2304eccbc88b234ba66fa461ec8cc63b341",
+    "Hush/Hush/Assistant/CoworkerDiagnostics.swift": "65f138db9f4b778b342a42c969d559375c028ecc3bc40a39d8d0430a7929b240",
+    "Hush/Hush/PostProcessing/LLMRuntime.swift": "f708e13de91b26615c3ebb7dfb2fa6bb5622a12b9708c778bc396c2c63fe4f9b",
+    "Hush/HushTests/CoworkerSequenceTests.swift": "4bffbd7e407e34142771923b670a07a5274d24ecdb3267f595c90bdc6fa76db2"
+  },
+  "cleanup": {
+    "temporary_bytes_removed": 1383068825,
+    "temporary_items_removed": [
+      "hush-sequence-baseline-20261101.xcresult",
+      "hush-sequence-core-20261101.xcresult",
+      "hush-sequence-validation-20261101.xcresult",
+      "hush-sequence-model-20261101.xcresult",
+      "hush-sequence-model-order-20261101.xcresult",
+      "hush-sequence-ab-20261101.xcresult",
+      "hush-sequence-ab-v2-20261101.xcresult",
+      "hush-sequence-final-20261101.xcresult",
+      "hush-sequence-model-logs",
+      "hush-sequence-order-logs",
+      "hush-sequence-ui-20261101",
+      "hush-sequence-proof-data",
+      "hush-sequence-ab-report.json",
+      "hush-sequence-ab-v1-report.json",
+      "hush-sequence-ab-source-hashes.json"
+    ],
+    "installed_models_preserved": true,
+    "prior_app_backup_preserved": "/private/tmp/hush-before-sequence-20261101.app"
+  }
+}

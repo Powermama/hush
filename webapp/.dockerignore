@@ -1,0 +1,13 @@
+.data
+.env
+.env.*
+!.env.production.example
+.git
+.github
+dist
+dist-server
+node_modules
+playwright-report
+test-results
+*.log
+*.tsbuildinfo

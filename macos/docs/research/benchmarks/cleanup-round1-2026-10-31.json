@@ -1,0 +1,47 @@
+{
+  "utc": "2026-11-01T00:07:40.904432+00:00",
+  "reason": "Remove completed first-round benchmark assets before additional quality tests",
+  "removed": [
+    {
+      "path": "/private/tmp/hush-model-bench-20261031/models/minicpm5",
+      "allocated_kib_before": 1392644,
+      "exists_after": false
+    },
+    {
+      "path": "/private/tmp/hush-model-bench-20261031/models/lfm3-text",
+      "allocated_kib_before": 973500,
+      "exists_after": false
+    },
+    {
+      "path": "/private/tmp/hush-model-bench-20261031/models/lfm3-vl",
+      "allocated_kib_before": 1571300,
+      "exists_after": false
+    },
+    {
+      "path": "/private/tmp/hush-model-bench-20261031/tts-models",
+      "allocated_kib_before": 566460,
+      "exists_after": false
+    },
+    {
+      "path": "/private/tmp/hush-model-bench-20261031/tts-bench",
+      "allocated_kib_before": 396852,
+      "exists_after": false
+    },
+    {
+      "path": "/private/tmp/hush-model-bench-20261031/swift-cache",
+      "allocated_kib_before": 98380,
+      "exists_after": false
+    },
+    {
+      "path": "/private/tmp/hush-model-bench-20261031/module-cache",
+      "allocated_kib_before": 158380,
+      "exists_after": false
+    },
+    {
+      "path": "/private/tmp/hush-model-bench-20261031/fixtures",
+      "allocated_kib_before": 92,
+      "exists_after": false
+    }
+  ],
+  "removed_allocated_gib": 4.918678283691406
+}

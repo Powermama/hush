@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-01",
+  "kind": "source_review_not_runtime_benchmark",
+  "revisions": {
+    "peekaboo": {
+      "head_observed": "653645cbddb596c8077940fce2506a32cb48f580",
+      "commit_date": "2026-10-27T22:04:34Z"
+    },
+    "openclaw": {
+      "head_observed": "2be13a6bdc761deaf59efceccb343852bbaee3c1",
+      "commit_date": "2026-11-01T20:43:31Z"
+    }
+  },
+  "peekaboo_files_inspected": [
+    {
+      "path": "Core/PeekabooCore/Sources/PeekabooAgentRuntime/Agent/PeekabooAgentService+Execution.swift",
+      "bytes": 27459,
+      "sha256": "e9ceaa672d609328a5dbc61cc449e1504912a6075d10d690535a32bbba544b47"
+    },
+    {
+      "path": "Core/PeekabooCore/Sources/PeekabooAgentRuntime/Agent/PeekabooAgentService+Streaming.swift",
+      "bytes": 66655,
+      "sha256": "eb2da0e442654f39f1f16d46b795be62024d4fa86b63960ab0374c0c8d3928d8"
+    },
+    {
+      "path": "Core/PeekabooCore/Sources/PeekabooAgentRuntime/Agent/AgentToolResultSemantics.swift",
+      "bytes": 13379,
+      "sha256": "7f733cbf78f59acd4615878210589b2e9d7b9e72e5d442d80664230f5df2be04"
+    },
+    {
+      "path": "Core/PeekabooCore/Sources/PeekabooAgentRuntime/Agent/ActionVerifier.swift",
+      "bytes": 15593,
+      "sha256": "588981afba4bf0ed84cdfdbd9cd58f4e5559cbe350342ce43ab577c37676726d"
+    }
+  ],
+  "hush_app_replaced": false,
+  "model_downloads": 0,
+  "local_link_check": "passed",
+  "runtime_tests_run": false,
+  "temporary_source_files_removed": 6,
+  "temporary_bytes_removed": 217713
+}

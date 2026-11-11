@@ -1,0 +1,104 @@
+{
+  "utc": "2026-11-01T00:13:44Z",
+  "command": "python -m mlx_lm convert --hf-path granite42-source --mlx-path granite42-3b-4bit -q --q-bits 4 --q-group-size 64 --dtype bfloat16",
+  "mlx_lm": "0.32.2",
+  "reported_average_bits_per_weight": 5.985,
+  "files": [
+    {
+      "path": "granite42-source/chat_template.jinja",
+      "bytes": 9013,
+      "sha256": "f0ba43f79b3cabca5e5a7584c77aec92f49feae45cdf7779c87d9fc54cd90258"
+    },
+    {
+      "path": "granite42-source/config.json",
+      "bytes": 905,
+      "sha256": "e4f44b9c6924a283f1d1d36057a89f1a04404bf1561fc2c0b64cf98180e72915"
+    },
+    {
+      "path": "granite42-source/generation_config.json",
+      "bytes": 207,
+      "sha256": "1b9baf0a7959d31d7fb58ff6b506c27d09a73d395cadccc7e6dd1d4b7e43fd9d"
+    },
+    {
+      "path": "granite42-source/model-00001-of-00002.safetensors",
+      "bytes": 5358533712,
+      "sha256": "db39eb2776b5404dbfd0696cf7fe5ec671f0dad0e0918c62c5aea9e2eb5825d7"
+    },
+    {
+      "path": "granite42-source/model-00002-of-00002.safetensors",
+      "bytes": 1960983408,
+      "sha256": "8fba6ea17551d5d129eac519dbd70237139221c7fd0b89623ef54d9711062505"
+    },
+    {
+      "path": "granite42-source/model.safetensors.index.json",
+      "bytes": 29893,
+      "sha256": "e030cfbb2b2dbe4489a522c5d65e73b63c69dc50b4fd23195e1e7b3227247d48"
+    },
+    {
+      "path": "granite42-source/special_tokens_map.json",
+      "bytes": 563,
+      "sha256": "e9435fefd6d838fd9fcbbc44b97a8e3ff322be7f6dfb7e4fd2468586574bb52b"
+    },
+    {
+      "path": "granite42-source/tokenizer.json",
+      "bytes": 7153414,
+      "sha256": "883975314d58743726347caaf2c32ac89afd5ad57222cffbc4f052f2ab27b2d7"
+    },
+    {
+      "path": "granite42-source/tokenizer_config.json",
+      "bytes": 17677,
+      "sha256": "2007f26df166ed10a2d6fa881c1c8f3cdd151e451469f59b274897f14449835f"
+    },
+    {
+      "path": "granite42-source/vocab.json",
+      "bytes": 1612694,
+      "sha256": "a1be0c1e0a89b5bacda6af6f8b63df09668cb8d1f656229ee9123140c9507810"
+    },
+    {
+      "path": "granite42-3b-4bit/README.md",
+      "bytes": 81,
+      "sha256": "748c964f9b7e5f2c3770ce013bbc0153be7c54311d9692c343b6188eefe77ac6"
+    },
+    {
+      "path": "granite42-3b-4bit/chat_template.jinja",
+      "bytes": 9013,
+      "sha256": "f0ba43f79b3cabca5e5a7584c77aec92f49feae45cdf7779c87d9fc54cd90258"
+    },
+    {
+      "path": "granite42-3b-4bit/config.json",
+      "bytes": 18513,
+      "sha256": "4256dff81563d87537ff060da9268b0b30170e551ecb2e1e20f631cd3768163d"
+    },
+    {
+      "path": "granite42-3b-4bit/generation_config.json",
+      "bytes": 207,
+      "sha256": "1b9baf0a7959d31d7fb58ff6b506c27d09a73d395cadccc7e6dd1d4b7e43fd9d"
+    },
+    {
+      "path": "granite42-3b-4bit/model.safetensors",
+      "bytes": 2737958758,
+      "sha256": "511da1f1b4fd7477fbcc51692108063c650113cebe7a6dd00195a7a3c7b254de"
+    },
+    {
+      "path": "granite42-3b-4bit/model.safetensors.index.json",
+      "bytes": 65461,
+      "sha256": "df416882dff8e16152ddb82ff3e05b2307349075a95ffe6daa8fcf7bff3405f5"
+    },
+    {
+      "path": "granite42-3b-4bit/tokenizer.json",
+      "bytes": 7153414,
+      "sha256": "883975314d58743726347caaf2c32ac89afd5ad57222cffbc4f052f2ab27b2d7"
+    },
+    {
+      "path": "granite42-3b-4bit/tokenizer_config.json",
+      "bytes": 436,
+      "sha256": "0b1cc678b9fbde8ce90c81e0f6483c4e1696dfa377330e42a88106416b96e659"
+    }
+  ],
+  "revisions": {
+    "granite42-source": [
+      "4e9c275e232f10211ec88644d106a1f6a1b60e06"
+    ],
+    "granite42-3b-4bit": []
+  }
+}

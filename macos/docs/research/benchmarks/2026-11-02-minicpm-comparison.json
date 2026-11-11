@@ -1,0 +1,3713 @@
+{
+  "metadata": {
+    "model": "minicpm-v47-1b-q4",
+    "model_path": "/private/tmp/hush-model-eval-data/minicpm",
+    "started_utc": "2026-11-02T21:08:21Z",
+    "chip": "Apple M5",
+    "macos": "26.3",
+    "memory_bytes": "17179869184",
+    "swap_before": "total = 15360.00M  used = 13788.38M  free = 1571.62M  (encrypted)",
+    "packages": {
+      "mlx": "0.32.4",
+      "mlx-vlm": "0.7.11",
+      "transformers": "5.22.1",
+      "llguidance": "1.9.1",
+      "Pillow": "13.0.0"
+    },
+    "temperature": 0,
+    "thinking": false,
+    "image_policy": "Same image capped at 2 MP; native processor patch budgets differ; no cache reuse",
+    "coordinate_order": "xy",
+    "decision_token_budget": 256,
+    "dataset": {
+      "dataset": "OS-Copilot/ScreenSpot-v2",
+      "revision": "5efbb1f1b5463a575f2eb7bc30fe29e49c15f93c",
+      "seed": 20261102,
+      "scope": "100 macOS target queries, 50 text and 50 icons; public benchmark, possible training contamination; no desktop execution",
+      "unique_images": 63
+    },
+    "limitations": "Public positive-target grounding benchmark, possible training overlap. Not overall assistant or task completion accuracy. One greedy sample per target. Background Mac apps uncontrolled. Python MLX runtime, not production Swift. No real clicks or messages.",
+    "artifact_bytes": 2686009710,
+    "config_sha256": "4a362462c2baba3a08eb547f9378203e25f08f291167181f1b89eb7df401ab41",
+    "load_seconds": 1.29047391586937,
+    "tasks_sha256": "82ad0e7341fce1a720d44a4a6ac98029357f722a354e03c672bf351d27560ea7",
+    "tasks_file": "docs/research/benchmarks/2026-11-02-operation-fixtures-v3.json",
+    "swap_after": "total = 15360.00M  used = 13628.38M  free = 1731.62M  (encrypted)"
+  },
+  "records": [
+    {
+      "output": "{\"point_2d\": [40, 40]}",
+      "seconds": 0.7929057078436017,
+      "ttft_seconds": 0.6356279170140624,
+      "prompt_tokens": 654,
+      "generation_tokens": 15,
+      "mlx_peak_bytes": 3420387158,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 0,
+      "instruction": "my account",
+      "image": "pc_bf63137d-d442-4bb9-a145-e07cb48abb64.png",
+      "image_sha256": "59527914a0ba8c7b617b0b264f4334aba4b1bef7f9056274edae8075dbd5f157",
+      "type": "icon",
+      "original_size": [
+        2154,
+        1514
+      ],
+      "input_size": [
+        1686,
+        1185
+      ],
+      "expected_xywh": [
+        29,
+        109,
+        118,
+        127
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [570, 206]}",
+      "seconds": 1.4591056250501424,
+      "ttft_seconds": 1.273786999983713,
+      "prompt_tokens": 724,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3433747710,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 1,
+      "instruction": "switch to privacy",
+      "image": "pc_63f20c0b-0abc-4cd5-a3cb-2ea0cb2ba3c8.png",
+      "image_sha256": "dbf9c43f9f62b0ca238a72b18aeca011bc877e3ce37258751582bcf038ab18b1",
+      "type": "text",
+      "original_size": [
+        1336,
+        1218
+      ],
+      "input_size": [
+        1336,
+        1218
+      ],
+      "expected_xywh": [
+        707,
+        245,
+        146,
+        46
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [110, 131]}",
+      "seconds": 0.8522133338265121,
+      "ttft_seconds": 0.6705682089086622,
+      "prompt_tokens": 724,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3433731326,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 2,
+      "instruction": "insert a shape",
+      "image": "pc_00b0c9f6-b24f-4bff-b492-12117b50e63b.png",
+      "image_sha256": "a59fa4ebf780a111145328d8fcfeb59c04cf6f7bb003da04e57d4e54eccb2f30",
+      "type": "text",
+      "original_size": [
+        1708,
+        1556
+      ],
+      "input_size": [
+        1481,
+        1349
+      ],
+      "expected_xywh": [
+        95,
+        256,
+        107,
+        114
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [394, 210]}",
+      "seconds": 0.8509262918960303,
+      "ttft_seconds": 0.6689571249298751,
+      "prompt_tokens": 727,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3436533218,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 3,
+      "instruction": "switch on do not disturb mode",
+      "image": "pc_ed2173e7-c929-4f52-9777-db36a36e0c3e.png",
+      "image_sha256": "e4545b6c853c8db78b167b78634bd115d79a8801749af35c385f127205aa5eb3",
+      "type": "icon",
+      "original_size": [
+        1334,
+        1454
+      ],
+      "input_size": [
+        1334,
+        1454
+      ],
+      "expected_xywh": [
+        529,
+        267,
+        91,
+        72
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [200, 218]}",
+      "seconds": 0.8734699999913573,
+      "ttft_seconds": 0.6846287499647588,
+      "prompt_tokens": 715,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3423760926,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 4,
+      "instruction": "input the email address",
+      "image": "pc_18a939a5-8f77-4519-9c7a-d62b11e7b878.png",
+      "image_sha256": "e44ba2407373e5d8ae489f7d29718a0bae4c73e087853fa527d01aaecc602238",
+      "type": "icon",
+      "original_size": [
+        1164,
+        1398
+      ],
+      "input_size": [
+        1164,
+        1398
+      ],
+      "expected_xywh": [
+        185,
+        253,
+        783,
+        84
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [950, 28]}",
+      "seconds": 0.8076971671544015,
+      "ttft_seconds": 0.6325849581044167,
+      "prompt_tokens": 655,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3421453082,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 5,
+      "instruction": "share this page",
+      "image": "pc_6d0b3e39-872b-48ec-b894-0490106eb629.png",
+      "image_sha256": "89170c586557298d05ba1d6e6f533818c799d7a1a68a63c63a4f463aea7fed34",
+      "type": "icon",
+      "original_size": [
+        2000,
+        1372
+      ],
+      "input_size": [
+        1707,
+        1171
+      ],
+      "expected_xywh": [
+        1880,
+        10,
+        81,
+        84
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [198, 42]}",
+      "seconds": 0.8226099160965532,
+      "ttft_seconds": 0.6239889999851584,
+      "prompt_tokens": 660,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3407314396,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 6,
+      "instruction": "back to previous folder",
+      "image": "pc_01625ab1-9757-4dc4-8da0-a9c946d3b76a.png",
+      "image_sha256": "d39b27e6f79c5124ee08b0b9865df8c2711446ec6b40b05ef8148ad230b40da1",
+      "type": "icon",
+      "original_size": [
+        1598,
+        894
+      ],
+      "input_size": [
+        1598,
+        894
+      ],
+      "expected_xywh": [
+        355,
+        39,
+        60,
+        45
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [200, 217]}",
+      "seconds": 0.8768375001382083,
+      "ttft_seconds": 0.6888973750174046,
+      "prompt_tokens": 713,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3420631286,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 7,
+      "instruction": "view plugins",
+      "image": "pc_7656e3c5-00b1-4be7-9103-9890b837342f.png",
+      "image_sha256": "a7b13ecfe95c128a54f0450c15aec5dd49005e0ada6311f15ba9079515846443",
+      "type": "text",
+      "original_size": [
+        1800,
+        1400
+      ],
+      "input_size": [
+        1603,
+        1247
+      ],
+      "expected_xywh": [
+        0,
+        282,
+        467,
+        45
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [406, 40]}",
+      "seconds": 0.8595667919144034,
+      "ttft_seconds": 0.6873015000019222,
+      "prompt_tokens": 714,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3422761282,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 8,
+      "instruction": "switch to design",
+      "image": "pc_71e8f8bd-7ff0-4846-ada6-ce337a0f5ebc.png",
+      "image_sha256": "c9edd848ca7ee37dfe534602eea29cc113402d4694d164e4827a2420b476445f",
+      "type": "text",
+      "original_size": [
+        2190,
+        1706
+      ],
+      "input_size": [
+        1602,
+        1248
+      ],
+      "expected_xywh": [
+        358,
+        65,
+        127,
+        61
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [736, 44]}",
+      "seconds": 0.8451136250514537,
+      "ttft_seconds": 0.6682555000297725,
+      "prompt_tokens": 724,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3433731326,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 9,
+      "instruction": "search in dictionary",
+      "image": "pc_97ce9c11-f20b-4294-982a-f01241c81576.png",
+      "image_sha256": "cf62637abaaf3c4a8e2575103c70041c5c16ac4fe198b2aa2451310c2c3e7e3a",
+      "type": "text",
+      "original_size": [
+        1380,
+        1244
+      ],
+      "input_size": [
+        1380,
+        1244
+      ],
+      "expected_xywh": [
+        836,
+        19,
+        523,
+        66
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [100, 800]}",
+      "seconds": 0.8882569998968393,
+      "ttft_seconds": 0.6921677498612553,
+      "prompt_tokens": 716,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3424498234,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 10,
+      "instruction": "add a new preferred language",
+      "image": "pc_3ffab0d5-e99d-47b8-9684-ec9d8d063419.png",
+      "image_sha256": "7803b8c067fe5c01b639d40be2f75918c09e9c02521cae2acc0f189c08946021",
+      "type": "icon",
+      "original_size": [
+        1338,
+        1064
+      ],
+      "input_size": [
+        1338,
+        1064
+      ],
+      "expected_xywh": [
+        78,
+        845,
+        53,
+        42
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [200, 886]}",
+      "seconds": 0.8665551249869168,
+      "ttft_seconds": 0.6803968749009073,
+      "prompt_tokens": 726,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3435894166,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 11,
+      "instruction": "choose apple chancery",
+      "image": "pc_c2ffa4d3-4cf7-4813-986d-d741f1260c4c.png",
+      "image_sha256": "663e505c6ad8186c84e2e15910d81a1412bd57670cf2400cdcd7a5aaab689e08",
+      "type": "text",
+      "original_size": [
+        1714,
+        1556
+      ],
+      "input_size": [
+        1484,
+        1347
+      ],
+      "expected_xywh": [
+        205,
+        1342,
+        814,
+        66
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [393, 44]}",
+      "seconds": 0.8561642079148442,
+      "ttft_seconds": 0.6785381250083447,
+      "prompt_tokens": 725,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3434075478,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 12,
+      "instruction": "turn on auto save",
+      "image": "pc_3f805781-f2fe-45dc-8bc5-e62d12f1c359.png",
+      "image_sha256": "cc150bcbc228576e2d87886d6bd82f2f2573ef92ef8451a57dba55f2bcad1ca2",
+      "type": "icon",
+      "original_size": [
+        1710,
+        1558
+      ],
+      "input_size": [
+        1481,
+        1349
+      ],
+      "expected_xywh": [
+        283,
+        0,
+        98,
+        61
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [462, 242]}",
+      "seconds": 0.8831427919212729,
+      "ttft_seconds": 0.6830468750558794,
+      "prompt_tokens": 724,
+      "generation_tokens": 18,
+      "mlx_peak_bytes": 3379871092,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 13,
+      "instruction": "add a screenshot",
+      "image": "pc_00b0c9f6-b24f-4bff-b492-12117b50e63b.png",
+      "image_sha256": "a59fa4ebf780a111145328d8fcfeb59c04cf6f7bb003da04e57d4e54eccb2f30",
+      "type": "text",
+      "original_size": [
+        1708,
+        1556
+      ],
+      "input_size": [
+        1481,
+        1349
+      ],
+      "expected_xywh": [
+        580,
+        258,
+        123,
+        112
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [193, 20]}",
+      "seconds": 0.8129869580734521,
+      "ttft_seconds": 0.6388949169777334,
+      "prompt_tokens": 656,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3422174054,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 14,
+      "instruction": "back to previous page",
+      "image": "pc_6d0b3e39-872b-48ec-b894-0490106eb629.png",
+      "image_sha256": "89170c586557298d05ba1d6e6f533818c799d7a1a68a63c63a4f463aea7fed34",
+      "type": "icon",
+      "original_size": [
+        2000,
+        1372
+      ],
+      "input_size": [
+        1707,
+        1171
+      ],
+      "expected_xywh": [
+        172,
+        15,
+        70,
+        75
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [368, 312]}",
+      "seconds": 0.7981521659530699,
+      "ttft_seconds": 0.614413415780291,
+      "prompt_tokens": 661,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3427712026,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 15,
+      "instruction": "show the files in list",
+      "image": "pc_f01bc231-56c4-4aba-9dd4-fd6271be0f8e.png",
+      "image_sha256": "d450aaf8098fc41c722ba986a43a65335f81d0e88ffa6290ac29f9fbcf911267",
+      "type": "text",
+      "original_size": [
+        1600,
+        898
+      ],
+      "input_size": [
+        1600,
+        898
+      ],
+      "expected_xywh": [
+        475,
+        248,
+        247,
+        48
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [586, 140]}",
+      "seconds": 0.8563561250921339,
+      "ttft_seconds": 0.6704029999673367,
+      "prompt_tokens": 725,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3434075466,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 16,
+      "instruction": "adjust the left indent",
+      "image": "pc_0205fe68-a787-4651-8cfa-495802d6beb6.png",
+      "image_sha256": "2d8c929b4490606016b65ecd3a81cf52293b761cf46030db32b7650127858897",
+      "type": "icon",
+      "original_size": [
+        1712,
+        1560
+      ],
+      "input_size": [
+        1481,
+        1349
+      ],
+      "expected_xywh": [
+        884,
+        175,
+        161,
+        44
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [488, 186]}",
+      "seconds": 0.8590326670091599,
+      "ttft_seconds": 0.6737934169359505,
+      "prompt_tokens": 725,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3429596614,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 17,
+      "instruction": "switch to dark mode",
+      "image": "pc_772a850b-eb35-4efb-9767-ef0eadeb70f0.png",
+      "image_sha256": "20dadec1feadfb7dae1b15ad0942bc147331e68331a701f76c8a3cb7c7c12e11",
+      "type": "text",
+      "original_size": [
+        1340,
+        1424
+      ],
+      "input_size": [
+        1340,
+        1424
+      ],
+      "expected_xywh": [
+        672,
+        145,
+        142,
+        134
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [318, 610]}",
+      "seconds": 0.85953608318232,
+      "ttft_seconds": 0.6767830830067396,
+      "prompt_tokens": 723,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3432682698,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 18,
+      "instruction": "save file",
+      "image": "pc_e73c6749-043f-4a24-8e56-6c829f78255d.png",
+      "image_sha256": "dd5f81091a448da3910b418b711f3458f998dc0ed7724e438920ec9c73320237",
+      "type": "icon",
+      "original_size": [
+        1710,
+        1554
+      ],
+      "input_size": [
+        1483,
+        1348
+      ],
+      "expected_xywh": [
+        438,
+        2,
+        61,
+        61
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [590, 342]}",
+      "seconds": 0.8717958750203252,
+      "ttft_seconds": 0.6863916669972241,
+      "prompt_tokens": 714,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422761414,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 19,
+      "instruction": "rotate title box",
+      "image": "pc_9eebe928-6d8a-4de5-8212-039d0282b082.png",
+      "image_sha256": "2d3c7888e0cac8cb4bccec017ba73e9270ef97cf5a18240df549c36fd74261a8",
+      "type": "icon",
+      "original_size": [
+        2192,
+        1704
+      ],
+      "input_size": [
+        1603,
+        1246
+      ],
+      "expected_xywh": [
+        1316,
+        553,
+        69,
+        60
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [938, 50]}",
+      "seconds": 0.7981012079399079,
+      "ttft_seconds": 0.6253891659434885,
+      "prompt_tokens": 645,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3415029464,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 20,
+      "instruction": "search in files",
+      "image": "pc_b313a50d-ac5e-4189-beb9-3f5ceb67e536.png",
+      "image_sha256": "607fe111d16e78a3c54b0b5158ccf60705b03d712afa718c1539323defaa8b10",
+      "type": "icon",
+      "original_size": [
+        1524,
+        940
+      ],
+      "input_size": [
+        1524,
+        940
+      ],
+      "expected_xywh": [
+        1426,
+        14,
+        80,
+        69
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [690, 42]}",
+      "seconds": 0.8090104172006249,
+      "ttft_seconds": 0.6347850421443582,
+      "prompt_tokens": 654,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3420388010,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 21,
+      "instruction": "forward email",
+      "image": "pc_75eae2f4-193e-4365-a5f1-b9b5340d02ff.png",
+      "image_sha256": "9cdcfddf0b6b494ff3d4badb3dea1ef89e743627d8d805d601693d6fb26df191",
+      "type": "icon",
+      "original_size": [
+        1906,
+        1340
+      ],
+      "input_size": [
+        1686,
+        1185
+      ],
+      "expected_xywh": [
+        1667,
+        0,
+        82,
+        103
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [760, 236]}",
+      "seconds": 0.7036922909319401,
+      "ttft_seconds": 0.4977315829601139,
+      "prompt_tokens": 525,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3385190580,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 22,
+      "instruction": "change user's password",
+      "image": "pc_b93bf9fd-afa5-40c0-b103-48f235f3ffe0.png",
+      "image_sha256": "9e21f97aaf86191865549854b0c0e56ace9b629541708e9b989e0af0139f5b69",
+      "type": "text",
+      "original_size": [
+        1338,
+        1002
+      ],
+      "input_size": [
+        1338,
+        1002
+      ],
+      "expected_xywh": [
+        965,
+        226,
+        283,
+        47
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [196, 618]}",
+      "seconds": 0.8684727498330176,
+      "ttft_seconds": 0.6850154169369489,
+      "prompt_tokens": 723,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3429874956,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 23,
+      "instruction": "software update",
+      "image": "pc_6f79b56c-2b0f-471d-9f9d-93932c69a0ce.png",
+      "image_sha256": "029ac3172cc9b85fac4b44d4b4ab79a4a3c4e6ba572bc4c6de4bf0b4b6a50349",
+      "type": "text",
+      "original_size": [
+        1338,
+        1362
+      ],
+      "input_size": [
+        1338,
+        1362
+      ],
+      "expected_xywh": [
+        39,
+        761,
+        111,
+        164
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [312, 912]}",
+      "seconds": 0.684349917108193,
+      "ttft_seconds": 0.49919554218649864,
+      "prompt_tokens": 533,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3387943314,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 24,
+      "instruction": "select the gzip file format",
+      "image": "pc_f656ce46-13af-4cd1-9126-f3c45a4e696c.png",
+      "image_sha256": "f8fa1790ffe52ce0e65674ede109ccd6a2dd2ae82a27ca478d758706ab0f8485",
+      "type": "text",
+      "original_size": [
+        1198,
+        822
+      ],
+      "input_size": [
+        1198,
+        822
+      ],
+      "expected_xywh": [
+        78,
+        603,
+        1046,
+        36
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [186, 860]}",
+      "seconds": 0.8512748749926686,
+      "ttft_seconds": 0.66974320798181,
+      "prompt_tokens": 724,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3433731326,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 25,
+      "instruction": "check app limits",
+      "image": "pc_6ca110ef-dfac-49fe-a9eb-4ba4f621cbdc.png",
+      "image_sha256": "27123704ed14fe7024ad25ad99501295bb64d103639feb93c96143695a651f03",
+      "type": "text",
+      "original_size": [
+        1338,
+        1254
+      ],
+      "input_size": [
+        1338,
+        1254
+      ],
+      "expected_xywh": [
+        1,
+        766,
+        396,
+        67
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [486, 704]}",
+      "seconds": 0.5662753751967102,
+      "ttft_seconds": 0.38067691703327,
+      "prompt_tokens": 391,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3299895718,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 26,
+      "instruction": "drag the slider to adjust volume",
+      "image": "pc_e2bd639a-f297-48fd-bee0-3b7044b0ad57.png",
+      "image_sha256": "7acb068a75fc97f2109092bcae97e8b0c0fbac62df30ff9e750db107eadd1e64",
+      "type": "icon",
+      "original_size": [
+        606,
+        744
+      ],
+      "input_size": [
+        606,
+        744
+      ],
+      "expected_xywh": [
+        26,
+        453,
+        556,
+        126
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [40, 886]}",
+      "seconds": 0.8396737079601735,
+      "ttft_seconds": 0.6698953751474619,
+      "prompt_tokens": 724,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3433731326,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 27,
+      "instruction": "add a device",
+      "image": "pc_2773ea59-8493-4c89-957a-d2ec661e6384.png",
+      "image_sha256": "de7e17dbc9c8d7aa872687af4cf9195ceaa437cefece78f31da4fc209a5763fb",
+      "type": "icon",
+      "original_size": [
+        1332,
+        1268
+      ],
+      "input_size": [
+        1332,
+        1268
+      ],
+      "expected_xywh": [
+        37,
+        1092,
+        51,
+        47
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [958, 112]}",
+      "seconds": 0.820358500117436,
+      "ttft_seconds": 0.6348056250717491,
+      "prompt_tokens": 653,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3419847238,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 28,
+      "instruction": "debug",
+      "image": "pc_ac718327-53b2-49c1-8707-d12220913fc1.png",
+      "image_sha256": "d8badb746314735517ffda0c95fb1a8d51e6d047cae89b420605e7cbcdc8bca4",
+      "type": "icon",
+      "original_size": [
+        2300,
+        1590
+      ],
+      "input_size": [
+        1700,
+        1175
+      ],
+      "expected_xywh": [
+        1511,
+        55,
+        58,
+        58
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [896, 112]}",
+      "seconds": 0.8674721249844879,
+      "ttft_seconds": 0.6840765001252294,
+      "prompt_tokens": 727,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3436533216,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 29,
+      "instruction": "share throught airdrop",
+      "image": "pc_9237faf6-9f95-4157-9d0b-aafa67f7b675.png",
+      "image_sha256": "58f5d1004f06df1be1be526a434d939529b39d122496b6ac3cb405db4cc25484",
+      "type": "text",
+      "original_size": [
+        1336,
+        1314
+      ],
+      "input_size": [
+        1336,
+        1314
+      ],
+      "expected_xywh": [
+        1103,
+        87,
+        230,
+        58
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [800, 882]}",
+      "seconds": 0.8680433330591768,
+      "ttft_seconds": 0.6852677080314606,
+      "prompt_tokens": 714,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422761438,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 30,
+      "instruction": "share the shortcut",
+      "image": "pc_64c386c3-9d87-4c91-b712-c1d9ab9216ae.png",
+      "image_sha256": "db6631c624455d5ed04d619a1d5e2c133dc4da2f2b97a34444402a0812771e7a",
+      "type": "icon",
+      "original_size": [
+        1774,
+        1392
+      ],
+      "input_size": [
+        1596,
+        1252
+      ],
+      "expected_xywh": [
+        1037,
+        13,
+        81,
+        79
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [546, 186]}",
+      "seconds": 0.843057582853362,
+      "ttft_seconds": 0.6361099579371512,
+      "prompt_tokens": 658,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3425532962,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 31,
+      "instruction": "get the bear markdown notes app",
+      "image": "pc_8be15b4a-65cc-4e89-94a2-3b6b571f41e2.png",
+      "image_sha256": "ab3bc3da0ff98b87dcb57a5e7a9c67cac2e43c382d04643956621f85959f8dd1",
+      "type": "icon",
+      "original_size": [
+        1998,
+        1370
+      ],
+      "input_size": [
+        1707,
+        1171
+      ],
+      "expected_xywh": [
+        1054,
+        211,
+        156,
+        81
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [590, 318]}",
+      "seconds": 0.8886618749238551,
+      "ttft_seconds": 0.696501457830891,
+      "prompt_tokens": 725,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3321200294,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 32,
+      "instruction": "switch to alerts mode",
+      "image": "pc_514bf9d5-ca63-4d33-94cb-dc1b11994199.png",
+      "image_sha256": "83e55a50873fca7ede40b7a4b5e0ff26a267bb88224724201a34221eea8fcb23",
+      "type": "text",
+      "original_size": [
+        1336,
+        1454
+      ],
+      "input_size": [
+        1336,
+        1454
+      ],
+      "expected_xywh": [
+        1024,
+        444,
+        212,
+        186
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [690, 60]}",
+      "seconds": 0.6810263330116868,
+      "ttft_seconds": 0.5029112079646438,
+      "prompt_tokens": 518,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3364999464,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 33,
+      "instruction": "adjust font size",
+      "image": "pc_63a274e4-38e1-4a50-a102-33b31aee3a62.png",
+      "image_sha256": "97673546955722ef7ac6afc8e57a818feee6cc45fdebff5f6e1d397da62956b5",
+      "type": "icon",
+      "original_size": [
+        1130,
+        952
+      ],
+      "input_size": [
+        1130,
+        952
+      ],
+      "expected_xywh": [
+        808,
+        19,
+        84,
+        72
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [500, 211]}",
+      "seconds": 0.8995791671331972,
+      "ttft_seconds": 0.6934722091536969,
+      "prompt_tokens": 714,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3390436958,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 34,
+      "instruction": "switch to apps",
+      "image": "pc_3ffab0d5-e99d-47b8-9684-ec9d8d063419.png",
+      "image_sha256": "7803b8c067fe5c01b639d40be2f75918c09e9c02521cae2acc0f189c08946021",
+      "type": "text",
+      "original_size": [
+        1338,
+        1064
+      ],
+      "input_size": [
+        1338,
+        1064
+      ],
+      "expected_xywh": [
+        681,
+        243,
+        113,
+        45
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [899, 942]}",
+      "seconds": 0.8684399579651654,
+      "ttft_seconds": 0.68668970791623,
+      "prompt_tokens": 713,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3420631430,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 35,
+      "instruction": "advanced setting",
+      "image": "pc_3ffab0d5-e99d-47b8-9684-ec9d8d063419.png",
+      "image_sha256": "7803b8c067fe5c01b639d40be2f75918c09e9c02521cae2acc0f189c08946021",
+      "type": "text",
+      "original_size": [
+        1338,
+        1064
+      ],
+      "input_size": [
+        1338,
+        1064
+      ],
+      "expected_xywh": [
+        1048,
+        982,
+        185,
+        44
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [922, 136]}",
+      "seconds": 0.6835624170489609,
+      "ttft_seconds": 0.4958625831641257,
+      "prompt_tokens": 518,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3364999464,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 36,
+      "instruction": "add a recipient",
+      "image": "pc_63a274e4-38e1-4a50-a102-33b31aee3a62.png",
+      "image_sha256": "97673546955722ef7ac6afc8e57a818feee6cc45fdebff5f6e1d397da62956b5",
+      "type": "icon",
+      "original_size": [
+        1130,
+        952
+      ],
+      "input_size": [
+        1130,
+        952
+      ],
+      "expected_xywh": [
+        1025,
+        106,
+        78,
+        56
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [494, 894]}",
+      "seconds": 0.5380186249967664,
+      "ttft_seconds": 0.3536040000617504,
+      "prompt_tokens": 373,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3322013842,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 37,
+      "instruction": "check focus preferences",
+      "image": "pc_e5c3f9ae-de8d-4457-8bdc-7c0aba699f38.png",
+      "image_sha256": "f064fc3eebc5b74a1cc9fc2f3ceee0a98d457319718f05f5a4227dec63a0b700",
+      "type": "text",
+      "original_size": [
+        1098,
+        698
+      ],
+      "input_size": [
+        1098,
+        698
+      ],
+      "expected_xywh": [
+        469,
+        494,
+        597,
+        62
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [814, 512]}",
+      "seconds": 0.868686042027548,
+      "ttft_seconds": 0.6868969581555575,
+      "prompt_tokens": 716,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3424499414,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 38,
+      "instruction": "add a send message action",
+      "image": "pc_2c2b6cbd-39cf-4bd2-80aa-d953890c21e5.png",
+      "image_sha256": "5c4f81a23521ffcc3d45df4de46a2de4d805789124c2d25b9241da3c9708549f",
+      "type": "text",
+      "original_size": [
+        1776,
+        1392
+      ],
+      "input_size": [
+        1597,
+        1252
+      ],
+      "expected_xywh": [
+        1254,
+        628,
+        491,
+        58
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [210, 518]}",
+      "seconds": 0.6744882080238312,
+      "ttft_seconds": 0.48986229207366705,
+      "prompt_tokens": 527,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3385193012,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 39,
+      "instruction": "open bluetooth preferences for me",
+      "image": "pc_65c6ab58-5f56-4a53-a65d-5e88511bbe0f.png",
+      "image_sha256": "c672f3a2f43fb3f71388cfa3e9e122c522236ca85324d59f50a198aa1244bba6",
+      "type": "text",
+      "original_size": [
+        790,
+        1080
+      ],
+      "input_size": [
+        790,
+        1080
+      ],
+      "expected_xywh": [
+        14,
+        539,
+        475,
+        68
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [500, 522]}",
+      "seconds": 0.6705791249405593,
+      "ttft_seconds": 0.4869201669935137,
+      "prompt_tokens": 524,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3385192964,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 40,
+      "instruction": "view attachment",
+      "image": "pc_1e16b18c-5d91-4155-9e49-4ad5d9453fc7.png",
+      "image_sha256": "0eaa787309b1e8bbb80cb92a750b28bc02051fc52ce29adaba9dda04d5dea0c4",
+      "type": "icon",
+      "original_size": [
+        970,
+        1340
+      ],
+      "input_size": [
+        970,
+        1340
+      ],
+      "expected_xywh": [
+        561,
+        693,
+        90,
+        52
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [586, 580]}",
+      "seconds": 0.8526060830336064,
+      "ttft_seconds": 0.6699287500232458,
+      "prompt_tokens": 726,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3435894166,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 41,
+      "instruction": "add a sunburst chart",
+      "image": "pc_3f805781-f2fe-45dc-8bc5-e62d12f1c359.png",
+      "image_sha256": "cc150bcbc228576e2d87886d6bd82f2f2573ef92ef8451a57dba55f2bcad1ca2",
+      "type": "icon",
+      "original_size": [
+        1710,
+        1558
+      ],
+      "input_size": [
+        1481,
+        1349
+      ],
+      "expected_xywh": [
+        879,
+        797,
+        212,
+        223
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [200, 218]}",
+      "seconds": 0.8141455419827253,
+      "ttft_seconds": 0.6341929170303047,
+      "prompt_tokens": 656,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422174054,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 42,
+      "instruction": "open a blank document",
+      "image": "pc_bf63137d-d442-4bb9-a145-e07cb48abb64.png",
+      "image_sha256": "59527914a0ba8c7b617b0b264f4334aba4b1bef7f9056274edae8075dbd5f157",
+      "type": "text",
+      "original_size": [
+        2154,
+        1514
+      ],
+      "input_size": [
+        1686,
+        1185
+      ],
+      "expected_xywh": [
+        307,
+        192,
+        226,
+        340
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [590, 117]}",
+      "seconds": 0.8133115000091493,
+      "ttft_seconds": 0.6311001249123365,
+      "prompt_tokens": 655,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3421452230,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 43,
+      "instruction": "delete this email",
+      "image": "pc_75eae2f4-193e-4365-a5f1-b9b5340d02ff.png",
+      "image_sha256": "9cdcfddf0b6b494ff3d4badb3dea1ef89e743627d8d805d601693d6fb26df191",
+      "type": "icon",
+      "original_size": [
+        1906,
+        1340
+      ],
+      "input_size": [
+        1686,
+        1185
+      ],
+      "expected_xywh": [
+        1284,
+        0,
+        90,
+        106
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [700, 20]}",
+      "seconds": 0.665893082972616,
+      "ttft_seconds": 0.4948634998872876,
+      "prompt_tokens": 518,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3365000808,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 44,
+      "instruction": "check the battery",
+      "image": "pc_819d6d6a-0ea9-46e0-869d-e17d271381ca.png",
+      "image_sha256": "f07cee9cae3a748a6fc17870f6054f2fc753a7902e57c584f9901aabeb0cd2c9",
+      "type": "icon",
+      "original_size": [
+        1316,
+        1050
+      ],
+      "input_size": [
+        1316,
+        1050
+      ],
+      "expected_xywh": [
+        635,
+        13,
+        78,
+        51
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [814, 44]}",
+      "seconds": 0.6604664998594671,
+      "ttft_seconds": 0.48786212480627,
+      "prompt_tokens": 524,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3385190552,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 45,
+      "instruction": "search for account",
+      "image": "pc_cddf10f9-43a9-4cce-9b1b-df4aaf216f6d.png",
+      "image_sha256": "aefce25171027733c81ee62a8e2d7ddef760c4c7b2d5efbd50454b80a20fe268",
+      "type": "text",
+      "original_size": [
+        1334,
+        1000
+      ],
+      "input_size": [
+        1334,
+        1000
+      ],
+      "expected_xywh": [
+        985,
+        22,
+        323,
+        58
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [226, 526]}",
+      "seconds": 0.8022043330129236,
+      "ttft_seconds": 0.6197649999521673,
+      "prompt_tokens": 645,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3415028696,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 46,
+      "instruction": "open anaconda",
+      "image": "pc_35c339d2-810d-4bbe-93db-0c1db024638f.png",
+      "image_sha256": "b6b0e8fc41eb0b9a9fb8edc031b7233afc3b5a32c043da5bc62a6751cb27e4e6",
+      "type": "text",
+      "original_size": [
+        2648,
+        1730
+      ],
+      "input_size": [
+        1749,
+        1143
+      ],
+      "expected_xywh": [
+        473,
+        701,
+        299,
+        286
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [46, 372]}",
+      "seconds": 0.8135937917977571,
+      "ttft_seconds": 0.6324118748307228,
+      "prompt_tokens": 655,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3421452206,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 47,
+      "instruction": "view downloads files",
+      "image": "pc_a4c60b7d-7f78-4255-8804-2dfbd297e09b.png",
+      "image_sha256": "fca478b974b9e189ae8cc27b398872babb3fc2baa5dc05d30b6621a04bee82ac",
+      "type": "text",
+      "original_size": [
+        1600,
+        1116
+      ],
+      "input_size": [
+        1600,
+        1116
+      ],
+      "expected_xywh": [
+        19,
+        376,
+        219,
+        44
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [192, 412]}",
+      "seconds": 0.8712278329767287,
+      "ttft_seconds": 0.6881416251417249,
+      "prompt_tokens": 716,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3424498138,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 48,
+      "instruction": "check the google chrome app",
+      "image": "pc_141ec1f5-ccf8-42f0-8b0b-8aba284ce81a.png",
+      "image_sha256": "1474e605d1390c2fb34d6dc4443350deefa856c4410a893971b50c359c3b22a9",
+      "type": "icon",
+      "original_size": [
+        1478,
+        1294
+      ],
+      "input_size": [
+        1478,
+        1294
+      ],
+      "expected_xywh": [
+        1,
+        360,
+        1475,
+        51
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [898, 281]}",
+      "seconds": 0.6766203329898417,
+      "ttft_seconds": 0.49558404088020325,
+      "prompt_tokens": 518,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3364999356,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 49,
+      "instruction": "adjust keyboard brightness",
+      "image": "pc_15bd214f-b45f-48f8-8125-21d79373a99e.png",
+      "image_sha256": "aa73d94b8953793d8a72073da4de2a7fc65606116d9fe8c1bd27e1aa046b73ff",
+      "type": "text",
+      "original_size": [
+        1272,
+        1042
+      ],
+      "input_size": [
+        1272,
+        1042
+      ],
+      "expected_xywh": [
+        969,
+        250,
+        129,
+        126
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [360, 281]}",
+      "seconds": 0.8268907500896603,
+      "ttft_seconds": 0.634751999983564,
+      "prompt_tokens": 658,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3425532830,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 50,
+      "instruction": "view the pixelmator app",
+      "image": "pc_8be15b4a-65cc-4e89-94a2-3b6b571f41e2.png",
+      "image_sha256": "ab3bc3da0ff98b87dcb57a5e7a9c67cac2e43c382d04643956621f85959f8dd1",
+      "type": "text",
+      "original_size": [
+        1998,
+        1370
+      ],
+      "input_size": [
+        1707,
+        1171
+      ],
+      "expected_xywh": [
+        517,
+        323,
+        699,
+        143
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [94, 834]}",
+      "seconds": 0.8097787499427795,
+      "ttft_seconds": 0.6380922920070589,
+      "prompt_tokens": 655,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3421452254,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 51,
+      "instruction": "pause the debugger",
+      "image": "pc_668258b4-f214-4a57-a500-d03aa94b0e65.png",
+      "image_sha256": "d0c5e649c2c5a55d613ac9515ab4501848678faa4524bc2fa2a7849cf92c571b",
+      "type": "icon",
+      "original_size": [
+        2292,
+        1590
+      ],
+      "input_size": [
+        1697,
+        1177
+      ],
+      "expected_xywh": [
+        38,
+        1009,
+        60,
+        49
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [188, 30]}",
+      "seconds": 0.8538461250718683,
+      "ttft_seconds": 0.6834980419371277,
+      "prompt_tokens": 714,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3422761282,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 52,
+      "instruction": "select python interpreter",
+      "image": "pc_8c77197f-8be9-485a-bf32-989a8a66fbae.png",
+      "image_sha256": "719fefbeb0dd0c58ea4b4466c840747c9b939eacc5b0467bd5953ab09df91278",
+      "type": "icon",
+      "original_size": [
+        1802,
+        1402
+      ],
+      "input_size": [
+        1603,
+        1247
+      ],
+      "expected_xywh": [
+        748,
+        158,
+        957,
+        51
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [788, 734]}",
+      "seconds": 0.857793667120859,
+      "ttft_seconds": 0.6737517090514302,
+      "prompt_tokens": 724,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3433731326,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 53,
+      "instruction": "open time machine",
+      "image": "pc_6f79b56c-2b0f-471d-9f9d-93932c69a0ce.png",
+      "image_sha256": "029ac3172cc9b85fac4b44d4b4ab79a4a3c4e6ba572bc4c6de4bf0b4b6a50349",
+      "type": "text",
+      "original_size": [
+        1338,
+        1362
+      ],
+      "input_size": [
+        1338,
+        1362
+      ],
+      "expected_xywh": [
+        859,
+        952,
+        113,
+        153
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [500, 918]}",
+      "seconds": 0.8195325420238078,
+      "ttft_seconds": 0.6373384590260684,
+      "prompt_tokens": 656,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422174030,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 54,
+      "instruction": "minimize the debug panel",
+      "image": "pc_668258b4-f214-4a57-a500-d03aa94b0e65.png",
+      "image_sha256": "d0c5e649c2c5a55d613ac9515ab4501848678faa4524bc2fa2a7849cf92c571b",
+      "type": "icon",
+      "original_size": [
+        2292,
+        1590
+      ],
+      "input_size": [
+        1697,
+        1177
+      ],
+      "expected_xywh": [
+        2192,
+        779,
+        66,
+        55
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [388, 910]}",
+      "seconds": 0.7993752500042319,
+      "ttft_seconds": 0.6167340411338955,
+      "prompt_tokens": 660,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3427367862,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 55,
+      "instruction": "create a new document",
+      "image": "pc_09fff6da-5dd8-4288-a0e7-f503273c1908.png",
+      "image_sha256": "34509c59fe47c2432fe7644e37b522db7c47eee08db937f0e3f87ffcae00fff8",
+      "type": "text",
+      "original_size": [
+        1598,
+        898
+      ],
+      "input_size": [
+        1598,
+        898
+      ],
+      "expected_xywh": [
+        354,
+        809,
+        241,
+        49
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [190, 131]}",
+      "seconds": 0.8592844170052558,
+      "ttft_seconds": 0.6771592090371996,
+      "prompt_tokens": 723,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3432682674,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 56,
+      "instruction": "adjust orientation",
+      "image": "pc_0205fe68-a787-4651-8cfa-495802d6beb6.png",
+      "image_sha256": "2d8c929b4490606016b65ecd3a81cf52293b761cf46030db32b7650127858897",
+      "type": "text",
+      "original_size": [
+        1712,
+        1560
+      ],
+      "input_size": [
+        1481,
+        1349
+      ],
+      "expected_xywh": [
+        221,
+        131,
+        126,
+        120
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [899, 100]}",
+      "seconds": 0.6753356668632478,
+      "ttft_seconds": 0.4891732498072088,
+      "prompt_tokens": 527,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3385192988,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 57,
+      "instruction": "share this guide to someone",
+      "image": "pc_65c6ab58-5f56-4a53-a65d-5e88511bbe0f.png",
+      "image_sha256": "c672f3a2f43fb3f71388cfa3e9e122c522236ca85324d59f50a198aa1244bba6",
+      "type": "icon",
+      "original_size": [
+        790,
+        1080
+      ],
+      "input_size": [
+        790,
+        1080
+      ],
+      "expected_xywh": [
+        646,
+        3,
+        68,
+        75
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [350, 131]}",
+      "seconds": 0.8648294999729842,
+      "ttft_seconds": 0.6731642920058221,
+      "prompt_tokens": 724,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3433731326,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 58,
+      "instruction": "enlarge font size",
+      "image": "pc_e73c6749-043f-4a24-8e56-6c829f78255d.png",
+      "image_sha256": "dd5f81091a448da3910b418b711f3458f998dc0ed7724e438920ec9c73320237",
+      "type": "icon",
+      "original_size": [
+        1710,
+        1554
+      ],
+      "input_size": [
+        1483,
+        1348
+      ],
+      "expected_xywh": [
+        513,
+        134,
+        63,
+        57
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [894, 906]}",
+      "seconds": 0.8024114998988807,
+      "ttft_seconds": 0.6197915829252452,
+      "prompt_tokens": 659,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3426205278,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 59,
+      "instruction": "open the file",
+      "image": "pc_09fff6da-5dd8-4288-a0e7-f503273c1908.png",
+      "image_sha256": "34509c59fe47c2432fe7644e37b522db7c47eee08db937f0e3f87ffcae00fff8",
+      "type": "text",
+      "original_size": [
+        1598,
+        898
+      ],
+      "input_size": [
+        1598,
+        898
+      ],
+      "expected_xywh": [
+        1411,
+        804,
+        152,
+        65
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [738, 962]}",
+      "seconds": 0.8695401248987764,
+      "ttft_seconds": 0.6848534159362316,
+      "prompt_tokens": 717,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3425202810,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 60,
+      "instruction": "cancel showing plots in tool windows",
+      "image": "pc_155db9b3-fe88-41cb-81d1-d51f37ba5970.png",
+      "image_sha256": "9a53a159b7b173b988416a6102deb86fe8cfcda3ae6e8c3eeb3aebaa6bbb9979",
+      "type": "text",
+      "original_size": [
+        1802,
+        1398
+      ],
+      "input_size": [
+        1605,
+        1245
+      ],
+      "expected_xywh": [
+        519,
+        139,
+        400,
+        68
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [480, 920]}",
+      "seconds": 0.8637755829840899,
+      "ttft_seconds": 0.6798539578448981,
+      "prompt_tokens": 714,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422761402,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 61,
+      "instruction": "translation languages setting",
+      "image": "pc_3ffab0d5-e99d-47b8-9684-ec9d8d063419.png",
+      "image_sha256": "7803b8c067fe5c01b639d40be2f75918c09e9c02521cae2acc0f189c08946021",
+      "type": "text",
+      "original_size": [
+        1338,
+        1064
+      ],
+      "input_size": [
+        1338,
+        1064
+      ],
+      "expected_xywh": [
+        335,
+        982,
+        338,
+        43
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [388, 318]}",
+      "seconds": 0.4795483329799026,
+      "ttft_seconds": 0.2965434999205172,
+      "prompt_tokens": 317,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3334459882,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 62,
+      "instruction": "set as contacts only",
+      "image": "pc_7ba3945d-3975-45f3-9145-71805a9723de.png",
+      "image_sha256": "36ba709b3d95d8e258de54e4e2c97b6d4313eb0f49e984db942905f4c0f36b09",
+      "type": "text",
+      "original_size": [
+        1098,
+        620
+      ],
+      "input_size": [
+        1098,
+        620
+      ],
+      "expected_xywh": [
+        471,
+        176,
+        594,
+        69
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [100, 40]}",
+      "seconds": 0.4737909999676049,
+      "ttft_seconds": 0.2955415830947459,
+      "prompt_tokens": 316,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3334459866,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 63,
+      "instruction": "open wechat",
+      "image": "pc_015a0262-924c-4ced-9f4d-23d07f94a657.png",
+      "image_sha256": "a0cdf557b1e30ebdf8023fe71c1039feeabe27c0a2d2569a36143ba738b027db",
+      "type": "icon",
+      "original_size": [
+        1178,
+        650
+      ],
+      "input_size": [
+        1178,
+        650
+      ],
+      "expected_xywh": [
+        180,
+        3,
+        92,
+        69
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [498, 486]}",
+      "seconds": 0.8580974591895938,
+      "ttft_seconds": 0.6750207501463592,
+      "prompt_tokens": 728,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3437630730,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 64,
+      "instruction": "jump to the spot that's clicked",
+      "image": "pc_772a850b-eb35-4efb-9767-ef0eadeb70f0.png",
+      "image_sha256": "20dadec1feadfb7dae1b15ad0942bc147331e68331a701f76c8a3cb7c7c12e11",
+      "type": "text",
+      "original_size": [
+        1340,
+        1424
+      ],
+      "input_size": [
+        1340,
+        1424
+      ],
+      "expected_xywh": [
+        502,
+        794,
+        423,
+        41
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [398, 318]}",
+      "seconds": 0.6875706668943167,
+      "ttft_seconds": 0.4967216670047492,
+      "prompt_tokens": 520,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3364999532,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 65,
+      "instruction": "open mind2web folder",
+      "image": "pc_819d6d6a-0ea9-46e0-869d-e17d271381ca.png",
+      "image_sha256": "f07cee9cae3a748a6fc17870f6054f2fc753a7902e57c584f9901aabeb0cd2c9",
+      "type": "text",
+      "original_size": [
+        1316,
+        1050
+      ],
+      "input_size": [
+        1316,
+        1050
+      ],
+      "expected_xywh": [
+        526,
+        274,
+        144,
+        163
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [938, 58]}",
+      "seconds": 0.8512541251257062,
+      "ttft_seconds": 0.6775418331380934,
+      "prompt_tokens": 725,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3429596656,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 66,
+      "instruction": "share the word file",
+      "image": "pc_41147eb1-3e27-4aa0-b9f9-71363b9be5c9.png",
+      "image_sha256": "aec6ca3712edc6977be39baf4f7cb525b219de5c16fd67baa7f541b4eb50d2fb",
+      "type": "text",
+      "original_size": [
+        1710,
+        1558
+      ],
+      "input_size": [
+        1481,
+        1349
+      ],
+      "expected_xywh": [
+        1554,
+        66,
+        142,
+        57
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [926, 21]}",
+      "seconds": 0.6668195831589401,
+      "ttft_seconds": 0.49071420822292566,
+      "prompt_tokens": 525,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3385193016,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 67,
+      "instruction": "search in emails",
+      "image": "pc_1e16b18c-5d91-4155-9e49-4ad5d9453fc7.png",
+      "image_sha256": "0eaa787309b1e8bbb80cb92a750b28bc02051fc52ce29adaba9dda04d5dea0c4",
+      "type": "icon",
+      "original_size": [
+        970,
+        1340
+      ],
+      "input_size": [
+        970,
+        1340
+      ],
+      "expected_xywh": [
+        872,
+        0,
+        98,
+        106
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [388, 131]}",
+      "seconds": 0.8700652921106666,
+      "ttft_seconds": 0.6818987501319498,
+      "prompt_tokens": 715,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3423760938,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 68,
+      "instruction": "show screen saver after",
+      "image": "pc_66906e9c-dc3c-49e9-aaf0-0e7d5efc97db.png",
+      "image_sha256": "3b8f2fa1272278c0fb9f510151b5a985e38dc54e5482cd7a3f8ab6a960635114",
+      "type": "text",
+      "original_size": [
+        1340,
+        1156
+      ],
+      "input_size": [
+        1340,
+        1156
+      ],
+      "expected_xywh": [
+        347,
+        209,
+        350,
+        41
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [694, 331]}",
+      "seconds": 0.8632737081497908,
+      "ttft_seconds": 0.6800111250486225,
+      "prompt_tokens": 716,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3424498282,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 69,
+      "instruction": "switch to time zone settings",
+      "image": "pc_8c34d9b6-4f21-4cfa-a277-8a4fe45c9ef7.png",
+      "image_sha256": "6296c9feb3817a940049838ff1f14250425883a1e2f2396daa0cd8ef210aeaba",
+      "type": "text",
+      "original_size": [
+        1334,
+        1076
+      ],
+      "input_size": [
+        1334,
+        1076
+      ],
+      "expected_xywh": [
+        672,
+        149,
+        183,
+        50
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [500, 281]}",
+      "seconds": 0.8573462080676109,
+      "ttft_seconds": 0.6756035829894245,
+      "prompt_tokens": 724,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3433731374,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 70,
+      "instruction": "choose highlight color",
+      "image": "pc_772a850b-eb35-4efb-9767-ef0eadeb70f0.png",
+      "image_sha256": "20dadec1feadfb7dae1b15ad0942bc147331e68331a701f76c8a3cb7c7c12e11",
+      "type": "icon",
+      "original_size": [
+        1340,
+        1424
+      ],
+      "input_size": [
+        1340,
+        1424
+      ],
+      "expected_xywh": [
+        499,
+        396,
+        304,
+        40
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [400, 860]}",
+      "seconds": 0.8622155000921339,
+      "ttft_seconds": 0.6790354170370847,
+      "prompt_tokens": 713,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3420631466,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 71,
+      "instruction": "sign in",
+      "image": "pc_38236247-66f3-4ad3-aeb0-bc4783335a46.png",
+      "image_sha256": "739584879f4db2221e9ff068c5d7c8d42bd7b4e930a28417fa7b9c865112f7c5",
+      "type": "text",
+      "original_size": [
+        1158,
+        1402
+      ],
+      "input_size": [
+        1158,
+        1402
+      ],
+      "expected_xywh": [
+        393,
+        1173,
+        378,
+        61
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [440, 318]}",
+      "seconds": 0.8538720000069588,
+      "ttft_seconds": 0.6710546249523759,
+      "prompt_tokens": 727,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3436533230,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 72,
+      "instruction": "disable \"allow notifications\" setting",
+      "image": "pc_514bf9d5-ca63-4d33-94cb-dc1b11994199.png",
+      "image_sha256": "83e55a50873fca7ede40b7a4b5e0ff26a267bb88224724201a34221eea8fcb23",
+      "type": "icon",
+      "original_size": [
+        1336,
+        1454
+      ],
+      "input_size": [
+        1336,
+        1454
+      ],
+      "expected_xywh": [
+        585,
+        329,
+        96,
+        65
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [500, 40]}",
+      "seconds": 0.5333195829298347,
+      "ttft_seconds": 0.3606092920526862,
+      "prompt_tokens": 372,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3322013862,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 73,
+      "instruction": "connect wifi",
+      "image": "pc_dde13919-4c5b-49a1-8c8a-7d03f363c7ac.png",
+      "image_sha256": "c01a1001494e735b3e003d958ad5956467e783f292e02be99edad633fbf89649",
+      "type": "icon",
+      "original_size": [
+        1116,
+        648
+      ],
+      "input_size": [
+        1116,
+        648
+      ],
+      "expected_xywh": [
+        509,
+        1,
+        67,
+        64
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [500, 210]}",
+      "seconds": 0.8508960420731455,
+      "ttft_seconds": 0.6698702499270439,
+      "prompt_tokens": 727,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3436533230,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 74,
+      "instruction": "select the interface in the bar",
+      "image": "pc_afcc8160-1ef9-4413-8d5e-b3aa88b2a879.png",
+      "image_sha256": "c7bf13588d6ab2a788c0b6dac5125b7f843ffd01b99817602f8e2c4bcf831920",
+      "type": "icon",
+      "original_size": [
+        1338,
+        1268
+      ],
+      "input_size": [
+        1338,
+        1268
+      ],
+      "expected_xywh": [
+        531,
+        569,
+        516,
+        41
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [892, 129]}",
+      "seconds": 0.47434337507002056,
+      "ttft_seconds": 0.29391900007613003,
+      "prompt_tokens": 318,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3334459910,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 75,
+      "instruction": "turn off airdrop",
+      "image": "pc_7ba3945d-3975-45f3-9145-71805a9723de.png",
+      "image_sha256": "36ba709b3d95d8e258de54e4e2c97b6d4313eb0f49e984db942905f4c0f36b09",
+      "type": "icon",
+      "original_size": [
+        1098,
+        620
+      ],
+      "input_size": [
+        1098,
+        620
+      ],
+      "expected_xywh": [
+        958,
+        98,
+        82,
+        56
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [908, 928]}",
+      "seconds": 0.8172243749722838,
+      "ttft_seconds": 0.636587250046432,
+      "prompt_tokens": 658,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3425533178,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 76,
+      "instruction": "download fantastical from icloud",
+      "image": "pc_4a9b8c51-5db6-4325-a6e0-8a0f9801e25d.png",
+      "image_sha256": "a9ba1ffaf02d232be46dcf2fa4f9f1f9e8da696d4fc4af65b25304ec5631bf15",
+      "type": "icon",
+      "original_size": [
+        1998,
+        1370
+      ],
+      "input_size": [
+        1707,
+        1171
+      ],
+      "expected_xywh": [
+        1795,
+        1229,
+        102,
+        99
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [694, 338]}",
+      "seconds": 0.8720646668225527,
+      "ttft_seconds": 0.6886036249343306,
+      "prompt_tokens": 715,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3423760782,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 77,
+      "instruction": "bullets and numbering settings",
+      "image": "pc_b113f651-ec99-4a84-8c15-ff0fc1aee615.png",
+      "image_sha256": "2fa4aaed1de82f6f1538e2614e2b16fe3c4ebccfb0ba3859c3bc5f0def892c40",
+      "type": "text",
+      "original_size": [
+        2190,
+        1696
+      ],
+      "input_size": [
+        1607,
+        1244
+      ],
+      "expected_xywh": [
+        1197,
+        572,
+        901,
+        64
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [536, 912]}",
+      "seconds": 0.8658827499020845,
+      "ttft_seconds": 0.6827444578520954,
+      "prompt_tokens": 713,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3420631310,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 78,
+      "instruction": "detail information",
+      "image": "pc_857c0a8b-5f0f-4d6a-966f-789b594622c9.png",
+      "image_sha256": "bfc1c0dbdd3ae427a3c5b56c9afd2777f7cfab1a6f78fb30aa4ef94519d29eab",
+      "type": "icon",
+      "original_size": [
+        1478,
+        1288
+      ],
+      "input_size": [
+        1478,
+        1288
+      ],
+      "expected_xywh": [
+        640,
+        17,
+        70,
+        70
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [718, 19]}",
+      "seconds": 0.5249812081456184,
+      "ttft_seconds": 0.35160420811735094,
+      "prompt_tokens": 375,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3322013754,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 79,
+      "instruction": "check the date and time",
+      "image": "pc_dde13919-4c5b-49a1-8c8a-7d03f363c7ac.png",
+      "image_sha256": "c01a1001494e735b3e003d958ad5956467e783f292e02be99edad633fbf89649",
+      "type": "icon",
+      "original_size": [
+        1116,
+        648
+      ],
+      "input_size": [
+        1116,
+        648
+      ],
+      "expected_xywh": [
+        837,
+        2,
+        277,
+        57
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [688, 42]}",
+      "seconds": 0.8432675839867443,
+      "ttft_seconds": 0.671468541957438,
+      "prompt_tokens": 724,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3433731326,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 80,
+      "instruction": "lock the memo",
+      "image": "pc_fe30b885-865a-442e-a8f5-0e9924f256fd.png",
+      "image_sha256": "9350e5bc59db7c5458d6179cadb2c7cadcbef7ae1015238783197b01321c2de5",
+      "type": "icon",
+      "original_size": [
+        1268,
+        1310
+      ],
+      "input_size": [
+        1268,
+        1310
+      ],
+      "expected_xywh": [
+        918,
+        9,
+        95,
+        81
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [388, 200]}",
+      "seconds": 0.8713143749628216,
+      "ttft_seconds": 0.6898664999753237,
+      "prompt_tokens": 714,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422761402,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 81,
+      "instruction": "check file colors",
+      "image": "pc_45480159-6b1b-4528-9109-dab1905c62b7.png",
+      "image_sha256": "604cabcafcd322688a6e4828b5596b030237433c952c3b46624f8e22a4de8531",
+      "type": "text",
+      "original_size": [
+        1802,
+        1398
+      ],
+      "input_size": [
+        1605,
+        1245
+      ],
+      "expected_xywh": [
+        520,
+        349,
+        184,
+        50
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [960, 418]}",
+      "seconds": 0.8579250830225646,
+      "ttft_seconds": 0.6700064160395414,
+      "prompt_tokens": 726,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3435894166,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 82,
+      "instruction": "open the image in memo",
+      "image": "pc_fe30b885-865a-442e-a8f5-0e9924f256fd.png",
+      "image_sha256": "9350e5bc59db7c5458d6179cadb2c7cadcbef7ae1015238783197b01321c2de5",
+      "type": "icon",
+      "original_size": [
+        1268,
+        1310
+      ],
+      "input_size": [
+        1268,
+        1310
+      ],
+      "expected_xywh": [
+        42,
+        567,
+        1183,
+        736
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [110, 110]}",
+      "seconds": 0.8554909999947995,
+      "ttft_seconds": 0.6714697501156479,
+      "prompt_tokens": 725,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3434075478,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 83,
+      "instruction": "choose the red pen",
+      "image": "pc_8fc1a1fb-00b9-4fe6-8fd3-4784ab2274e8.png",
+      "image_sha256": "a059cbada05514d37bb5b3726636175e6d8a95170115287906c76ed1ff78b083",
+      "type": "icon",
+      "original_size": [
+        1714,
+        1558
+      ],
+      "input_size": [
+        1483,
+        1348
+      ],
+      "expected_xywh": [
+        352,
+        133,
+        85,
+        111
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [800, 882]}",
+      "seconds": 0.8754865420050919,
+      "ttft_seconds": 0.6919419169425964,
+      "prompt_tokens": 714,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422761426,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 84,
+      "instruction": "run the shortcut",
+      "image": "pc_64c386c3-9d87-4c91-b712-c1d9ab9216ae.png",
+      "image_sha256": "db6631c624455d5ed04d619a1d5e2c133dc4da2f2b97a34444402a0812771e7a",
+      "type": "icon",
+      "original_size": [
+        1774,
+        1392
+      ],
+      "input_size": [
+        1596,
+        1252
+      ],
+      "expected_xywh": [
+        1144,
+        16,
+        66,
+        71
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [100, 100]}",
+      "seconds": 0.8475479159969836,
+      "ttft_seconds": 0.6382732910569757,
+      "prompt_tokens": 658,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3425532950,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 85,
+      "instruction": "view files from airdrop",
+      "image": "pc_a4c60b7d-7f78-4255-8804-2dfbd297e09b.png",
+      "image_sha256": "fca478b974b9e189ae8cc27b398872babb3fc2baa5dc05d30b6621a04bee82ac",
+      "type": "text",
+      "original_size": [
+        1600,
+        1116
+      ],
+      "input_size": [
+        1600,
+        1116
+      ],
+      "expected_xywh": [
+        20,
+        150,
+        217,
+        47
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [188, 138]}",
+      "seconds": 0.8626155001111329,
+      "ttft_seconds": 0.6785825421102345,
+      "prompt_tokens": 725,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3434075466,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 86,
+      "instruction": "check my apple id",
+      "image": "pc_6f79b56c-2b0f-471d-9f9d-93932c69a0ce.png",
+      "image_sha256": "029ac3172cc9b85fac4b44d4b4ab79a4a3c4e6ba572bc4c6de4bf0b4b6a50349",
+      "type": "text",
+      "original_size": [
+        1338,
+        1362
+      ],
+      "input_size": [
+        1338,
+        1362
+      ],
+      "expected_xywh": [
+        1025,
+        141,
+        104,
+        127
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [900, 100]}",
+      "seconds": 0.8767392910085618,
+      "ttft_seconds": 0.6860230001620948,
+      "prompt_tokens": 715,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3423760902,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 87,
+      "instruction": "search in activity monitor",
+      "image": "pc_141ec1f5-ccf8-42f0-8b0b-8aba284ce81a.png",
+      "image_sha256": "1474e605d1390c2fb34d6dc4443350deefa856c4410a893971b50c359c3b22a9",
+      "type": "icon",
+      "original_size": [
+        1478,
+        1294
+      ],
+      "input_size": [
+        1478,
+        1294
+      ],
+      "expected_xywh": [
+        1381,
+        17,
+        86,
+        77
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [312, 186]}",
+      "seconds": 0.8882191248703748,
+      "ttft_seconds": 0.693762790877372,
+      "prompt_tokens": 715,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3421976962,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 88,
+      "instruction": "add a new package",
+      "image": "pc_8c77197f-8be9-485a-bf32-989a8a66fbae.png",
+      "image_sha256": "719fefbeb0dd0c58ea4b4466c840747c9b939eacc5b0467bd5953ab09df91278",
+      "type": "icon",
+      "original_size": [
+        1802,
+        1402
+      ],
+      "input_size": [
+        1603,
+        1247
+      ],
+      "expected_xywh": [
+        509,
+        256,
+        50,
+        51
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [388, 380]}",
+      "seconds": 0.8277875420171767,
+      "ttft_seconds": 0.6411394169554114,
+      "prompt_tokens": 656,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3414899528,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 89,
+      "instruction": "open synapse folder",
+      "image": "pc_a4c60b7d-7f78-4255-8804-2dfbd297e09b.png",
+      "image_sha256": "fca478b974b9e189ae8cc27b398872babb3fc2baa5dc05d30b6621a04bee82ac",
+      "type": "text",
+      "original_size": [
+        1600,
+        1116
+      ],
+      "input_size": [
+        1600,
+        1116
+      ],
+      "expected_xywh": [
+        542,
+        390,
+        133,
+        171
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [900, 162]}",
+      "seconds": 0.8761720829643309,
+      "ttft_seconds": 0.6907749581150711,
+      "prompt_tokens": 714,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422761282,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 90,
+      "instruction": "switch to apps",
+      "image": "pc_2c2b6cbd-39cf-4bd2-80aa-d953890c21e5.png",
+      "image_sha256": "5c4f81a23521ffcc3d45df4de46a2de4d805789124c2d25b9241da3c9708549f",
+      "type": "text",
+      "original_size": [
+        1776,
+        1392
+      ],
+      "input_size": [
+        1597,
+        1252
+      ],
+      "expected_xywh": [
+        1496,
+        204,
+        257,
+        44
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [312, 218]}",
+      "seconds": 0.8302931671496481,
+      "ttft_seconds": 0.6383530420716852,
+      "prompt_tokens": 662,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3429645542,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 91,
+      "instruction": "view the 2023 app store awards",
+      "image": "pc_a2300b43-a1e0-4da9-aed4-3543b507d9a3.png",
+      "image_sha256": "4526f978acf9a96e694561d57211d0ece85af5d9506c5e5ce44037f345b68977",
+      "type": "text",
+      "original_size": [
+        2000,
+        1372
+      ],
+      "input_size": [
+        1707,
+        1171
+      ],
+      "expected_xywh": [
+        518,
+        231,
+        685,
+        641
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [82, 312]}",
+      "seconds": 0.8449142500758171,
+      "ttft_seconds": 0.6725586671382189,
+      "prompt_tokens": 726,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3435894166,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 92,
+      "instruction": "remove a network connected device",
+      "image": "pc_2773ea59-8493-4c89-957a-d2ec661e6384.png",
+      "image_sha256": "de7e17dbc9c8d7aa872687af4cf9195ceaa437cefece78f31da4fc209a5763fb",
+      "type": "icon",
+      "original_size": [
+        1332,
+        1268
+      ],
+      "input_size": [
+        1332,
+        1268
+      ],
+      "expected_xywh": [
+        88,
+        1091,
+        53,
+        51
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [398, 119]}",
+      "seconds": 0.8564088330604136,
+      "ttft_seconds": 0.6733641249593347,
+      "prompt_tokens": 724,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3433731350,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 93,
+      "instruction": "enlarge the font",
+      "image": "pc_97ce9c11-f20b-4294-982a-f01241c81576.png",
+      "image_sha256": "cf62637abaaf3c4a8e2575103c70041c5c16ac4fe198b2aa2451310c2c3e7e3a",
+      "type": "icon",
+      "original_size": [
+        1380,
+        1244
+      ],
+      "input_size": [
+        1380,
+        1244
+      ],
+      "expected_xywh": [
+        746,
+        19,
+        62,
+        65
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [800, 180]}",
+      "seconds": 0.678557958919555,
+      "ttft_seconds": 0.49579624994657934,
+      "prompt_tokens": 521,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3364999524,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 94,
+      "instruction": "switch on do not disturb mode",
+      "image": "pc_15bd214f-b45f-48f8-8125-21d79373a99e.png",
+      "image_sha256": "aa73d94b8953793d8a72073da4de2a7fc65606116d9fe8c1bd27e1aa046b73ff",
+      "type": "text",
+      "original_size": [
+        1272,
+        1042
+      ],
+      "input_size": [
+        1272,
+        1042
+      ],
+      "expected_xywh": [
+        969,
+        105,
+        272,
+        128
+      ],
+      "passed": true
+    },
+    {
+      "output": "{\"point_2d\": [690, 21]}",
+      "seconds": 0.8735782080329955,
+      "ttft_seconds": 0.6948558329604566,
+      "prompt_tokens": 714,
+      "generation_tokens": 16,
+      "mlx_peak_bytes": 3422761426,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 95,
+      "instruction": "add a shortcut",
+      "image": "pc_dc199113-7c34-4cc2-85cb-e9b552b87b05.png",
+      "image_sha256": "a0ed06740f9c4122606f1bceed27d7799406b8dd7866b93156266e99d84e69ce",
+      "type": "icon",
+      "original_size": [
+        1658,
+        1382
+      ],
+      "input_size": [
+        1549,
+        1291
+      ],
+      "expected_xywh": [
+        1024,
+        20,
+        70,
+        69
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [386, 102]}",
+      "seconds": 0.879414499970153,
+      "ttft_seconds": 0.6922117499634624,
+      "prompt_tokens": 714,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3422761426,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 96,
+      "instruction": "terminate this process",
+      "image": "pc_857c0a8b-5f0f-4d6a-966f-789b594622c9.png",
+      "image_sha256": "bfc1c0dbdd3ae427a3c5b56c9afd2777f7cfab1a6f78fb30aa4ef94519d29eab",
+      "type": "icon",
+      "original_size": [
+        1478,
+        1288
+      ],
+      "input_size": [
+        1478,
+        1288
+      ],
+      "expected_xywh": [
+        555,
+        18,
+        79,
+        67
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [368, 361]}",
+      "seconds": 0.8736234579700977,
+      "ttft_seconds": 0.6830182920675725,
+      "prompt_tokens": 724,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3433731350,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 97,
+      "instruction": "cancel the calculator",
+      "image": "pc_63f20c0b-0abc-4cd5-a3cb-2ea0cb2ba3c8.png",
+      "image_sha256": "dbf9c43f9f62b0ca238a72b18aeca011bc877e3ce37258751582bcf038ab18b1",
+      "type": "text",
+      "original_size": [
+        1336,
+        1218
+      ],
+      "input_size": [
+        1336,
+        1218
+      ],
+      "expected_xywh": [
+        179,
+        455,
+        979,
+        42
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [210, 318]}",
+      "seconds": 0.8150999159552157,
+      "ttft_seconds": 0.627492249943316,
+      "prompt_tokens": 665,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3444259510,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 98,
+      "instruction": "turn on \"user apple watch to unlock\"",
+      "image": "pc_cb3fc7f0-9ed8-4692-8610-0f32b929a5a3.png",
+      "image_sha256": "56d525ce8d1ffaf57801a48c8715ce37d30d5bb2010e182441bb80341b7f40b9",
+      "type": "text",
+      "original_size": [
+        1334,
+        1174
+      ],
+      "input_size": [
+        1334,
+        1174
+      ],
+      "expected_xywh": [
+        203,
+        400,
+        689,
+        56
+      ],
+      "passed": false
+    },
+    {
+      "output": "{\"point_2d\": [110, 700]}",
+      "seconds": 0.855041665956378,
+      "ttft_seconds": 0.6713409579824656,
+      "prompt_tokens": 725,
+      "generation_tokens": 17,
+      "mlx_peak_bytes": 3434075466,
+      "process_peak_rss_bytes": 2559115264,
+      "index": 99,
+      "instruction": "check desplay settings",
+      "image": "pc_6f79b56c-2b0f-471d-9f9d-93932c69a0ce.png",
+      "image_sha256": "029ac3172cc9b85fac4b44d4b4ab79a4a3c4e6ba572bc4c6de4bf0b4b6a50349",
+      "type": "text",
+      "original_size": [
+        1338,
+        1362
+      ],
+      "input_size": [
+        1338,
+        1362
+      ],
+      "expected_xywh": [
+        41,
+        954,
+        110,
+        128
+      ],
+      "passed": false
+    }
+  ],
+  "decisions": [
+    {
+      "output": "{\"action\": \"newTab\", \"target\": 0, \"content\": \"\", \"subject\": \"\", \"start\": \"2026-11-01T10:00:00-03:00\", \"minutes\": 0, \"message\": \"\", \"more\": true}",
+      "seconds": 1.3097741671372205,
+      "ttft_seconds": 0.5546100421342999,
+      "prompt_tokens": 2068,
+      "generation_tokens": 68,
+      "mlx_peak_bytes": 3936530044,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-tab",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To follow the request, I'll open a new Safari tab and then search for David Guetta on YouTube. The next step is to open a new tab.\n\nAction: newTab\nContent: Open a new tab in Safari.\nSubject: New tab to start.\nStart: 2026-11-01T10:00:00-03:00\nMinutes: 0\nMessage: Open tab to proceed.\nMore: false",
+      "seconds": 1.345713417045772,
+      "ttft_seconds": 0.27940787514671683,
+      "prompt_tokens": 2068,
+      "generation_tokens": 102,
+      "mlx_peak_bytes": 3936530044,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-tab",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"search\", \"target\": 0, \"content\": \"David Guetta\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Search for David Guetta on YouTube in Safari tab.\", \"more\": true}",
+      "seconds": 0.8368088330607861,
+      "ttft_seconds": 0.20453500002622604,
+      "prompt_tokens": 897,
+      "generation_tokens": 56,
+      "mlx_peak_bytes": 3597603920,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-tab",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "arguments"
+      ]
+    },
+    {
+      "output": "To proceed, I'll open a new tab and navigate to YouTube to find David Guetta's first result.\naction: navigate\ntarget: https://www.youtube.com/\ncontent: search for David Guetta\nsubject: Open tab and search for David Guetta\nstart: 0\nminutes: 0\nmessage: Launch Safari tab and search for David Guetta on YouTube.",
+      "seconds": 0.9973111671861261,
+      "ttft_seconds": 0.13270225003361702,
+      "prompt_tokens": 897,
+      "generation_tokens": 80,
+      "mlx_peak_bytes": 3597603920,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-tab",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"searchPage\", \"target\": 0, \"content\": \"search\", \"subject\": \"David Guetta\", \"start\": \"tab 1\", \"minutes\": 0, \"message\": \"Search for David Guetta on YouTube in the first tab.\", \"more\": true}",
+      "seconds": 0.8487982088699937,
+      "ttft_seconds": 0.14600670896470547,
+      "prompt_tokens": 1016,
+      "generation_tokens": 64,
+      "mlx_peak_bytes": 3581754162,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-fill",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "target",
+        "arguments"
+      ]
+    },
+    {
+      "output": "I'll open a new tab and search for David Guetta on YouTube.\n\ntarget: 0\ncontent: https://www.youtube.com/\nsubject: Search for David Guetta\nstart: 0\nminutes: 0\nmessage: Open tab, search for David Guetta, open first result.",
+      "seconds": 0.7984289159066975,
+      "ttft_seconds": 0.1419266250450164,
+      "prompt_tokens": 1016,
+      "generation_tokens": 64,
+      "mlx_peak_bytes": 3581754162,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-fill",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 31, \"content\": \"David Guetta\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 0.7986298750620335,
+      "ttft_seconds": 0.29264154098927975,
+      "prompt_tokens": 2132,
+      "generation_tokens": 46,
+      "mlx_peak_bytes": 3936661628,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-fill",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To proceed, I'll open a new tab, then search for David Guetta on YouTube. The first result is likely the match.\n\nAction: newTab\nContent: Open a new tab.\nSubject: New tab for search.\nStart: 2026-11-01T10:00:00-03:00\nMinutes: 0\nMessage: Ready to search.\nMore: false",
+      "seconds": 1.2687697079963982,
+      "ttft_seconds": 0.2891000830568373,
+      "prompt_tokens": 2132,
+      "generation_tokens": 94,
+      "mlx_peak_bytes": 3936661628,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-fill",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 0, \"content\": \"Open the tab and navigate to the first result.\", \"subject\": \"New tab to search David Guetta\", \"start\": \"0\", \"minutes\": 0, \"message\": \"Open the tab and navigate to the first result.\", \"more\": false}",
+      "seconds": 1.0968194170854986,
+      "ttft_seconds": 0.307814541971311,
+      "prompt_tokens": 2194,
+      "generation_tokens": 71,
+      "mlx_peak_bytes": 3936793196,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-result",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "target"
+      ]
+    },
+    {
+      "output": "To follow the goal: open a new tab, visit YouTube, search for David Guetta, and click the first result. I'll start by opening a new tab.\naction: newTab\ncontent: empty\nsubject: none\nstart: 2026-11-01T10:00:00-03:00\nminutes: 0\nmessage: open tab\nmore: false",
+      "seconds": 1.2429186662193388,
+      "ttft_seconds": 0.2981158751063049,
+      "prompt_tokens": 2194,
+      "generation_tokens": 91,
+      "mlx_peak_bytes": 3936793196,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-result",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"newTab\", \"target\": 0, \"content\": \"https://www.youtube.com/\", \"subject\": \"Search for David Guetta\", \"start\": \"} {\", \"minutes\": 0, \"message\": \"Open a new tab, visit https://www.youtube.com/, search for David Guetta, and open the first matching result.\", \"more\": true}",
+      "seconds": 1.0418584160506725,
+      "ttft_seconds": 0.14520670799538493,
+      "prompt_tokens": 1045,
+      "generation_tokens": 81,
+      "mlx_peak_bytes": 3605660546,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-result",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "target",
+        "continuation"
+      ]
+    },
+    {
+      "output": "To proceed with the user's request, I'll open a new tab and navigate to YouTube.\n\naction: newTab\ntarget: 0\ncontent: https://www.youtube.com/\nsubject: Search for David Guetta\nstart: 0\nminutes: 0\nmessage: Open a new tab and go to YouTube to find David Guetta.",
+      "seconds": 0.9074930420611054,
+      "ttft_seconds": 0.14298408315517008,
+      "prompt_tokens": 1045,
+      "generation_tokens": 74,
+      "mlx_peak_bytes": 3605660546,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "music-result",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"search\", \"target\": 0, \"content\": \"https://docs.example.org/search\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Search for offline maps on docs.example.org\", \"more\": true}",
+      "seconds": 0.7436984591186047,
+      "ttft_seconds": 0.12963816709816456,
+      "prompt_tokens": 896,
+      "generation_tokens": 56,
+      "mlx_peak_bytes": 3597245176,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "docs-tab",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action"
+      ]
+    },
+    {
+      "output": "I'll open a new Safari tab and navigate to https://docs.example.org/ to begin the search for offline maps.\n\naction: navigate\ntarget: https://docs.example.org/\ncontent: \nsubject: Search for offline maps\nstart: 0\nminutes: 0\nmore: true",
+      "seconds": 0.7611005420330912,
+      "ttft_seconds": 0.1265492499805987,
+      "prompt_tokens": 896,
+      "generation_tokens": 62,
+      "mlx_peak_bytes": 3597245176,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "docs-tab",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"newTab\", \"target\": 0, \"content\": \"\", \"subject\": \"\", \"start\": \"2026-11-01T10:00:00-03:00\", \"minutes\": 0, \"message\": \"\", \"more\": true}",
+      "seconds": 1.033241249853745,
+      "ttft_seconds": 0.280651249922812,
+      "prompt_tokens": 2067,
+      "generation_tokens": 68,
+      "mlx_peak_bytes": 3936530036,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "docs-tab",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To follow the goal, I'll open a new Safari tab first. Next, I'll navigate to the URL. Then search for offline maps. Finally, open the first matching result. I'll proceed step by step.\n\nAction: newTab",
+      "seconds": 0.8011964589823037,
+      "ttft_seconds": 0.2781968340277672,
+      "prompt_tokens": 2067,
+      "generation_tokens": 50,
+      "mlx_peak_bytes": 3936530036,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "docs-tab",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 72, \"content\": \"offline maps\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 0.8065549591556191,
+      "ttft_seconds": 0.2924631249625236,
+      "prompt_tokens": 2131,
+      "generation_tokens": 45,
+      "mlx_peak_bytes": 3936661620,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "docs-fill",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To proceed with the goal, I'll open a new tab, then search for offline maps on docs.example.org. The first result is likely a map. I'll start by filling the search field.\n\nAction: fill\nTarget: AXTextField (ID 72)\nContent: search for offline maps\n\nMore: true",
+      "seconds": 0.991192749934271,
+      "ttft_seconds": 0.28865041700191796,
+      "prompt_tokens": 2131,
+      "generation_tokens": 67,
+      "mlx_peak_bytes": 3936661620,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "docs-fill",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"searchPage\", \"target\": 0, \"content\": \"offline maps\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Search for offline maps on docs.example.org.\", \"more\": true}",
+      "seconds": 0.7583073750138283,
+      "ttft_seconds": 0.14359287498518825,
+      "prompt_tokens": 1015,
+      "generation_tokens": 54,
+      "mlx_peak_bytes": 3580852958,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "docs-fill",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "target"
+      ]
+    },
+    {
+      "output": "I'll open a new tab and navigate to the specified URL to start the offline maps search.\n\ntarget: 0\ncontent: https://docs.example.org/\nsubject: Search for offline maps\nstart: 0\nminutes: 0\nmessage: Open new tab and visit the example.org page to begin the search.",
+      "seconds": 0.8742530408781022,
+      "ttft_seconds": 0.14594812504947186,
+      "prompt_tokens": 1015,
+      "generation_tokens": 68,
+      "mlx_peak_bytes": 3580820190,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "docs-fill",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 19, \"content\": \"Select the Output tab in Sound settings.\", \"subject\": \"Sound settings\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": true}",
+      "seconds": 0.7295006660278887,
+      "ttft_seconds": 0.11445249989628792,
+      "prompt_tokens": 766,
+      "generation_tokens": 53,
+      "mlx_peak_bytes": 3477474542,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "settings-sequence",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "text_limits",
+        "invalid_continuation"
+      ]
+    },
+    {
+      "output": "To proceed with opening Sound settings, I'll navigate to the Sound tab.\naction: press\ntarget: 19\ncontent: \nsubject: Open Sound and choose the Output tab.\nstart: \nminutes: 0\nmessage: Navigate to Sound tab.\nmore: true",
+      "seconds": 0.9084526249207556,
+      "ttft_seconds": 0.1132779170293361,
+      "prompt_tokens": 766,
+      "generation_tokens": 60,
+      "mlx_peak_bytes": 3477474542,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "settings-sequence",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 0, \"content\": \"No Sound button visible; check for 'Sound' in 'Sound and' section.\", \"subject\": \"Sound Tab\", \"start\": \"19\", \"minutes\": 0, \"message\": \"Look for 'Sound' and 'Output' tabs in System Settings.\", \"more\": false}",
+      "seconds": 1.1680745421908796,
+      "ttft_seconds": 0.29882720904424787,
+      "prompt_tokens": 2046,
+      "generation_tokens": 78,
+      "mlx_peak_bytes": 3939266004,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "settings-sequence",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "target",
+        "continuation"
+      ]
+    },
+    {
+      "output": "To proceed, I'll first click on the \"Sound\" button (id 19) to open the Sound settings. Then I'll navigate to the Output tab. What's the next step?",
+      "seconds": 0.69116066605784,
+      "ttft_seconds": 0.2662647911347449,
+      "prompt_tokens": 2046,
+      "generation_tokens": 41,
+      "mlx_peak_bytes": 3939282388,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "settings-sequence",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 0, \"content\": \"No output tab available.\", \"subject\": \"\", \"start\": \"2026-11-01T10:00:00-03:00\", \"minutes\": 0, \"message\": \"The settings window closed. No target is exposed.\", \"more\": false}",
+      "seconds": 1.1774672500323504,
+      "ttft_seconds": 0.2647982088383287,
+      "prompt_tokens": 2032,
+      "generation_tokens": 82,
+      "mlx_peak_bytes": 3930811748,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "stale-target",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": []
+    },
+    {
+      "output": "To proceed with the \"Output tab\" request, I need to identify the output interface. The screen shows a Task window with no visible tab. I'll ask for clarification on which output tab to use.",
+      "seconds": 0.7218032921664417,
+      "ttft_seconds": 0.26855316711589694,
+      "prompt_tokens": 2032,
+      "generation_tokens": 42,
+      "mlx_peak_bytes": 3908627794,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "stale-target",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 0, \"content\": \"Open the Output tab.\", \"subject\": \"Task window\", \"start\": \"2026-11-01T10:00:00-03:00\", \"minutes\": 0, \"message\": \"\", \"more\": true}",
+      "seconds": 0.9667930421419442,
+      "ttft_seconds": 0.11319325002841651,
+      "prompt_tokens": 730,
+      "generation_tokens": 74,
+      "mlx_peak_bytes": 3440145490,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "stale-target",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "text_limits",
+        "invalid_continuation"
+      ]
+    },
+    {
+      "output": "To proceed with the output tab selection, I'll identify the appropriate tab. The settings window closed, so no target is exposed. I'll inform the user about the current state.\n\n{\"action\": \"answer\", \"content\": \"The settings window closed. No target is exposed.\", \"duration\": 0, \"message\": \"Task window\", \"target\": 0, \"start\": \"current\", \"minutes\": 0, \"more\": true}",
+      "seconds": 1.0830470421351492,
+      "ttft_seconds": 0.10827241698279977,
+      "prompt_tokens": 730,
+      "generation_tokens": 94,
+      "mlx_peak_bytes": 3440129106,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "stale-target",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"navigate\", \"target\": 1, \"content\": \"https://example.org/museums\", \"subject\": \"Museums\", \"start\": \", \", \"minutes\": 0, \"message\": \"Open the second visible result.\", \"more\": true}",
+      "seconds": 0.8088195831514895,
+      "ttft_seconds": 0.13022420811466873,
+      "prompt_tokens": 880,
+      "generation_tokens": 61,
+      "mlx_peak_bytes": 3592638140,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "second-result",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "target",
+        "continuation"
+      ]
+    },
+    {
+      "output": "To find the second visible result, I'll navigate to the museums link.\naction: navigate\ntarget: https://example.org/museums\nsubject: second visible result\nstart: 0\nminutes: 0\nmessage: Go to museums link to view results.",
+      "seconds": 0.7180065838620067,
+      "ttft_seconds": 0.12843849998898804,
+      "prompt_tokens": 880,
+      "generation_tokens": 57,
+      "mlx_peak_bytes": 3592638140,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "second-result",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"navigate\", \"target\": 41, \"content\": \"https://example.org/parks\", \"subject\": \"\", \"start\": \"2026-11-01T10:00:00-03:00\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 1.1358558749780059,
+      "ttft_seconds": 0.30293900007382035,
+      "prompt_tokens": 2092,
+      "generation_tokens": 74,
+      "mlx_peak_bytes": 3936579388,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "second-result",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "target",
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To find the second result, I see \"Museums\" as the second item. Navigate to its URL.\n\nAction: navigate\ntarget: 9\ncontent: https://example.org/museums\nsubject: None\nstart: \nminutes: 0\nmessage: \nmore: false",
+      "seconds": 0.9210890419781208,
+      "ttft_seconds": 0.28738837502896786,
+      "prompt_tokens": 2092,
+      "generation_tokens": 61,
+      "mlx_peak_bytes": 3936579388,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "second-result",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 62, \"content\": \"climate policy\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 0.7832382500637323,
+      "ttft_seconds": 0.28503899998031557,
+      "prompt_tokens": 2079,
+      "generation_tokens": 45,
+      "mlx_peak_bytes": 3936546516,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "field-replace",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To update the search field to \"climate policy,\" I'll replace the current value. Target is 62, so I'll set the field to \"climate policy\". More=false.",
+      "seconds": 0.681586624821648,
+      "ttft_seconds": 0.28398004081100225,
+      "prompt_tokens": 2079,
+      "generation_tokens": 38,
+      "mlx_peak_bytes": 3936546516,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "field-replace",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"searchPage\", \"target\": 62, \"content\": \"climate policy\", \"subject\": \"search field\", \"start\": \"\", \"minutes\": 0, \"message\": \"Update search field to climate policy without submitting.\", \"more\": true}",
+      "seconds": 0.7923301251139492,
+      "ttft_seconds": 0.141913834027946,
+      "prompt_tokens": 983,
+      "generation_tokens": 59,
+      "mlx_peak_bytes": 3626954870,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "field-replace",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation"
+      ]
+    },
+    {
+      "output": "To update the search field, I'll set the value to \"climate policy\".\n{\"action\": \"fill\", \"target\": \"search\", \"content\": \"climate policy\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0}",
+      "seconds": 0.6674877081532031,
+      "ttft_seconds": 0.14231066708453,
+      "prompt_tokens": 983,
+      "generation_tokens": 51,
+      "mlx_peak_bytes": 3626954870,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "field-replace",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"searchPage\", \"target\": 17, \"content\": \"Berlin\", \"subject\": \"Suche\", \"start\": \"\", \"minutes\": 0, \"message\": \"Suche Berlin in das Suchfeld, ohne dieSuche abzusenden.\", \"more\": true}",
+      "seconds": 0.8426651661284268,
+      "ttft_seconds": 0.13916112505830824,
+      "prompt_tokens": 958,
+      "generation_tokens": 65,
+      "mlx_peak_bytes": 3602884974,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "german-field",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation"
+      ]
+    },
+    {
+      "output": "Ich werde die Suche f\u00fcr Berlin in der Suche einf\u00fcgen, ohne die Suche abzusenden.\n\ncontent=query\nsubject=Berlin\ntarget=17",
+      "seconds": 0.5079561669845134,
+      "ttft_seconds": 0.13552462495863438,
+      "prompt_tokens": 958,
+      "generation_tokens": 36,
+      "mlx_peak_bytes": 3602884974,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "german-field",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 17, \"content\": \"Berlin\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 0.7812008750624955,
+      "ttft_seconds": 0.2821767919231206,
+      "prompt_tokens": 2074,
+      "generation_tokens": 44,
+      "mlx_peak_bytes": 3936546476,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "german-field",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To find Berlin in the search field, type \"Berlin\" into the currently empty \"Suche\" field. The field is ready for input.",
+      "seconds": 0.5976909580640495,
+      "ttft_seconds": 0.28609645809046924,
+      "prompt_tokens": 2074,
+      "generation_tokens": 30,
+      "mlx_peak_bytes": 3936546476,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "german-field",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"navigate\", \"target\": 12, \"content\": \"https://example.org/cafe\", \"subject\": \"\", \"start\": \"10:00\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 0.881497667171061,
+      "ttft_seconds": 0.2828026250936091,
+      "prompt_tokens": 2072,
+      "generation_tokens": 54,
+      "mlx_peak_bytes": 3936530076,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "no-rank-evidence",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To find the highest-rated restaurant, I'll search the web using Google. What's the URL or link for the highest-rated restaurant?",
+      "seconds": 0.5772159579209983,
+      "ttft_seconds": 0.2834870829246938,
+      "prompt_tokens": 2072,
+      "generation_tokens": 28,
+      "mlx_peak_bytes": 3936530076,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "no-rank-evidence",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"answer\", \"target\": 12, \"content\": \"Find the highest-rated cafe and verify its rating.\", \"subject\": \"Restaurant ratings\", \"start\": \", \", \"minutes\": 0, \"message\": \"Look for the cafe with the highest rating and confirm it.\", \"more\": true}",
+      "seconds": 0.8992490419186652,
+      "ttft_seconds": 0.1288517089560628,
+      "prompt_tokens": 860,
+      "generation_tokens": 69,
+      "mlx_peak_bytes": 3573188652,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "no-rank-evidence",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": true,
+      "failures": [
+        "continuation",
+        "invalid_continuation"
+      ]
+    },
+    {
+      "output": "To find the highest-rated restaurant, I'll search the available links for ratings.\naction: navigate\ntarget: https://example.org/cafe\ncontent: https://example.org/cafe\nsubject: Restaurant links without any ratings\nstart: 0\nminutes: 0\nmessage: Search the cafe link for ratings.",
+      "seconds": 0.8249405839014798,
+      "ttft_seconds": 0.12604529201053083,
+      "prompt_tokens": 860,
+      "generation_tokens": 67,
+      "mlx_peak_bytes": 3573237804,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "no-rank-evidence",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"searchPage\", \"target\": 21, \"content\": \"city maps\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"Search for city maps once and open the first result.\", \"more\": true}",
+      "seconds": 0.7759556251112372,
+      "ttft_seconds": 0.14854433410800993,
+      "prompt_tokens": 1015,
+      "generation_tokens": 57,
+      "mlx_peak_bytes": 3580836574,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "uncertain-action",
+      "variant": "bundled",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "continuation"
+      ]
+    },
+    {
+      "output": "To fulfill the request, I'll submit the search for city maps and then open the first result.\n\ntarget=21, content=query, action=submitSearch, subject=city maps, start=0, minutes=0.",
+      "seconds": 0.6391734168864787,
+      "ttft_seconds": 0.14382941694930196,
+      "prompt_tokens": 1015,
+      "generation_tokens": 48,
+      "mlx_peak_bytes": 3580820190,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "uncertain-action",
+      "variant": "bundled",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    },
+    {
+      "output": "{\"action\": \"fill\", \"target\": 21, \"content\": \"city maps\", \"subject\": \"\", \"start\": \"\", \"minutes\": 0, \"message\": \"\", \"more\": false}",
+      "seconds": 0.7912691670935601,
+      "ttft_seconds": 0.2932603331282735,
+      "prompt_tokens": 2111,
+      "generation_tokens": 45,
+      "mlx_peak_bytes": 3936612308,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "uncertain-action",
+      "variant": "primitive",
+      "constrained": true,
+      "preferred_operation": false,
+      "failures": [
+        "action",
+        "text_limits"
+      ]
+    },
+    {
+      "output": "To fulfill the request, I'll first fill the search field with \"city maps\" and then submit. The target is the AXTextField id 21.\n\nAction: fill target=21 with content=\"city maps\".",
+      "seconds": 0.7766847079619765,
+      "ttft_seconds": 0.28867170796729624,
+      "prompt_tokens": 2111,
+      "generation_tokens": 47,
+      "mlx_peak_bytes": 3936612308,
+      "process_peak_rss_bytes": 2559115264,
+      "id": "uncertain-action",
+      "variant": "primitive",
+      "constrained": false,
+      "failures": [
+        "json"
+      ]
+    }
+  ],
+  "warmup": {
+    "output": "{\"point_2d\": [40, 40]}",
+    "seconds": 4.46521170809865,
+    "ttft_seconds": 4.300378542160615,
+    "prompt_tokens": 654,
+    "generation_tokens": 15,
+    "mlx_peak_bytes": 3321083614,
+    "process_peak_rss_bytes": 2559115264
+  }
+}

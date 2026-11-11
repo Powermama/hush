@@ -1,0 +1,36 @@
+{
+  "accessibility": true,
+  "description": "I couldn't verify that link. Tell me the address or ask me to search.",
+  "document_loaded": true,
+  "document_ready": true,
+  "duration": "4.015490458 seconds",
+  "error": "invalidLink",
+  "page_found": true,
+  "steps": [
+    {
+      "action": "newTab",
+      "duration": "0.162153291 seconds",
+      "result": "Opened a new tab in Safari.",
+      "verified": true
+    },
+    {
+      "action": "navigate",
+      "duration": "2.356092959 seconds",
+      "result": "The requested page is open in this tab.",
+      "verified": true
+    },
+    {
+      "action": "fill",
+      "duration": "0.098750125 seconds",
+      "result": "Filled the field and checked its value.",
+      "verified": true
+    },
+    {
+      "action": "submitSearch",
+      "duration": "0.145126167 seconds",
+      "result": "The requested page is open in this tab.",
+      "verified": true
+    }
+  ],
+  "tabs_before": 49
+}

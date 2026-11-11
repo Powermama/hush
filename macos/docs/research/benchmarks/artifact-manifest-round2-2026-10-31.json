@@ -1,0 +1,239 @@
+{
+  "utc": "2026-11-01T00:26:15Z",
+  "purpose": "Preserve remaining artifact provenance before requested cleanup",
+  "files": [
+    {
+      "path": "granite42-3b-4bit/README.md",
+      "bytes": 81,
+      "sha256": "748c964f9b7e5f2c3770ce013bbc0153be7c54311d9692c343b6188eefe77ac6"
+    },
+    {
+      "path": "granite42-3b-4bit/chat_template.jinja",
+      "bytes": 9013,
+      "sha256": "f0ba43f79b3cabca5e5a7584c77aec92f49feae45cdf7779c87d9fc54cd90258"
+    },
+    {
+      "path": "granite42-3b-4bit/config.json",
+      "bytes": 18513,
+      "sha256": "4256dff81563d87537ff060da9268b0b30170e551ecb2e1e20f631cd3768163d"
+    },
+    {
+      "path": "granite42-3b-4bit/generation_config.json",
+      "bytes": 207,
+      "sha256": "1b9baf0a7959d31d7fb58ff6b506c27d09a73d395cadccc7e6dd1d4b7e43fd9d"
+    },
+    {
+      "path": "granite42-3b-4bit/model.safetensors",
+      "bytes": 2737958758,
+      "sha256": "511da1f1b4fd7477fbcc51692108063c650113cebe7a6dd00195a7a3c7b254de"
+    },
+    {
+      "path": "granite42-3b-4bit/model.safetensors.index.json",
+      "bytes": 65461,
+      "sha256": "df416882dff8e16152ddb82ff3e05b2307349075a95ffe6daa8fcf7bff3405f5"
+    },
+    {
+      "path": "granite42-3b-4bit/tokenizer.json",
+      "bytes": 7153414,
+      "sha256": "883975314d58743726347caaf2c32ac89afd5ad57222cffbc4f052f2ab27b2d7"
+    },
+    {
+      "path": "granite42-3b-4bit/tokenizer_config.json",
+      "bytes": 436,
+      "sha256": "0b1cc678b9fbde8ce90c81e0f6483c4e1696dfa377330e42a88106416b96e659"
+    },
+    {
+      "path": "qwen35-4b/chat_template.jinja",
+      "bytes": 7756,
+      "sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+    },
+    {
+      "path": "qwen35-4b/config.json",
+      "bytes": 3366,
+      "sha256": "f3efc81b2ea8d96a45301037d3ccccbcccdef44a961845c87f286aaddbc6eaaa"
+    },
+    {
+      "path": "qwen35-4b/model.safetensors",
+      "bytes": 3034300695,
+      "sha256": "5fb9acd0246866381cf8c5c354c6db1019f6498eec4ccb4f5edcc71ffeacb2db"
+    },
+    {
+      "path": "qwen35-4b/model.safetensors.index.json",
+      "bytes": 101944,
+      "sha256": "52e534c41f7b97708329c85f762e5882bf48bd5955a422c6ae74eba321e6048a"
+    },
+    {
+      "path": "qwen35-4b/preprocessor_config.json",
+      "bytes": 390,
+      "sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516"
+    },
+    {
+      "path": "qwen35-4b/processor_config.json",
+      "bytes": 1300,
+      "sha256": "14932921ca485d458a04dafd8069fbb0a4505622a48208d19ed247115801385b"
+    },
+    {
+      "path": "qwen35-4b/tokenizer.json",
+      "bytes": 19989343,
+      "sha256": "87a7830d63fcf43bf241c3c5242e96e62dd3fdc29224ca26fed8ea333db72de4"
+    },
+    {
+      "path": "qwen35-4b/tokenizer_config.json",
+      "bytes": 1139,
+      "sha256": "e98f1901ac6f0adff67b1d540bfa0c36ac1a0cf59eb72ed78146ef89aafa1182"
+    },
+    {
+      "path": "qwen35-4b/video_preprocessor_config.json",
+      "bytes": 385,
+      "sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13"
+    },
+    {
+      "path": "qwen35-4b/vocab.json",
+      "bytes": 6722759,
+      "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+    },
+    {
+      "path": "qwen35-9b/chat_template.jinja",
+      "bytes": 7756,
+      "sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+    },
+    {
+      "path": "qwen35-9b/config.json",
+      "bytes": 3331,
+      "sha256": "a96942cb6a8a1d3f1d17514d81a1925d04362a6a3233b389d13012211baaa9f8"
+    },
+    {
+      "path": "qwen35-9b/model-00001-of-00002.safetensors",
+      "bytes": 5349771222,
+      "sha256": "a68b87558c6ef43f74c2bd63ce7e9092ceddc3101f3def0030774bae5f42aadd"
+    },
+    {
+      "path": "qwen35-9b/model-00002-of-00002.safetensors",
+      "bytes": 600449850,
+      "sha256": "b0a770bf8469c7f3f18756a0e0283f1c1174344a83e059a4e483f6af4907352d"
+    },
+    {
+      "path": "qwen35-9b/model.safetensors.index.json",
+      "bytes": 123592,
+      "sha256": "dd023913fb87cfdae27fb11dcf695117c925833796ccac3c64117d6652d8ff1e"
+    },
+    {
+      "path": "qwen35-9b/preprocessor_config.json",
+      "bytes": 390,
+      "sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516"
+    },
+    {
+      "path": "qwen35-9b/processor_config.json",
+      "bytes": 1300,
+      "sha256": "14932921ca485d458a04dafd8069fbb0a4505622a48208d19ed247115801385b"
+    },
+    {
+      "path": "qwen35-9b/tokenizer.json",
+      "bytes": 19989343,
+      "sha256": "87a7830d63fcf43bf241c3c5242e96e62dd3fdc29224ca26fed8ea333db72de4"
+    },
+    {
+      "path": "qwen35-9b/tokenizer_config.json",
+      "bytes": 1139,
+      "sha256": "e98f1901ac6f0adff67b1d540bfa0c36ac1a0cf59eb72ed78146ef89aafa1182"
+    },
+    {
+      "path": "qwen35-9b/video_preprocessor_config.json",
+      "bytes": 385,
+      "sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13"
+    },
+    {
+      "path": "qwen35-9b/vocab.json",
+      "bytes": 6722759,
+      "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+    }
+  ],
+  "revisions": {
+    "granite42-3b-4bit": [],
+    "qwen35-4b": [
+      "0e7ffd5c629ef7719d4cbc04069232580bfa9d9c"
+    ],
+    "qwen35-9b": [
+      "8b2b98c00a6b4d291155e4890773ca8f769aee53"
+    ]
+  },
+  "python_packages": {
+    "aiohappyeyeballs": "2.7.1",
+    "aiohttp": "3.14.5",
+    "aiosignal": "1.4.0",
+    "annotated-doc": "0.0.5",
+    "annotated-types": "0.8.0",
+    "anyio": "4.15.1",
+    "attrs": "26.1.0",
+    "certifi": "2026.10.23",
+    "cffi": "2.1.1",
+    "charset-normalizer": "3.5.2",
+    "click": "8.5.0",
+    "cryptography": "50.0.2",
+    "datasets": "5.1.0",
+    "dill": "0.4.1",
+    "fastapi": "0.162.0",
+    "filelock": "4.2.6",
+    "frozenlist": "1.8.0",
+    "fsspec": "2026.7.0",
+    "h11": "0.16.0",
+    "hf-xet": "1.8.0",
+    "httpcore2": "2.16.0",
+    "httpx2": "2.16.0",
+    "huggingface_hub": "2.4.0",
+    "idna": "3.20",
+    "Jinja2": "3.1.6",
+    "llguidance": "1.9.1",
+    "markdown-it-py": "4.2.0",
+    "MarkupSafe": "3.0.4",
+    "mdurl": "0.1.2",
+    "miniaudio": "1.71",
+    "mlx": "0.32.4",
+    "mlx-audio": "0.6.3",
+    "mlx-lm": "0.32.2",
+    "mlx-metal": "0.32.4",
+    "mlx-vlm": "0.7.11",
+    "multidict": "7.2.1",
+    "multiprocess": "0.70.19",
+    "numpy": "2.5.4",
+    "opencv-python": "5.0.0.93",
+    "opentelemetry-api": "1.45.2",
+    "packaging": "26.3",
+    "pandas": "3.1.0",
+    "pillow": "13.0.0",
+    "pip": "26.1.2",
+    "propcache": "0.5.4",
+    "protobuf": "7.36.2",
+    "pyarrow": "26.0.0",
+    "pycparser": "3.12",
+    "pydantic": "2.14.2",
+    "pydantic_core": "2.50.2",
+    "Pygments": "2.21.0",
+    "python-dateutil": "3.0.0",
+    "python-multipart": "0.0.33",
+    "PyYAML": "6.0.3",
+    "regex": "2026.9.29",
+    "requests": "2.34.2",
+    "rich": "15.0.0",
+    "safetensors": "0.8.0",
+    "scipy": "1.18.1",
+    "sentencepiece": "0.2.2",
+    "shellingham": "1.5.4",
+    "six": "1.17.0",
+    "sounddevice": "0.5.6",
+    "starlette": "1.10.0",
+    "tokenizers": "0.23.3",
+    "tqdm": "4.70.1",
+    "transformers": "5.22.1",
+    "truststore": "0.10.5",
+    "typer": "0.27.3",
+    "typing-inspection": "0.4.4",
+    "typing_extensions": "4.16.0",
+    "tzdata": "2026.6",
+    "urllib3": "2.8.0",
+    "uvicorn": "0.54.0",
+    "websockets": "17.4",
+    "xxhash": "4.0.2",
+    "yarl": "1.25.1"
+  }
+}

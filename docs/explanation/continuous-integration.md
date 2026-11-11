@@ -1,0 +1,80 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<!-- Copyright (c) 2026 Clemens Kressmann -->
+
+# CI checks the components a change can affect
+
+Ready pull requests and pushes to `main` run checks selected from the complete
+Git diff. Draft pull requests do not allocate product build runners. Marking a
+draft ready starts its checks; converting it back to a draft cancels older work.
+Manual workflow runs always check both components.
+
+| Change | Web journeys | Swift package and service integration | Native Release build |
+| --- | --- | --- | --- |
+| Website UI, assets, legal contact or browser tests | Yes | No | No |
+| Proof service, shared proof contracts, OpenAPI or web dependencies | Yes | Yes | No |
+| Native source, resources, packages or build scripts | No | Yes | Yes |
+| Both components | Yes | Yes | Yes |
+| Documentation, licenses or issue forms only | No | No | No |
+| CI configuration, an unknown root component or an unavailable comparison | Yes | Yes | Yes |
+
+Component selection itself has tests, including real Git histories with
+multi-commit pushes, divergent PR branches, renamed/deleted files and rewritten
+base commits. It uses Git instead of a file-list API with a pagination cap.
+Unrecognized events and unavailable comparisons run the full suite. A failed
+selection step cannot produce a passing aggregate check.
+
+Use **CI result** as the required CI status when repository protection is
+available. It accepts only successful selected jobs and skipped unaffected jobs.
+It fails if selection fails or a selected job fails, is cancelled or skips.
+Keep **Conventional title** as the other required check. Workflow concurrency
+cancels obsolete runs for the same PR or branch.
+
+## Coverage and resource choices
+
+Web checks retain backend tests, API drift detection, the production build and
+all Chromium desktop/mobile and WebKit journeys. `bun run build` already runs
+`tsc -b`, so CI does not run that type check twice. Run `bun run lint` locally for
+a type-check-only pass. Swift and native build commands remain pinned to the
+existing toolchain and package lockfiles.
+
+Service-only changes still exercise the real Swift client against the local
+Hono service on macOS, but do not compile the unrelated desktop app. Native
+changes retain both Swift tests and the unsigned Release compilation.
+
+Playwright keeps one CI worker and its global timeout. Increasing concurrency
+previously caused contention in software-rendered WebGL tests. Its official
+[CI guidance](https://playwright.dev/docs/ci) recommends one worker for stability
+and does not recommend caching browser binaries by default. In the sampled run,
+installing web dependencies took one second and browser setup took 43 seconds;
+adding broad caches would not address the dominant cost. No DerivedData cache
+is trusted as a replacement for a clean native compilation.
+
+Dependabot groups weekly GitHub Actions updates into one PR. Existing PRs keep
+their own review histories; the grouping applies to future updates.
+
+## Cost evidence and limits
+
+The successful website-only PR #9 run, before the history cleanup, took
+9m 26s on macOS and 8m 40s on Linux. At GitHub's published standard rates
+($0.062/min macOS and $0.006/min Linux, rounded up per job), those jobs represented
+about $0.62 and $0.054 of gross usage respectively. These are usage estimates,
+not invoices; included usage and public-repository discounts may cover them.
+
+Removing the unrelated Mac job from an equivalent website change is expected
+to reduce its compute usage by roughly 90%, including the two small Linux
+selection/result jobs. This is an estimate from the old run, not a measured
+post-change bill. Overall savings depend on the mix of native and web work.
+The `main` push check intentionally remains, to validate the merged code.
+
+Sources consulted:
+
+- [GitHub runner pricing](https://docs.github.com/en/billing/reference/actions-runner-pricing)
+- [GitHub job conditions and skipped checks](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-jobs-with-conditions)
+- [iOS developers discussing runner costs](https://www.reddit.com/r/iOSProgramming/comments/1wwt739/ios_teams_on_github_actions_what_do_macos_runners/)
+- [Community experiences with frequent AI-assisted CI runs](https://www.reddit.com/r/ChatGPTCoding/comments/1xd9yqp/github_actions_getting_really_expensive_any/)
+
+The Reddit discussions are anecdotal. They informed the questions to investigate;
+the decisions above use hush's job timings and official tool documentation.
+Changing providers or adding self-hosted machines is a separate infrastructure
+decision. This workflow does not change account budgets, paid runner tiers or
+repository visibility.

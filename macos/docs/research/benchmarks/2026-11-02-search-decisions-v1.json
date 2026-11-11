@@ -1,0 +1,47 @@
+[
+  {
+    "id" : "recorded-submit",
+    "passed" : true,
+    "reply" : {
+      "action" : "submitSearch",
+      "content" : "",
+      "message" : "Ready to submit the search for Martin Garrix.",
+      "minutes" : 0,
+      "more" : true,
+      "start" : "",
+      "subject" : "",
+      "target" : 3
+    },
+    "seconds" : "8.514208 seconds"
+  },
+  {
+    "id" : "fresh-result",
+    "passed" : false,
+    "reply" : {
+      "action" : "press",
+      "content" : "",
+      "message" : "Ready to open the first result.",
+      "minutes" : 0,
+      "more" : true,
+      "start" : "",
+      "subject" : "",
+      "target" : 5
+    },
+    "seconds" : "3.241977625 seconds"
+  },
+  {
+    "id" : "search-only",
+    "passed" : false,
+    "reply" : {
+      "action" : "submitSearch",
+      "content" : "",
+      "message" : "Ready to submit the search.",
+      "minutes" : 0,
+      "more" : true,
+      "start" : "",
+      "subject" : "",
+      "target" : 3
+    },
+    "seconds" : "5.063848875000001 seconds"
+  }
+]
