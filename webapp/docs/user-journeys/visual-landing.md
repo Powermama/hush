@@ -49,13 +49,29 @@ Inspect screenshots for material quality, readable copy, the app constellation, 
 
 ## Shared public navigation
 
-LANDING-NAV-001: home, Verified Messages, releases and legal pages use one full-width Header component. Right-aligned links include the still-private app GitHub repository, Verified Messages, a disabled Community placeholder and the existing download. Privacy and releases remain in the footer. On mobile the compact header shows the brand, an Apple-marked “Get started on macOS” action immediately left of the menu toggle. The expanded menu fills the viewport in normal document flow, hides the compact header action, and shows large links with a single Apple-marked download action at its bottom. It pushes the hero down rather than covering it. Escape and outside interaction close it; keyboard focus returns to the toggle. At 320px the logo mark remains while its wordmark yields space to the controls.
+LANDING-NAV-001: home, Verified Messages, releases and legal pages use one full-width Header component. Right-aligned links include the public app GitHub repository, Verified Messages, a disabled Community placeholder and the existing download. Privacy and releases remain in the footer. On mobile the compact header shows the brand, an Apple-marked “Get started on macOS” action immediately left of the menu toggle. The expanded menu fills the viewport, hides the compact header action, and shows large links with a single Apple-marked download action at its bottom. The hero remains below the header in document flow. Escape or the close toggle closes the menu; keyboard focus returns to the toggle. At 320px the logo mark remains while its wordmark yields space to the controls.
 
 LANDING-NAV-002: headers scroll away normally. Only a thin reading-progress line stays fixed at the top, without dots or section markers. It follows native scrolling in both directions and recalculates on content-size changes. Reduced motion removes easing.
 
-Both journeys are covered in tests/navigation.spec.ts across desktop Chromium, mobile Chromium and WebKit.
+LANDING-NAV-003: an open mobile menu locks the page against background scrolling
+and keeps keyboard focus within the header. Closing restores the original page
+position and normal scrolling. Navigating away or resizing to desktop releases
+the lock. On short viewports, only the menu can scroll so every link stays
+reachable. The nested mobile download dialog retains its own keyboard handling;
+closing it returns to the still-locked menu, then closing the menu unlocks the page.
+
+These journeys are covered in tests/navigation.spec.ts and the nested dialog
+case in tests/mobile-download.spec.ts across desktop Chromium, mobile Chromium
+and WebKit. Real-device Safari touch and browser-toolbar behaviour remain a
+manual check beyond the automated WebKit coverage.
 
 ## Entrance recovery
+
+LANDING-FOOTER-001: on mobile, the brand and description sit above two balanced
+columns for Product and Legal. Both groups and their links are left-aligned.
+Desktop retains its brand, Product and Legal layout. Links remain readable
+without horizontal overflow at 320px. Covered in `tests/footer.spec.ts` across
+Chromium, mobile Chromium and WebKit.
 
 LANDING-ENTRY-001: prerendered HTML and CSS start the finite entrance at first paint. The header fades and moves into place without blur or layout shifts; the headline and download finish appearing within 0.85 seconds of CSS readiness. Decorative details settle within 1.8 seconds. Neither hydration nor WebGL controls content visibility. JavaScript observes the CSS animation's completion instead of starting another timer.
 

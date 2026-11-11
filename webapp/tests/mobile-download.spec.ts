@@ -55,6 +55,18 @@ test("mobile handoff handles unavailable sharing and denied clipboard access", a
   await expect(sheet.getByRole("textbox", { name: "hush download page" })).toBeFocused();
   await expect(sheet.getByRole("status")).toHaveText("Select and copy the link below.");
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+  await page.keyboard.press("Escape");
+  await expect(sheet).toHaveCount(0);
+  await expect(page.locator(".site-header-download")).toBeFocused();
+  await expect(page.getByRole("button", { name: "Close navigation" })).toBeInViewport();
+  await page.mouse.move(160, 500);
+  await page.mouse.wheel(0, 600);
+  await page.waitForTimeout(300);
+  await expect(page.getByRole("button", { name: "Close navigation" })).toBeInViewport();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Open navigation" })).toBeFocused();
+  await page.mouse.wheel(0, 600);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(100);
 });
 
 test("iPad desktop browsing offers handoff while narrow Mac windows keep the download", async ({ page }) => {

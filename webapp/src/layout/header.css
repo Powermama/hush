@@ -36,7 +36,7 @@
   .site-brand > a > span:first-child { width: 37px; height: 37px; }
   .site-menu-toggle { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; padding: 0; border: 1px solid #a7b6bf40; border-radius: 50%; background: transparent; color: var(--header-ink); cursor: pointer; }
   .site-menu-toggle svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; fill: none; }
-  .site-header[data-menu-open="true"] { min-height: 100svh; background: #f8fafb; }
+  .site-header[data-menu-open="true"] { min-height: 100dvh; max-height: 100dvh; overflow-y: auto; overscroll-behavior: contain; background: #f8fafb; }
   .site-header[data-menu-open="true"] nav { grid-template-columns: 1fr 44px; }
   .site-header[data-menu-open="true"] .site-mobile-start { display: none; }
   .site-header nav .site-header-download { justify-content: center; width: 100%; min-height: 60px; margin-top: auto; padding: 0 22px; gap: 11px; border: 1px solid #24272b; border-radius: 18px; font-size: 17px; font-weight: 550; letter-spacing: -.01em; background: linear-gradient(#34383d, #24272b); box-shadow: inset 0 1px 1px #ffffff28, 0 3px 8px #171d3112; }
