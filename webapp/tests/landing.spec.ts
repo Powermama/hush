@@ -278,7 +278,7 @@ test("publishes legal drafts without indexing placeholder identities", async ({
   ).toBeVisible();
   await expect(page.getByText("3. Website access and technical logs"))
     .toBeVisible();
-  await expect(page.getByText(/expiry alone does not automatically delete/))
+  await expect(page.getByText(/24 hours after expiry or revocation/))
     .toBeVisible();
 
   await page.getByRole("link", { name: "DE", exact: true }).click();
@@ -292,6 +292,26 @@ test("publishes legal drafts without indexing placeholder identities", async ({
   await expect(germanNavigation.getByRole("link", { name: "DE", exact: true })).toHaveAttribute("aria-current", "page");
   await germanNavigation.getByRole("link", { name: "Startseite", exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
+});
+
+test("discloses the confirmed host and processing limits in both languages", async ({ page }) => {
+  for (const language of ["en", "de"] as const) {
+    const german = language === "de";
+    await page.goto(german ? "/de/datenschutz" : "/datenschutz");
+    const article = page.locator("article");
+    await expect(article.getByText(/Hetzner Online GmbH, Industriestr\. 25, 91710 Gunzenhausen/)).toBeVisible();
+    await expect(article.getByText(german ? /Serverstandort: Deutschland/ : /Server location: Germany/)).toBeVisible();
+    await expect(article.getByText(german ? /Stand: 11\. November 2026/ : /Last updated: 11 November 2026/)).toBeVisible();
+    await expect(article.locator('a[href="https://www.cloudflare.com/cloudflare-customer-dpa/"]')).toBeVisible();
+    await expect(article.getByText(/iCloud Mail/)).toBeVisible();
+    await expect(article.locator('a[href="https://www.apple.com/legal/privacy/"]')).toBeVisible();
+    await expect(article.getByText(german ? /24 Stunden nach Ablauf oder Widerruf/ : /24 hours after expiry or revocation/)).toBeVisible();
+    await expect(article.getByText(german ? /innerhalb von zwei Minuten/ : /within two minutes/)).toBeVisible();
+    await expect(article.getByText(/\[Add|\[Hosting|must be documented before publication|vor Veröffentlichung die tatsächlich/)).toHaveCount(0);
+    await page.goto(german ? "/de/impressum" : "/impressum");
+    await expect(page.getByText(german ? /Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG/ : /VAT identification number under Section 27a/)).toBeVisible();
+    await expect(page.getByText(/A German tax number does not belong|Eine Steuernummer gehört nicht/)).toHaveCount(0);
+  }
 });
 
 test("opens the optional verification story from the privacy section", async ({
