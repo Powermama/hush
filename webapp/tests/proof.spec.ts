@@ -48,12 +48,26 @@ test("verifies and decrypts a complete signed message proof", async ({ page, isM
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
   await page.screenshot({ path: testInfo.outputPath("recipient-voice.png"), fullPage: true });
   await page.getByRole("button", { name: "Explore its history" }).click();
-  await expect(page.locator("#message-history")).toBeFocused();
+  const history = page.locator("#message-history");
+  await expect(history).toBeFocused();
+  // Focus changes before native smooth scrolling finishes. In WebKit, clicking
+  // the next disclosure mid-scroll can move it between mouse down and mouse up.
+  await expect.poll(() => history.evaluate((element) => {
+    const root = document.documentElement;
+    const margin = Number.parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
+    const padding = Number.parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
+    const destination = Math.max(0, Math.min(
+      scrollY + element.getBoundingClientRect().top - margin - padding,
+      root.scrollHeight - root.clientHeight,
+    ));
+    return Math.abs(scrollY - destination);
+  }), { message: "History navigation reaches its visible destination" }).toBeLessThan(1);
   await expect.poll(() => page.evaluate(() => window.location.hash)).toBe(
     `#k=${fixture.key}`,
   );
 
   await page.locator(".proof-comparison summary").click();
+  await expect(page.locator(".proof-comparison")).toHaveAttribute("open", "");
   await page.getByRole("textbox", { name: "Received text" }).fill(fixture.manifest.finalText);
   await expect(page.getByText("✓ Exact match with the signed message")).toBeVisible();
   await page.getByRole("textbox", { name: "Received text" }).fill("A different message.");
