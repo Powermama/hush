@@ -26,7 +26,8 @@ Footer legal link selected
 - Placeholder operator, hosting, or supervisory-authority data must remain `noindex, nofollow` and excluded from the sitemap.
 - The privacy policy must distinguish local app processing from network features such as downloads, update checks, and optional Verified Messages.
 - Sponsorship must not imply sponsor access to messages, audio, proof content, or usage profiles.
-- The policy must not claim physical deletion that the product does not yet perform.
+- The policy describes live proof cleanup after the 24-hour terminal-state interval, bounded IP expiry, and the separate limits of historical backups. It must not promise deletion the product cannot perform.
+- Email disclosures distinguish iCloud Mail as the mailbox provider, Apple Mail as the client and Cloudflare as DNS. Preserve the issued VAT identifier as instructed by the operator.
 - Both languages name Hetzner and Germany as the confirmed origin host and location, while distinguishing Cloudflare's international processing. Public provider documents do not establish the account's contractual compliance; pending operational checks are recorded in `../legal-review.md`.
 - The notice labels the VAT identifier under Section 27a UStG without exposing internal drafting instructions. An unconfirmed official lookup must not be presented as successful validation.
 

@@ -278,7 +278,7 @@ test("publishes legal drafts without indexing placeholder identities", async ({
   ).toBeVisible();
   await expect(page.getByText("3. Website access and technical logs"))
     .toBeVisible();
-  await expect(page.getByText(/expiry alone does not automatically delete/))
+  await expect(page.getByText(/24 hours after expiry or revocation/))
     .toBeVisible();
 
   await page.getByRole("link", { name: "DE", exact: true }).click();
@@ -303,8 +303,10 @@ test("discloses the confirmed host and processing limits in both languages", asy
     await expect(article.getByText(german ? /Serverstandort: Deutschland/ : /Server location: Germany/)).toBeVisible();
     await expect(article.getByText(german ? /Stand: 11\. November 2026/ : /Last updated: 11 November 2026/)).toBeVisible();
     await expect(article.locator('a[href="https://www.cloudflare.com/cloudflare-customer-dpa/"]')).toBeVisible();
-    await expect(article.getByText(german ? /eine automatische Löschfrist ist nicht implementiert/ : /no automatic deletion deadline is implemented/)).toBeVisible();
-    await expect(article.getByText(german ? /bis zum Neustart des Serverprozesses/ : /until the server process restarts/)).toBeVisible();
+    await expect(article.getByText(/iCloud Mail/)).toBeVisible();
+    await expect(article.locator('a[href="https://www.apple.com/legal/privacy/"]')).toBeVisible();
+    await expect(article.getByText(german ? /24 Stunden nach Ablauf oder Widerruf/ : /24 hours after expiry or revocation/)).toBeVisible();
+    await expect(article.getByText(german ? /innerhalb von zwei Minuten/ : /within two minutes/)).toBeVisible();
     await expect(article.getByText(/\[Add|\[Hosting|must be documented before publication|vor Veröffentlichung die tatsächlich/)).toHaveCount(0);
     await page.goto(german ? "/de/impressum" : "/impressum");
     await expect(page.getByText(german ? /Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG/ : /VAT identification number under Section 27a/)).toBeVisible();

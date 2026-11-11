@@ -1,7 +1,7 @@
 # Legal disclosure review
 
 Reviewed on 11 November 2026. This is an engineering evidence record and a
-source-based draft review, not legal clearance. Tests verify publication and
+source-based disclosure review, not legal clearance. Tests verify publication and
 behaviour, not compliance.
 
 ## Confirmed and implemented
@@ -17,9 +17,21 @@ behaviour, not compliance.
 - Local inference, model downloads, update checks, assistant navigation and
   optional proof publication are distinguished. Public and private signing keys
   are no longer described ambiguously.
-- Proof expiry blocks retrieval but does not physically purge stored objects.
-  IP rate-limit entries can persist in memory until process restart. The policy
-  discloses both limitations instead of promising deletion the code cannot perform.
+- Public MX records point to `mx01.mail.icloud.com` and `mx02.mail.icloud.com`;
+  the SPF record lists iCloud. The operator confirmed Apple Mail as the client.
+  Both languages now distinguish Apple's iCloud Mail from Cloudflare DNS.
+- The retention fix implements bounded live-storage cleanup: terminal proofs
+  and abandoned reservations become eligible after 24 hours; expired challenges
+  are removed; IP limiter entries expire within two minutes. Failures retry.
+  See `proof-retention.md` for tests, erasure handling and restore limitations.
+- Coolify shows one historical local volume backup, a disabled daily schedule,
+  seven copies configured and no age limit. No schedule was enabled or backup
+  deleted during this review. Live deletion does not remove that backup, and the
+  policy does not promise a fixed backup-erasure date.
+- The VAT identifier remains published at the operator's explicit request.
+  Free distribution alone does not establish an exemption from DDG disclosure.
+  Project wording now says free, open source and alpha, without an invented
+  future commercialization plan.
 - Unsubstantiated blanket liability exclusions and internal drafting advice
   have been removed. EN and DE use the same updated facts.
 
@@ -40,20 +52,26 @@ Noindex is an indexing choice, not a substitute for legal obligations.
    a private telephone number from a receipt.
 3. Processors: retain the actual Hetzner processing agreement and the applicable
    Cloudflare terms in private operational records. Public provider documents
-   alone do not prove the account's contractual configuration. Confirm the mail
-   provider for `hello@behu.sh` and its processing/transfer arrangements.
+   alone do not prove the account's contractual configuration. iCloud Mail is
+   confirmed; retain the applicable Apple account terms and assess the actual
+   processing/transfer arrangement for business correspondence.
 4. Logging and tracking: check Coolify/proxy, host and Cloudflare log retention,
    backups, and dashboard-injected analytics. No analytics SDK was found in the
    application, but this does not verify account settings. Do not invent log
    retention periods. Update the policy with the actual periods or specific
    determination criteria once confirmed.
-5. Deletion: implement and test expiry/revocation cleanup for objects and
-   database records, including backup retention and necessary audit metadata;
-   implement bounded expiry of IP rate-limit entries. Define an authenticated
-   erasure procedure without requesting message decryption keys. The current
-   disclosure of indefinite retention does not resolve GDPR storage limitation.
+5. Backups: give the historical backup a bounded removal date and verify how
+   expiry is enforced while its schedule is disabled. Do not enable recurring
+   backups or erase the only recovery copy merely to make this checklist green.
+   Live-object cleanup and authenticated revocation are implemented separately;
+   neither removes historical snapshots or establishes GDPR compliance alone.
 6. Confirm the dispute-resolution statement and whether editorial activities
    or other business circumstances trigger additional disclosure duties.
+
+The factual disclosure improvements are approved for publication by the operator.
+Outstanding private contractual/account checks remain explicit; they do not
+justify retaining known-incorrect provider text. Keep legal indexing disabled
+pending those confirmations. A merged PR is not legal clearance.
 
 ## Primary sources
 
@@ -71,6 +89,8 @@ Noindex is an indexing choice, not a substitute for legal obligations.
   dispute-resolution disclosure and its scope.
 - [Official VIES guidance](https://europa.eu/youreurope/business/finance-and-tax/vat/check-vat-number-vies/index_en.htm):
   meaning and limitations of an invalid lookup result.
+- [Apple privacy policy](https://www.apple.com/legal/privacy/): email processing and transfers.
+- [Apple service entities](https://www.apple.com/legal/privacy/en-ww/affiliated-company/): iCloud entity depends on account region.
 - [Hetzner legal notice](https://www.hetzner.com/de/legal/legal-notice/): provider identity.
 - [Cloudflare processing terms](https://www.cloudflare.com/cloudflare-customer-dpa/):
   processing roles and section 6 transfer safeguards.

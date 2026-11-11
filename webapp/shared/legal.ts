@@ -30,8 +30,8 @@ export const legalConfig = {
     privacyURL: "https://www.hetzner.com/de/legal/privacy-policy/",
   },
   projectStatus: {
-    en: "hush is currently provided free of charge as an early test version. Future commercialization or funding through sponsorship is intended.",
-    de: "hush wird derzeit unentgeltlich als frühe Testversion angeboten. Eine spätere Kommerzialisierung oder Finanzierung durch Sponsoring ist vorgesehen.",
+    en: "hush is free and open source. It is currently in alpha.",
+    de: "hush ist kostenlos und Open Source. Die Software befindet sich derzeit in der Alpha-Phase.",
   },
 } as const;
 
