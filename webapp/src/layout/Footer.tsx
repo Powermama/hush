@@ -4,8 +4,8 @@ export function Footer() {
   return (
     <footer className="bg-stone px-5 pb-10 pt-16">
       <div className="mx-auto max-w-6xl border-t border-black/8 pt-10">
-        <div className="grid gap-10 sm:grid-cols-[1fr_auto_auto] sm:gap-16">
-          <div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-[1fr_auto_auto] sm:gap-16">
+          <div className="col-span-2 sm:col-span-1">
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-6 text-muted">
               The voice layer for your Mac. Personal by nature. Local by design.
