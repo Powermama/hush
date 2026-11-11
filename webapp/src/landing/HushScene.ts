@@ -93,13 +93,11 @@ export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
     opening = true;
     const rect = host.getBoundingClientRect();
     dockY = Math.max(-100, Math.min(100, innerHeight * 0.46 - rect.top - rect.height / 2));
-    if (entry) entry.dataset.opening = "playing";
     schedule();
   }
   function finish() {
     opening = false;
     host.style.removeProperty("translate");
-    if (entry) entry.dataset.opening = "complete";
     schedule();
   }
   body.rotation.set(targetX, targetY, -0.09);
@@ -175,7 +173,6 @@ export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
   window.addEventListener("pointerdown", interrupt, { passive: true });
   resize();
   if (opening) begin();
-  else if (entry) entry.dataset.opening = "complete";
   return () => {
     disposed = true;
     cancelAnimationFrame(frame);
