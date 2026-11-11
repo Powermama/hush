@@ -23,6 +23,14 @@ export function LocalUniverse() {
     let cancelled = false;
     const controller = new AbortController();
     let dispose: (() => void) | null = null;
+    // These optional hints only accelerate the fallback. Safari and browsers
+    // without them use the same bounded CSS window and actual scene readiness.
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    if (host.current && (connection?.saveData || /^(slow-)?2g$/.test(connection?.effectiveType ?? ""))) {
+      host.current.dataset.fallback = "immediate";
+    }
     // Vite loads the optional scene and its shared chunks after the HTML/CSS
     // entrance has begun. Artwork never owns page visibility.
     void import("./HushScene").then(async ({ mountHushScene }) => {

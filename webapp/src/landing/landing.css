@@ -48,6 +48,10 @@
 .hush-landing[data-opening="pending"] > .site-header { animation: header-arrive .75s cubic-bezier(.22,.68,.22,1) both; }
 .hush-landing[data-opening="pending"] .hero-introduction { animation: introduction-arrive .7s .1s both; }
 .hush-landing[data-opening="pending"] .hush-core { animation: core-arrive .65s .1s both; }
+/* Let a fast scene own the first reveal. A slow/failed scene cannot postpone
+   static artwork beyond 1.2s from CSS readiness, even without JavaScript. */
+.hush-landing[data-opening="pending"] .hush-core:not([data-scene="ready"]) .core-fallback { animation: core-arrive .25s .95s both; }
+.hush-landing[data-opening="pending"] .hush-core[data-fallback="immediate"] .core-fallback { animation-delay: 0s; }
 .hush-landing[data-opening="pending"] .orbit-app { animation: orbit-arrive .85s both cubic-bezier(.2,.8,.2,1); animation-delay: calc(.35s + var(--app-delay, 0s)); }
 .hush-landing[data-opening="pending"] .universe-paths { animation: paths-arrive 1s .35s both; }
 .hush-landing[data-opening="pending"] .universe-texture { animation: texture-arrive 1.8s both; }
