@@ -1,4 +1,5 @@
 export const legalConfig = {
+  // Keep indexing disabled until the operational review in docs/legal-review.md is complete.
   isPlaceholder: true,
   operator: {
     name: "Clemens Kressmann",
@@ -18,17 +19,15 @@ export const legalConfig = {
   },
   hosting: {
     provider: {
-      en: "[Add hosting provider]",
-      de: "[Hosting-Anbieter ergänzen]",
+      en: "Hetzner Online GmbH",
+      de: "Hetzner Online GmbH",
     },
     address: {
-      en: "[Add address and server location]",
-      de: "[Anschrift und Serverstandort ergänzen]",
+      en: "Industriestr. 25, 91710 Gunzenhausen, Germany",
+      de: "Industriestr. 25, 91710 Gunzenhausen, Deutschland",
     },
-  },
-  supervisoryAuthority: {
-    en: "[Add the competent German data protection authority]",
-    de: "[zuständige Landesdatenschutzbehörde ergänzen]",
+    serverLocation: { en: "Germany", de: "Deutschland" },
+    privacyURL: "https://www.hetzner.com/de/legal/privacy-policy/",
   },
   projectStatus: {
     en: "hush is currently provided free of charge as an early test version. Future commercialization or funding through sponsorship is intended.",

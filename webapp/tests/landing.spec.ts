@@ -294,6 +294,24 @@ test("publishes legal drafts without indexing placeholder identities", async ({
   await expect(page).toHaveURL(/\/$/);
 });
 
+test("discloses the confirmed host and processing limits in both languages", async ({ page }) => {
+  for (const language of ["en", "de"] as const) {
+    const german = language === "de";
+    await page.goto(german ? "/de/datenschutz" : "/datenschutz");
+    const article = page.locator("article");
+    await expect(article.getByText(/Hetzner Online GmbH, Industriestr\. 25, 91710 Gunzenhausen/)).toBeVisible();
+    await expect(article.getByText(german ? /Serverstandort: Deutschland/ : /Server location: Germany/)).toBeVisible();
+    await expect(article.getByText(german ? /Stand: 11\. November 2026/ : /Last updated: 11 November 2026/)).toBeVisible();
+    await expect(article.locator('a[href="https://www.cloudflare.com/cloudflare-customer-dpa/"]')).toBeVisible();
+    await expect(article.getByText(german ? /eine automatische Löschfrist ist nicht implementiert/ : /no automatic deletion deadline is implemented/)).toBeVisible();
+    await expect(article.getByText(german ? /bis zum Neustart des Serverprozesses/ : /until the server process restarts/)).toBeVisible();
+    await expect(article.getByText(/\[Add|\[Hosting|must be documented before publication|vor Veröffentlichung die tatsächlich/)).toHaveCount(0);
+    await page.goto(german ? "/de/impressum" : "/impressum");
+    await expect(page.getByText(german ? /Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG/ : /VAT identification number under Section 27a/)).toBeVisible();
+    await expect(page.getByText(/A German tax number does not belong|Eine Steuernummer gehört nicht/)).toHaveCount(0);
+  }
+});
+
 test("opens the optional verification story from the privacy section", async ({
   page,
 }) => {
