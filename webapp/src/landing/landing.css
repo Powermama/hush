@@ -31,7 +31,7 @@
 .hush-core canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .4s; }
 .hush-core[data-scene="ready"] canvas { opacity: 1; }
 .hush-core[data-scene="ready"] .core-fallback { opacity: 0; }
-.core-fallback { position: absolute; width: 235px; height: 235px; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-7deg); }
+.core-fallback { transition: opacity .4s; position: absolute; width: 235px; height: 235px; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-7deg); }
 .core-fallback > i, .core-fallback > div { position: absolute; inset: 0; border-radius: 40px; }
 .core-fallback > i { background: #c7e4eaa1; border: 1px solid #ffffff; box-shadow: 0 8px 16px #5b8b9814; transform: translate(22px, -18px); }
 .core-fallback > i:nth-child(2) { transform: translate(11px, -9px); }
@@ -44,17 +44,15 @@
 .orbit-tile img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 2px #0001); }
 .orbit-app > span { font-size: 11px; color: #626973; }
 .orbit-app:hover .orbit-tile { transform: translateY(-4px); }
-/* One first-paint state owns the entire entrance, including the header and fallback. */
-.hush-landing[data-opening="pending"] :is(.site-header, .hero-introduction, .hush-core, .core-fallback, .orbit-app, .universe-paths, .universe-halo, .universe-texture, .hero-download-area) { opacity: 0; }
-.hush-landing[data-opening="playing"] > .site-header { animation: header-arrive 1.05s .12s cubic-bezier(.22,.68,.22,1) both; }
-.hush-landing[data-opening="playing"] .hero-introduction { animation: introduction-arrive .9s .55s both; }
-.hush-landing[data-opening="playing"] .hush-core { animation: core-arrive .65s .1s both; }
-.hush-landing[data-opening="playing"] .core-fallback { opacity: 0; }
-.hush-landing[data-opening="playing"] .orbit-app { animation: orbit-arrive 1.15s both cubic-bezier(.2,.8,.2,1); animation-delay: calc(1s + var(--app-delay, 0s)); }
-.hush-landing[data-opening="playing"] .universe-paths { animation: paths-arrive 1.5s .85s both; }
-.hush-landing[data-opening="playing"] .universe-texture { animation: texture-arrive 2.4s both; }
-.hush-landing[data-opening="playing"] .universe-halo { animation: core-arrive 1.4s .3s both; }
-.hush-landing[data-opening="playing"] .hero-download-area { animation: download-arrive .7s 1.65s both; }
+/* Progressive entrance runs from prerendered HTML, without waiting for JS or WebGL. */
+.hush-landing[data-opening="pending"] > .site-header { animation: header-arrive .75s cubic-bezier(.22,.68,.22,1) both; }
+.hush-landing[data-opening="pending"] .hero-introduction { animation: introduction-arrive .7s .1s both; }
+.hush-landing[data-opening="pending"] .hush-core { animation: core-arrive .65s .1s both; }
+.hush-landing[data-opening="pending"] .orbit-app { animation: orbit-arrive .85s both cubic-bezier(.2,.8,.2,1); animation-delay: calc(.35s + var(--app-delay, 0s)); }
+.hush-landing[data-opening="pending"] .universe-paths { animation: paths-arrive 1s .35s both; }
+.hush-landing[data-opening="pending"] .universe-texture { animation: texture-arrive 1.8s both; }
+.hush-landing[data-opening="pending"] .universe-halo { animation: core-arrive 1s .15s both; }
+.hush-landing[data-opening="pending"] .hero-download-area { animation: download-arrive .6s .25s both; }
 .verified-link { display: inline-flex; gap: 8px; font-size: 12px; margin-top: 15px; text-underline-offset: 4px; }
 .verified-link:hover { text-decoration: underline; }
 .story-afterword { position: relative; overflow: clip; background: linear-gradient(#f8fafb 20%, #edf0fa 65%, #f5f4f1); }
