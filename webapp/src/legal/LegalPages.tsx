@@ -178,7 +178,7 @@ export function ImprintPage({ language = "en" }: { language?: LegalLanguage }) {
           ? "Provider identification and contact information for hush."
           : "Anbieterkennzeichnung und Kontakt für hush."
       }
-      updatedAt={english ? "8 August 2026" : "8. August 2026"}
+      updatedAt={english ? "11 November 2026" : "11. November 2026"}
     >
       <Section title={english ? "Information under Section 5 DDG" : "Angaben gemäß § 5 DDG"}>
         <Address language={language} />
@@ -197,11 +197,11 @@ export function ImprintPage({ language = "en" }: { language?: LegalLanguage }) {
       </Section>
 
       <Section title={english ? "VAT" : "Umsatzsteuer"}>
-        <p>{operator.vatId[language]}</p>
         <p>
           {english
-            ? "A German tax number does not belong in a public legal notice. A VAT identification number is listed here only if one has actually been issued."
-            : "Eine Steuernummer gehört nicht in das öffentliche Impressum. Eine USt-IdNr. wird hier nur angegeben, wenn sie tatsächlich vergeben wurde."}
+            ? "VAT identification number under Section 27a of the German VAT Act: "
+            : "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: "}
+          <span>{operator.vatId[language]}</span>
         </p>
       </Section>
 
@@ -209,8 +209,8 @@ export function ImprintPage({ language = "en" }: { language?: LegalLanguage }) {
         <p>{legalConfig.projectStatus[language]}</p>
         <p>
           {english
-            ? "Support from sponsors does not change hush's privacy promises. Sponsors receive no access to messages, audio, proof contents or usage profiles unless a separate arrangement is disclosed transparently."
-            : "Eine Unterstützung durch Sponsoren ändert nichts an den Datenschutzversprechen von hush. Ohne eine gesonderte, transparente Vereinbarung erhalten Sponsoren keinen Zugriff auf Nachrichten, Audiodaten, Proof-Inhalte oder Nutzungsprofile."}
+            ? "Sponsorship does not give sponsors access to messages, audio, proof contents or usage profiles."
+            : "Sponsoring gewährt Sponsoren keinen Zugriff auf Nachrichten, Audiodaten, Proof-Inhalte oder Nutzungsprofile."}
         </p>
       </Section>
 
@@ -222,13 +222,6 @@ export function ImprintPage({ language = "en" }: { language?: LegalLanguage }) {
         </p>
       </Section>
 
-      <Section title={english ? "Liability for links" : "Haftung für Links"}>
-        <p>
-          {english
-            ? "The operators of external pages linked by hush are solely responsible for their contents. Linked content is checked for recognizable legal violations when the link is created."
-            : "Für Inhalte externer Seiten, auf die hush verlinkt, sind ausschließlich deren Betreiber verantwortlich. Verlinkte Inhalte werden zum Zeitpunkt der Verlinkung auf erkennbare Rechtsverstöße geprüft."}
-        </p>
-      </Section>
     </LegalShell>
   );
 }
@@ -251,7 +244,7 @@ export function PrivacyPolicyPage({
           ? "How hush handles data on the website, during downloads and for optional Verified Messages."
           : "Wie hush auf der Website, beim Download und bei optionalen Verified Messages mit Daten umgeht."
       }
-      updatedAt={english ? "8 August 2026" : "8. August 2026"}
+      updatedAt={english ? "11 November 2026" : "11. November 2026"}
     >
       <Section title={english ? "1. Controller" : "1. Verantwortlicher"}>
         <Contact language={language} />
@@ -272,9 +265,23 @@ export function PrivacyPolicyPage({
 
       <Section title={english ? "3. Website access and technical logs" : "3. Aufruf der Website und technische Protokolle"}>
         <p>
+          {english ? "Our servers are hosted by " : "Unsere Server werden bei "}
+          {legalConfig.hosting.provider[language]}, {legalConfig.hosting.address[language]}.
+          {english ? " Server location: " : " Serverstandort: "}
+          {legalConfig.hosting.serverLocation[language]}.
           {english
-            ? "Accessing the website requires processing technical connection data. This can include the IP address, time, requested URL, referrer, browser and operating system information, and HTTP status. hush uses the IP address briefly in memory for abuse prevention. The application itself does not create a persistent user profile from it. Infrastructure providers may keep security and access logs."
-            : "Beim Aufruf der Website werden technisch erforderliche Verbindungsdaten verarbeitet. Dazu können IP-Adresse, Zeitpunkt, angeforderte URL, Referrer, Browser- und Betriebssystemangaben sowie HTTP-Status gehören. hush nutzt die IP-Adresse kurzfristig im Arbeitsspeicher zur Missbrauchsbegrenzung. Die Anwendung selbst legt daraus kein dauerhaftes Nutzerprofil an. Infrastruktur-Anbieter können Sicherheits- und Zugriffsprotokolle führen."}
+            ? " The website, proof service, database and encrypted proof storage run on this infrastructure. Cloudflare also handles the connections described below; hosting in Germany does not mean all network processing is limited to Germany."
+            : " Website, Proof-Dienst, Datenbank und verschlüsselter Proof-Speicher laufen auf dieser Infrastruktur. Cloudflare verarbeitet zusätzlich die unten beschriebenen Verbindungen; Hosting in Deutschland bedeutet nicht, dass sämtliche Netzwerkverarbeitung auf Deutschland beschränkt ist."}
+        </p>
+        <p>
+          <a className="text-ink underline underline-offset-4" href={legalConfig.hosting.privacyURL}>
+            {english ? "Hetzner privacy information" : "Datenschutzhinweise von Hetzner"}
+          </a>
+        </p>
+        <p>
+          {english
+            ? "Accessing the website requires technical connection data, including the IP address, time, requested URL, referrer, browser and operating system information, and HTTP status. For abuse prevention, the API keeps IP-based request counters in server memory. Entries expire within two minutes for the current one-minute rate-limit windows, even when traffic stops. Each limiter holds at most 10,000 entries. The application does not create a persistent user profile from these counters. Infrastructure providers may also keep security and access logs."
+            : "Beim Aufruf der Website fallen technische Verbindungsdaten an, darunter IP-Adresse, Zeitpunkt, angeforderte URL, Referrer, Browser- und Betriebssystemangaben sowie HTTP-Status. Zum Missbrauchsschutz hält die API IP-bezogene Anfragezähler im Server-Arbeitsspeicher. Einträge werden bei den derzeitigen einminütigen Zeitfenstern innerhalb von zwei Minuten entfernt, auch ohne weitere Anfragen. Jeder Limiter hält höchstens 10.000 Einträge. Die Anwendung erstellt daraus kein dauerhaftes Nutzerprofil. Infrastruktur-Anbieter können zusätzlich Sicherheits- und Zugriffsprotokolle führen."}
         </p>
         <p>
           {english
@@ -289,6 +296,7 @@ export function PrivacyPolicyPage({
       </Section>
 
       <Section title={english ? "4. Cloudflare and app downloads" : "4. Cloudflare und App-Downloads"}>
+        <p>Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA.</p>
         <p>
           {english
             ? "Cloudflare provides DNS, protection and delivery functions, as well as downloads of installation files. Versioned DMG files are stored in Cloudflare R2 and delivered through updates.behu.sh. Cloudflare processes connection and device information required for transmission, protection and caching."
@@ -296,16 +304,17 @@ export function PrivacyPolicyPage({
         </p>
         <p>
           {english
-            ? "The legal basis is Article 6(1)(f) GDPR. The legitimate interest is secure, fast and reliable delivery. If data is processed outside the EEA, the safeguards actually applying under the Cloudflare agreement, such as an adequacy decision or standard contractual clauses, must be documented before publication."
-            : "Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse liegt in sicherer, schneller und belastbarer Auslieferung. Soweit Daten außerhalb des EWR verarbeitet werden, sind vor Veröffentlichung die tatsächlich geltenden Garantien des Cloudflare-Vertrags, etwa ein Angemessenheitsbeschluss oder Standardvertragsklauseln, zu dokumentieren."}
+            ? "The legal basis is Article 6(1)(f) GDPR: secure and reliable delivery. Processing can also take place outside the EEA, including in the USA. Cloudflare's published data processing terms provide for the EU-US Data Privacy Framework and standard contractual clauses for restricted transfers. You can read these safeguards in the linked terms."
+            : "Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO: sichere und zuverlässige Auslieferung. Die Verarbeitung kann auch außerhalb des EWR, insbesondere in den USA, stattfinden. Die veröffentlichten Auftragsverarbeitungsbedingungen von Cloudflare sehen das EU-US Data Privacy Framework und Standardvertragsklauseln für beschränkte Übermittlungen vor. Diese Garantien sind in den verlinkten Bedingungen beschrieben."}
         </p>
+        <p><a className="text-ink underline underline-offset-4" href="https://www.cloudflare.com/cloudflare-customer-dpa/">{english ? "Cloudflare data processing terms" : "Auftragsverarbeitungsbedingungen von Cloudflare"}</a></p>
       </Section>
 
       <Section title="5. Verified Messages">
         <p>
           {english
-            ? "Verified Messages are optional. When one is published, the service processes an installation key with its fingerprint and type, app and platform versions, and timestamps. The proof stores technical metadata, cryptographic bindings, encrypted content, size, status and expiry time."
-            : "Verified Messages sind optional. Bei ihrer Veröffentlichung verarbeitet der Dienst einen Installationsschlüssel mit Fingerabdruck, Schlüsselart, App- und Plattformversion sowie Zeitstempeln. Für den Proof werden technische Metadaten, kryptografische Bindungen, verschlüsselter Inhalt, Größe, Status und Ablaufzeit gespeichert."}
+            ? "Verified Messages are optional. When one is published, the service processes the installation's public signing key, its fingerprint and type, app and platform versions, and timestamps. The private signing key stays on the Mac. The proof stores technical metadata, cryptographic bindings, encrypted content, size, status and expiry time."
+            : "Verified Messages sind optional. Bei ihrer Veröffentlichung verarbeitet der Dienst den öffentlichen Signaturschlüssel der Installation, seinen Fingerabdruck und Typ, App- und Plattformversion sowie Zeitstempel. Der private Signaturschlüssel bleibt auf dem Mac. Für den Proof werden technische Metadaten, kryptografische Bindungen, verschlüsselter Inhalt, Größe, Status und Ablaufzeit gespeichert."}
         </p>
         <p>
           {english
@@ -319,8 +328,8 @@ export function PrivacyPolicyPage({
         </p>
         <p>
           {english
-            ? "Users choose an expiry between one minute and 90 days. After expiry or revocation, the service no longer returns the encrypted content. In the current alpha, expiry alone does not automatically delete proof records and encrypted objects physically. An automated deletion routine must be added before a public product launch, and this policy must then be updated."
-            : "Nutzer wählen eine Ablaufzeit von mindestens einer Minute und höchstens 90 Tagen. Nach Ablauf oder Widerruf liefert der Dienst den verschlüsselten Inhalt nicht mehr aus. In der aktuellen Alpha werden Proof-Datensätze und verschlüsselte Objekte nicht allein durch den Ablauf automatisch physisch gelöscht. Eine automatisierte Löschroutine muss vor einem öffentlichen Produktstart ergänzt und diese Erklärung danach aktualisiert werden."}
+            ? `Users choose an expiry between one minute and 90 days. After expiry or revocation, the service no longer returns the encrypted content. Encrypted objects, proof metadata and short aliases become eligible for automatic deletion 24 hours after expiry or revocation. Uncompleted reservations become eligible 24 hours after creation. Cleanup runs every minute in bounded batches and retries failures; outages or a backlog can delay removal. Expired one-time challenges are also deleted. The public installation key remains registered so the Mac can publish again. To request deletion, contact ${operator.email}. Deletion from live storage does not remove historical recovery backups. Their removal depends on the backup retention configuration and any incident or legal preservation requirements; the current alpha does not guarantee a fixed backup-erasure deadline. Expiry or deletion cannot remove copies that recipients have already saved. Do not send your complete private link or decryption key in a support request.`
+            : `Nutzer wählen eine Ablaufzeit von mindestens einer Minute und höchstens 90 Tagen. Nach Ablauf oder Widerruf liefert der Dienst den verschlüsselten Inhalt nicht mehr aus. Verschlüsselte Objekte, Proof-Metadaten und Kurzlinks werden 24 Stunden nach Ablauf oder Widerruf zur automatischen Löschung vorgesehen. Nicht abgeschlossene Reservierungen werden 24 Stunden nach Erstellung zur Löschung vorgesehen. Die Bereinigung läuft minütlich in begrenzten Stapeln und wiederholt fehlgeschlagene Löschungen; Störungen oder Rückstände können die Entfernung verzögern. Abgelaufene Einmal-Challenges werden ebenfalls gelöscht. Der öffentliche Installationsschlüssel bleibt registriert, damit der Mac erneut veröffentlichen kann. Für eine Löschanfrage wende dich an ${operator.email}. Die Löschung im laufenden Speicher entfernt keine historischen Wiederherstellungssicherungen. Deren Entfernung hängt von der Sicherungskonfiguration sowie etwaigen Vorfällen oder gesetzlichen Aufbewahrungspflichten ab; die aktuelle Alpha garantiert hierfür keine feste Löschfrist. Ablauf oder Löschung entfernen keine bereits von Empfängern gespeicherten Kopien. Sende bei einer Support-Anfrage weder den vollständigen privaten Link noch den Entschlüsselungsschlüssel.`}
         </p>
       </Section>
 
@@ -330,9 +339,21 @@ export function PrivacyPolicyPage({
             ? "The app can use Sparkle to check for new versions. Update files and the signed update feed are delivered through updates.behu.sh. This produces the connection data described in sections 3 and 4. Message text and audio are not transmitted."
             : "Die App kann über Sparkle prüfen, ob eine neue Version verfügbar ist. Die Update-Dateien und das signierte Update-Feed werden über updates.behu.sh ausgeliefert. Hierbei fallen die unter Ziffer 3 und 4 beschriebenen Verbindungsdaten an. Es werden keine Nachrichtentexte oder Audiodaten übertragen."}
         </p>
+        <p>
+          {english
+            ? "Optional speech and AI models are downloaded from their distribution services, including Hugging Face. Those services receive the requested model URL and technical connection data such as your IP address. The model download itself does not upload your audio or messages. Opening a website through the assistant also connects to that website, whose privacy policy applies."
+            : "Optionale Sprach- und KI-Modelle werden von ihren Distributionsdiensten heruntergeladen, darunter Hugging Face. Diese Dienste erhalten die angeforderte Modell-URL und technische Verbindungsdaten wie deine IP-Adresse. Der Modell-Download selbst lädt keine Audiodaten oder Nachrichten hoch. Öffnet der Assistent eine Website, entsteht außerdem eine Verbindung zu dieser Website; dort gelten deren Datenschutzhinweise."}
+        </p>
+        <p><a className="text-ink underline underline-offset-4" href="https://huggingface.co/privacy">{english ? "Hugging Face privacy information" : "Datenschutzhinweise von Hugging Face"}</a></p>
       </Section>
 
       <Section title={english ? "7. Contact by email" : "7. Kontakt per E-Mail"}>
+        <p>
+          {english
+            ? "Email for hello@behu.sh is handled by Apple's iCloud Mail. Cloudflare manages the domain's DNS records; it is not the mailbox provider. Apple Mail is the app used to access the mailbox. Apple processes the email content and associated transmission data to deliver and store correspondence. Processing may also take place outside the EEA, including in the USA; Apple's privacy information explains the applicable entities and transfer safeguards."
+            : "E-Mails an hello@behu.sh werden über Apples iCloud Mail verarbeitet. Cloudflare verwaltet die DNS-Einträge der Domain und ist nicht der Postfachanbieter. Apple Mail ist die Anwendung für den Zugriff auf das Postfach. Apple verarbeitet E-Mail-Inhalte und zugehörige Übermittlungsdaten, um die Korrespondenz zuzustellen und zu speichern. Die Verarbeitung kann auch außerhalb des EWR, insbesondere in den USA, erfolgen; Apples Datenschutzhinweise erläutern die zuständigen Gesellschaften und Übermittlungsgarantien."}
+        </p>
+        <p><a className="text-ink underline underline-offset-4" href="https://www.apple.com/legal/privacy/">{english ? "Apple privacy information" : "Datenschutzhinweise von Apple"}</a></p>
         <p>
           {english
             ? "When you contact us by email, the sender address, content, technical metadata and any other voluntarily provided information are processed to handle the request. Depending on the request, the legal basis is Article 6(1)(b) or (f) GDPR. Messages are deleted when they are no longer required for handling the request or statutory evidence."
@@ -351,8 +372,8 @@ export function PrivacyPolicyPage({
       <Section title={english ? "9. Recipients and processors" : "9. Empfänger und Auftragsverarbeiter"}>
         <p>
           {english
-            ? "Only parties required to operate and provide the service receive data. These include the hosting provider named above and Cloudflare. Data is not disclosed to sponsors for advertising, analytics or profiling."
-            : "Daten erhalten nur Stellen, die für Betrieb und Bereitstellung erforderlich sind. Dazu gehören der oben genannte Hosting-Anbieter und Cloudflare. Eine Weitergabe an Sponsoren zu Werbe-, Analyse- oder Profilbildungszwecken findet nicht statt."}
+            ? "Only parties required to operate and provide the service receive data. These include the hosting provider named above, Cloudflare for delivery, and Apple for email correspondence. Data is not disclosed to sponsors for advertising, analytics or profiling."
+            : "Daten erhalten nur Stellen, die für Betrieb und Bereitstellung erforderlich sind. Dazu gehören der oben genannte Hosting-Anbieter, Cloudflare für die Auslieferung und Apple für E-Mail-Korrespondenz. Eine Weitergabe an Sponsoren zu Werbe-, Analyse- oder Profilbildungszwecken findet nicht statt."}
         </p>
       </Section>
 
@@ -361,6 +382,11 @@ export function PrivacyPolicyPage({
           {english
             ? `Under the GDPR, data subjects may have rights to access, rectification, erasure, restriction, portability and objection. Consent can be withdrawn for the future. Requests can be sent to ${operator.email}.`
             : `Betroffene Personen haben nach Maßgabe der DSGVO Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit und Widerspruch. Erteilte Einwilligungen können mit Wirkung für die Zukunft widerrufen werden. Anfragen können an ${operator.email} gerichtet werden.`}
+        </p>
+        <p>
+          {english
+            ? "Where processing is based on legitimate interests, you can object on grounds relating to your particular situation (Article 21 GDPR). hush does not use these data for automated decisions with legal or similarly significant effects under Article 22 GDPR."
+            : "Beruht eine Verarbeitung auf berechtigten Interessen, kannst du aus Gründen deiner besonderen Situation widersprechen (Art. 21 DSGVO). hush verwendet diese Daten nicht für automatisierte Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung nach Art. 22 DSGVO."}
         </p>
         <p>
           {english
