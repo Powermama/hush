@@ -24,7 +24,7 @@ test("LANDING-NAV-001 shares clear navigation across public pages", async ({ pag
   await expect(page.locator('.site-header [aria-current="page"]')).toHaveText("Verified Messages");
 });
 
-test("mobile navigation stays compact and closes with Escape or outside interaction", async ({ page }, testInfo) => {
+test("mobile navigation stays compact and closes with Escape or its toggle", async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const width of [320, 390, 760]) {
     await page.setViewportSize({ width, height: 844 });
@@ -56,7 +56,7 @@ test("mobile navigation stays compact and closes with Escape or outside interact
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
     await expect(start).toBeVisible();
     await toggle.click();
-    await page.getByRole("heading", { level: 1 }).click();
+    await header.getByRole("button", { name: "Close navigation" }).click();
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     await page.screenshot({ path: testInfo.outputPath(`mobile-header-${width}.png`) });
@@ -79,4 +79,62 @@ test("LANDING-NAV-002 scrolls the header away and shows only a progress line", a
   await expect(progress).toHaveAttribute("aria-valuenow", "100");
   await page.evaluate(() => scrollTo(0, 0));
   await expect(progress).toHaveAttribute("aria-valuenow", "0");
+});
+
+test("LANDING-NAV-003 locks the page behind the mobile menu and restores scrolling", async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/datenschutz");
+  await page.evaluate(() => scrollTo({ top: 12, behavior: "instant" }));
+  const before = await page.evaluate(() => scrollY);
+  // Click the visible control without Playwright auto-scrolling it to the top
+  // through the page's scroll-padding before dispatching the user's click.
+  const trigger = (await page.getByRole("button", { name: "Open navigation" }).boundingBox())!;
+  await page.mouse.click(trigger.x + trigger.width / 2, trigger.y + trigger.height / 2);
+  const close = page.getByRole("button", { name: "Close navigation" });
+  await expect(close).toBeVisible();
+  await page.mouse.move(195, 600);
+  await page.mouse.wheel(0, 650);
+  await page.waitForTimeout(300);
+  await expect(close).toBeInViewport();
+  await expect(page.locator(".site-header-download")).toBeInViewport();
+  await page.locator(".site-header-download").focus();
+  await page.keyboard.press("Tab");
+  await expect(page.locator(".site-brand a")).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(page.locator(".site-header-download")).toBeFocused();
+  await page.screenshot({ path: testInfo.outputPath("locked-mobile-navigation.png") });
+  await close.click();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(before);
+  await page.mouse.move(195, 600, { steps: 2 });
+  await page.mouse.wheel(0, 650);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(before + 100);
+});
+
+test("LANDING-NAV-003 releases the page lock on desktop resize", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/datenschutz");
+  await page.getByRole("button", { name: "Open navigation" }).click();
+  await page.setViewportSize({ width: 1280, height: 844 });
+  await expect(page.locator(".site-menu-toggle")).toHaveAttribute("aria-expanded", "false");
+  await page.mouse.move(600, 600);
+  await page.mouse.wheel(0, 650);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(100);
+});
+
+test("LANDING-NAV-003 keeps all menu links reachable in a short viewport", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 740, height: 320 });
+  await page.goto("/datenschutz");
+  await page.getByRole("button", { name: "Open navigation" }).click();
+  await page.mouse.move(370, 220);
+  await page.mouse.wheel(0, 500);
+  await expect(page.locator(".site-header-download")).toBeInViewport();
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Open navigation" })).toBeFocused();
+  await page.mouse.move(370, 200, { steps: 2 });
+  await page.mouse.wheel(0, 500);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(100);
 });
