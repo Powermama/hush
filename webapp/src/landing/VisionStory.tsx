@@ -1,3 +1,4 @@
+import { artwork } from "../media/artwork";
 
 import { HushMascotArtwork, HushMascotGrip } from "./HushMascot";
 import { ProvenanceStory } from "./ProvenanceStory";
@@ -9,8 +10,8 @@ const libertySource = "https://commons.wikimedia.org/wiki/File:Eug%C3%A8ne_Delac
 
 function Portrait({ decorative = false }: { decorative?: boolean }) {
   return <img
-    src="/art/aristotle.webp"
-    srcSet="/art/aristotle-small.webp 480w, /art/aristotle.webp 960w"
+    src={artwork.aristotle.src}
+    srcSet={artwork.aristotle.srcSet}
     sizes="(max-width: 760px) 95vw, 650px"
     width="960" height="1000" loading="lazy" decoding="async"
     alt={decorative ? "" : "A marble portrait of Aristotle, reinterpreted in blue with offset collage strips."}
@@ -73,8 +74,8 @@ export function VisionStory() {
       <figure className="freedom-figure">
         <div className="freedom-art">
           <img
-            src="/art/liberty.webp"
-            srcSet="/art/liberty-small.webp 768w, /art/liberty.webp 1280w"
+            src={artwork.liberty.src}
+            srcSet={artwork.liberty.srcSet}
             sizes="100vw" width="1280" height="1016" loading="lazy" decoding="async"
             alt="Delacroix’s Liberty Leading the People, reinterpreted in coral and ink blue."
           />
@@ -94,8 +95,8 @@ export function VisionStory() {
         <figure className="intelligence-figure">
           <div className="intelligence-art">
             <img
-              src="/art/geographer.webp"
-              srcSet="/art/geographer-small.webp 480w, /art/geographer.webp 960w"
+              src={artwork.geographer.src}
+              srcSet={artwork.geographer.srcSet}
               sizes="(max-width: 760px) 65vw, 380px"
               width="960" height="1076" loading="lazy" decoding="async"
               alt="A geographer pausing over a map beside a sunlit window, painted by Johannes Vermeer."

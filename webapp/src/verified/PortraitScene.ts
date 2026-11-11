@@ -1,9 +1,10 @@
+import { artwork } from "../media/artwork";
 import * as THREE from "three";
 
 /** Ameca photo by Willy Jackson; photo adaptation under CC BY-SA 4.0. See /art/CREDITS.md. */
 export async function mountPortraitScene(host: HTMLElement): Promise<(() => void) | null> {
   const picture = new Image();
-  picture.src = "/art/robot-portrait.webp";
+  picture.src = artwork.robotPortrait.src;
   try { await picture.decode(); } catch { return null; }
   if (!host.isConnected) return null;
   const canvas = document.createElement("canvas");

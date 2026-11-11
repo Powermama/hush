@@ -1,20 +1,13 @@
+import { appIcons } from "../media/appIcons";
 import { siLinear } from "simple-icons";
 import { apps } from "../content/site";
 
 type AppName = (typeof apps)[number];
 
-const appIconPaths: Partial<Record<AppName, string>> = {
-  Mail: "/app-icons/mail.png",
-  Messages: "/app-icons/messages.png",
-  Slack: "/app-icons/slack.png",
-  Notion: "/app-icons/notion.png",
-  Notes: "/app-icons/notes.png",
-  Figma: "/app-icons/figma.png",
-  Chrome: "/app-icons/chrome.png",
-};
+
 
 function AppMark({ app }: { app: AppName }) {
-  const iconPath = appIconPaths[app];
+  const iconPath = appIcons[app];
   if (iconPath) {
     return (
       <img

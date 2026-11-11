@@ -1,5 +1,9 @@
 # hush editorial artwork
 
+Active image sources live in `src/media/art/` and are served with Vite-generated
+content hashes. This public credit record and all licenses below remain in force.
+Unused archive images remain in `public/art/`.
+
 ## Studio lighting
 
 - `src/landing/assets/studio-environment.ktx2.gz` is generated from Three.js's `RoomEnvironment` with its PMREM filter. It contains lighting, not a photograph or generated illustration.

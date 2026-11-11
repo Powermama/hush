@@ -92,3 +92,5 @@ LANDING-DOWNLOAD-002: phone and iPad visitors get an Apple-marked “Get hush fo
 Tests: `tests/mobile-download.spec.ts`, the download scenario in `tests/landing.spec.ts`, and the mobile invitation branch of `tests/proof.spec.ts`. Native OS share targets and mail delivery require a real device check; browser tests verify the payload and client-side interaction without sending messages.
 
 The final invitation omits the extra slogan. Its headline has relaxed tracking and a 40px gap before the primary action. “Less input. More instinct.” shares the adjacent ribbon's rotation, and the “Independent by nature” stamp is removed.
+
+LANDING-CACHE-001 / LANDING-CACHE-002: public artwork and app icons use Vite content-hashed URLs with immutable caching. Prerendered and hydrated pages reference the same assets; HTML is revalidated. Responsive WebP candidates, intrinsic dimensions, lazy loading and public attribution remain available. Covered in `tests/public-assets.spec.ts`; see [asset delivery](../operations/asset-delivery.md).

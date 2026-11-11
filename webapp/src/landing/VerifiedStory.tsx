@@ -1,3 +1,4 @@
+import { artwork } from "../media/artwork";
 import "./verified-story.css";
 
 const pressSource = "https://commons.wikimedia.org/wiki/File:Buchdrucker-1568.png";
@@ -13,7 +14,7 @@ export function VerifiedStory() {
         <div className="press-composition">
           <figure className="press-figure">
             <div className="press-art">
-              <img src="/art/printing-press.webp" srcSet="/art/printing-press-small.webp 480w, /art/printing-press.webp 751w" sizes="(max-width: 760px) calc(100vw - 48px), 540px" width="751" height="879" loading="lazy" decoding="async" alt="Printers setting type and operating a hand press in Jost Amman’s 1568 woodcut." />
+              <img src={artwork.printingPress.src} srcSet={artwork.printingPress.srcSet} sizes="(max-width: 760px) calc(100vw - 48px), 540px" width="751" height="879" loading="lazy" decoding="async" alt="Printers setting type and operating a hand press in Jost Amman’s 1568 woodcut." />
               <span className="press-at" aria-hidden="true">@</span>
               <svg className="press-signal" viewBox="0 0 540 560" fill="none" aria-hidden="true"><path d="M94 262H175L220 307H432V364" /><circle cx="94" cy="262" r="5" /><path d="M35 40V20H55M505 40V20H485" /></svg>
             </div>
