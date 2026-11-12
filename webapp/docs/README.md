@@ -11,6 +11,7 @@
 | Deploy or move the service | [Coolify deployment](operations/coolify-deployment.md) |
 | Understand private short links | [Short-link operation](operations/proof-short-links.md) |
 | Review dependency security updates | [Dependency security](operations/dependency-security.md) |
+| Plan the Safari 3D entrance correction | [Performance PRD](design/safari-hero-performance-prd.md) |
 | Inspect the API | [OpenAPI contract](../openapi/hush-provenance.json) |
 | Check image attribution | [Artwork credits](../public/art/CREDITS.md) |
 
