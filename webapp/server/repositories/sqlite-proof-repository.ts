@@ -31,6 +31,10 @@ export class SQLiteProofRepository implements ProofRepository {
     this.migrate();
   }
 
+  async ping(): Promise<void> {
+    this.sqlite.query("select 1").get();
+  }
+
   close(): void {
     this.sqlite.close();
   }

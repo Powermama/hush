@@ -1,4 +1,4 @@
-import { mkdir, unlink } from "node:fs/promises";
+import { mkdir, rename, unlink } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import type { ProofObjectStore, UploadTarget } from "./proof-object-store";
 
@@ -30,7 +30,16 @@ export class LocalProofObjectStore implements ProofObjectStore {
   async put(objectKey: string, bytes: Uint8Array): Promise<void> {
     const path = this.pathFor(objectKey);
     await mkdir(dirname(path), { recursive: true });
-    await Bun.write(path, bytes);
+    // Write then rename so another instance sharing the volume during a rolling
+    // update never reads a partially written object.
+    const temporary = `${path}.${crypto.randomUUID()}.tmp`;
+    await Bun.write(temporary, bytes);
+    try {
+      await rename(temporary, path);
+    } catch (error) {
+      await unlink(temporary).catch(() => {});
+      throw error;
+    }
   }
 
   async get(objectKey: string): Promise<Uint8Array | null> {

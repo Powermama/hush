@@ -180,6 +180,10 @@ export function createApp(input: {
   proofService: ProofService;
   allowedOrigin: string;
   registerRootAlias?: boolean;
+  /** Resolves true when this instance can serve traffic. Defaults to always ready. */
+  readiness?: () => Promise<boolean>;
+  /** Rejects proof writes with 503 and Retry-After while reads keep working. */
+  readOnly?: boolean;
 }) {
   const app = new OpenAPIHono<AppEnvironment>();
 
@@ -213,6 +217,22 @@ export function createApp(input: {
     }),
   );
   app.use("/v1/*", rateLimiter({ windowMs: 60_000, limit: 120 }));
+  if (input.readOnly) {
+    app.use("/v1/*", async (context, next) => {
+      if (["GET", "HEAD", "OPTIONS"].includes(context.req.method)) return next();
+      context.header("retry-after", "300");
+      return context.json(
+        {
+          error: {
+            code: "read_only",
+            message: "Publishing is paused for maintenance. Existing proofs remain available.",
+            requestId: context.get("requestId"),
+          },
+        },
+        503,
+      );
+    });
+  }
   app.use("/s/*", rateLimiter({ windowMs: 60_000, limit: 60 }));
   app.use(
     "/v1/proofs/*/content",
@@ -316,7 +336,13 @@ export function createApp(input: {
   }
 
   app.get("/health/live", (context) => context.json({ status: "ok" }));
-  app.get("/health/ready", (context) => context.json({ status: "ok" }));
+  app.get("/health/ready", async (context) => {
+    context.header("cache-control", "no-store");
+    const ready = await (input.readiness?.() ?? Promise.resolve(true)).catch(() => false);
+    return ready
+      ? context.json({ status: "ok" })
+      : context.json({ status: "unavailable" }, 503);
+  });
   app.doc("/openapi.json", {
     openapi: "3.1.0",
     info: {

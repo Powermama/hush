@@ -16,6 +16,12 @@ export type ServerConfig = {
   allowedOrigin: string;
   serviceKeyId?: string;
   servicePrivateJwk?: JsonWebKey;
+  /** Allows a production service to create its first signing key. Off by default. */
+  allowServiceKeyBootstrap: boolean;
+  /** Rejects proof writes with 503 while every read keeps working (data migrations). */
+  readOnly: boolean;
+  /** How long a stopping instance keeps serving before it closes its listener. */
+  shutdownDrainMs: number;
   s3?: {
     bucket: string;
     region: string;
@@ -55,8 +61,26 @@ export function loadConfig(env = process.env): ServerConfig {
     allowedOrigin: env.HUSH_ALLOWED_ORIGIN ?? new URL(publicBaseUrl).origin,
     serviceKeyId: env.HUSH_SERVICE_KEY_ID,
     servicePrivateJwk: privateJwk,
+    allowServiceKeyBootstrap: env.HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP === "1",
+    readOnly: env.HUSH_READ_ONLY === "1",
+    shutdownDrainMs: boundedInteger(env.HUSH_SHUTDOWN_DRAIN_MS, 10_000, 0, 60_000, "HUSH_SHUTDOWN_DRAIN_MS"),
     s3,
   };
+}
+
+function boundedInteger(
+  value: string | undefined,
+  fallback: number,
+  min: number,
+  max: number,
+  name: string,
+): number {
+  if (value === undefined || value === "") return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
+    throw new Error(`${name} must be an integer from ${min} to ${max}`);
+  }
+  return parsed;
 }
 
 function normalizeBaseUrl(
@@ -96,6 +120,15 @@ export async function loadServiceKey(
   if (await file.exists()) {
     const stored = (await file.json()) as { id: string; privateJwk: JsonWebKey };
     return importServiceKey(stored.id, stored.privateJwk);
+  }
+  // A missing key in production almost always means a lost or mis-mounted data
+  // volume. Minting a new key would silently invalidate every existing proof,
+  // so fail closed unless the operator explicitly bootstraps a new deployment.
+  if (config.environment === "production" && !config.allowServiceKeyBootstrap) {
+    throw new Error(
+      `Service signing key not found at ${keyPath}. Mount the existing data volume, ` +
+      "or set HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP=1 once to create the first key.",
+    );
   }
   const generatedKey = await createEphemeralServiceKey();
   const privateJwk = await crypto.subtle.exportKey(

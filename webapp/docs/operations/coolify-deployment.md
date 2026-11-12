@@ -118,8 +118,9 @@ For stronger origin isolation, allow Cloudflare IP ranges at the server firewall
 No secret needs to be generated or pasted before the first deployment.
 
 - Coolify generates `SERVICE_PASSWORD_64_POSTGRES` once and keeps it stable across deployments.
-- hush generates a P-256 proof-signing key on first startup and atomically stores it at `/app/data/service-key.json` in the persistent `hush_objects` volume.
+- On the very first production start, set `HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP=1` once. hush then generates a P-256 proof-signing key and atomically stores it at `/app/data/service-key.json` in the persistent data volume. Remove the variable after that start.
 - Later deployments reuse the same signing key automatically.
+- In production, hush refuses to start when the key file is missing and bootstrapping is not enabled. A mis-mounted or empty volume therefore fails the deployment loudly; it never silently mints a new identity that would invalidate existing proofs. During a rolling update the old instance keeps serving.
 
 Back up the `hush_objects` volume before publishing real proofs. Losing that volume loses the signing identity used by existing proofs.
 
@@ -167,3 +168,108 @@ Back up both named volumes. If external key management is enabled, back up that 
 ## Optional external storage
 
 For multiple web replicas, replace the local encrypted-object volume with S3-compatible storage and configure `HUSH_S3_BUCKET`, `HUSH_S3_REGION`, `HUSH_S3_ENDPOINT`, `HUSH_S3_ACCESS_KEY_ID`, and `HUSH_S3_SECRET_ACCESS_KEY`. PostgreSQL remains the source of truth. The included single-web-service stack does not require S3.
+
+## Zero-downtime deployments
+
+Goal: a deployment never fails a visitor's or the Mac app's request. A Docker
+Compose resource cannot reach that goal on Coolify: "Rolling updates are not
+supported for Docker Compose applications"
+([Coolify rolling updates](https://coolify.io/docs/applications/deployments/rolling-updates)).
+Compose stops the old web container before the new one is ready, which caused
+the brief HTTP 503 observed while PR #17 deployed on 12 November 2026.
+
+The target topology separates concerns:
+
+| Resource | Coolify type | Owns |
+| --- | --- | --- |
+| `hush-web` | Application, Dockerfile build pack, base directory `/webapp` | The stateless web process; the encrypted-object volume at `/app/data` |
+| `hush-postgres` | Database, PostgreSQL 17 | Proof metadata and aliases, with Coolify's database backups |
+
+### Platform-neutral runtime contract
+
+Zero downtime depends on the application, not on one host. Any platform that
+starts a replacement, waits for readiness and then sends `SIGTERM` (Coolify,
+Docker Swarm, Kubernetes, Fly.io) works without code changes:
+
+| Contract | Behaviour |
+| --- | --- |
+| `GET /health/live` | 200 while the process runs, including while draining. Use for liveness only. |
+| `GET /health/ready` | 200 only when the instance is not draining and PostgreSQL answers within 2 seconds; otherwise 503. Never cached. Use for readiness and routing. |
+| `SIGTERM` | Report not-ready, keep serving for `HUSH_SHUTDOWN_DRAIN_MS` (default 10000), stop listening without dropping in-flight requests, close the database and exit 0. |
+| Configuration | Environment variables only. No host port, container name or IP is required. |
+| Migrations | Applied at start under a PostgreSQL advisory lock, so concurrent starts never race. |
+| Background cleanup | Idempotent; two instances may run it during an overlap. |
+| Shared volume | Object writes are atomic (temporary file, then rename). |
+| `HUSH_READ_ONLY=1` | Proof writes return 503 with `Retry-After: 300`; pages and proof reads keep working. Used during data moves. |
+
+**Migrations must stay additive.** The previous release keeps serving from the
+new schema until its replacement is healthy. Add tables, nullable columns and
+indexes freely. Remove or rename something only in a later release, after no
+running version uses it.
+
+### Coolify settings for `hush-web`
+
+1. **General**: build pack Dockerfile, base directory `/webapp`, Dockerfile location `/Dockerfile`, port `3000`, domain `https://behu.sh`. Leave **Ports Mappings** empty; a published host port disables rolling updates.
+2. **Advanced**: keep the default container naming. Do not set a custom container name or IP; each disables rolling updates.
+3. **Health Check**: enable it with path `/health/ready`, port `3000`, interval 5 seconds, timeout 2 seconds, retries 3, start period 10 seconds. The dashboard check replaces the image's slower `HEALTHCHECK`.
+4. **Advanced > Operations > Stop Grace Period**: 30 seconds (Coolify's default). The drain (10 seconds) plus in-flight requests must finish well inside it.
+5. **Container Labels**: add a Traefik retry so a request that reaches an instance at the instant it exits is retried on the healthy one:
+
+   ```text
+   traefik.http.middlewares.hush-retry.retry.attempts=3
+   ```
+
+   and append `hush-retry` to the router's existing `middlewares` label for the HTTPS router Coolify generated. Keep Coolify's other generated labels unchanged.
+6. **Environment Variables** (runtime only): `NODE_ENV=production`, `PORT=3000`, `HUSH_PUBLIC_BASE_URL=https://behu.sh`, `HUSH_DATA_DIR=/app/data`, `HUSH_SERVICE_KEY_ID`, and `DATABASE_URL` from the `hush-postgres` resource's internal connection URL.
+7. **Persistent Storage**: one volume mounted at `/app/data`.
+8. Automatic deployment settings stay as in "Automatic website deployments" above.
+
+### Verify the contract before every infrastructure change
+
+```sh
+bun scripts/rolling-update-e2e.ts
+```
+
+The script builds the production image and runs PostgreSQL, Traefik and the web
+service in local Docker. It replays both replacement models under continuous
+load from eight concurrent clients. The Compose-style control must drop
+requests, which proves the probe detects outages. The rolling update must drop
+none and keep the signing key unchanged. CI runs the same check whenever the
+web service changes.
+
+### Migrate the existing Compose installation
+
+Run once, in order. Every step has a check; stop at the first failing check.
+Keep the old Compose resource and its volumes until the new setup has served
+production for at least a week.
+
+1. **Back up.** In the Compose resource's terminal or on the server:
+   `pg_dump -Fc` of the `hush` database, and a `tar` of the `hush_objects`
+   volume. Copy both off the server and record their SHA-256 checksums. Record
+   the SHA-256 of `/app/data/service-key.json`.
+2. **Create `hush-postgres`** (PostgreSQL 17) in the same project and network.
+   Restore the dump with `pg_restore --no-owner`. Compare row counts of every
+   table with the source.
+3. **Create `hush-web`** with the settings above, but on a temporary domain
+   (for example `https://next.behu.sh`). Add the persistent storage, then copy
+   the `hush_objects` contents into the new volume, preserving ownership for the
+   `bun` user (UID 1000). Do not set `HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP`: if the
+   copy is wrong, the deployment fails instead of minting a new key.
+4. **Verify on the temporary domain**: `/health/ready` is 200; the key file's
+   SHA-256 matches step 1; a known private proof opens and verifies in its
+   recipient's browser; the homepage, `/verified-messages` and `/releases`
+   render.
+5. **Rehearse rolling updates** on the temporary domain: redeploy three times
+   while polling it every 200 milliseconds. Require zero non-2xx responses.
+6. **Cut over.**
+   1. Set `HUSH_READ_ONLY=1` on the Compose resource and redeploy it. Proof
+      publishing pauses; every page stays up.
+   2. Take a final `pg_dump` and restore it into `hush-postgres`; copy any
+      objects created since step 3.
+   3. Move `https://behu.sh` from the Compose resource to `hush-web`, keeping
+      the temporary domain until the switch is verified.
+   4. Verify `/health/ready`, a proof, and the pages on `https://behu.sh`.
+   5. Stop (do not delete) the Compose resource.
+7. **Rollback**: move the domain back to the Compose resource, remove
+   `HUSH_READ_ONLY`, and redeploy it. Its database and volume are untouched
+   until the final cleanup.

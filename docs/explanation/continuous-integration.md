@@ -32,7 +32,11 @@ cancels obsolete runs for the same PR or branch.
 ## Coverage and resource choices
 
 Web checks retain backend tests, API drift detection, the production build and
-all Chromium desktop/mobile and WebKit journeys. `bun run build` already runs
+all Chromium desktop/mobile and WebKit journeys. Whenever web journeys run, the
+**Zero-downtime deployment** job also runs `webapp/scripts/rolling-update-e2e.ts`:
+it builds the production image and replaces the web service twice under
+continuous load behind Traefik with a separate PostgreSQL, failing on any
+dropped request or changed signing key. **CI result** requires it. `bun run build` already runs
 `tsc -b`, so CI does not run that type check twice. Run `bun run lint` locally for
 a type-check-only pass. Swift and native build commands remain pinned to the
 existing toolchain and package lockfiles.
