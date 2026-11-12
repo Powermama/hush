@@ -14,7 +14,7 @@ repository, adding maintainers, or moving it to an organization.
 | Private vulnerability reporting | Enabled; see [the reporting policy](../../SECURITY.md) |
 | Dependabot alerts | Enabled |
 | Dependabot security updates | Enabled; review and test each proposed fix |
-| CodeQL | Default setup, high-precision default queries, standard runners; Actions, JavaScript/TypeScript, Python and Swift |
+| CodeQL | Advanced setup in `.github/workflows/codeql.yml`, default queries, standard runners; Actions, JavaScript/TypeScript, Python and Swift |
 | Default workflow token | Read-only; cannot approve pull requests |
 | Fork workflows | Maintainer approval for first-time contributors |
 | Third-party Actions | Pinned to full commit SHAs in workflows |
@@ -45,18 +45,21 @@ updates do not automatically merge or deploy.
 
 ## CodeQL scanning
 
-CodeQL default setup is managed by GitHub, outside the repository. It was
-activated on 11 November 2026 with the default query suite, the remote threat
-model and standard GitHub-hosted runners. The selected languages are `actions`,
-`javascript-typescript`, `python` and `swift`. Inspect the returned configuration
-and the latest analysis jobs to confirm actual coverage, rather than treating
-an enabled toggle as a successful scan.
+CodeQL default setup was activated on 11 November 2026 and replaced by advanced
+setup on 12 November 2026. `.github/workflows/codeql.yml` analyses `actions`,
+`javascript-typescript` and `python` without a build on every pull request,
+every push to `main`, weekly and on manual dispatch. Swift requires building the
+Xcode project on a macOS runner, so pull requests run it only when
+`.github/scripts/ci_scope.py` selects native checks: `macos/`, CI or root
+configuration changes. Pushes to `main`, the weekly schedule and manual runs
+always analyse Swift, so the default branch keeps complete coverage.
 
-GitHub manages its pull-request, protected/default-branch and scheduled scans.
-Do not add a duplicate CodeQL workflow while default setup is active. If Swift
-autobuild cannot build the Xcode project, use advanced setup with an explicit
-unsigned, single-architecture build and the pinned native toolchain. Keep that
-change in its own reviewed PR, and verify every language still reports results.
+Categories (`/language:<language>`), the default query suite and build modes
+(`none`, and `autobuild` for Swift) match the former default setup so existing
+alerts continue. Default setup must stay disabled: GitHub rejects advanced
+uploads while it is enabled. After changing the workflow, confirm that every
+language reports a new analysis on `main`, rather than treating a green
+workflow as coverage. Neither check is required for merging.
 
 Standard GitHub-hosted runner compute is free for public repositories such as
 this one. Larger runners and storage have different billing rules; this setup
