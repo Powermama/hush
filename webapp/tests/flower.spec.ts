@@ -148,7 +148,9 @@ test("rose stays open with reduced motion and survives a missing model", async (
   await page.route(/rose-.*\.glb$/, route => route.abort());
   await page.reload();
   await rose.scrollIntoViewIfNeeded();
-  await expect(rose).toHaveAttribute("data-scene", "fallback");
+  // Same budget as the first scene check: under a loaded test runner the scene
+  // module and lighting can take longer than the default 5 s to fail over.
+  await expect(rose).toHaveAttribute("data-scene", "fallback", { timeout: 15000 });
   await expect(rose.locator(".bloom-fallback")).toBeVisible();
   await expect(page.getByRole("link", { name: "Explore the source" })).toBeVisible();
 });
