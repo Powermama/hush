@@ -27,7 +27,9 @@ for (const [path, metadata] of Object.entries(sitePages)) {
   // Keep the existing script-src 'self' policy. Router hydration is an external,
   // immutable build asset, not an inline-script exemption. Escape embedded NULs
   // before HTML parsing can replace them and corrupt TanStack's match IDs.
-  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+  // This extracts trusted SSR hydration scripts, not untrusted HTML. HTML tag
+  // names are case-insensitive; JSON-LD and scripts with attributes stay intact.
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)];
   for (const [tag, source] of scripts) {
     const code = source!.replaceAll("\u0000", "\\u0000");
     const digest = createHash("sha256").update(code).digest("hex").slice(0, 16);
