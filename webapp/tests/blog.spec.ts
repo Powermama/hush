@@ -47,7 +47,7 @@ test("BLOG-003 offers the right download action for the device", async ({ page, 
     await expect(cta.getByRole("button", { name: "Get hush for Mac" })).toBeVisible();
     await expect(cta.locator('a[href$=".dmg"]')).toHaveCount(0);
   } else {
-    await expect(cta.getByRole("link", { name: "Download hush for Mac" })).toBeVisible();
+    await expect(cta.getByRole("link", { name: "Download for Mac" })).toBeVisible();
   }
 });
 

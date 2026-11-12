@@ -35,6 +35,13 @@ export const blogCopy = {
     related: "Keep reading",
     allArticles: "All articles",
     ctaTitle: "Dictate on your Mac, with models that run locally",
+    ctaDownload: "Download for Mac",
+    ctaMobile: "Get hush for Mac",
+    // The download card replays one dictation; HUD labels match the app.
+    ctaDemo: {
+      app: "Mail", title: "New Message", toLabel: "To:", to: "Anna", subjectLabel: "Subject:", subject: "Revised draft",
+      text: "Thanks for the notes. I'll send the revised draft on Friday morning.", words: "12 words",
+    },
     ctaBody: "hush is free and open source. Your dictation and AI models run on your Mac; web search, model downloads, updates and optional Verified Messages use the internet.",
     by: "By",
   },
@@ -51,6 +58,12 @@ export const blogCopy = {
     related: "Weiterlesen",
     allArticles: "Alle Artikel",
     ctaTitle: "Diktieren auf dem Mac, mit Modellen, die lokal laufen",
+    ctaDownload: "Für den Mac laden",
+    ctaMobile: "hush für den Mac holen",
+    ctaDemo: {
+      app: "Mail", title: "Neue E-Mail", toLabel: "An:", to: "Anna", subjectLabel: "Betreff:", subject: "Überarbeiteter Entwurf",
+      text: "Danke für die Notizen. Der überarbeitete Entwurf kommt am Freitagmorgen.", words: "10 words",
+    },
     ctaBody: "hush ist kostenlos und Open Source. Diktat und KI-Modelle laufen auf dem Mac; Websuche, Modell-Downloads, Updates und optionale Verified Messages nutzen das Internet.",
     by: "Von",
   },

@@ -3,9 +3,10 @@
 import { blogCopy, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
-import { DownloadLink } from "../components/DownloadExperience";
 import { Footer } from "../layout/Footer";
 import { Header } from "../layout/Header";
+import { BlogDownloadCard } from "./BlogDownloadCard";
+import { useActiveSection } from "./useActiveSection";
 import "./blog.css";
 
 const dateFormat = (lang: BlogLanguage) => new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-US", {
@@ -32,10 +33,17 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
   if (!post) throw new Error(`Unknown blog article ${lang}/${slug}`);
   const copy = blogCopy[lang];
   const related = relatedPosts(post);
+  const active = useActiveSection(post.toc.map((entry) => entry.id));
   const toc = post.toc.length > 1 && (
     <nav aria-label={copy.onThisPage} className="blog-toc">
       <p className="blog-toc-title">{copy.onThisPage}</p>
-      <ol>{post.toc.map((entry) => <li key={entry.id}><a href={`#${entry.id}`}>{entry.text}</a></li>)}</ol>
+      <ol>
+        {post.toc.map((entry) => (
+          <li key={entry.id}>
+            <a href={`#${entry.id}`} aria-current={entry.id === active ? "location" : undefined}>{entry.text}</a>
+          </li>
+        ))}
+      </ol>
     </nav>
   );
 
@@ -63,13 +71,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
             <div className="blog-prose" data-blog-body="" dangerouslySetInnerHTML={{ __html: html }} />
             {toc && <aside className="blog-toc-desktop">{toc}</aside>}
           </div>
-          <section className="blog-cta" aria-labelledby="blog-cta-title">
-            <h2 id="blog-cta-title">{copy.ctaTitle}</h2>
-            <p>{copy.ctaBody}</p>
-            <DownloadLink variant="primary" mobileLabel={lang === "de" ? "hush für den Mac holen" : "Get hush for Mac"}>
-              {lang === "de" ? "hush für den Mac laden" : "Download hush for Mac"}
-            </DownloadLink>
-          </section>
+          <BlogDownloadCard lang={lang} />
         </article>
         {related.length > 0 && (
           <section className="blog-related" aria-labelledby="blog-related-title">

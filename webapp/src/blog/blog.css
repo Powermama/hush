@@ -44,10 +44,18 @@
   .blog-toc-desktop { display: block; }
   .blog-toc-desktop .blog-toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); }
 }
-.blog-toc-title { margin: 0 0 12px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
-.blog-toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.blog-toc a { font-size: 14px; line-height: 1.45; color: var(--color-muted); }
+.blog-toc-title { margin: 0 0 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
+/* A quiet rail; the section being read gets the ink segment and full contrast. */
+.blog-toc ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid rgb(0 0 0 / 0.08); }
+.blog-toc li + li { margin-top: 2px; }
+.blog-toc a {
+  display: block; margin-left: -1px; padding: 5px 0 5px 14px; border-left: 2px solid transparent;
+  font-size: 13.5px; line-height: 1.45; color: var(--color-soft);
+  transition: color 0.2s, border-color 0.2s;
+}
 .blog-toc a:hover, .blog-toc a:focus-visible { color: var(--color-ink); }
+.blog-toc a[aria-current="location"] { color: var(--color-ink); border-left-color: var(--color-ink); font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .blog-toc a { transition: none; } }
 
 /* Article body */
 .blog-prose { font-size: 17px; line-height: 1.75; color: #2b2c29; min-width: 0; }
@@ -74,11 +82,48 @@
 .blog-prose th, .blog-prose td { padding: 10px 14px; border-bottom: 1px solid rgb(0 0 0 / 0.08); text-align: left; vertical-align: top; min-width: 120px; }
 .blog-prose th { font-weight: 600; color: var(--color-ink); background: rgb(0 0 0 / 0.025); }
 
-/* Download card */
-.blog-cta { max-width: 680px; margin: 56px auto 0; padding: 28px; border-radius: 20px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px rgb(31 32 30 / 0.06); }
+/* Download card: replays one dictation with the app's HUD. */
+.blog-cta { max-width: 680px; margin: 64px auto 0; border-radius: 24px; overflow: hidden; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 16px 40px rgb(31 32 30 / 0.07); }
 @media (min-width: 1024px) { .blog-cta { margin-left: max(0px, calc((100% - 968px) / 2)); } }
-.blog-cta h2 { margin: 0; font-size: 22px; line-height: 1.25; letter-spacing: -0.02em; font-weight: 600; }
-.blog-cta p { margin: 10px 0 20px; font-size: 15px; line-height: 1.6; color: var(--color-muted); }
+/* A cropped piece of a Mac screen: the Mail window runs off the right and
+   bottom edges, the HUD floats where the app shows it. */
+.blog-cta-stage {
+  position: relative; height: 300px; overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 15% 0%, rgb(255 179 199 / 0.32), transparent 60%),
+    radial-gradient(110% 90% at 90% 10%, rgb(158 201 255 / 0.34), transparent 62%),
+    radial-gradient(90% 80% at 50% 110%, rgb(201 184 255 / 0.4), transparent 70%),
+    #f4f2f8;
+  border-bottom: 1px solid rgb(0 0 0 / 0.06);
+}
+.blog-cta-window {
+  position: absolute; top: 34px; left: 44px; right: -40px; bottom: -40px;
+  border-radius: 12px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08);
+  box-shadow: 0 2px 6px rgb(31 32 30 / 0.05), 0 24px 60px rgb(31 32 30 / 0.12);
+}
+.blog-cta-window-bar { position: relative; display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-bottom: 1px solid rgb(0 0 0 / 0.06); background: #f7f6f4; border-radius: 12px 12px 0 0; }
+.blog-cta-window-bar i { width: 11px; height: 11px; border-radius: 50%; background: #ff5f57; box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.12); }
+.blog-cta-window-bar i:nth-child(2) { background: #febc2e; }
+.blog-cta-window-bar i:nth-child(3) { background: #28c840; }
+.blog-cta-window-bar span { position: absolute; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 600; color: var(--color-muted); }
+.blog-cta-window-field { display: flex; gap: 8px; margin: 0 18px; padding: 9px 0; border-bottom: 1px solid rgb(0 0 0 / 0.06); font-size: 13px; color: var(--color-ink); }
+.blog-cta-window-field span { color: var(--color-soft); }
+.blog-cta-window-text { margin: 0; padding: 14px 18px; max-width: 470px; font-size: 14px; line-height: 1.55; color: var(--color-ink); }
+.blog-cta-window-text span { display: none; }
+.blog-cta-window-text[data-typed="true"] span { display: inline; animation: blog-insert 0.45s ease-out; }
+@keyframes blog-insert { from { opacity: 0; } }
+.blog-cta-caret { display: inline-block; width: 1.5px; height: 1.1em; margin-left: 1px; vertical-align: -0.2em; background: #2f6fde; animation: blog-caret 1.1s steps(1) infinite; }
+@keyframes blog-caret { 50% { opacity: 0; } }
+.blog-cta-hud { position: absolute; left: 50%; bottom: 22px; width: min(calc(100% - 32px), 380px); translate: -50% 0; }
+@media (max-width: 639px) {
+  .blog-cta-stage { height: 290px; }
+  .blog-cta-window { left: 20px; top: 24px; }
+  .blog-cta-window-text { font-size: 13.5px; padding-right: 40px; }
+}
+@media (prefers-reduced-motion: reduce) { .blog-cta-window-text[data-typed="true"] span, .blog-cta-caret { animation: none; } }
+.blog-cta-body { padding: 26px 28px 28px; }
+.blog-cta-body h2 { margin: 0; font-size: 22px; line-height: 1.25; letter-spacing: -0.02em; font-weight: 600; }
+.blog-cta-body p { margin: 10px 0 20px; font-size: 15px; line-height: 1.6; color: var(--color-muted); }
 
 /* Related and index lists */
 /* Same left edge and width as the article column plus its table of contents. */
