@@ -2,7 +2,6 @@
   --story-ink: #171d31; --story-blue: #3848ce; --story-paper: #dee3fa; --story-ribbon-angle: -5deg;
   position: relative; isolation: isolate; overflow: clip; color: var(--story-ink); background: var(--story-ink);
 }
-.story-filters { position: absolute; pointer-events: none; }
 .story-handoff { position: relative; height: clamp(190px, 24vw, 330px); margin-top: -35px; background: linear-gradient(#f8fafb, #eef0fa 55%, var(--story-paper)); }
 .story-handoff svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #7c89bf; stroke-width: .8; opacity: .35; }
 .handoff-whisper { position: absolute; top: 43%; left: 50%; translate: -50% 0; color: #64709a; font-size: 14px; white-space: nowrap; background: #f1f3fb; padding: 7px 16px; border-radius: 50%; }
@@ -18,7 +17,7 @@
 .thought-figure { position: absolute; right: 9%; top: -25px; width: min(57%, 700px); margin: 0; }
 .thought-art { position: relative; aspect-ratio: 1 / 1.1; isolation: isolate; }
 .portrait-base, .portrait-slice { position: absolute; inset: 0; }
-.portrait-base img, .portrait-slice img { width: 100%; height: 100%; object-fit: cover; filter: url(#hush-art-blue) saturate(.55) hue-rotate(20deg); clip-path: polygon(47% 3%, 55% 3%, 63% 7%, 68% 17%, 66% 25%, 64% 35%, 73% 38%, 85% 46%, 92% 60%, 92% 74%, 84% 87%, 73% 93%, 61% 96%, 39% 96%, 19% 90%, 8% 78%, 7% 63%, 10% 48%, 20% 40%, 31% 36%, 35% 30%, 34% 23%, 33% 14%, 39% 7%); }
+.portrait-base img, .portrait-slice img { width: 100%; height: 100%; object-fit: cover; clip-path: polygon(47% 3%, 55% 3%, 63% 7%, 68% 17%, 66% 25%, 64% 35%, 73% 38%, 85% 46%, 92% 60%, 92% 74%, 84% 87%, 73% 93%, 61% 96%, 39% 96%, 19% 90%, 8% 78%, 7% 63%, 10% 48%, 20% 40%, 31% 36%, 35% 30%, 34% 23%, 33% 14%, 39% 7%); }
 .portrait-base { clip-path: polygon(0 0, 100% 0, 100% 28%, 0 28%, 0 34%, 100% 34%, 100% 66%, 0 66%, 0 72%, 100% 72%, 100% 100%, 0 100%); }
 .portrait-slice { transition: transform .7s cubic-bezier(.2,.65,.3,1); }
 .portrait-slice-one { clip-path: inset(28% 0 66%); transform: translateX(26px) skewX(-5deg); }
@@ -42,9 +41,9 @@
 .story-freedom { position: relative; background: var(--story-ink); scroll-margin-top: 24px; }
 .freedom-figure { margin: 0; position: relative; }
 .freedom-art { position: relative; height: clamp(720px, 72vw, 1040px); isolation: isolate; }
-.freedom-art > img { position: absolute; width: 100%; height: 116%; top: -16%; left: 0; object-fit: cover; object-position: 50% 40%; filter: url(#hush-art-coral) saturate(.7); mask-image: linear-gradient(transparent, #000 20%, #000 70%, transparent); opacity: .72; }
+.freedom-art > img { position: absolute; width: 100%; height: 116%; top: -16%; left: 0; object-fit: cover; object-position: 50% 40%; mask-image: linear-gradient(transparent, #000 20%, #000 70%, transparent); opacity: .72; }
 .freedom-art::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(0deg, var(--story-ink), transparent 50%); }
-.freedom-image-echo { position: absolute; inset: -16% 0 0; background: url('../media/art/liberty.webp') 50% 40% / cover; filter: url(#hush-art-coral); clip-path: polygon(60% 0, 68% 0, 56% 100%, 48% 100%); translate: 22px 0; opacity: .35; mask-image: linear-gradient(transparent, #000 20%, #000 60%, transparent); }
+.freedom-image-echo { position: absolute; inset: -16% 0 0; background: url('../media/art/liberty-coral-echo.webp') 50% 40% / cover; clip-path: polygon(60% 0, 68% 0, 56% 100%, 48% 100%); translate: 22px 0; opacity: .35; mask-image: linear-gradient(transparent, #000 20%, #000 60%, transparent); }
 .freedom-overprint { position: absolute; top: 7%; left: 3%; font: italic clamp(180px, 27vw, 430px)/1 Georgia, serif; color: transparent; -webkit-text-stroke: 1px #f1d6cd55; rotate: -7deg; pointer-events: none; }
 .freedom-copy { position: relative; z-index: 2; max-width: 1280px; margin: auto; padding: 21% 4vw 0; color: #f2edf7; }
 .freedom-copy h2 { font-size: clamp(72px, 10.4vw, 152px); font-weight: 500; letter-spacing: -.075em; line-height: .88; margin: 0; }
@@ -59,7 +58,7 @@
 .intelligence-layout { position: relative; max-width: 1280px; height: 850px; margin: auto; }
 .intelligence-figure { position: absolute; z-index: 2; top: 105px; left: 4%; width: 31%; margin: 0; transform: rotate(-8deg); }
 .intelligence-art { position: relative; isolation: isolate; padding: 30px 9px 9px; border: 1px solid #f4f5fc; background: #e8eafa; border-radius: 10px; box-shadow: 12px 20px 0 -5px #afb6d76b, 0 20px 60px #141e3c25; }
-.intelligence-art > img { display: block; width: 100%; height: auto; aspect-ratio: .84; object-fit: cover; object-position: 50% 35%; filter: saturate(.62); }
+.intelligence-art > img { display: block; width: 100%; height: auto; aspect-ratio: .84; object-fit: cover; object-position: 50% 35%; }
 .local-window-label { position: absolute; top: 0; left: 0; right: 0; height: 30px; display: flex; align-items: center; gap: 5px; padding: 0 12px; color: #747b95; }
 .local-window-label > span { width: 5px; height: 5px; border-radius: 50%; background: #a9b1d1; }
 .local-window-label > b { margin-left: auto; font: 9px var(--font-mono); font-weight: 400; }
@@ -95,7 +94,7 @@
 .hush-mascot-recording .mascot-character { transform: rotate(-4deg); }
 /* Body behind the marble, fingers in front. Both layers share one coordinate space. */
 .thought-companion, .thought-companion-grip { position: absolute; width: 26%; aspect-ratio: 200 / 190; left: 28%; bottom: 34%; translate: 0 30%; pointer-events: none; }
-.thought-companion { z-index: 6; filter: saturate(.65); }
+.thought-companion { z-index: 6; }
 .thought-companion-grip { z-index: 8; }
 .thought-companion svg, .thought-companion-grip svg { display: block; width: 100%; height: 100%; }
 .window-companion { width: 25px; height: 25px; margin-left: 7px; border-radius: 50%; overflow: hidden; background: #d9ddef; }

@@ -1,12 +1,39 @@
 # PRD: smooth 3D entrance across browsers, devices and networks
 
-Status: the original transition calendar is restored in the current optimized
-architecture, and the user confirms the longer entrance. The Safari hitch
-remains about half a second into the object's entrance, with roughly one smooth
-reload in ten. Neither shader-only preparation nor hidden-first-frame warmup
-resolved it; the latter experiment was removed. Causal attribution, a physically
-verified performance fix and deployment remain open.
+Status: resolved on physical Safari 26.3 (macOS 26.3, Apple M5) on November 12.
+See [Root cause and resolution](#root-cause-and-resolution). Earlier
+investigation notes below are retained as history.
 See the [executive brief](safari-hero-executive-brief.md).
+
+## Root cause and resolution
+
+Sampling Safari's processes during a hitching reload showed the web content main
+thread blocked in `WebGLRenderingContextBase::prepareForDisplay()`, waiting on a
+synchronous reply from the GPU process. The GPU process was busy rendering CSS
+and SVG filters on the CPU (`vBoxConvolve`, `vMatrixMultiply`,
+`FEComponentTransferSoftwareApplier`). Those filters tinted the story artwork
+just below the hero, which Safari paints ahead of the viewport. The page's own
+JavaScript and WebGL calls were idle; Chrome rasterizes filters elsewhere and
+was unaffected.
+
+The same filters existed in the November 10 build. That build kept the page
+hidden while lighting was generated at runtime, so filtered painting finished
+before the entrance. Precomputed lighting and the removed import delay started
+the 3D entrance earlier, into the filtered paint.
+
+The fix bakes every colour treatment and the hero icons' shadow into WebP files
+with `scripts/bake-artwork.mjs` and removes runtime filters (LANDING-PAINT-001).
+Reloads in physical Safari through the production server:
+
+| Build | Reloads | Stalls over 100 ms | Worst frame |
+| --- | --- | --- | --- |
+| `main` before the fix | 13 | 4 | 198 ms |
+| Baked artwork | 18 | 0 | 56 ms |
+
+Removing the story section or all filters on production bytes also removed the
+stall (11 of 11 clean), while unchanged production stalled in 7 of 8
+interleaved reloads. Pixel comparison against the filtered originals in Chromium
+and WebKit at DPR 2 shows mean channel differences of 0.9-3.6 out of 255.
 
 ## Problem and outcome
 

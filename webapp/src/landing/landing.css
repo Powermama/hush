@@ -41,7 +41,10 @@
 .orbit-app { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 9px; z-index: 3; }
 .orbit-tile { width: 70px; height: 70px; padding: 11px; display: grid; place-items: center; background: linear-gradient(150deg, #fff, #fafcfd); border: 1px solid white; border-radius: 20px; box-shadow: 0 3px 3px #35445406, 0 12px 28px #3544540a, inset 0 0 0 1px #dfe4e54d; transform: rotate(-7deg); transition: transform .3s; }
 .orbit-app:nth-of-type(even) .orbit-tile { transform: rotate(7deg); }
-.orbit-tile img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 2px #0001); }
+/* The image carries a baked shadow in a 1/12 margin on every side; the icon spans
+   --icon, the tile's content box, and the margin keeps the shadow out of layout.
+   The 1px offset preserves the icons' established optical position. */
+.orbit-tile img { --icon: 46px; width: calc(var(--icon) * 7 / 6); max-width: none; height: calc(var(--icon) * 7 / 6); margin: calc(var(--icon) / -12); translate: 0 1px; }
 .orbit-app > span { font-size: 11px; color: #626973; }
 .orbit-app:hover .orbit-tile { transform: translateY(-4px); }
 /* A prepared scene starts one shared timeline. CSS alone reveals the composition
@@ -88,7 +91,7 @@
   .hush-core { width: 330px; height: 330px; top: 49%; }
   .core-fallback { width: 145px; height: 145px; }
   .orbit-tile { width: 54px; height: 54px; padding: 8px; border-radius: 15px; }
-  .orbit-tile img { width: 38px; height: 38px; }
+  .orbit-tile img { --icon: 36px; }
   .orbit-app > span { font-size: 9px; }
   .orbit-app { gap: 6px; }
   .hero-download-area { margin-top: 38px; }
@@ -103,7 +106,7 @@
   .core-fallback { width: 125px; height: 125px; }
   .core-fallback > i, .core-fallback > div { border-radius: 28px; }
   .orbit-tile { width: 44px; height: 44px; padding: 6px; border-radius: 13px; }
-  .orbit-tile img { width: 32px; height: 32px; }
+  .orbit-tile img { --icon: 30px; }
   .hero-actions { gap: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {

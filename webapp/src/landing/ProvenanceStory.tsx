@@ -4,9 +4,10 @@ import "./provenance.css";
 const pressSource = "https://commons.wikimedia.org/wiki/File:Buchdrucker-1568.png";
 
 function PrintingPress({ decorative = false }: { decorative?: boolean }) {
+  const image = decorative ? artwork.printingPressEcho : artwork.printingPress;
   return <img
-    src={artwork.printingPress.src}
-    srcSet={artwork.printingPress.srcSet}
+    src={image.src}
+    srcSet={image.srcSet}
     sizes="(max-width: 760px) 65vw, 420px"
     width="751" height="879" loading="lazy" decoding="async"
     alt={decorative ? "" : "Printers setting type and working a press in Jost Amman’s 1568 woodcut, reinterpreted in blue ink on a pale collage."}
@@ -16,19 +17,6 @@ function PrintingPress({ decorative = false }: { decorative?: boolean }) {
 /** An editorial collage, not a live verification result or an identity claim. */
 export function ProvenanceStory() {
   return <section className="story-provenance" aria-labelledby="provenance-title">
-    <svg className="story-filters" aria-hidden="true" width="0" height="0">
-      <defs>
-        <filter id="hush-art-print" colorInterpolationFilters="sRGB">
-          <feColorMatrix type="saturate" values="0" />
-          <feComponentTransfer>
-            <feFuncR type="table" tableValues="0.10 0.90" />
-            <feFuncG type="table" tableValues="0.19 0.94" />
-            <feFuncB type="table" tableValues="0.38 0.99" />
-          </feComponentTransfer>
-        </filter>
-      </defs>
-    </svg>
-
     <div className="provenance-inner">
       <div className="provenance-opening">
         <h2 id="provenance-title">Reality has<br />a copy problem.</h2>

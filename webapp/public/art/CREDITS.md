@@ -10,7 +10,7 @@ Unused archive images remain in `public/art/`.
 - Rebuild with `node scripts/bake-studio-environment.mjs` from `webapp/`, using the pinned Three.js version. Six half-float reflection levels are stored in KTX2 and gzip-compressed for delivery; each level is area-downsampled by two before packaging.
 - Source: [Three.js RoomEnvironment](https://github.com/mrdoob/three.js/blob/r187/examples/jsm/environments/RoomEnvironment.js), MIT. The notice is preserved in `/third-party/three-LICENSE.txt`. The MIT-licensed `ktx-parse` reader's notice is in `/third-party/ktx-parse-LICENSE.txt`.
 
-These are existing public-domain artworks and an openly licensed photograph, not AI-generated images. The website applies its own colour treatments, cropping and displaced collage strips. No endorsement by an artist, photographer or museum is implied.
+These are existing public-domain artworks and an openly licensed photograph, not AI-generated images. The website applies its own colour treatments, cropping and displaced collage strips. Colour treatments are baked into derived files by `scripts/bake-artwork.mjs` from the untreated sources listed below; pages run no image filters. No endorsement by an artist, photographer or museum is implied.
 
 ## Portrait of Aristotle
 
@@ -19,8 +19,8 @@ These are existing public-domain artworks and an openly licensed photograph, not
 - [Source and rights statement](https://commons.wikimedia.org/wiki/File:Portrait_of_Aristotle,_set_on_a_restored_bust,_Colosseum.jpg).
 - The photographer expressly released the photograph into the public domain worldwide; the sculpture is also public domain.
 - Downloaded the 960 x 1404 thumbnail on 4 November 2026. Cropped to x=0, y=80, width=960, height=1000; encoded as WebP at quality 78. The small version is 480 x 500.
-- Files: `aristotle.webp`, `aristotle-small.webp`.
-- The page masks the portrait, maps it to a blue/ice duotone and offsets two horizontal strips. The copy is hush's own writing, not a quotation attributed to Aristotle.
+- Files: `aristotle.webp`, `aristotle-small.webp`; treated `aristotle-blue.webp`, `aristotle-blue-small.webp`.
+- The page masks the portrait, uses a blue/ice duotone and offsets two horizontal strips. The copy is hush's own writing, not a quotation attributed to Aristotle.
 
 ## Liberty Leading the People
 
@@ -28,8 +28,8 @@ These are existing public-domain artworks and an openly licensed photograph, not
 - [Source and rights statement](https://commons.wikimedia.org/wiki/File:Eug%C3%A8ne_Delacroix_-_Liberty_Leading_the_People.jpeg).
 - Public-domain work and faithful reproduction, marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/).
 - Downloaded the 1280 x 1016 thumbnail on 4 November 2026. Encoded as WebP at quality 76. The small version is 768 x 610.
-- Files: `liberty.webp`, `liberty-small.webp`.
-- The page crops the composition responsively, maps it to a coral/ink duotone and displaces one narrow image strip on desktop.
+- Files: `liberty.webp`, `liberty-small.webp`; treated `liberty-coral.webp`, `liberty-coral-small.webp`, `liberty-coral-echo.webp`.
+- The page crops the composition responsively, uses a coral/ink duotone and displaces one narrow image strip on desktop.
 
 ## The Geographer
 
@@ -37,8 +37,8 @@ These are existing public-domain artworks and an openly licensed photograph, not
 - [Downloaded reproduction and rights statement](https://commons.wikimedia.org/wiki/File:Johannes_Vermeer_-_The_Geographer_-_Google_Art_Project.jpg), from the Google Art Project reproduction on Wikimedia Commons.
 - [Museum record](https://sammlung.staedelmuseum.de/en/work/the-geographer), which supplies the date and lists the picture copyright as Public Domain.
 - The reproduction is marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/).
-- Downloaded the 960 x 1076 thumbnail on 4 November 2026. Encoded as WebP at quality 82, with a 480 x 538 responsive version. Original colours are preserved; a square display crop is applied with CSS.
-- Files: `geographer.webp`, `geographer-small.webp`.
+- Downloaded the 960 x 1076 thumbnail on 4 November 2026. Encoded as WebP at quality 82, with a 480 x 538 responsive version. Colours are softened (saturation 62%); a square display crop is applied with CSS.
+- Files: `geographer.webp`, `geographer-small.webp`; treated `geographer-muted.webp`, `geographer-muted-small.webp`.
 - The intelligence section shows the painting with its own visible caption and an original Three.js/SVG hush companion, considering an idea beside the map. Liberty's attribution stays with the preceding banner.
 
 ## Steve Jobs, 2010 (unused archive asset)
@@ -55,8 +55,8 @@ These are existing public-domain artworks and an openly licensed photograph, not
 - Jost Amman, from the 1568 book of trades published with Hans Sachs's text. This depicts a sixteenth-century print workshop, not the invention of printing in 1568.
 - [Source and rights statement](https://commons.wikimedia.org/wiki/File:Buchdrucker-1568.png). The woodcut and reproduction are marked public domain / [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/).
 - Downloaded the 751 x 879 PNG on 4 November 2026. Encoded as WebP at quality 83, plus a 450 x 527 responsive version at quality 80.
-- Files: `printing-press.webp`, `printing-press-small.webp`.
-- The website reverses the monochrome print into a cyan/ink duotone, masks the edge and displaces decorative strips using SVG/CSS. Surrounding words and the connecting thread are original code-native illustrations, not historic quotations or a real proof result.
+- Files: `printing-press.webp`, `printing-press-small.webp`; treated `printing-press-print*.webp` and `printing-press-print-echo*.webp`.
+- The website maps the monochrome print to a cyan/ink duotone, masks the edge and displaces decorative strips using CSS. Surrounding words and the connecting thread are original code-native illustrations, not historic quotations or a real proof result.
 
 ## Ameca Generation 1
 
@@ -64,7 +64,7 @@ These are existing public-domain artworks and an openly licensed photograph, not
 - [Source and rights statement](https://commons.wikimedia.org/wiki/File:Ameca_Generation_1.jpg).
 - Licensed under [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/).
 - Downloaded the 878 x 973 original on 4 November 2026. Cropped to x=49, y=0, width=780, height=973; WebP quality 82, plus a 480 x 599 version at quality 80.
-- Files: `robot-portrait.webp`, `robot-portrait-small.webp`. Both files and hush's six-panel photographic adaptation are distributed under CC BY-SA 4.0. The adaptation is implemented in `src/verified/PortraitScene.ts` and the `.vm-portrait-fallback` / `.vm-portrait-fragment` styles in `src/verified/verified-editorial.css`.
+- Files: `robot-portrait.webp`, `robot-portrait-small.webp`; recoloured `robot-portrait-teal.webp`, `robot-portrait-teal-small.webp` and `robot-portrait-violet.webp`. All these files and hush's six-panel photographic adaptation are distributed under CC BY-SA 4.0. The adaptation is implemented in `src/verified/PortraitScene.ts` and the `.vm-portrait-fallback` / `.vm-portrait-fragment` styles in `src/verified/verified-editorial.css`.
 - The robot image is recoloured in cyan and pink and split into displaced panels. It is a dimensional photo collage, not a 3D scan or an AI-generated image. The nearby message is an independent illustrative example, not attributed to the robot, its creator or photographer. No endorsement is implied.
 
 ## Twittering Machine (Die Zwitscher-Maschine)
@@ -73,8 +73,8 @@ These are existing public-domain artworks and an openly licensed photograph, not
 - [Source and rights statement](https://commons.wikimedia.org/wiki/File:Die_Zwitscher-Maschine_(Twittering_Machine),_1922_-_Paul_Klee.jpg).
 - Public-domain work and faithful reproduction, marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/).
 - Downloaded the 994 x 1350 reproduction on 4 November 2026; WebP quality 80, plus a 480 x 652 version at quality 78.
-- Files: `twittering-machine.webp`, `twittering-machine-small.webp`.
-- CSS applies a restrained colour shift, rotated paper composition and edge mask. The example voice transcript and time are original illustrative content layered over the painting, not Klee's words or a historical recording.
+- Files: `twittering-machine.webp`, `twittering-machine-small.webp`; treated `twittering-machine-muted.webp`, `twittering-machine-muted-small.webp`.
+- The treated files carry a restrained colour shift; CSS adds the rotated paper composition and edge mask. The example voice transcript and time are original illustrative content layered over the painting, not Klee's words or a historical recording.
 
 Editorial artwork has visible credits beneath its composition. Files are hosted on hush's own site, with no third-party image requests.
 
