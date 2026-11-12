@@ -5,7 +5,7 @@ import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { DownloadLink } from "../components/DownloadExperience";
 import { Footer } from "../layout/Footer";
-import { SubpageHeader } from "../layout/SubpageHeader";
+import { Header } from "../layout/Header";
 import "./blog.css";
 
 const dateFormat = (lang: BlogLanguage) => new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-US", {
@@ -23,16 +23,7 @@ function relatedPosts(post: BlogPostMetadata) {
 }
 
 export function BlogHeader({ lang }: { lang: BlogLanguage }) {
-  return (
-    <SubpageHeader navigationLabel={lang === "de" ? "Blog-Navigation" : "Blog navigation"}>
-      <a
-        href={blogCopy[lang].indexPath}
-        className="inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold text-muted transition hover:bg-black/5 hover:text-ink"
-      >
-        {blogCopy[lang].allArticles}
-      </a>
-    </SubpageHeader>
-  );
+  return <Header navigationLabel={lang === "de" ? "Blog-Navigation" : "Blog navigation"} />;
 }
 
 /** Rendered by each generated article module with its own HTML chunk. */
@@ -55,6 +46,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
       <main className="blog-article-main">
         <article className="blog-article" aria-labelledby="article-title">
           <header className="blog-article-header">
+            <a className="blog-back" href={copy.indexPath}>{copy.allArticles}</a>
             <h1 id="article-title">{post.heading}</h1>
             <p className="blog-byline">
               <span>{copy.by} <a href={post.authorUrl} rel="author">{post.author}</a></span>

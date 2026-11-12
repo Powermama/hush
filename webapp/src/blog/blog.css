@@ -8,6 +8,10 @@
   font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -0.035em;
   font-weight: 600; margin: 0; color: var(--color-ink); text-wrap: balance;
 }
+/* Way back to the index, aligned with the article column. */
+.blog-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; font-weight: 600; color: var(--color-muted); }
+.blog-back::before { content: "\2039"; font-size: 18px; line-height: 1; transform: translateY(-1px); }
+.blog-back:hover, .blog-back:focus-visible { color: var(--color-ink); }
 .blog-byline { margin: 18px 0 0; display: flex; flex-wrap: wrap; column-gap: 0; row-gap: 2px; font-size: 14px; line-height: 1.6; color: var(--color-muted); }
 .blog-byline > span { white-space: nowrap; }
 .blog-byline > span + span::before { content: "·"; margin: 0 0.5em; color: var(--color-soft); }
@@ -60,6 +64,9 @@
 .blog-prose li::marker { color: var(--color-soft); }
 .blog-prose strong { font-weight: 600; color: var(--color-ink); }
 .blog-prose code { font-size: 0.88em; padding: 0.15em 0.35em; border-radius: 6px; background: rgb(0 0 0 / 0.05); }
+/* Code blocks scroll inside their own box, like tables. */
+.blog-prose pre { margin: 0 0 1.25em; padding: 14px 18px; overflow-x: auto; border-radius: 12px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); font-size: 0.85em; line-height: 1.6; }
+.blog-prose pre code { padding: 0; border-radius: 0; background: none; font-size: inherit; }
 .blog-prose blockquote { padding-left: 1em; border-left: 3px solid rgb(0 0 0 / 0.1); color: var(--color-muted); }
 .blog-prose hr { border: 0; border-top: 1px solid rgb(0 0 0 / 0.08); margin: 2.5em 0; }
 /* Tables scroll inside their own box; the page never scrolls sideways. */
