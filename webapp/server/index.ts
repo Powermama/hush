@@ -35,10 +35,18 @@ const proofService = new ProofService(
   config.publicBaseUrl,
   { shortBaseUrl: config.shortBaseUrl },
 );
+let draining = false;
 const app = createApp({
   proofService,
   allowedOrigin: config.allowedOrigin,
   registerRootAlias: false,
+  readOnly: config.readOnly,
+  // Ready only while not draining and the database answers promptly. The
+  // proxy and Coolify's rolling update both rely on this being truthful.
+  readiness: async () => !draining && await Promise.race([
+    repository.ping().then(() => true),
+    Bun.sleep(2_000).then(() => false),
+  ]),
 });
 
 const pageFile = Bun.file("./dist-pages/pages.json");
@@ -99,13 +107,28 @@ console.info(
   }),
 );
 
+// Graceful shutdown for rolling updates. Coolify starts the replacement, waits
+// for its health check, then stops this instance with a grace period (30 s by
+// default). Keep answering during the drain so requests the proxy still routes
+// here succeed, report not-ready so health checks move traffic away, then stop
+// listening without dropping in-flight requests and exit inside the grace period.
 let stopping = false;
-async function shutdown() {
+async function shutdown(signal: string) {
   if (stopping) return;
   stopping = true;
-  await server.stop(true);
+  draining = true;
+  console.info(JSON.stringify({
+    level: "info",
+    message: "Draining before shutdown",
+    signal,
+    drainMs: config.shutdownDrainMs,
+  }));
+  await Bun.sleep(config.shutdownDrainMs);
+  await server.stop(false);
   await cleanup.stop();
   await repository.close();
+  console.info(JSON.stringify({ level: "info", message: "Hush proof service stopped" }));
+  process.exit(0);
 }
-process.once("SIGTERM", () => void shutdown());
-process.once("SIGINT", () => void shutdown());
+process.once("SIGTERM", () => void shutdown("SIGTERM"));
+process.once("SIGINT", () => void shutdown("SIGINT"));

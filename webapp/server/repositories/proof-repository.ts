@@ -51,5 +51,7 @@ export interface ProofRepository {
   claimProofsForDeletion(now: Date, limit: number): Promise<ProofRecord[]>;
   deleteClaimedProof(id: string): Promise<void>;
   deleteExpiredChallenges(now: Date, limit: number): Promise<number>;
+  /** Cheap round trip used by the readiness probe. Rejects when the store is unavailable. */
+  ping(): Promise<void>;
   revokeProof(id: string, revokedAt: Date): Promise<ProofRecord | null>;
 }

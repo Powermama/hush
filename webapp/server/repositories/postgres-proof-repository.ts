@@ -33,6 +33,10 @@ export class PostgresProofRepository implements ProofRepository {
     await this.client.end({ timeout: 5 });
   }
 
+  async ping(): Promise<void> {
+    await this.client`select 1`;
+  }
+
   async createChallenge(
     input: Omit<ChallengeRecord, "id" | "consumedAt" | "createdAt">,
   ): Promise<ChallengeRecord> {
