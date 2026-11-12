@@ -87,11 +87,15 @@ describe("graceful shutdown of the real server process", () => {
         if (attempt > 100) throw new Error("server did not become ready");
         await Bun.sleep(50);
       }
+      expect((await fetch(`${base}/health/live`)).headers.get("connection")).not.toBe("close");
       const started = Date.now();
       child.kill("SIGTERM");
       await Bun.sleep(200);
       // During the drain the instance still answers requests the proxy routes to it.
-      expect((await fetch(`${base}/health/live`)).status).toBe(200);
+      const live = await fetch(`${base}/health/live`);
+      expect(live.status).toBe(200);
+      // The proxy must stop reusing keep-alive connections to a draining instance.
+      expect(live.headers.get("connection")).toBe("close");
       expect((await fetch(`${base}/health/ready`)).status).toBe(503);
       expect(await child.exited).toBe(0);
       const elapsed = Date.now() - started;

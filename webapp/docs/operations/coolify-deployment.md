@@ -195,7 +195,7 @@ Docker Swarm, Kubernetes, Fly.io) works without code changes:
 | --- | --- |
 | `GET /health/live` | 200 while the process runs, including while draining. Use for liveness only. |
 | `GET /health/ready` | 200 only when the instance is not draining and PostgreSQL answers within 2 seconds; otherwise 503. Never cached. Use for readiness and routing. |
-| `SIGTERM` | Report not-ready, keep serving for `HUSH_SHUTDOWN_DRAIN_MS` (default 10000), stop listening without dropping in-flight requests, close the database and exit 0. |
+| `SIGTERM` | Report not-ready and keep serving for `HUSH_SHUTDOWN_DRAIN_MS` (default 10000), answering with `Connection: close` so the proxy stops reusing keep-alive connections to this instance. Then wait (at most 10 seconds) for in-flight requests, close every remaining connection at once, close the database and exit 0. Leaving idle keep-alive connections open made requests sent on them hang until they timed out. |
 | Configuration | Environment variables only. No host port, container name or IP is required. |
 | Migrations | Applied at start under a PostgreSQL advisory lock, so concurrent starts never race. |
 | Background cleanup | Idempotent; two instances may run it during an overlap. |
@@ -213,13 +213,7 @@ running version uses it.
 2. **Advanced**: keep the default container naming. Do not set a custom container name or IP; each disables rolling updates.
 3. **Health Check**: enable it with path `/health/ready`, port `3000`, interval 5 seconds, timeout 2 seconds, retries 3, start period 10 seconds. The dashboard check replaces the image's slower `HEALTHCHECK`.
 4. **Advanced > Operations > Stop Grace Period**: 30 seconds (Coolify's default). The drain (10 seconds) plus in-flight requests must finish well inside it.
-5. **Container Labels**: add a Traefik retry so a request that reaches an instance at the instant it exits is retried on the healthy one:
-
-   ```text
-   traefik.http.middlewares.hush-retry.retry.attempts=3
-   ```
-
-   and append `hush-retry` to the router's existing `middlewares` label for the HTTPS router Coolify generated. Keep Coolify's other generated labels unchanged.
+5. **Container Labels**: keep **Managed by Coolify**. No retry middleware is needed: the end-to-end check below runs with Coolify's generated labels and no retry, and drops no requests. Hand-edited labels would stop following domain changes.
 6. **Environment Variables** (runtime only): `NODE_ENV=production`, `PORT=3000`, `HUSH_PUBLIC_BASE_URL=https://behu.sh`, `HUSH_DATA_DIR=/app/data`, `HUSH_SERVICE_KEY_ID`, and `DATABASE_URL` from the `hush-postgres` resource's internal connection URL.
 7. **Persistent Storage**: one volume mounted at `/app/data`.
 8. Automatic deployment settings stay as in "Automatic website deployments" above.
@@ -231,15 +225,30 @@ bun scripts/rolling-update-e2e.ts
 ```
 
 The script builds the production image and runs PostgreSQL, Traefik and the web
-service in local Docker. It replays both replacement models under continuous
-load from eight concurrent clients. The Compose-style control must drop
+service in local Docker. Traefik routes with labels like Coolify's and no retry
+middleware; the rolling replacement waits for health, then five seconds, then
+stops the old container, as Coolify's deployment log shows. It replays both
+replacement models under continuous load from eight concurrent clients. The Compose-style control must drop
 requests, which proves the probe detects outages. The rolling update must drop
 none and keep the signing key unchanged. CI runs the same check whenever the
 web service changes.
 
 ### Migrate the existing Compose installation
 
-Run once, in order. Every step has a check; stop at the first failing check.
+**Completed on 12 November 2026.** Production now runs `hush-website`
+(Dockerfile application) and `hush-postgres` (PostgreSQL 17) on a dedicated
+`hush` Docker network on the `automation` server. Before cutover the signing
+key's SHA-256 matched in the new volume and every table had identical row
+counts in both databases. The previous Compose resource `hush-web` is stopped,
+not deleted, with its volumes as the rollback; the backup is in
+`/root/hush-backup-20261112-1815` on that server. In a redeploy under load after the
+cutover, one request timed out exactly when the old instance's drain ended,
+which led to closing keep-alive connections during the drain (see the runtime
+contract). The local end-to-end check did not reproduce that timeout, so
+production redeploys are measured as well. Because nobody depended on the site
+yet, the cutover used a short planned window instead of a temporary domain.
+
+The steps below remain the procedure for a future migration. Run them once, in order. Every step has a check; stop at the first failing check.
 Keep the old Compose resource and its volumes until the new setup has served
 production for at least a week.
 
