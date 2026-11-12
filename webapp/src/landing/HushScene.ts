@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { loadStudioEnvironment } from "./StudioEnvironment";
 import { createHeroScene } from "./hero/createHeroScene";
+import { startLandingEntrance } from "./entrance/landingEntrance";
 
 // Original procedural artwork. No downloaded model or texture is required.
 export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
@@ -62,6 +63,7 @@ export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
   function finish() {
     opening = false;
     host.style.removeProperty("translate");
+    if (entry?.dataset.opening === "playing") entry.dataset.opening = "complete";
     schedule();
   }
   body.rotation.set(targetX, targetY, -0.09);
@@ -72,7 +74,10 @@ export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
     frame = 0;
     if (disposed || !visible || document.hidden) return;
     // GPU preparation is not part of the visible three-second assembly.
-    if (started === undefined) started = now;
+    if (started === undefined) {
+      started = now;
+      if (opening) opening = startLandingEntrance(entry);
+    }
     const progress = !opening || reducedMotion.matches ? 1 : Math.max(0, Math.min(1, (now - started) / 3000));
     const ease = 1 - Math.pow(1 - progress, 4);
     for (const [index, layer] of layers.entries()) {

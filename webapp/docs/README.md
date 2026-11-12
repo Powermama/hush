@@ -12,6 +12,7 @@
 | Understand private short links | [Short-link operation](operations/proof-short-links.md) |
 | Review dependency security updates | [Dependency security](operations/dependency-security.md) |
 | Plan the Safari 3D entrance correction | [Performance PRD](design/safari-hero-performance-prd.md) |
+| Brief a senior developer on the Safari hitch | [Executive brief](design/safari-hero-executive-brief.md) |
 | Inspect the API | [OpenAPI contract](../openapi/hush-provenance.json) |
 | Check image attribution | [Artwork credits](../public/art/CREDITS.md) |
 

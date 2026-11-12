@@ -44,19 +44,17 @@
 .orbit-tile img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 2px #0001); }
 .orbit-app > span { font-size: 11px; color: #626973; }
 .orbit-app:hover .orbit-tile { transform: translateY(-4px); }
-/* Progressive entrance runs from prerendered HTML, without waiting for JS or WebGL. */
-.hush-landing[data-opening="pending"] > .site-header { animation: header-arrive .75s cubic-bezier(.22,.68,.22,1) both; }
-.hush-landing[data-opening="pending"] .hero-introduction { animation: introduction-arrive .7s .1s both; }
-.hush-landing[data-opening="pending"] .hush-core { animation: core-arrive .65s .1s both; }
-/* Let a fast scene own the first reveal. A slow/failed scene cannot postpone
-   static artwork beyond 1.2s from CSS readiness, even without JavaScript. */
-.hush-landing[data-opening="pending"] .hush-core:not([data-scene="ready"]) .core-fallback { animation: core-arrive .25s .95s both; }
-.hush-landing[data-opening="pending"] .hush-core[data-fallback="immediate"] .core-fallback { animation-delay: 0s; }
-.hush-landing[data-opening="pending"] .orbit-app { animation: orbit-arrive .85s both cubic-bezier(.2,.8,.2,1); animation-delay: calc(.35s + var(--app-delay, 0s)); }
-.hush-landing[data-opening="pending"] .universe-paths { animation: paths-arrive 1s .35s both; }
-.hush-landing[data-opening="pending"] .universe-texture { animation: texture-arrive 1.8s both; }
-.hush-landing[data-opening="pending"] .universe-halo { animation: core-arrive 1s .15s both; }
-.hush-landing[data-opening="pending"] .hero-download-area { animation: download-arrive .6s .25s both; }
+/* A prepared scene starts one shared timeline. CSS alone reveals the composition
+   within 1.2s if hydration or graphics miss that window, including JS failure. */
+.hush-landing[data-opening="pending"] :is(.site-header, .hero-introduction, .hush-core, .orbit-app, .universe-paths, .universe-halo, .universe-texture, .hero-download-area) { animation: entrance-fallback .2s 1s both; }
+.hush-landing[data-opening="playing"] > .site-header { animation: header-arrive 1.05s .12s cubic-bezier(.22,.68,.22,1) both; }
+.hush-landing[data-opening="playing"] .hero-introduction { animation: introduction-arrive .9s .55s both; }
+.hush-landing[data-opening="playing"] .hush-core { animation: core-arrive .65s .1s both; }
+.hush-landing[data-opening="playing"] .orbit-app { animation: orbit-arrive 1.15s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(1s + var(--app-delay, 0s)); }
+.hush-landing[data-opening="playing"] .universe-paths { animation: paths-arrive 1.5s .85s both; }
+.hush-landing[data-opening="playing"] .universe-texture { animation: texture-arrive 2.4s both; }
+.hush-landing[data-opening="playing"] .universe-halo { animation: core-arrive 1.4s .3s both; }
+.hush-landing[data-opening="playing"] .hero-download-area { animation: download-arrive .7s 1.65s both; }
 .verified-link { display: inline-flex; gap: 8px; font-size: 12px; margin-top: 15px; text-underline-offset: 4px; }
 .verified-link:hover { text-decoration: underline; }
 .story-afterword { position: relative; overflow: clip; background: linear-gradient(#f8fafb 20%, #edf0fa 65%, #f5f4f1); }
@@ -76,6 +74,7 @@
 .release-link:hover { text-decoration: underline; }
 .hush-landing > footer { background: #f1f3f5; }
 @keyframes header-arrive { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes entrance-fallback { from { opacity: 0; } to { opacity: 1; } }
 @keyframes core-arrive { from { opacity: 0; } to { opacity: 1; } }
 @keyframes orbit-arrive { from { opacity: 0; translate: 0 18px; scale: .9; } to { opacity: 1; translate: 0 0; scale: 1; } }
 @keyframes introduction-arrive { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }

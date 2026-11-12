@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 import { useEffect, type RefObject } from "react";
+import { canStartLandingEntrance } from "./entrance/landingEntrance";
 
-/** CSS starts the entrance at first paint, before hydration or optional artwork. */
+/** Own interruption and CSS fallback; a prepared scene starts the shared timeline. */
 export function useLandingEntrance(root: RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const entry = root.current;
@@ -10,14 +11,16 @@ export function useLandingEntrance(root: RefObject<HTMLDivElement | null>) {
     let disposed = false;
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
     const finish = () => { if (!disposed) entry.dataset.opening = "complete"; };
-    // This is the longest CSS entrance animation. A late hydration observes its
-    // finished state instead of starting a second, JavaScript-owned timer.
-    const entrance = entry.querySelector(".universe-texture")?.getAnimations()[0];
-    if (!entrance || entrance.playState === "finished" || motion.matches ||
+    // Read the CSS fallback clock, including after delayed hydration. The scene
+    // may start the choreography only while the first composition is unrevealed.
+    if (!canStartLandingEntrance(entry) || motion.matches ||
         scrollY >= 100 || location.hash || document.hidden) finish();
-    else void entrance.finished.then(finish, () => {});
+    const fallbackEnd = (event: AnimationEvent) => {
+      if (event.animationName === "entrance-fallback" && entry.dataset.opening === "pending") finish();
+    };
     const visibility = () => { if (document.hidden) finish(); };
     const reduceMotion = () => { if (motion.matches) finish(); };
+    entry.addEventListener("animationend", fallbackEnd);
     window.addEventListener("wheel", finish, { passive: true });
     window.addEventListener("keydown", finish);
     window.addEventListener("touchstart", finish, { passive: true });
@@ -26,6 +29,7 @@ export function useLandingEntrance(root: RefObject<HTMLDivElement | null>) {
     motion.addEventListener("change", reduceMotion);
     return () => {
       disposed = true;
+      entry.removeEventListener("animationend", fallbackEnd);
       window.removeEventListener("wheel", finish);
       window.removeEventListener("keydown", finish);
       window.removeEventListener("touchstart", finish);
