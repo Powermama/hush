@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("keeps navigation and static artwork usable when studio lighting fails", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
-  await page.route(/studio-environment.*\.gz$/, route => route.abort());
+  await page.route(/studio-lighting.*\.gz$/, route => route.abort());
   await page.goto("/");
   await expect(page.locator(".hush-core")).toHaveAttribute("data-scene", "fallback");
   await expect(page.locator(".site-header")).toHaveCSS("opacity", "1");

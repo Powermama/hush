@@ -1,3 +1,4 @@
+import { appIcons } from "../media/appIcons";
 import { useEffect, useRef, type CSSProperties } from "react";
 import { ResponsiveField } from "./ResponsiveField";
 
@@ -63,7 +64,7 @@ export function LocalUniverse() {
     </div>
     {apps.map((app, index) => <div className={`orbit-app orbit-${app.file}`} key={app.name}
       style={{ left: `${app.x}%`, top: `${app.y}%`, "--app-delay": `${index * 0.08}s` } as CSSProperties} aria-hidden="true">
-      <div className="orbit-tile"><img src={`/app-icons/${app.file}.png`} width="64" height="64" alt="" decoding="async" /></div>
+      <div className="orbit-tile"><img src={appIcons[app.name]} width="64" height="64" alt="" decoding="async" /></div>
       <span>{app.name}</span>
     </div>)}
     </div>

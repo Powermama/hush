@@ -20,4 +20,10 @@ describe("website cache policy", () => {
       "public, max-age=300",
     );
   });
+
+  test("preserves precompressed binary archives without proxy recompression", () => {
+    expect(cacheControlForStaticPath("/assets/studio-lighting.ktx2-abc123.gz")).toBe(
+      "public, max-age=31536000, immutable, no-transform",
+    );
+  });
 });

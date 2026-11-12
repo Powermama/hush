@@ -1,11 +1,12 @@
+import { artwork } from "../media/artwork";
 import "./provenance.css";
 
 const pressSource = "https://commons.wikimedia.org/wiki/File:Buchdrucker-1568.png";
 
 function PrintingPress({ decorative = false }: { decorative?: boolean }) {
   return <img
-    src="/art/printing-press.webp"
-    srcSet="/art/printing-press-small.webp 450w, /art/printing-press.webp 751w"
+    src={artwork.printingPress.src}
+    srcSet={artwork.printingPress.srcSet}
     sizes="(max-width: 760px) 65vw, 420px"
     width="751" height="879" loading="lazy" decoding="async"
     alt={decorative ? "" : "Printers setting type and working a press in Jost Amman’s 1568 woodcut, reinterpreted in blue ink on a pale collage."}

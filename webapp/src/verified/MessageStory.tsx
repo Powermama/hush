@@ -1,3 +1,4 @@
+import { artwork } from "../media/artwork";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { HushMascotArtwork } from "../landing/HushMascot";
 import "./message-story.css";
@@ -99,7 +100,7 @@ export function MessageStory() {
       <div className="message-story-art">
         <h2 id="message-story-title">Let your words<br />carry their story.</h2>
         <figure>
-          <img src="/art/twittering-machine.webp" srcSet="/art/twittering-machine-small.webp 480w, /art/twittering-machine.webp 994w" sizes="(max-width: 760px) 100vw, 620px" width="994" height="1350" loading="lazy" decoding="async" alt="Paul Klee’s mechanical birds, recoloured in blue and rose." />
+          <img src={artwork.twitteringMachine.src} srcSet={artwork.twitteringMachine.srcSet} sizes="(max-width: 760px) 100vw, 620px" width="994" height="1350" loading="lazy" decoding="async" alt="Paul Klee’s mechanical birds, recoloured in blue and rose." />
           <figcaption><a href="https://commons.wikimedia.org/wiki/File:Die_Zwitscher-Maschine_(Twittering_Machine),_1922_-_Paul_Klee.jpg" target="_blank" rel="noreferrer">Twittering Machine · Paul Klee, 1922.</a><br />Public domain. Recoloured for hush.</figcaption>
         </figure>
       </div>
