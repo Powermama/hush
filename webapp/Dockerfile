@@ -12,6 +12,7 @@ COPY server ./server
 COPY shared ./shared
 COPY src ./src
 COPY scripts/generate-site-files.ts scripts/prerender.ts ./scripts/
+COPY scripts/prerender ./scripts/prerender
 RUN bun run build
 
 FROM oven/bun:1.3.9-alpine AS runtime

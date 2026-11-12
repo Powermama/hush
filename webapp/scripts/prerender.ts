@@ -2,7 +2,7 @@
 // Copyright 2026 Clemens Kressmann
 import { sitePages, siteOrigin, privatePageMetadata } from "../shared/site";
 import { renderPageHead } from "../shared/site-head";
-import { createHash } from "node:crypto";
+import { externalizeScripts } from "./prerender/externalize-scripts";
 
 // Vite compiles CSS, static assets and environment-specific imports for SSR.
 const { render } = await import("../dist-ssr/entry-server.js");
@@ -24,18 +24,9 @@ for (const [path, metadata] of Object.entries(sitePages)) {
   html = html.replace('<html lang="en">', `<html lang="${metadata.language}">`);
   // Preserve React's resource hints alongside Vite's compiled script and CSS.
   html = html.replace("<head>", () => `<head>${pageHead(metadata)}`);
-  // Keep the existing script-src 'self' policy. Router hydration is an external,
-  // immutable build asset, not an inline-script exemption. Escape embedded NULs
-  // before HTML parsing can replace them and corrupt TanStack's match IDs.
-  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
-  for (const [tag, source] of scripts) {
-    const code = source!.replaceAll("\u0000", "\\u0000");
-    const digest = createHash("sha256").update(code).digest("hex").slice(0, 16);
-    const asset = `/assets/route-${digest}.js`;
-    await Bun.write(`dist${asset}`, code);
-    html = html.replace(tag, `<script src="${asset}"></script>`);
-  }
-  pages[path] = html;
+  const externalized = externalizeScripts(html);
+  for (const asset of externalized.assets) await Bun.write(`dist${asset.path}`, asset.code);
+  pages[path] = externalized.html;
 }
 // Kept outside the public static directory. Only explicit server routes serve it.
 await Bun.write("dist-pages/pages.json", JSON.stringify(pages));

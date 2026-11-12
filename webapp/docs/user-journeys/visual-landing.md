@@ -81,6 +81,8 @@ LANDING-ENTRY-003: with every application JavaScript request held back, the prod
 
 LANDING-ENTRY-004: failed application JavaScript leaves the prerendered page readable, and ordinary links still navigate. Interactive enhancements require JavaScript; the public content does not. Tests: `tests/entrance.spec.ts`, plus failure, reduced-motion and keyboard journeys in `tests/landing.spec.ts`.
 
+LANDING-ENTRY-005: trusted SSR hydration scripts are externalized using an HTML parser, so interactive controls work under the existing `script-src 'self'` policy for mixed case, whitespace and malformed closing-tag syntax accepted by browsers. Source positions preserve script order and exact hydration data, including escaped NULs. Comments, inert templates, JSON-LD and attributed scripts retain their original bytes; an unclosed hydration script fails the build. `tests/prerender-scripts.spec.ts` exercises the actual build and browser interaction under CSP. `scripts/prerender/externalize-scripts.test.ts` covers exact preservation and repeated scripts in CI. This build transform is not an HTML sanitizer and never handles private proof contents.
+
 Implementation follows [Vite's async chunk loading](https://vite.dev/guide/features#async-chunk-loading-optimization): retain dynamic scene imports, extracted CSS and automatic dependency preloads. No additional loading framework or global animation loop is introduced.
 
 LANDING-010: the rose opens and closes with actual wheel scrolling; reduced motion presents its open pose, and a missing local model keeps the vector fallback. Covered in tests/flower.spec.ts.
