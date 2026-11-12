@@ -27,7 +27,15 @@ if (errors.length) {
   process.exit(1);
 }
 
-const json = (value: unknown) => JSON.stringify(value, null, 2);
+// Every value written into generated code goes through these. JSON.stringify
+// alone leaves "<", ">" and the JavaScript line separators U+2028/U+2029 as is,
+// so they are escaped as well; the result is valid JSON and JavaScript.
+const unsafeCodeCharacters: Record<string, string> = {
+  "<": "\\u003C", ">": "\\u003E", "\u2028": "\\u2028", "\u2029": "\\u2029",
+};
+const escapeCode = (code: string) => code.replace(/[<>\u2028\u2029]/g, (character) => unsafeCodeCharacters[character]!);
+const json = (value: unknown) => escapeCode(JSON.stringify(value, null, 2));
+const literal = (value: string) => escapeCode(JSON.stringify(value));
 const escapeXML = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
   .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&apos;");
 const moduleName = (post: BlogPost) => `${post.lang}/${post.slug}`;
@@ -43,18 +51,18 @@ export const blogPosts: readonly BlogPostMetadata[] = ${json(metadata)};
 for (const post of posts) {
   outputs.set(`${generatedDir}/${moduleName(post)}.tsx`, `${header}import { BlogArticlePage } from "../../BlogArticlePage";
 
-const html = ${JSON.stringify(post.html)};
+const html = ${literal(post.html)};
 
 export function Article() {
-  return <BlogArticlePage lang=${JSON.stringify(post.lang)} slug=${JSON.stringify(post.slug)} html={html} />;
+  return <BlogArticlePage lang=${literal(post.lang)} slug=${literal(post.slug)} html={html} />;
 }
 `);
 }
 
 const languagesWithPosts = blogLanguages.filter((lang) => posts.some((post) => post.lang === lang));
 const routeLines = [
-  ...languagesWithPosts.map((lang) => `    createRoute({ getParentRoute: () => parent, path: ${JSON.stringify(blogPath(lang))}, component: () => <BlogIndexPage lang=${JSON.stringify(lang)} /> }),`),
-  ...posts.map((post) => `    createRoute({ getParentRoute: () => parent, path: ${JSON.stringify(post.path)}, component: lazyRouteComponent(() => import("./${moduleName(post)}"), "Article") }),`),
+  ...languagesWithPosts.map((lang) => `    createRoute({ getParentRoute: () => parent, path: ${literal(blogPath(lang))}, component: () => <BlogIndexPage lang=${literal(lang)} /> }),`),
+  ...posts.map((post) => `    createRoute({ getParentRoute: () => parent, path: ${literal(post.path)}, component: lazyRouteComponent(() => import(${literal(`./${moduleName(post)}`)}), "Article") }),`),
 ];
 outputs.set(`${generatedDir}/routes.generated.tsx`, routeLines.length
   ? `${header}import { createRoute, lazyRouteComponent, type AnyRoute } from "@tanstack/react-router";
