@@ -1,0 +1,86 @@
+name: CodeQL
+
+# Advanced setup replaces GitHub's default setup so the slow Swift analysis,
+# which builds the Xcode project, runs only when native code can be affected.
+# Categories and build modes match the former default setup to keep alerts.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: Select affected components
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    outputs:
+      native: ${{ steps.scope.outputs.native }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - id: scope
+        name: Select checks
+        # Pushes, schedules and manual runs always analyse every language.
+        run: python3 .github/scripts/ci_scope.py
+
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, javascript-typescript, python]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: /language:${{ matrix.language }}
+
+  swift:
+    name: Analyze (swift)
+    needs: changes
+    # Pull requests that cannot affect native code skip the Xcode build.
+    if: github.event_name != 'pull_request' || needs.changes.outputs.native == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 60
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: swift
+          build-mode: autobuild
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: /language:swift
