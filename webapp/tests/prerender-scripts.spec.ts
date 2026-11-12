@@ -19,11 +19,17 @@ test("LANDING-ENTRY-005 preserves interactive scripts under CSP regardless of HT
     await cp("scripts/prerender", join(directory, "scripts/prerender"), { recursive: true });
     await symlink(resolve("node_modules"), join(directory, "node_modules"), "dir");
     await cp("shared", join(directory, "shared"), { recursive: true });
+    // Keep HTML as data. The fixture module never constructs executable source
+    // from the document being tested.
+    await writeFile(join(directory, "dist-ssr/entry-server.js"), `
+      const document = await Bun.file(new URL("./document.html", import.meta.url)).text();
+      export async function render() { return new Response(document); }
+    `);
 
     for (const [open, close] of [["script", "script"], ["SCRIPT", "SCRIPT"], ["ScRiPt", "sCrIpT"], ["script ", "script data-end='ignored'"], ["script\n", "script\t"]]) {
       await writeFile(join(directory, "dist/index.html"), '<html><head><!--hush-head-start--><!--hush-head-end--></head><body></body></html>');
       const document = `<html lang="en"><head></head><body><h1>Prerender fixture</h1><button id="action">Open menu</button><${open}>window.$_TSR = {}; document.querySelector('#action').addEventListener('click', event => { event.currentTarget.textContent = 'Menu opened'; });</${close}></body></html>`;
-      await writeFile(join(directory, "dist-ssr/entry-server.js"), `export async function render() { return new Response(${JSON.stringify(document)}); }`);
+      await writeFile(join(directory, "dist-ssr/document.html"), document);
       await run("bun", ["scripts/prerender.ts"], { cwd: directory });
       const pages = JSON.parse(await readFile(join(directory, "dist-pages/pages.json"), "utf8"));
       await page.route("**/__prerender-test/", route => route.fulfill({
