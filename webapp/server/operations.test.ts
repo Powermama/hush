@@ -82,10 +82,16 @@ describe("graceful shutdown of the real server process", () => {
       stderr: "pipe",
     });
     try {
-      for (let attempt = 0; ; attempt++) {
+      // Shared CI runners can take several seconds to start a Bun process.
+      const readyBy = Date.now() + 30_000;
+      for (;;) {
         try { if ((await fetch(`${base}/health/ready`)).ok) break; } catch {}
-        if (attempt > 100) throw new Error("server did not become ready");
-        await Bun.sleep(50);
+        if (Date.now() > readyBy || child.exitCode !== null) {
+          child.kill("SIGKILL");
+          const output = `${await new Response(child.stdout).text()}${await new Response(child.stderr).text()}`;
+          throw new Error(`server did not become ready (exit ${child.exitCode}):\n${output.slice(-2_000)}`);
+        }
+        await Bun.sleep(100);
       }
       expect((await fetch(`${base}/health/live`)).headers.get("connection")).not.toBe("close");
       const started = Date.now();
@@ -104,5 +110,5 @@ describe("graceful shutdown of the real server process", () => {
     } finally {
       child.kill("SIGKILL");
     }
-  }, 20_000);
+  }, 60_000);
 });
