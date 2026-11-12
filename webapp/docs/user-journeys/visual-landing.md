@@ -93,4 +93,6 @@ Tests: `tests/mobile-download.spec.ts`, the download scenario in `tests/landing.
 
 The final invitation omits the extra slogan. Its headline has relaxed tracking and a 40px gap before the primary action. “Less input. More instinct.” shares the adjacent ribbon's rotation, and the “Independent by nature” stamp is removed.
 
+LANDING-CACHE-001 / LANDING-CACHE-002: public artwork and app icons use Vite content-hashed URLs with immutable caching. Prerendered and hydrated pages reference the same assets; HTML is revalidated. Responsive WebP candidates, intrinsic dimensions, lazy loading and public attribution remain available. Covered in `tests/public-assets.spec.ts`; see [asset delivery](../operations/asset-delivery.md).
+
 LANDING-LIGHTING-002: the hero and rose both render from the legacy edge-compressed lighting response observed in production WebKit. The normal asset response retains immutable caching with `no-transform`; invalid lighting still falls back without blocking content. Covered in `tests/studio-delivery.spec.ts`.

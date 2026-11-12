@@ -18,3 +18,5 @@
 contains deployment and service guides. `design/` records visual direction and
 the reasons behind it; a design proposal is not evidence that a feature shipped.
 Generated contracts are updated through their generator, never edited by hand.
+
+Public image caching and CDN verification: [asset delivery](operations/asset-delivery.md).

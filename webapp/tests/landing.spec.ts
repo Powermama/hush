@@ -447,7 +447,7 @@ test("LANDING-006 keeps each locally hosted artwork with its story and credit", 
 });
 
 test("LANDING-007 keeps the narrative and download usable when artwork fails", async ({ page, isMobile }) => {
-  await page.route("**/art/**", route => route.abort());
+  await page.route(/\/assets\/.*\.webp$/, route => route.abort());
   await page.goto("/");
   for (const name of ["Think out loud.", "Keep your mind yours.", "Intelligence on your terms.", "Reality has a copy problem.", "Give your words their story back."]) {
     const heading = page.getByRole("heading", { name });

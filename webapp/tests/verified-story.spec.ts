@@ -23,7 +23,7 @@ test("LANDING-VM-003 follows one message through the illustrated story", async (
   expect(heading.y + heading.height).toBeLessThan(player.y);
   const artwork = story.getByRole("img", { name: /Paul Klee/ });
   await expect.poll(() => artwork.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
-  await expect(artwork).toHaveAttribute("src", "/art/twittering-machine.webp");
+  await expect(artwork).toHaveAttribute("src", /\/assets\/twittering-machine-[\w-]+\.webp$/);
   await expect(page.locator('img[src*="liberty"], img[src*="aristotle"], img[src*="steve-jobs"], img[src*="public-portrait"]')).toHaveCount(0);
   await expect(story.getByText("Listening on your Mac")).toBeVisible();
   await expect(story.locator(".message-record time")).toHaveAttribute("datetime", "2026-11-04T10:42:08Z");
