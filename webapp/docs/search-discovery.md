@@ -26,6 +26,17 @@ fragment keys and message text never enter prerendering or discovery files.
 Unknown pages remain HTTP 404; private alpha releases and unfinished legal
 pages retain noindex/no-store. `/releases/latest` redirects to the current version.
 
+## Blog
+
+Published articles from `content/blog/<lang>/` enter the same catalogue through
+the generated `shared/blog-posts.generated.ts`, so canonical URLs, the sitemap
+(`lastmod` from each article's `updated` date), `llms.txt` and prerendering work
+as for every other page. Articles get `og:type article` and `BlogPosting`
+structured data; FAQPage and HowTo markup are not used because Google no longer
+shows those rich results. `keyword` fields are internal and never rendered.
+Each language has an Atom feed at `/blog/feed.xml` or `/de/blog/feed.xml`. See
+[the blog journeys](user-journeys/blog.md) and `content/blog/README.md`.
+
 ## Commands and generated files
 
 ```sh

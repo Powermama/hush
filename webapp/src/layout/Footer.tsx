@@ -1,4 +1,8 @@
 import { Logo } from "../components/Logo";
+import { blogPosts } from "../../shared/blog-posts.generated";
+
+// The blog link appears only once an English article is published.
+const hasBlog = blogPosts.some((post) => post.lang === "en");
 
 export function Footer() {
   return (
@@ -17,6 +21,7 @@ export function Footer() {
               <a className="transition hover:text-ink" href="/#top">About hush</a>
               <a className="transition hover:text-ink" href="/verified-messages">Verified Messages</a>
               <a className="transition hover:text-ink" href="/releases">Releases</a>
+              {hasBlog && <a className="transition hover:text-ink" href="/blog">Blog</a>}
               <a className="transition hover:text-ink" href="mailto:hello@behu.sh">Contact</a>
             </div>
           </nav>
