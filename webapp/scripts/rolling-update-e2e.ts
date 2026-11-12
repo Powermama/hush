@@ -11,9 +11,10 @@
 //            replacement, wait for its health check, then stop the old
 //            container with a grace period. Must fail zero requests.
 //
-// Traefik (Coolify's proxy) routes by Docker labels with a retry middleware,
-// PostgreSQL runs as its own container, and every instance shares one data
-// volume, as on the server.
+// Traefik (Coolify's proxy) routes by Docker labels exactly as Coolify generates
+// them, without a retry middleware, so the application alone must not drop
+// requests. PostgreSQL runs as its own container, and every instance shares one
+// data volume, as on the server.
 //
 // Run from webapp/: bun scripts/rolling-update-e2e.ts [--skip-build]
 // Requires Docker. Uses only containers, a network and a volume prefixed hush-e2e.
@@ -76,8 +77,6 @@ async function startApp(name: string, extraEnv: Record<string, string> = {}) {
     "-l", "traefik.enable=true",
     "-l", "traefik.http.routers.hush.rule=PathPrefix(`/`)",
     "-l", "traefik.http.routers.hush.entrypoints=web",
-    "-l", "traefik.http.routers.hush.middlewares=hush-retry",
-    "-l", "traefik.http.middlewares.hush-retry.retry.attempts=3",
     "-l", "traefik.http.services.hush.loadbalancer.server.port=3000",
     image,
   ]);
@@ -178,8 +177,11 @@ async function scenario(kind: "control" | "rolling") {
       await startApp(next);
       await waitHealthy(next);
     } else {
+      // Coolify: start the replacement, wait for its health check, wait five
+      // seconds for the proxy to send it traffic, then stop the old container.
       await startApp(next);
       await waitHealthy(next);
+      await Bun.sleep(5_000);
       await docker(["stop", "--time", "30", last]);
       await docker(["rm", last]);
     }

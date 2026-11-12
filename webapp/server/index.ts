@@ -91,7 +91,16 @@ registerRootProofAlias(app, proofService);
 const cleanup = startProofCleanup(repository, objects);
 const server = Bun.serve({
   port: config.port,
-  fetch: app.fetch,
+  // While draining, ask the proxy to close each connection after its response.
+  // Otherwise it keeps reusing idle keep-alive connections to this instance,
+  // and a request sent on one after the listener closes hangs until it times out.
+  fetch: async (request, bunServer) => {
+    const response = await app.fetch(request, bunServer);
+    if (!draining) return response;
+    const headers = new Headers(response.headers);
+    headers.set("connection", "close");
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  },
   idleTimeout: 30,
 });
 
@@ -124,7 +133,11 @@ async function shutdown(signal: string) {
     drainMs: config.shutdownDrainMs,
   }));
   await Bun.sleep(config.shutdownDrainMs);
-  await server.stop(false);
+  // Let requests already in flight finish (bounded), then close every remaining
+  // connection at once, so no idle keep-alive connection is left half-open.
+  const deadline = Date.now() + 10_000;
+  while (server.pendingRequests > 0 && Date.now() < deadline) await Bun.sleep(50);
+  await server.stop(true);
   await cleanup.stop();
   await repository.close();
   console.info(JSON.stringify({ level: "info", message: "Hush proof service stopped" }));
