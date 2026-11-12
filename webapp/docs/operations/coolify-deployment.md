@@ -194,7 +194,7 @@ Docker Swarm, Kubernetes, Fly.io) works without code changes:
 | Contract | Behaviour |
 | --- | --- |
 | `GET /health/live` | 200 while the process runs, including while draining. Use for liveness only. |
-| `GET /health/ready` | 200 only when the instance is not draining and PostgreSQL answers within 2 seconds; otherwise 503. Never cached. Use for readiness and routing. |
+| `GET /health/ready` | 200 only when the instance is not draining and PostgreSQL answers within 2 seconds; otherwise 503. Never cached. Use for readiness and routing. During a deploy the proxy may still send a few requests to the draining instance, so `https://behu.sh/health/ready` can briefly answer 503 while every page succeeds. Point external uptime monitors at `/health/live` or a page, not at `/health/ready`. |
 | `SIGTERM` | Report not-ready and keep serving for `HUSH_SHUTDOWN_DRAIN_MS` (default 10000), answering with `Connection: close` so the proxy stops reusing keep-alive connections to this instance. Then wait (at most 10 seconds) for in-flight requests, close every remaining connection at once, close the database and exit 0. Leaving idle keep-alive connections open made requests sent on them hang until they timed out. |
 | Configuration | Environment variables only. No host port, container name or IP is required. |
 | Migrations | Applied at start under a PostgreSQL advisory lock, so concurrent starts never race. |
