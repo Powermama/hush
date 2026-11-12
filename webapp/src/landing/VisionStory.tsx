@@ -20,27 +20,6 @@ function Portrait({ decorative = false }: { decorative?: boolean }) {
 
 export function VisionStory() {
   return <div className="vision-story">
-    <svg className="story-filters" aria-hidden="true" width="0" height="0">
-      <defs>
-        <filter id="hush-art-blue" colorInterpolationFilters="sRGB">
-          <feColorMatrix type="saturate" values="0" />
-          <feComponentTransfer>
-            <feFuncR type="table" tableValues="0.055 0.79" />
-            <feFuncG type="table" tableValues="0.20 0.94" />
-            <feFuncB type="table" tableValues="0.37 0.93" />
-          </feComponentTransfer>
-        </filter>
-        <filter id="hush-art-coral" colorInterpolationFilters="sRGB">
-          <feColorMatrix type="saturate" values="0" />
-          <feComponentTransfer>
-            <feFuncR type="table" tableValues="0.06 1" />
-            <feFuncG type="table" tableValues="0.12 0.73" />
-            <feFuncB type="table" tableValues="0.22 0.66" />
-          </feComponentTransfer>
-        </filter>
-      </defs>
-    </svg>
-
     <div className="story-handoff" aria-hidden="true">
       <svg viewBox="0 0 1440 360" preserveAspectRatio="none"><g>{Array.from({ length: 11 }, (_, i) => <path key={i} d={`M${690 + i * 6} 0 C${690 + i * 6} 100 ${-320 + i * 140} 130 ${-260 + i * 175} 360`} />)}</g></svg>
       <span className="handoff-whisper">A thought doesn't fit in a box.</span>
@@ -60,7 +39,7 @@ export function VisionStory() {
             <svg className="thought-wave" viewBox="0 0 680 160" fill="none" aria-hidden="true">
               <path d="M0 80H105C130 80 130 30 145 30S160 130 175 130 190 5 205 5 220 155 235 155 250 38 265 38 280 112 295 112 310 80 330 80H680" />
             </svg>
-            <div className="thought-companion" role="img" aria-label="A small hush cameo peeking out from behind the marble collage."><HushMascotArtwork state="listening" peeking /></div>
+            <div className="thought-companion" role="img" aria-label="A small hush cameo peeking out from behind the marble collage."><HushMascotArtwork state="listening" peeking saturation={0.65} /></div>
             <div className="thought-companion-grip" aria-hidden="true"><HushMascotGrip /></div>
           </div>
           <figcaption><a href={aristotleSource} target="_blank" rel="noreferrer">Aristotle, reimagined in colour</a><span>Photograph by Szilas. Public domain.</span></figcaption>

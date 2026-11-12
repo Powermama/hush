@@ -1,6 +1,7 @@
 # Safari hero entrance: senior developer brief
 
-Updated: 2026-11-12. Status: unresolved on physical Safari; nothing deployed.
+Updated: 2026-11-12. Status: resolved by baking artwork filters into image files;
+see [Root cause and resolution](safari-hero-performance-prd.md#root-cause-and-resolution).
 Follow-up to [PR #18](https://github.com/Powermama/hush/pull/18).
 
 ## Problem

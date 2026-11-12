@@ -36,3 +36,20 @@ test("LANDING-CACHE-002 retains responsive artwork and its public attribution", 
   }
   expect((await request.get("/art/CREDITS.md")).status()).toBe(200);
 });
+
+test("LANDING-PAINT-001 renders artwork and icons without runtime CSS or SVG filters", async ({ page }) => {
+  for (const path of ["/", "/verified-messages"]) {
+    await page.goto(path);
+    // Scroll through so lazy artwork and every story section are laid out.
+    await page.evaluate(async () => {
+      for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight) {
+        scrollTo(0, y);
+        await new Promise(requestAnimationFrame);
+      }
+    });
+    const filtered = await page.evaluate(() => [...document.querySelectorAll("*")]
+      .filter(element => getComputedStyle(element).filter !== "none")
+      .map(element => `${element.tagName.toLowerCase()}.${element.getAttribute("class") ?? ""}`));
+    expect(filtered, `${path} applies filters at runtime`).toEqual([]);
+  }
+});
