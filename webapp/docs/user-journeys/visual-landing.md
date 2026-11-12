@@ -73,11 +73,11 @@ Desktop retains its brand, Product and Legal layout. Links remain readable
 without horizontal overflow at 320px. Covered in `tests/footer.spec.ts` across
 Chromium, mobile Chromium and WebKit.
 
-LANDING-ENTRY-001: prerendered HTML and CSS start the finite entrance at first paint. The header fades and moves into place without blur or layout shifts; the headline and download finish appearing within 0.85 seconds of CSS readiness. Decorative details settle within 1.8 seconds. Neither hydration nor WebGL controls content visibility. JavaScript observes the CSS animation's completion instead of starting another timer.
+LANDING-ENTRY-001: a promptly prepared scene starts one three-second entrance for the hero and page. The header fades for 1.05 seconds after 0.12 seconds; the introduction for 0.9 seconds after 0.55 seconds; icons for 1.15 seconds after 1 second plus their 0.08-second stagger; paths for 1.5 seconds after 0.85 seconds; the background texture for 2.4 seconds; the halo for 1.4 seconds after 0.3 seconds; and the download for 0.7 seconds after 1.65 seconds. The header does not run ahead of the scene. The background finishing does not interrupt the remaining 3D assembly. Movement does not shift layout or blur the header. `tests/entrance.spec.ts` checks this shared transition calendar with the real scene while holding the fallback clock to model prompt readiness on slow CI GPUs.
 
-LANDING-ENTRY-002: 3D artwork is a separate, dynamically imported enhancement. A slow or failed scene retains visible CSS artwork and usable content. Fast WebGL owns the initial model reveal. Static artwork waits at most 1.2 seconds from CSS readiness, avoiding a 2D flash on fast visits; save-data or 2G hints remove that fallback delay. Late WebGL upgrades the artwork without hiding content or replaying the page entrance. Browser support for network hints is optional; actual scene readiness is authoritative. Reduced motion, anchor navigation and interaction skip the entrance. The scene retains its bounded rendering, visibility suspension and resource cleanup.
+LANDING-ENTRY-002: 3D artwork is a separate, immediately requested dynamic import. CSS alone reveals navigation, headline, static artwork and download within 1.2 seconds if the scene misses the initial one-second readiness window. This prevents indefinite waiting for graphics or hydration. Save-data or 2G hints remove the fallback delay. Once the fallback starts appearing, late WebGL upgrades to the settled composition without hiding content or replaying the page entrance. Browser support for network hints is optional; actual scene readiness is authoritative. Reduced motion, anchor navigation and interaction skip the entrance. The scene retains bounded rendering, visibility suspension and resource cleanup.
 
-LANDING-ENTRY-003: with every application JavaScript request held back, the production page still shows navigation, headline, artwork and download. Releasing the bundle must not replay the entrance. The browser test requires the headline to finish appearing within 1.8 seconds of observing the production CSS, allowing scheduling margin beyond its 0.8-second animation.
+LANDING-ENTRY-003: with every application JavaScript request held back, the production page still shows navigation, headline, artwork and download. Releasing the bundle must not replay the entrance. The browser test requires the headline to finish appearing within 1.8 seconds of observing the production CSS, allowing scheduling margin beyond the independent 1.2-second fallback.
 
 LANDING-ENTRY-004: failed application JavaScript leaves the prerendered page readable, and ordinary links still navigate. Interactive enhancements require JavaScript; the public content does not. Tests: `tests/entrance.spec.ts`, plus failure, reduced-motion and keyboard journeys in `tests/landing.spec.ts`.
 
@@ -96,3 +96,21 @@ The final invitation omits the extra slogan. Its headline has relaxed tracking a
 LANDING-CACHE-001 / LANDING-CACHE-002: public artwork and app icons use Vite content-hashed URLs with immutable caching. Prerendered and hydrated pages reference the same assets; HTML is revalidated. Responsive WebP candidates, intrinsic dimensions, lazy loading and public attribution remain available. Covered in `tests/public-assets.spec.ts`; see [asset delivery](../operations/asset-delivery.md).
 
 LANDING-LIGHTING-002: the hero and rose both render from the legacy edge-compressed lighting response observed in production WebKit. The normal asset response retains immutable caching with `no-transform`; invalid lighting still falls back without blocking content. Covered in `tests/studio-delivery.spec.ts`.
+
+## Hero preparation
+
+LANDING-ENTRY-006: the hero prepares its final shader variants before drawing the
+3D entrance and starts its three-second motion clock on the first prepared
+animation frame. Pending preparation retains usable content and the bounded
+static fallback. Late readiness never replays the page entrance. Navigating away
+releases pending GPU resources; a renderer without parallel shader compilation
+still works. Geometry/material construction has its own module, separate from
+mounting and lifecycle. `tests/hero-performance.spec.ts` covers pending shaders,
+navigation cancellation, extension absence, capped drawing buffers, five-second
+idle periods, offscreen suspension and injected visibility changes across all
+browser projects. Unchanged dimensions do not reallocate the drawing buffer.
+These deterministic checks do not replace frame-time measurements on Safari.
+
+The hidden-first-frame GPU-fence experiment did not remove the user's Safari
+hitch and is not part of the implementation. Its results remain in the
+[performance investigation](../design/safari-hero-performance-prd.md).

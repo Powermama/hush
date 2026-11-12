@@ -31,9 +31,11 @@ export function LocalUniverse() {
     }).connection;
     if (host.current && (connection?.saveData || /^(slow-)?2g$/.test(connection?.effectiveType ?? ""))) {
       host.current.dataset.fallback = "immediate";
+      const entry = host.current.closest<HTMLElement>(".hush-landing");
+      if (entry) entry.dataset.opening = "complete";
     }
-    // Vite loads the optional scene and its shared chunks after the HTML/CSS
-    // entrance has begun. Artwork never owns page visibility.
+    // Fetch immediately. The CSS fallback bounds content visibility independently
+    // while a fast scene can coordinate the original entrance choreography.
     void import("./HushScene").then(async ({ mountHushScene }) => {
       if (!cancelled && host.current) {
         dispose = await mountHushScene(host.current, controller.signal);

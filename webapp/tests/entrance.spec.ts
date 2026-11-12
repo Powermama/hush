@@ -16,13 +16,33 @@ test("keeps navigation and static artwork usable when studio lighting fails", as
   expect(errors).toEqual([]);
 });
 
-test("LANDING-ENTRY-001 fades the header from first paint without waiting for the scene", async ({ page }, testInfo) => {
+test("LANDING-ENTRY-001 coordinates the original transition calendar with the prepared scene", async ({ page }, testInfo) => {
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
-  await page.route(/\/assets\/.*\.js(?:\?.*)?$/, async route => { await gate; await route.continue(); });
+  await page.route(/HushScene.*\.js/, async route => { await gate; await route.continue(); });
+  // Hold only the fallback clock to exercise a prompt scene on slow CI GPUs.
+  // The real three-second choreography runs normally once the scene starts it.
+  await page.route(/\/assets\/.*\.css$/, async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: await response.text() +
+      '\n.hush-landing[data-opening="pending"] :is(.site-header,.hero-introduction,.hush-core,.orbit-app,.universe-paths,.universe-halo,.universe-texture,.hero-download-area) { animation-play-state: paused; }' });
+  });
   try {
-    await page.goto("/", { waitUntil: "commit" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator(".site-header")).toHaveCSS("position", "relative");
+    await expect(page.locator(".site-header")).toHaveCSS("opacity", "0");
+    release();
+    await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "playing", { timeout: 15000 });
+    const calendar = await page.evaluate(() => [".site-header", ".hero-introduction", ".hush-core", ".orbit-app", ".universe-paths", ".universe-texture", ".universe-halo", ".hero-download-area"].map(selector => {
+      const animation = document.querySelector(selector)!.getAnimations()[0];
+      const timing = animation.effect!.getTiming();
+      return { selector, delay: timing.delay, duration: Number(timing.duration), start: Number(animation.startTime) };
+    }));
+    expect(calendar.map(({ delay, duration }) => [delay, duration])).toEqual([
+      [120, 1050], [550, 900], [100, 650], [1000, 1150],
+      [850, 1500], [0, 2400], [300, 1400], [1650, 700],
+    ]);
+    expect(Math.max(...calendar.map(item => item.start)) - Math.min(...calendar.map(item => item.start))).toBeLessThan(1);
     const fade = await page.evaluate(() => {
       const header = document.querySelector<HTMLElement>(".site-header")!;
       const animation = header.getAnimations().find(item => (item as CSSAnimation).animationName === "header-arrive")!;
@@ -36,6 +56,7 @@ test("LANDING-ENTRY-001 fades the header from first paint without waiting for th
         opacity: Number(style.opacity), y: new DOMMatrixReadOnly(style.transform).m42,
         sameLayout: height === header.offsetHeight && top === header.offsetTop,
         filter: style.filter,
+        duration: Number(timing.duration), delay: timing.delay,
       };
       animation.currentTime = originalTime;
       animation.play();
@@ -47,6 +68,8 @@ test("LANDING-ENTRY-001 fades the header from first paint without waiting for th
     expect(fade.y).toBeLessThan(0);
     expect(fade.sameLayout).toBe(true);
     expect(fade.filter).toBe("none");
+    expect(fade.duration).toBe(1050);
+    expect(fade.delay).toBe(120);
   } finally { release(); }
   await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "complete");
   await expect(page.locator(".site-header")).toHaveCSS("opacity", "1");
