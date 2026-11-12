@@ -272,5 +272,5 @@ timelines, then repeat uninstrumented runs.
   hero draw calls; hidden-state coverage uses an injected visibility event.
 - No physical Safari performance gate or exact bandwidth/RTT matrix is marked
   complete. Earlier/current emulation results remain inconclusive for attribution.
-  Publishing is blocked in the agent process by unavailable Keychain-backed
-  credentials despite a successful interactive-terminal GitHub login.
+  Implementation is published in PR #18; parser and fixture corrections are
+  published in PR #17. Neither PR has been deployed by this investigation.

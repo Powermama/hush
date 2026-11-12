@@ -81,18 +81,6 @@ LANDING-ENTRY-003: with every application JavaScript request held back, the prod
 
 LANDING-ENTRY-004: failed application JavaScript leaves the prerendered page readable, and ordinary links still navigate. Interactive enhancements require JavaScript; the public content does not. Tests: `tests/entrance.spec.ts`, plus failure, reduced-motion and keyboard journeys in `tests/landing.spec.ts`.
 
-LANDING-ENTRY-006: the hero prepares its final shader variants before drawing the
-3D entrance and starts its three-second motion clock on the first prepared
-animation frame. Pending preparation retains usable content and the bounded
-static fallback. Late readiness never replays the page entrance. Navigating away
-releases pending GPU resources; a renderer without parallel shader compilation
-still works. Geometry/material construction has its own module, separate from
-mounting and lifecycle. `tests/hero-performance.spec.ts` covers pending shaders,
-navigation cancellation, extension absence, capped drawing buffers, five-second
-idle periods, offscreen suspension and injected visibility changes across all
-browser projects. Unchanged dimensions do not reallocate the drawing buffer.
-These deterministic checks do not replace frame-time measurements on Safari.
-
 Implementation follows [Vite's async chunk loading](https://vite.dev/guide/features#async-chunk-loading-optimization): retain dynamic scene imports, extracted CSS and automatic dependency preloads. No additional loading framework or global animation loop is introduced.
 
 LANDING-010: the rose opens and closes with actual wheel scrolling; reduced motion presents its open pose, and a missing local model keeps the vector fallback. Covered in tests/flower.spec.ts.
@@ -108,3 +96,17 @@ The final invitation omits the extra slogan. Its headline has relaxed tracking a
 LANDING-CACHE-001 / LANDING-CACHE-002: public artwork and app icons use Vite content-hashed URLs with immutable caching. Prerendered and hydrated pages reference the same assets; HTML is revalidated. Responsive WebP candidates, intrinsic dimensions, lazy loading and public attribution remain available. Covered in `tests/public-assets.spec.ts`; see [asset delivery](../operations/asset-delivery.md).
 
 LANDING-LIGHTING-002: the hero and rose both render from the legacy edge-compressed lighting response observed in production WebKit. The normal asset response retains immutable caching with `no-transform`; invalid lighting still falls back without blocking content. Covered in `tests/studio-delivery.spec.ts`.
+
+## Hero preparation
+
+LANDING-ENTRY-006: the hero prepares its final shader variants before drawing the
+3D entrance and starts its three-second motion clock on the first prepared
+animation frame. Pending preparation retains usable content and the bounded
+static fallback. Late readiness never replays the page entrance. Navigating away
+releases pending GPU resources; a renderer without parallel shader compilation
+still works. Geometry/material construction has its own module, separate from
+mounting and lifecycle. `tests/hero-performance.spec.ts` covers pending shaders,
+navigation cancellation, extension absence, capped drawing buffers, five-second
+idle periods, offscreen suspension and injected visibility changes across all
+browser projects. Unchanged dimensions do not reallocate the drawing buffer.
+These deterministic checks do not replace frame-time measurements on Safari.
