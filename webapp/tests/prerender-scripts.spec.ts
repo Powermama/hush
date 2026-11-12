@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 import { execFile } from "node:child_process";
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
 
@@ -16,9 +16,11 @@ test("LANDING-ENTRY-005 preserves interactive scripts under CSP regardless of HT
     await mkdir(join(directory, "dist"));
     await mkdir(join(directory, "dist-ssr"));
     await cp("scripts/prerender.ts", join(directory, "scripts/prerender.ts"));
+    await cp("scripts/prerender", join(directory, "scripts/prerender"), { recursive: true });
+    await symlink(resolve("node_modules"), join(directory, "node_modules"), "dir");
     await cp("shared", join(directory, "shared"), { recursive: true });
 
-    for (const [open, close] of [["script", "script"], ["SCRIPT", "SCRIPT"], ["ScRiPt", "sCrIpT"]]) {
+    for (const [open, close] of [["script", "script"], ["SCRIPT", "SCRIPT"], ["ScRiPt", "sCrIpT"], ["script ", "script data-end='ignored'"], ["script\n", "script\t"]]) {
       await writeFile(join(directory, "dist/index.html"), '<html><head><!--hush-head-start--><!--hush-head-end--></head><body></body></html>');
       const document = `<html lang="en"><head></head><body><h1>Prerender fixture</h1><button id="action">Open menu</button><${open}>window.$_TSR = {}; document.querySelector('#action').addEventListener('click', event => { event.currentTarget.textContent = 'Menu opened'; });</${close}></body></html>`;
       await writeFile(join(directory, "dist-ssr/entry-server.js"), `export async function render() { return new Response(${JSON.stringify(document)}); }`);

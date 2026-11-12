@@ -55,7 +55,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Check dependency advisories
         run: bun audit
-      - run: bun test server
+      - run: bun test server scripts/prerender
       - run: bun run api:check
       - run: bun run build
       - run: bunx playwright install --with-deps chromium webkit
