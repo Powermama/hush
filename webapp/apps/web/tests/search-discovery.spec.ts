@@ -30,7 +30,8 @@ test("public pages provide readable content and unique previews without JavaScri
       expect(bytes.readUInt32BE(20)).toBe(630);
     }
     await page.goto(`${test.info().project.use.baseURL}/`);
-    const application = JSON.parse(await page.locator('script[type="application/ld+json"]').innerText());
+    const homeData = (await page.locator('script[type="application/ld+json"]').allInnerTexts()).map((text) => JSON.parse(text));
+    const application = homeData.find((data) => data["@type"] === "SoftwareApplication");
     expect(application).toMatchObject({ "@type": "SoftwareApplication", name: "hush", operatingSystem: "macOS 15 or later" });
     expect(application).not.toHaveProperty("aggregateRating");
     for (const [path, language, alternate] of [["/impressum", "en", "/de/impressum"], ["/de/impressum", "de", "/impressum"]]) {
@@ -75,4 +76,27 @@ test("keeps discovery public, preserves private no-store and returns genuine 404
     expect((await request.get(path)).status()).toBe(404);
   }
   expect((await request.get("/index.html", { maxRedirects: 0 })).headers().location).toBe("/");
+});
+
+test("SEARCH-004 names the site and shows its icon and logo wherever search engines and devices look", async ({ page, request }) => {
+  await page.goto("/");
+  for (const [selector, href] of [
+    ['link[rel="icon"][sizes="48x48"]', "/favicon.ico"],
+    ['link[rel="icon"][type="image/svg+xml"]', "/favicon.svg"],
+    ['link[rel="icon"][sizes="96x96"]', "/favicon-96x96.png"],
+    ['link[rel="apple-touch-icon"]', "/apple-touch-icon.png"],
+  ]) await expect(page.locator(selector!)).toHaveAttribute("href", href!);
+  for (const [path, type, size] of [
+    ["/favicon.ico", "image/", 0], ["/favicon-96x96.png", "image/png", 96], ["/apple-touch-icon.png", "image/png", 180], ["/logo.png", "image/png", 512],
+  ] as const) {
+    const response = await request.get(path);
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()["content-type"], path).toContain(type);
+    if (size) expect((await response.body()).readUInt32BE(16), path).toBe(size);
+  }
+  const data = (await page.locator('script[type="application/ld+json"]').allInnerTexts()).map((text) => JSON.parse(text));
+  expect(data.find((item) => item["@type"] === "WebSite")).toMatchObject({ name: "hush", url: "https://behu.sh/" });
+  expect(data.find((item) => item["@type"] === "Organization")).toMatchObject({
+    name: "hush", logo: { url: "https://behu.sh/logo.png", width: 512, height: 512 },
+  });
 });
