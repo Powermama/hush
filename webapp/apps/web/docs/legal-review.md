@@ -24,10 +24,12 @@ behaviour, not compliance.
   and abandoned reservations become eligible after 24 hours; expired challenges
   are removed; IP limiter entries expire within two minutes. Failures retry.
   See `proof-retention.md` for tests, erasure handling and restore limitations.
-- Coolify shows one historical local volume backup, a disabled daily schedule,
-  seven copies configured and no age limit. No schedule was enabled or backup
-  deleted during this review. Live deletion does not remove that backup, and the
-  policy does not promise a fixed backup-erasure date.
+- Backups (updated 13 November 2026): the proof database had no backup schedule
+  after the November migration. A daily schedule now writes to the non-public
+  Cloudflare R2 bucket `hush-proof-backups` with a token limited to it, keeps 7
+  days and keeps no local copy; the bucket deletes objects after 9 days. The
+  policy states the 9-day bound for these backups and keeps the caveat for other
+  recovery copies.
 - The VAT identifier remains published at the operator's explicit request.
   Free distribution alone does not establish an exemption from DDG disclosure.
   Project wording now says free, open source and alpha, without an invented
@@ -60,11 +62,12 @@ Noindex is an indexing choice, not a substitute for legal obligations.
    application, but this does not verify account settings. Do not invent log
    retention periods. Update the policy with the actual periods or specific
    determination criteria once confirmed.
-5. Backups: give the historical backup a bounded removal date and verify how
-   expiry is enforced while its schedule is disabled. Do not enable recurring
-   backups or erase the only recovery copy merely to make this checklist green.
-   Live-object cleanup and authenticated revocation are implemented separately;
-   neither removes historical snapshots or establishes GDPR compliance alone.
+5. Backups: regular proof-database backups are bounded (9 days, see above).
+   Still open: give the November 2026 migration backup on the server
+   (`/root/hush-backup-20261112-1815`) and the stopped rollback resources a
+   removal date, and confirm the Cloudflare processing terms cover R2 storage
+   of these backups. Live-object cleanup and authenticated revocation are
+   implemented separately; neither establishes GDPR compliance alone.
 6. Confirm the dispute-resolution statement and whether editorial activities
    or other business circumstances trigger additional disclosure duties.
 
