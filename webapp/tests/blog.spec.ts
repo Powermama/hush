@@ -114,7 +114,7 @@ test("BLOG-007 links bylines to a prerendered author profile with ProfilePage da
   await context.close();
 
   await page.goto(article);
-  await page.locator(".blog-article-header .blog-byline").click();
+  await page.locator(".blog-byline").getByRole("link", { name: "Clemens Kressmann" }).click();
   await expect(page).toHaveURL(/\/authors\/clemens-kressmann$/);
   await expect(page.locator(".blog-author-links").getByRole("link", { name: /LinkedIn/ })).toHaveAttribute("rel", "me noopener");
   expect((await page.request.get("/de/autoren/clemens-kressmann")).status()).toBe(200);

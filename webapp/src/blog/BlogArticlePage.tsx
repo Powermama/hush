@@ -95,19 +95,13 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
         <article className="blog-article" aria-labelledby="article-title">
           <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
           <header className="blog-article-header">
-            <p className="blog-meta">
+            <h1 id="article-title">{post.heading}</h1>
+            <p className="blog-byline">
+              <span>{copy.by} <a href={authorPath(lang, post.author)} rel="author">{blogAuthors[post.author].name}</a></span>
               <span>{copy.published} <BlogDate lang={lang} value={post.published} /></span>
               {post.updated !== post.published && <span>{copy.updated} <BlogDate lang={lang} value={post.updated} /></span>}
               <span>{copy.readingTime(post.readingMinutes)}</span>
             </p>
-            <h1 id="article-title">{post.heading}</h1>
-            <a className="blog-byline" href={authorPath(lang, post.author)} rel="author">
-              <BlogAuthorAvatar author={post.author} />
-              <span>
-                <span className="blog-byline-name">{copy.by} {blogAuthors[post.author].name}</span>
-                <span className="blog-byline-role">{blogAuthors[post.author].role[lang]}</span>
-              </span>
-            </a>
           </header>
           <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-margin" />
           <div className="blog-body">

@@ -10,9 +10,9 @@
     grid-template-columns: 212px minmax(0, 680px);
     grid-template-areas: "back header" "share body";
   }
-  .blog-article > .blog-back { grid-area: back; align-self: start; margin-top: 2px; }
+  .blog-article > .blog-back { grid-area: back; align-self: start; margin-top: 12px; }
   .blog-article-header { grid-area: header; }
-  .blog-share-margin { grid-area: share; align-self: start; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); }
+  .blog-share-margin { grid-area: share; align-self: start; }
   .blog-body { grid-area: body; min-width: 0; }
   .blog-share-end { display: none; }
 }
@@ -37,16 +37,16 @@ a:hover > .blog-arrow-back .blog-arrow-head, a:focus-visible > .blog-arrow-back 
 .blog-arrow-forward .blog-arrow-head { transform: translateX(-4px); }
 a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forward .blog-arrow-head { transform: none; }
 @media (prefers-reduced-motion: reduce) { .blog-arrow-shaft, .blog-arrow-head { transition: none; } }
-.blog-meta { display: flex; flex-wrap: wrap; margin: 0 0 14px; font-size: 14px; line-height: 1.6; color: var(--color-muted); }
-.blog-meta > span { white-space: nowrap; }
+.blog-byline { margin: 18px 0 0; display: flex; flex-wrap: wrap; column-gap: 0; row-gap: 2px; font-size: 14px; line-height: 1.6; color: var(--color-muted); }
+.blog-byline > span { white-space: nowrap; }
 /* The separator ends a line rather than starting the next one when the line wraps. */
-.blog-meta > span:not(:last-child)::after { content: "·"; margin: 0 0.5em; color: var(--color-soft); }
-/* Author under the headline: portrait, name and role, linked to the profile. */
-.blog-byline { display: inline-flex; align-items: center; gap: 12px; margin-top: 22px; color: inherit; }
-.blog-byline > span { display: grid; }
-.blog-byline-name { font-size: 15px; font-weight: 500; color: var(--color-ink); }
-.blog-byline-role { font-size: 13px; color: var(--color-muted); }
-.blog-byline:hover .blog-byline-name, .blog-byline:focus-visible .blog-byline-name { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.blog-byline > span:not(:last-child)::after { content: "·"; margin: 0 0.5em; color: var(--color-soft); }
+/* Narrow screens: author on its own line, then the dates and reading time. */
+@media (max-width: 639px) {
+  .blog-byline > span:first-child { flex-basis: 100%; }
+  .blog-byline > span:first-child::after { content: none; }
+}
+.blog-byline a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgb(0 0 0 / 0.2); }
 
 
 /* Article body */
