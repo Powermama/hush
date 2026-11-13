@@ -377,6 +377,63 @@
           "height",
           "createdAt"
         ]
+      },
+      "SiteExport": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "description": "The site revision these posts reflect; the built site serves it at /blog/revision.txt."
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "<lang>/<slug>.md"
+                },
+                "markdown": {
+                  "type": "string",
+                  "description": "The article in the hush-seo Markdown format."
+                },
+                "media": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "description": "<lang>/media/<slug>/<name>"
+                      },
+                      "sha256": {
+                        "type": "string"
+                      },
+                      "contentType": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "sha256",
+                      "contentType"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "path",
+                "markdown",
+                "media"
+              ]
+            }
+          }
+        },
+        "required": [
+          "revision",
+          "files"
+        ]
       }
     },
     "parameters": {}
@@ -1463,6 +1520,140 @@
           },
           "422": {
             "description": "Not a valid image or name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/site/revision": {
+      "get": {
+        "operationId": "getSiteRevision",
+        "tags": [
+          "Site"
+        ],
+        "description": "The current site revision as plain text. Public: it reveals only a count of changes.",
+        "responses": {
+          "200": {
+            "description": "The revision",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/site/export": {
+      "get": {
+        "operationId": "exportSite",
+        "tags": [
+          "Site"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "Every published post as a hush-seo Markdown file, with the images it references. The website build writes these files into a content directory.",
+        "responses": {
+          "200": {
+            "description": "The published posts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteExport"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/media/{sha256}": {
+      "get": {
+        "operationId": "getMediaOriginal",
+        "tags": [
+          "Site"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "required": true,
+            "name": "sha256",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The original image as uploaded",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No image with this hash",
             "content": {
               "application/json": {
                 "schema": {

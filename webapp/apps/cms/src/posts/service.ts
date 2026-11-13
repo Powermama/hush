@@ -4,23 +4,28 @@
 // The post lifecycle. Each change runs in one transaction with its revision, so
 // a post, its keywords, its rendition and its history always agree. A scheduled
 // or published post always passed the article contract and has a rendition, so
-// anything live is valid.
+// anything live is valid. A change to what the website shows also records the
+// changed pages under the next site revision, in the same transaction.
+import { blogPath, type BlogLanguage } from "@hush/article/taxonomy";
 import { and, asc, desc, eq, inArray, lte, sql } from "drizzle-orm";
 import type { Database } from "../db/client";
-import { postRenditions, postRevisions, postSecondaryKeywords, posts } from "../db/schema";
+import { postRenditions, postRevisions, postSecondaryKeywords, posts, siteChanges, siteState } from "../db/schema";
 import { writeRenditions, type Cms } from "../media/service";
 import { checkPost } from "./contract";
 import { PostError } from "./errors";
 import { postFields, type PostFields, type PostPatch } from "./fields";
 
 type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
-type Executor = Database | Transaction;
+export type Executor = Database | Transaction;
 
 export type PostStatus = (typeof posts.$inferSelect)["status"];
 export type Rendition = Omit<typeof postRenditions.$inferSelect, "postId">;
 export type Post = typeof posts.$inferSelect & { secondaryKeywords: string[]; rendition: Rendition | null };
 
 export { PostError };
+
+/** The public address of a post (its language is validated on every write). */
+const pagePath = (post: Post) => blogPath(post.lang as BlogLanguage, post.slug);
 
 const withRelations = {
   secondaryKeywords: { columns: { keyword: true as const }, orderBy: [asc(postSecondaryKeywords.position)] },
@@ -53,6 +58,13 @@ function uniqueSlug(error: unknown) {
   return code === "23505" ? new PostError(409, "slug_taken", "Another post in this language already uses this slug.") : error;
 }
 
+/** Takes the next site revision for changed articles and the blog index listing them. */
+async function recordSiteChange(tx: Transaction, articlePaths: string[]) {
+  const paths = new Set(articlePaths.flatMap((path) => [path, path.slice(0, path.lastIndexOf("/"))]));
+  const [state] = await tx.update(siteState).set({ revision: sql`${siteState.revision} + 1` }).returning({ revision: siteState.revision });
+  await tx.insert(siteChanges).values([...paths].map((path) => ({ revision: state!.revision, path })));
+}
+
 /**
  * Writes a post's state in one transaction: its row, its keywords, its
  * rendition (set, removed or left alone) and a revision.
@@ -62,6 +74,8 @@ async function write(db: Database, actor: string, change: {
   fields?: PostFields;
   row?: Partial<typeof posts.$inferInsert>;
   rendition?: Omit<Rendition, "renderedAt"> | null;
+  /** Public pages this change alters. */
+  sitePaths?: string[];
 }) {
   try {
     return await db.transaction(async (tx) => {
@@ -83,6 +97,7 @@ async function write(db: Database, actor: string, change: {
         await tx.insert(postRenditions).values({ postId: id, ...rendition })
           .onConflictDoUpdate({ target: postRenditions.postId, set: rendition });
       }
+      if (change.sitePaths?.length) await recordSiteChange(tx, change.sitePaths);
       const post = await load(tx, id);
       await tx.insert(postRevisions).values({ postId: id, status: post.status, snapshot: editableFields(post), actor });
       return post;
@@ -100,7 +115,7 @@ async function render(cms: Cms, id: string, fields: PostFields, publishedAt: Dat
   return { heading: post.heading, html: post.html, toc: post.toc, readingMinutes: post.readingMinutes };
 }
 
-export async function listPosts(db: Database, filter: { lang?: string; status?: PostStatus }) {
+export async function listPosts(db: Executor, filter: { lang?: string; status?: PostStatus }) {
   const rows: Loaded[] = await db.query.posts.findMany({
     where: and(filter.lang ? eq(posts.lang, filter.lang) : undefined, filter.status ? eq(posts.status, filter.status) : undefined),
     with: withRelations,
@@ -121,7 +136,9 @@ export async function updatePost(cms: Cms, id: string, patch: PostPatch, actor: 
   const updatedAt = new Date();
   // A live post changes only to another valid version.
   const rendition = post.status === "draft" ? undefined : await render(cms, id, fields, post.publishedAt!, updatedAt);
-  return write(cms.db, actor, { id, fields, row: { updatedAt }, rendition });
+  // A live post's page changes, at its old and its new address.
+  const sitePaths = post.status === "published" ? [pagePath(post), blogPath(fields.lang, fields.slug)] : undefined;
+  return write(cms.db, actor, { id, fields, row: { updatedAt }, rendition, sitePaths });
 }
 
 export async function schedulePost(cms: Cms, id: string, at: Date, actor: string) {
@@ -143,14 +160,15 @@ export async function publishPost(cms: Cms, id: string, actor: string, dates?: {
     ?? (post.publishedAt && post.publishedAt.getTime() <= Date.now() ? post.publishedAt : new Date());
   const updatedAt = dates?.updatedAt ?? post.updatedAt;
   const rendition = await render(cms, id, editableFields(post), publishedAt, updatedAt);
-  return write(cms.db, actor, { id, row: { status: "published", publishedAt, updatedAt }, rendition });
+  return write(cms.db, actor, { id, row: { status: "published", publishedAt, updatedAt }, rendition, sitePaths: [pagePath(post)] });
 }
 
 export async function unpublishPost(db: Database, id: string, actor: string) {
   const post = await load(db, id);
   if (post.status === "draft") return post;
   const keepDate = post.publishedAt && post.publishedAt.getTime() <= Date.now();
-  return write(db, actor, { id, row: { status: "draft", publishedAt: keepDate ? post.publishedAt : null }, rendition: null });
+  const sitePaths = post.status === "published" ? [pagePath(post)] : undefined;
+  return write(db, actor, { id, row: { status: "draft", publishedAt: keepDate ? post.publishedAt : null }, rendition: null, sitePaths });
 }
 
 export async function listRevisions(db: Database, id: string) {
@@ -177,6 +195,7 @@ export async function publishDuePosts(db: Database) {
     const rows: Loaded[] = await tx.query.posts.findMany({ where: inArray(posts.id, due.map((row) => row.id)), with: withRelations });
     const published = rows.map(compose);
     await tx.insert(postRevisions).values(published.map((post) => ({ postId: post.id, status: post.status, snapshot: editableFields(post), actor: "scheduler" })));
+    await recordSiteChange(tx, published.map(pagePath));
     return published;
   });
 }
