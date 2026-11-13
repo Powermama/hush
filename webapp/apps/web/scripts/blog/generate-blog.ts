@@ -8,6 +8,7 @@
 //   public/blog/feed.xml, public/de/blog/feed.xml   Atom feeds
 //   public/blog/media/*.webp                  responsive article images (content-hashed)
 //   public/blog/covers/*.png                  social previews (content-hashed)
+//   public/blog/revision.txt                  the CMS site revision, when the content came from the CMS
 //
 // Run from webapp/apps/web/:  bun run blog:generate   (write)
 //                    bun run blog:check      (fail if committed output is stale)
@@ -128,6 +129,12 @@ function feed(lang: BlogLanguage) {
 }
 for (const lang of languagesWithPosts) outputs.set(`public${blogPath(lang)}/feed.xml`, feed(lang));
 
+// Content pulled from the CMS (scripts/blog/pull-cms.ts) names the site revision
+// it reflects; the site serves it so the CMS can tell when a change is live.
+const revisionFile = "public/blog/revision.txt";
+const revision = await readFile(join(contentDir, "revision.txt"), "utf8").catch(() => null);
+if (revision !== null) outputs.set(revisionFile, revision);
+
 // Image renditions and covers carry a content hash in their name, so an existing file is current.
 const mediaDir = "public/blog/media";
 const coversDir = "public/blog/covers";
@@ -150,6 +157,7 @@ async function staleFiles() {
     const feedFile = `public${blogPath(lang)}/feed.xml`;
     if (!outputs.has(feedFile) && await Bun.file(feedFile).exists()) stale.push(feedFile);
   }
+  if (!outputs.has(revisionFile) && await Bun.file(revisionFile).exists()) stale.push(revisionFile);
   return stale;
 }
 
