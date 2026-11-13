@@ -218,3 +218,14 @@ test("BLOG-013 explains the editorial policy, linked from the footer", async ({ 
   expect((await request.get("/de/blog/redaktionelle-richtlinien")).status()).toBe(200);
   expect(await (await request.get("/sitemap.xml")).text()).toContain("/blog/editorial-policy");
 });
+
+test("BLOG-014 copies a command from a code block with one click", async ({ page, browserName }) => {
+  if (browserName === "chromium") await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto(article);
+  const button = page.locator(".blog-code").first().getByRole("button", { name: "Copy code" });
+  await expect(button).toHaveText("Copy");
+  await button.click();
+  await expect(button).toHaveText("Copied");
+  if (browserName === "chromium") expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("killall corespeechd");
+  await expect(button).toHaveText("Copy", { timeout: 4000 });
+});

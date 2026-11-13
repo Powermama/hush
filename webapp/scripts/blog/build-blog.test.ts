@@ -88,6 +88,7 @@ describe("blog content pipeline", () => {
     expect(first.toc.map((entry) => entry.id)).toEqual(["how-does-the-fixture-render", "frequently-asked-questions"]);
     expect(first.html).toContain('<h2 id="frequently-asked-questions" class="blog-appendix">');
     expect(first.html).toContain("<table>");
+    expect(first.html).toContain('<div class="blog-code"><pre><code>killall corespeechd\n</code></pre><button type="button" class="blog-code-copy" aria-label="Copy code" data-copied-label="Copied">Copy</button></div>');
     expect(posts.some((post) => post.slug === "fixture-draft")).toBe(false);
   });
 

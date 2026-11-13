@@ -85,6 +85,18 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
   const copy = blogCopy[lang];
   const related = relatedPosts(post);
   const articleHTML = useMemo(() => ({ __html: html }), [html]);
+  // Code blocks carry a copy button from the build; one delegated handler serves them all.
+  const copyCode = (event: React.MouseEvent<HTMLDivElement>) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>(".blog-code-copy");
+    const code = button?.parentElement?.querySelector("pre")?.innerText;
+    if (!button || code === undefined) return;
+    void navigator.clipboard.writeText(code.trimEnd()).then(() => {
+      const label = button.textContent;
+      button.dataset.copied = "true";
+      button.textContent = button.dataset.copiedLabel ?? label;
+      setTimeout(() => { delete button.dataset.copied; button.textContent = label; }, 1800);
+    }, () => {});
+  };
 
   return (
     <div className="min-h-screen bg-canvas text-ink" lang={lang}>
@@ -105,7 +117,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
           </header>
           <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-margin" />
           <div className="blog-body">
-            <div className="blog-prose" data-blog-body="" dangerouslySetInnerHTML={articleHTML} />
+            <div className="blog-prose" data-blog-body="" onClick={copyCode} dangerouslySetInnerHTML={articleHTML} />
             <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-end" />
             <BlogAuthorCard lang={lang} author={post.author} />
           </div>

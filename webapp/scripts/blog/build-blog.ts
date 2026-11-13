@@ -102,6 +102,24 @@ function isTldr(node: { children?: Array<{ type: string; tagName?: string; child
   return text?.type === "text" && (text.value ?? "").trimStart().startsWith(tldrMarker);
 }
 
+const copyLabels: Record<BlogLanguage, { label: string; text: string; copied: string }> = {
+  en: { label: "Copy code", text: "Copy", copied: "Copied" },
+  de: { label: "Code kopieren", text: "Kopieren", copied: "Kopiert" },
+};
+
+/** Wraps every code block with a copy button; the article page handles the click. */
+function addCopyButtons(node: HastNode, lang: BlogLanguage) {
+  node.children = node.children?.map((child) => {
+    if (child.type !== "element" || child.tagName !== "pre") { addCopyButtons(child, lang); return child; }
+    return {
+      type: "element", tagName: "div", properties: { className: ["blog-code"] }, children: [child, {
+        type: "element", tagName: "button", properties: { type: "button", className: ["blog-code-copy"], ariaLabel: copyLabels[lang].label, dataCopiedLabel: copyLabels[lang].copied },
+        children: [{ type: "text", value: copyLabels[lang].text }],
+      }],
+    };
+  });
+}
+
 const faqHeadings: Record<BlogLanguage, string> = {
   en: "Frequently asked questions",
   de: "Häufige Fragen",
@@ -311,6 +329,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       .use(remarkRehype)
       .use(rehypeSlug)
       .run(tree as never) as unknown as HastNode;
+    addCopyButtons(hast, lang);
     // The page renders the H1 in its own header with the byline, so remove it
     // from the body to keep exactly one H1 on the page.
     let heading = "";
