@@ -65,7 +65,10 @@ test("mobile navigation stays compact and closes with Escape or its toggle", asy
 
 test("LANDING-NAV-002 scrolls the header away and shows only a progress line", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  // Only the main landing page has the progress line.
   await page.goto("/datenschutz");
+  await expect(page.getByRole("progressbar", { name: "Page reading progress" })).toHaveCount(0);
+  await page.goto("/");
   const progress = page.getByRole("progressbar", { name: "Page reading progress" });
   await expect(progress).toHaveAttribute("aria-valuenow", "0");
   await expect(progress).toHaveCSS("opacity", "0");

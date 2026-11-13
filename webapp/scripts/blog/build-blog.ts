@@ -4,8 +4,10 @@
 // Reads Markdown articles, validates them against the hush blog contract and
 // renders them to HTML. Pure apart from reading the content directory, so it
 // can be tested against fixtures. The writer lives in generate-blog.ts.
+import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import sharp from "sharp";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
@@ -14,6 +16,8 @@ import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
+import { authorPath, blogAuthorIds, type BlogAuthorId } from "../../shared/authors";
+import { blogClusterIds, editorialPolicyPath, editorialPolicySlugs, type BlogClusterId } from "../../shared/blog";
 
 export const blogLanguages = ["en", "de"] as const;
 export type BlogLanguage = (typeof blogLanguages)[number];
@@ -26,10 +30,9 @@ export const frontMatterSchema = z.object({
   lang: z.enum(blogLanguages),
   keyword: z.string().min(2),
   secondaryKeywords: z.array(z.string().min(2)).max(8),
-  type: z.enum(["how-to", "comparison", "guide", "listicle", "news"]),
-  cluster: z.string().min(2),
-  author: z.string().min(2),
-  authorUrl: z.url().startsWith("https://"),
+  type: z.enum(["how-to", "comparison", "guide", "listicle", "essay", "news"]),
+  cluster: z.enum(blogClusterIds),
+  author: z.enum(blogAuthorIds),
   published: z.iso.date(),
   updated: z.iso.date(),
   imageAlt: z.string().min(10).max(160),
@@ -44,6 +47,30 @@ export type FrontMatter = z.infer<typeof frontMatterSchema>;
 
 export type TocEntry = { id: string; text: string };
 
+/**
+ * The cover of an article, rendered from cover-template.html. The hash covers the
+ * template, renderer and every value shown, so changes produce new file names.
+ */
+export type BlogCoverPlan = {
+  hash: string;
+  lang: BlogLanguage;
+  title: string;
+  /** The 1200x630 PNG for link previews. */
+  path: string;
+  /** The same artwork as an 800px WebP for article cards. */
+  cardPath: string;
+};
+
+export const coverTemplatePath = join(import.meta.dir, "cover-template.html");
+
+/** One responsive rendition the generator writes to public/. */
+export type BlogImageOutput = { source: string; path: string; width: number };
+
+// Article images render at most 680 CSS px wide; the second size serves 2x screens.
+const imageWidths = [680, 1360];
+const imageSizes = "(min-width: 768px) 680px, calc(100vw - 40px)";
+const imagePath = /^media\/([a-z0-9-]+)\/([a-z0-9-]+)\.(png|jpe?g|webp)$/;
+
 export type BlogPost = {
   slug: string;
   lang: BlogLanguage;
@@ -52,9 +79,8 @@ export type BlogPost = {
   description: string;
   heading: string;
   type: FrontMatter["type"];
-  cluster: string;
-  author: string;
-  authorUrl: string;
+  cluster: BlogClusterId;
+  author: BlogAuthorId;
   published: string;
   updated: string;
   imageAlt: string;
@@ -63,11 +89,47 @@ export type BlogPost = {
   html: string;
   /** Internal only: used for duplicate checks, never rendered. */
   keyword: string;
+  /** Internal only: image renditions the generator must write. */
+  images: BlogImageOutput[];
+  cover: BlogCoverPlan;
 };
+
+// A blockquote starting with [!TLDR] (GitHub alert syntax) becomes the summary box.
+const tldrMarker = "[!TLDR]";
+const tldrTitles: Record<BlogLanguage, string> = { en: "In short", de: "Kurz gesagt" };
+
+function isTldr(node: { children?: Array<{ type: string; tagName?: string; children?: Array<{ type: string; value?: string }> }> }) {
+  const first = node.children?.find((child) => child.type === "paragraph" || child.tagName === "p");
+  const text = first?.children?.[0];
+  return text?.type === "text" && (text.value ?? "").trimStart().startsWith(tldrMarker);
+}
+
+const copyLabels: Record<BlogLanguage, { label: string; text: string; copied: string }> = {
+  en: { label: "Copy code", text: "Copy", copied: "Copied" },
+  de: { label: "Code kopieren", text: "Kopieren", copied: "Kopiert" },
+};
+
+/** Wraps every code block with a copy button; the article page handles the click. */
+function addCopyButtons(node: HastNode, lang: BlogLanguage) {
+  node.children = node.children?.map((child) => {
+    if (child.type !== "element" || child.tagName !== "pre") { addCopyButtons(child, lang); return child; }
+    return {
+      type: "element", tagName: "div", properties: { className: ["blog-code"] }, children: [child, {
+        type: "element", tagName: "button", properties: { type: "button", className: ["blog-code-copy"], ariaLabel: copyLabels[lang].label, dataCopiedLabel: copyLabels[lang].copied },
+        children: [{ type: "text", value: copyLabels[lang].text }],
+      }],
+    };
+  });
+}
 
 const faqHeadings: Record<BlogLanguage, string> = {
   en: "Frequently asked questions",
   de: "Häufige Fragen",
+};
+// The FAQ and the sources section close the article; the page sets them apart from the body.
+const sourcesHeadings: Record<BlogLanguage, string> = {
+  en: "Sources and how we tested",
+  de: "Quellen und Testaufbau",
 };
 
 // Mirrors the hush-seo skill profile (section 4). Matched case-insensitively.
@@ -84,8 +146,32 @@ export function blogPath(lang: BlogLanguage, slug?: string) {
   return slug ? `${base}/${slug}` : base;
 }
 
-type MdNode = { type: string; depth?: number; url?: string; value?: string; children?: MdNode[] };
-type HastNode = { type: string; tagName?: string; properties?: { id?: string }; value?: string; children?: HastNode[] };
+type MdNode = { type: string; depth?: number; url?: string; alt?: string; title?: string | null; value?: string; children?: MdNode[] };
+type HastNode = { type: string; tagName?: string; properties?: Record<string, unknown>; value?: string; children?: HastNode[] };
+
+type ArticleImage = { url: string; alt: string; title?: string; width: number; height: number; renditions: BlogImageOutput[] };
+
+/** Validates an article image and plans its WebP renditions. */
+async function planImage(contentDir: string, lang: string, slug: string, node: MdNode, problems: string[]): Promise<ArticleImage | undefined> {
+  const url = node.url ?? "";
+  const match = imagePath.exec(url);
+  if (!match) { problems.push(`image "${url}" must be media/${slug}/<name>.png|jpg|webp`); return; }
+  if (match[1] !== slug) { problems.push(`image "${url}" must live in media/${slug}/`); return; }
+  const alt = (node.alt ?? "").trim();
+  if (alt.length < 10 || alt.length > 160) problems.push(`image "${url}" needs alt text of 10 to 160 characters`);
+  const source = join(contentDir, lang, url);
+  let bytes: Buffer;
+  try { bytes = await readFile(source); } catch { problems.push(`image "${url}" does not exist`); return; }
+  const { width, height } = await sharp(bytes).metadata();
+  if (!width || !height) { problems.push(`image "${url}" cannot be read`); return; }
+  if (width < imageWidths[0]!) problems.push(`image "${url}" is ${width}px wide; provide at least ${imageWidths[0]}px`);
+  // Content-hashed names: a changed image gets new URLs, so caches never serve a stale one.
+  const hash = createHash("sha256").update(bytes).digest("hex").slice(0, 10);
+  const renditions = [...new Set(imageWidths.map((target) => Math.min(target, width)))].map((target) => ({
+    source, width: target, path: `/blog/media/${slug}-${match[2]}-${hash}-${target}.webp`,
+  }));
+  return { url, alt, title: node.title ?? undefined, width, height, renditions };
+}
 
 function walk<T extends { children?: T[] }>(node: T, visit: (node: T) => void) {
   visit(node);
@@ -117,6 +203,8 @@ export type BuildResult = { posts: BlogPost[]; errors: string[] };
  */
 export async function buildBlog(contentDir: string, staticPaths: Iterable<string>): Promise<BuildResult> {
   const errors: string[] = [];
+  const coverTemplate = await readFile(coverTemplatePath, "utf8");
+  const coverRenderer = await readFile(join(import.meta.dir, "render-covers.ts"), "utf8");
   const parsed: Array<{ file: string; front: FrontMatter; tree: MdNode; body: string }> = [];
 
   for (const lang of blogLanguages) {
@@ -164,6 +252,8 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
   for (const { front } of parsed) {
     knownPaths.add(blogPath(front.lang, front.slug));
     knownPaths.add(blogPath(front.lang));
+    knownPaths.add(authorPath(front.lang, front.author));
+    knownPaths.add(editorialPolicyPath(front.lang));
   }
 
   const keywords = new Map<string, string>();
@@ -174,6 +264,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
     const lang = front.lang;
     const problems: string[] = [];
 
+    if (front.slug === editorialPolicySlugs[lang]) problems.push(`slug "${front.slug}" is reserved for the editorial policy`);
     const slugKey = `${lang}:${front.slug}`;
     if (slugs.has(slugKey)) problems.push(`slug already used by ${slugs.get(slugKey)}`);
     slugs.set(slugKey, file);
@@ -182,7 +273,16 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
     keywords.set(keywordKey, file);
 
     const headings: Array<{ depth: number; text: string }> = [];
+    const imageNodes: MdNode[] = [];
+    let tldrCount = 0;
     walk(tree, (node) => {
+      if (node.type === "blockquote" && isTldr(node)) {
+        tldrCount++;
+        if (headings.some((heading) => heading.depth === 2)) problems.push(`the ${tldrMarker} summary must come before the first section`);
+      }
+      if (node.type === "image") imageNodes.push(node);
+      if (node.type === "paragraph" && node.children?.some((child) => child.type === "image")
+        && (node.children.length !== 1)) problems.push("an image must stand alone in its own paragraph");
       if (node.type === "heading") headings.push({ depth: node.depth!, text: text(node) });
       if (node.type === "link") {
         const url = node.url ?? "";
@@ -197,6 +297,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       if (node.type === "html") problems.push("raw HTML is not allowed in articles");
     });
 
+    if (tldrCount > 1) problems.push(`only one ${tldrMarker} summary is allowed`);
     const h1 = headings.filter((heading) => heading.depth === 1);
     if (h1.length !== 1) problems.push(`must contain exactly one H1, found ${h1.length}`);
     if (headings[0] && headings[0].depth !== 1) problems.push("the first heading must be the H1");
@@ -215,6 +316,12 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       if (lower.includes(phrase)) problems.push(`contains the banned phrase "${phrase}"`);
     }
 
+    const images = new Map<string, ArticleImage>();
+    for (const node of imageNodes) {
+      const image = await planImage(contentDir, lang, front.slug, node, problems);
+      if (image) images.set(image.url, image);
+    }
+
     if (problems.length) {
       errors.push(...problems.map((problem) => `${file}: ${problem}`));
       continue;
@@ -224,6 +331,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       .use(remarkRehype)
       .use(rehypeSlug)
       .run(tree as never) as unknown as HastNode;
+    addCopyButtons(hast, lang);
     // The page renders the H1 in its own header with the byline, so remove it
     // from the body to keep exactly one H1 on the page.
     let heading = "";
@@ -238,11 +346,56 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
     walk(hast, (node) => {
       if (node.type === "element" && node.tagName === "h2" && node.properties?.id) {
         toc.push({ id: String(node.properties.id), text: text(node) });
+        if ([faqHeadings[lang], sourcesHeadings[lang]].includes(text(node).trim())) node.properties.className = ["blog-appendix"];
+      }
+      if (node.type === "element" && node.tagName === "blockquote" && isTldr(node as never)) {
+        const first = node.children!.find((child) => child.tagName === "p")!;
+        const marker = first.children![0]!;
+        marker.value = marker.value!.replace(tldrMarker, "").replace(/^\s+/, "");
+        if (!marker.value && first.children!.length === 1) node.children = node.children!.filter((child) => child !== first);
+        node.tagName = "aside";
+        node.properties = { className: ["blog-tldr"], ariaLabel: tldrTitles[lang] };
+        node.children = [{ type: "element", tagName: "p", properties: { className: ["blog-tldr-title"] }, children: [{ type: "text", value: tldrTitles[lang] }] }, ...node.children!];
+      }
+      // A paragraph holding only an image becomes a figure with responsive WebP sources.
+      const only = node.children?.length === 1 ? node.children[0] : undefined;
+      if (node.type === "element" && node.tagName === "p" && only?.tagName === "img") {
+        const image = images.get(String(only.properties?.src));
+        if (!image) return;
+        const first = image.renditions[0]!;
+        const img: HastNode = {
+          type: "element", tagName: "img", children: [], properties: {
+            src: first.path,
+            srcSet: image.renditions.map((rendition) => `${rendition.path} ${rendition.width}w`).join(", "),
+            sizes: imageSizes,
+            width: first.width,
+            height: Math.round(image.height * first.width / image.width),
+            alt: image.alt,
+            loading: "lazy",
+            decoding: "async",
+          },
+        };
+        node.tagName = "figure";
+        node.properties = {};
+        node.children = [img, {
+          type: "element", tagName: "figcaption", properties: {}, children: [
+            ...(image.title ? [{ type: "text", value: image.title } as HastNode] : []),
+            {
+              type: "element", tagName: "a", properties: {
+                className: ["blog-image-full"], href: image.renditions.at(-1)!.path,
+                target: "_blank", rel: ["noopener"],
+                ariaLabel: lang === "de" ? `Bild in voller Größe öffnen (neuer Tab): ${image.alt}` : `Open full-size image (new tab): ${image.alt}`,
+              }, children: [{ type: "text", value: lang === "de" ? "Bild in voller Größe ansehen" : "View full-size image" }],
+            },
+          ],
+        }];
       }
     });
     const html = unified().use(rehypeStringify).stringify(hast as never);
     const words = body.split(/\s+/).filter(Boolean).length;
 
+    const coverHash = createHash("sha256").update(JSON.stringify([coverTemplate, coverRenderer, lang, heading])).digest("hex").slice(0, 10);
+    const coverBase = `/blog/covers/${front.slug}-${coverHash}`;
     posts.push({
       slug: front.slug,
       lang,
@@ -253,7 +406,6 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       type: front.type,
       cluster: front.cluster,
       author: front.author,
-      authorUrl: front.authorUrl,
       published: front.published,
       updated: front.updated,
       imageAlt: front.imageAlt,
@@ -261,6 +413,12 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       toc,
       html,
       keyword: front.keyword,
+      images: [...images.values()].flatMap((image) => image.renditions),
+      cover: {
+        hash: coverHash, lang, title: heading,
+        path: `${coverBase}-social.png`,
+        cardPath: `${coverBase}-card.webp`,
+      },
     });
   }
 

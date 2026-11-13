@@ -6,14 +6,21 @@
 //   src/blog/generated/routes.generated.tsx   one lazy route per article
 //   src/blog/generated/<lang>/<slug>.tsx      one code-split module per article
 //   public/blog/feed.xml, public/de/blog/feed.xml   Atom feeds
+//   public/blog/media/*.webp                  responsive article images (content-hashed)
+//   public/blog/covers/*.png                  social previews (content-hashed)
 //
 // Run from webapp/:  bun run blog:generate   (write)
 //                    bun run blog:check      (fail if committed output is stale)
 // HUSH_BLOG_CONTENT_DIR selects another content directory (browser-test fixtures).
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import sharp from "sharp";
+import { authorPath, blogAuthors } from "../../shared/authors";
+import { editorialPolicyPath } from "../../shared/blog";
 import { siteOrigin, staticSitePaths } from "../../shared/site";
-import { blogLanguages, blogPath, buildBlog, type BlogLanguage, type BlogPost } from "./build-blog";
+import { blogLanguages, blogPath, buildBlog, type BlogImageOutput, type BlogLanguage, type BlogPost } from "./build-blog";
+import { renderCovers } from "./render-covers";
 
 const check = Bun.argv.includes("--check");
 const contentDir = process.env.HUSH_BLOG_CONTENT_DIR ?? "content/blog";
@@ -42,7 +49,7 @@ const moduleName = (post: BlogPost) => `${post.lang}/${post.slug}`;
 
 const outputs = new Map<string, string>();
 
-const metadata = posts.map(({ html: _html, keyword: _keyword, ...post }) => post);
+const metadata = posts.map(({ html: _html, keyword: _keyword, images: _images, cover, ...post }) => ({ ...post, socialImage: cover.path, cardImage: cover.cardPath }));
 outputs.set("shared/blog-posts.generated.ts", `${header}import type { BlogPostMetadata } from "./blog.ts";
 
 export const blogPosts: readonly BlogPostMetadata[] = ${json(metadata)};
@@ -62,10 +69,18 @@ export function Article() {
 const languagesWithPosts = blogLanguages.filter((lang) => posts.some((post) => post.lang === lang));
 const routeLines = [
   ...languagesWithPosts.map((lang) => `    createRoute({ getParentRoute: () => parent, path: ${literal(blogPath(lang))}, component: () => <BlogIndexPage lang=${literal(lang)} /> }),`),
+  ...languagesWithPosts.map((lang) => `    createRoute({ getParentRoute: () => parent, path: ${literal(editorialPolicyPath(lang))}, component: () => <BlogEditorialPolicyPage lang=${literal(lang)} /> }),`),
   ...posts.map((post) => `    createRoute({ getParentRoute: () => parent, path: ${literal(post.path)}, component: lazyRouteComponent(() => import(${literal(`./${moduleName(post)}`)}), "Article") }),`),
+  // One profile page per author and language they have published in.
+  ...[...new Set(posts.map((post) => `${post.lang} ${post.author}`))].map((key) => {
+    const [lang, author] = key.split(" ") as [BlogLanguage, BlogPost["author"]];
+    return `    createRoute({ getParentRoute: () => parent, path: ${literal(authorPath(lang, author))}, component: () => <BlogAuthorPage lang=${literal(lang)} author=${literal(author)} /> }),`;
+  }),
 ];
 outputs.set(`${generatedDir}/routes.generated.tsx`, routeLines.length
   ? `${header}import { createRoute, lazyRouteComponent, type AnyRoute } from "@tanstack/react-router";
+import { BlogAuthorPage } from "../BlogAuthorPage";
+import { BlogEditorialPolicyPage } from "../BlogEditorialPolicyPage";
 import { BlogIndexPage } from "../BlogIndexPage";
 
 /** Blog routes exist only for languages with at least one published article. */
@@ -102,7 +117,7 @@ function feed(lang: BlogLanguage) {
       `    <link rel="alternate" type="text/html" href="${siteOrigin}${post.path}"/>`,
       `    <published>${post.published}T00:00:00Z</published>`,
       `    <updated>${post.updated}T00:00:00Z</updated>`,
-      `    <author><name>${escapeXML(post.author)}</name><uri>${escapeXML(post.authorUrl)}</uri></author>`,
+      `    <author><name>${escapeXML(blogAuthors[post.author].name)}</name><uri>${siteOrigin}${authorPath(post.lang, post.author)}</uri></author>`,
       `    <summary>${escapeXML(post.description)}</summary>`,
       "  </entry>",
     ]),
@@ -112,9 +127,21 @@ function feed(lang: BlogLanguage) {
 }
 for (const lang of languagesWithPosts) outputs.set(`public${blogPath(lang)}/feed.xml`, feed(lang));
 
+// Image renditions and covers carry a content hash in their name, so an existing file is current.
+const mediaDir = "public/blog/media";
+const coversDir = "public/blog/covers";
+const imageFiles = new Map(posts.flatMap((post) => post.images).map((image) => [`public${image.path}`, image]));
+const coverFiles = new Set(posts.flatMap((post) => [`public${post.cover.path}`, `public${post.cover.cardPath}`]));
+
 // Files a previous run produced that no longer have a source.
 async function staleFiles() {
   const stale: string[] = [];
+  for (const file of await readdir(mediaDir).catch(() => [] as string[])) {
+    if (!imageFiles.has(`${mediaDir}/${file}`)) stale.push(`${mediaDir}/${file}`);
+  }
+  for (const file of await readdir(coversDir).catch(() => [] as string[])) {
+    if (!coverFiles.has(`${coversDir}/${file}`)) stale.push(`${coversDir}/${file}`);
+  }
   for (const lang of blogLanguages) {
     const dir = `${generatedDir}/${lang}`;
     const files = await readdir(dir).catch(() => [] as string[]);
@@ -126,17 +153,56 @@ async function staleFiles() {
 }
 
 const changed: string[] = [];
+const changedOutputs = new Map<string, string>();
 for (const [path, content] of outputs) {
   const current = await readFile(path, "utf8").catch(() => null);
   if (current === content) continue;
   changed.push(path);
-  if (!check) {
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, content);
-  }
+  changedOutputs.set(path, content);
+}
+const missingImages = new Map<string, BlogImageOutput>();
+for (const [path, image] of imageFiles) {
+  if (await Bun.file(path).exists()) continue;
+  changed.push(path);
+  missingImages.set(path, image);
+}
+const missingCovers = [];
+for (const post of posts) {
+  // The social PNG and the card WebP are rendered together; either missing re-renders both.
+  const paths = [`public${post.cover.path}`, `public${post.cover.cardPath}`];
+  const missing = [];
+  for (const path of paths) if (!await Bun.file(path).exists()) missing.push(path);
+  if (!missing.length) continue;
+  changed.push(...missing);
+  missingCovers.push(post.cover);
 }
 const stale = await staleFiles();
-if (!check) for (const path of stale) await rm(path);
+
+if (!check) {
+  // A failed image conversion or browser launch must leave the previous site
+  // usable. Prepare every missing asset before changing metadata or removing
+  // old files, and keep incomplete renders outside the public directory.
+  const stagingDir = await mkdtemp(join(tmpdir(), "hush-blog-assets-"));
+  try {
+    for (const [path, image] of missingImages) {
+      const staged = join(stagingDir, path);
+      await mkdir(dirname(staged), { recursive: true });
+      await sharp(image.source).resize({ width: image.width }).webp({ quality: 82 }).toFile(staged);
+    }
+    await renderCovers(missingCovers, join(stagingDir, "public"));
+    for (const path of [...missingImages.keys(), ...missingCovers.flatMap((cover) => [`public${cover.path}`, `public${cover.cardPath}`])]) {
+      await mkdir(dirname(path), { recursive: true });
+      await copyFile(join(stagingDir, path), path);
+    }
+    for (const [path, content] of changedOutputs) {
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, content);
+    }
+    for (const path of stale) await rm(path);
+  } finally {
+    await rm(stagingDir, { recursive: true, force: true });
+  }
+}
 
 if (check) {
   const problems = [...changed.map((path) => `${path} is out of date`), ...stale.map((path) => `${path} has no source`)];

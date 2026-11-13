@@ -2,8 +2,9 @@
 // Copyright 2026 Clemens Kressmann
 import { legalConfig } from "./legal.ts";
 import { releases, releasePath } from "./releases.ts";
-import { blogCopy, type BlogLanguage } from "./blog.ts";
+import { blogCopy, editorialPolicyPath, type BlogLanguage } from "./blog.ts";
 import { blogPosts } from "./blog-posts.generated.ts";
+import { authorPath, blogAuthors, type BlogAuthorId } from "./authors.ts";
 
 export const siteOrigin = "https://behu.sh";
 export type PageMetadata = {
@@ -17,12 +18,15 @@ export type PageMetadata = {
   /** Present for blog articles: drives og:type article and BlogPosting data. */
   article?: {
     heading: string;
-    author: string;
-    authorUrl: string;
+    author: BlogAuthorId;
     published: string;
     modified: string;
     imageAlt: string;
+    /** Site path of the 1200x630 social preview. */
+    image: string;
   };
+  /** Present for author pages: drives ProfilePage data. */
+  profile?: { author: BlogAuthorId };
 };
 
 export const sitePages: Record<string, PageMetadata> = {
@@ -88,7 +92,7 @@ export const softwareDescription = {
 
 /** Site paths that exist independently of the blog (blog articles may link to them). */
 export function staticSitePaths(): string[] {
-  return Object.keys(sitePages).filter((path) => !/^(\/de)?\/blog(\/|$)/.test(path));
+  return Object.keys(sitePages).filter((path) => !/^(\/de)?\/(blog|authors|autoren)(\/|$)/.test(path));
 }
 
 // Blog pages exist only for languages with at least one published article, so
@@ -106,9 +110,27 @@ for (const lang of ["en", "de"] as BlogLanguage[]) {
       title: post.title, description: post.description, canonicalPath: post.path,
       indexable: true, language: lang, modified: post.updated,
       article: {
-        heading: post.heading, author: post.author, authorUrl: post.authorUrl,
-        published: post.published, modified: post.updated, imageAlt: post.imageAlt,
+        heading: post.heading, author: post.author,
+        published: post.published, modified: post.updated, imageAlt: post.imageAlt, image: post.socialImage,
       },
+    };
+  }
+  sitePages[editorialPolicyPath(lang)] = {
+    title: copy.editorialTitle, description: copy.editorialDescription,
+    canonicalPath: editorialPolicyPath(lang), indexable: true, language: lang,
+  };
+  for (const author of new Set(articles.map((post) => post.author))) {
+    // build-blog rejects unknown authors; this only skips stale generated data
+    // while the generator itself imports this module to regenerate it.
+    if (!(author in blogAuthors)) continue;
+    const path = authorPath(lang, author);
+    const own = articles.filter((post) => post.author === author);
+    const { name, role } = blogAuthors[author];
+    sitePages[path] = {
+      title: `${name} - ${role[lang]}`,
+      description: copy.authorDescription(name),
+      canonicalPath: path, indexable: true, language: lang,
+      modified: own.map((post) => post.updated).sort().at(-1), profile: { author },
     };
   }
 }

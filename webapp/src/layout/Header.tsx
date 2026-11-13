@@ -9,11 +9,14 @@ export function Header({
   theme = "light",
   currentPage,
   navigationLabel = "Primary navigation",
+  progress = false,
   children,
 }: {
   theme?: "light" | "dark";
   currentPage?: "verified-messages";
   navigationLabel?: string;
+  /** The scroll progress line; only the main landing page shows it. */
+  progress?: boolean;
   children?: ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -69,7 +72,7 @@ export function Header({
     };
   }, [menuOpen]);
   return (
-    <><PageProgress /><header ref={header} className="site-header" data-theme={theme} data-menu-open={menuOpen}>
+    <>{progress && <PageProgress />}<header ref={header} className="site-header" data-theme={theme} data-menu-open={menuOpen}>
       <nav aria-label={navigationLabel}>
         <div className="site-brand"><Logo href="/" /></div>
         <div className="site-mobile-start"><DownloadLink variant="custom" className="site-compact-download" mobileLabel="Get started on macOS"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={siApple.path} fill="currentColor" /></svg>Get started on macOS</DownloadLink></div>

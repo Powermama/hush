@@ -6,9 +6,8 @@ lang: de
 keyword: fixture diktieren ohne cloud
 secondaryKeywords: []
 type: how-to
-cluster: fixture-cluster
-author: Fixture Author
-authorUrl: https://github.com/Powermama
+cluster: local-dictation
+author: clemens-kressmann
 published: "2026-11-02"
 updated: "2026-11-02"
 imageAlt: Eine Testgrafik eines Macs mit Wellenform.

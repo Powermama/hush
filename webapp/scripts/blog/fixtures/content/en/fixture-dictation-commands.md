@@ -5,10 +5,9 @@ slug: fixture-dictation-commands
 lang: en
 keyword: fixture dictation commands
 secondaryKeywords: []
-type: guide
-cluster: fixture-cluster
-author: Fixture Author
-authorUrl: https://github.com/Powermama
+type: essay
+cluster: local-dictation
+author: clemens-kressmann
 published: "2026-11-05"
 updated: "2026-11-05"
 imageAlt: A fixture illustration of dictation commands.

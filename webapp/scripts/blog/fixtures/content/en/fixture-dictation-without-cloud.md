@@ -6,9 +6,8 @@ lang: en
 keyword: fixture dictation without cloud
 secondaryKeywords: ["fixture local dictation"]
 type: how-to
-cluster: fixture-cluster
-author: Fixture Author
-authorUrl: https://github.com/Powermama
+cluster: local-dictation
+author: clemens-kressmann
 published: "2026-11-01"
 updated: "2026-11-10"
 imageAlt: A fixture illustration of a Mac with a waveform.
@@ -23,6 +22,14 @@ This fixture paragraph answers the question first. It links to [the second fixtu
 ## How does the fixture render?
 
 A paragraph with **strong text** and an external [source](https://example.com/).
+
+Run this in Terminal:
+
+```
+killall corespeechd
+```
+
+![A synthetic image for testing responsive article figures](media/fixture-dictation-without-cloud/responsive-image.png "A generated test image, not a product screenshot.")
 
 ### A nested heading
 
