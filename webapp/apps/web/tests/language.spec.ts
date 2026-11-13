@@ -19,7 +19,7 @@ test("LANG-001 prerenders the German landing page with its own metadata and href
   const html = await page.content();
   expect(html).toContain("Download für Mac");
   expect(html).not.toMatch(/>\s*(Für den Mac laden|Laden)\s*</);
-  for (const [lang, href] of [["en", "https://behu.sh/"], ["de", "https://behu.sh/de"], ["x-default", "https://behu.sh/"]]) {
+  for (const [lang, href] of [["en", "https://behu.sh/"], ["de", "https://behu.sh/de"], ["x-default", "https://behu.sh/"]] as const) {
     await expect(page.locator(`link[rel="alternate"][hreflang="${lang}"]`)).toHaveAttribute("href", href);
   }
   const data = JSON.parse((await page.locator('script[type="application/ld+json"]').allInnerTexts())[0]!);

@@ -15,14 +15,15 @@ async function holdShaders(page: Page) {
     const state = { release: false, polls: 0, earlyDraws: 0, deletedPrograms: 0 };
     Object.assign(window, { shaderPreparation: state });
     const prototype = WebGL2RenderingContext.prototype;
-    const extension = prototype.getExtension;
+    // The overloads of getExtension cannot be patched as one function type.
+    const extension = prototype.getExtension as (this: WebGL2RenderingContext, name: string) => object | null;
     const parameter = prototype.getProgramParameter;
-    prototype.getExtension = function (name: string) {
+    prototype.getExtension = function (this: WebGL2RenderingContext, name: string) {
       const actual = extension.call(this, name);
       return name === "KHR_parallel_shader_compile"
         ? actual ?? { COMPLETION_STATUS_KHR: 0x91b1 }
         : actual;
-    };
+    } as typeof prototype.getExtension;
     prototype.getProgramParameter = function (program: WebGLProgram, name: number) {
       if (name === 0x91b1) {
         state.polls++;
@@ -79,10 +80,10 @@ test("LANDING-ENTRY-006 releases preparing graphics when navigating away", async
 
 test("LANDING-ENTRY-006 supports renderers without parallel shader compilation", async ({ page }) => {
   await page.addInitScript(() => {
-    const original = WebGL2RenderingContext.prototype.getExtension;
-    WebGL2RenderingContext.prototype.getExtension = function (name: string) {
+    const original = WebGL2RenderingContext.prototype.getExtension as (this: WebGL2RenderingContext, name: string) => object | null;
+    WebGL2RenderingContext.prototype.getExtension = function (this: WebGL2RenderingContext, name: string) {
       return name === "KHR_parallel_shader_compile" ? null : original.call(this, name);
-    };
+    } as typeof WebGL2RenderingContext.prototype.getExtension;
   });
   await page.goto("/");
   await expect(page.locator(".hush-core")).toHaveAttribute("data-scene", "ready", { timeout: 15000 });

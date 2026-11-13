@@ -49,7 +49,7 @@ test("explains hardware, offline limits and the beta with native disclosures", a
 test("keeps the landing usable when WebGL is unavailable", async ({ page }) => {
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (kind: string, ...args: unknown[]) {
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind: string, ...args: unknown[]) {
       if (kind === "webgl2" || kind === "webgl") return null;
       return Reflect.apply(original, this, [kind, ...args]);
     } as typeof original;

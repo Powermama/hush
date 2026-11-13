@@ -73,7 +73,7 @@ test("LANDING-VM-004 keeps the story usable without WebGL or motion", async ({ p
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (kind: string, ...args: unknown[]) {
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind: string, ...args: unknown[]) {
       if (kind === "webgl2" || kind === "webgl") return null;
       return Reflect.apply(original, this, [kind, ...args]);
     } as typeof original;

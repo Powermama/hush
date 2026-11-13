@@ -38,6 +38,7 @@ test("LANDING-ENTRY-001 coordinates the original transition calendar with the pr
     await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "playing", { timeout: 15000 });
     const calendar = await page.evaluate(() => [".site-header", ".hero-introduction", ".hush-core", ".orbit-app", ".universe-paths", ".universe-texture", ".universe-halo", ".hero-download-area"].map(selector => {
       const animation = document.querySelector(selector)!.getAnimations()[0];
+      if (!animation) throw new Error(`${selector} has no entrance animation`);
       const timing = animation.effect!.getTiming();
       return { selector, delay: timing.delay, duration: Number(timing.duration), start: Number(animation.startTime) };
     }));
@@ -53,7 +54,7 @@ test("LANDING-ENTRY-001 coordinates the original transition calendar with the pr
       const originalTime = animation.currentTime;
       const height = header.offsetHeight, top = header.offsetTop;
       animation.pause();
-      animation.currentTime = timing.delay + Number(timing.duration) * .4;
+      animation.currentTime = Number(timing.delay) + Number(timing.duration) * .4;
       const style = getComputedStyle(header);
       const result = {
         opacity: Number(style.opacity), y: new DOMMatrixReadOnly(style.transform).m42,
