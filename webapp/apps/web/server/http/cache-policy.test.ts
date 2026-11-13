@@ -26,4 +26,8 @@ describe("website cache policy", () => {
       "public, max-age=31536000, immutable, no-transform",
     );
   });
+
+  test("never caches the blog's CMS revision, which the CMS polls", () => {
+    expect(cacheControlForStaticPath("./dist/blog/revision.txt")).toBe("no-store");
+  });
 });

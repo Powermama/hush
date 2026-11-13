@@ -3,7 +3,8 @@
 //
 // Imports articles written as Markdown files (the hush-seo format: <lang>/<slug>.md
 // with images in <lang>/media/<slug>/). Safe to run again: posts are matched by
-// language and slug and updated, published articles keep their original dates.
+// language and slug and updated only where they differ, and published articles
+// keep their original dates.
 import { parseArticle } from "@hush/article";
 import { blogLanguages } from "@hush/article/taxonomy";
 import { and, eq } from "drizzle-orm";
@@ -12,7 +13,8 @@ import { extname, join } from "node:path";
 import { posts } from "../db/schema";
 import { uploadMedia, type Cms } from "../media/service";
 import { PostError } from "./errors";
-import { createDraft, publishPost, updatePost } from "./service";
+import { postFields } from "./fields";
+import { createDraft, editableFields, getPost, publishPost, updatePost } from "./service";
 
 const contentTypes: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };
 const day = (date: string) => new Date(`${date}T00:00:00.000Z`);
@@ -39,7 +41,11 @@ export async function importArticles(cms: Cms, contentDir: string, actor = "impo
           const type = contentTypes[extname(name)];
           if (type) await uploadMedia(cms, id, name, new Uint8Array(await Bun.file(join(mediaDir, name)).arrayBuffer()), type);
         }
-        if (existing) await updatePost(cms, id, fields, actor);
+        // Only a real difference is an edit: an unchanged article keeps its
+        // date, revision history and site revision.
+        if (existing && JSON.stringify(editableFields(await getPost(cms.db, id))) !== JSON.stringify(postFields.parse(fields))) {
+          await updatePost(cms, id, fields, actor);
+        }
         report.imported.push(where);
         if (!draft) toPublish.push({ file: where, id, publishedAt: day(published), updatedAt: day(updated) });
       } catch (error) {

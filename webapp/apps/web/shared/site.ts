@@ -93,6 +93,27 @@ export const notFoundPages: Record<SiteLanguage, PageMetadata> = {
 /** Prerendered documents for unknown addresses, keyed in pages.json by language. */
 export const notFoundDocumentKey = (language: SiteLanguage) => `404:${language}`;
 
+/** The publisher everywhere in structured data; its logo is what Google shows for the brand. */
+export const organizationData = {
+  "@type": "Organization",
+  "@id": `${siteOrigin}/#organization`,
+  name: "hush",
+  url: `${siteOrigin}/`,
+  logo: { "@type": "ImageObject", url: `${siteOrigin}/logo.png`, width: 512, height: 512 },
+  sameAs: ["https://github.com/Powermama/hush"],
+};
+
+/** The site's name in search results (https://developers.google.com/search/docs/appearance/site-names). */
+export const websiteData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${siteOrigin}/#website`,
+  name: "hush",
+  alternateName: ["hush for Mac", "behu.sh"],
+  url: `${siteOrigin}/`,
+  publisher: { "@id": organizationData["@id"] },
+};
+
 /** SoftwareApplication data for a landing page in its language; free is stated as a zero-price offer. */
 export const softwareDescription = (page: PageMetadata) => ({
   "@context": "https://schema.org",
@@ -108,6 +129,7 @@ export const softwareDescription = (page: PageMetadata) => ({
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   license: "https://github.com/Powermama/hush/blob/main/LICENSING.md",
   sameAs: ["https://github.com/Powermama/hush"],
+  publisher: { "@id": organizationData["@id"] },
 });
 
 /** Pages that are a landing page, in either language. */

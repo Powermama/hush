@@ -54,8 +54,9 @@ describe.skipIf(!serverUrl)("CMS import", () => {
     expect(posts["linked-guide"]!.rendition!.html).toContain("-680.webp");
   });
 
-  test("CMS-IMPORT-002 running it again changes nothing but records the edit", async () => {
+  test("CMS-IMPORT-002 running it again changes nothing", async () => {
     const before = await listPosts(cms.db, {});
+    const revisionsBefore = (await listRevisions(cms.db, before.find((post) => post.slug === "linked-guide")!.id)).length;
     const report = await importArticles(cms, content);
     expect(report.failed).toEqual([]);
     const after = await listPosts(cms.db, {});
@@ -63,6 +64,7 @@ describe.skipIf(!serverUrl)("CMS import", () => {
     const linked = after.find((post) => post.slug === "linked-guide")!;
     expect(linked.status).toBe("published");
     expect(linked.publishedAt!.toISOString()).toBe("2026-11-12T00:00:00.000Z");
-    expect((await listRevisions(cms.db, linked.id)).map((revision) => revision.actor).every((actor) => actor === "import")).toBe(true);
+    expect(linked.updatedAt.getTime()).toBe(before.find((post) => post.slug === "linked-guide")!.updatedAt.getTime());
+    expect((await listRevisions(cms.db, linked.id)).length).toBe(revisionsBefore);
   });
 });

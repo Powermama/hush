@@ -215,6 +215,17 @@ export function parseArticle(source: string): { article?: ParsedArticle; problem
 }
 
 /**
+ * Writes an article in the hush-seo file format: front matter in the schema's
+ * field order, one JSON value per line (valid YAML), then the body.
+ * parseArticle(formatArticle(article)) returns the same article.
+ */
+export function formatArticle({ front, body }: ParsedArticle): string {
+  const fields = Object.keys(frontMatterFields.shape) as Array<keyof FrontMatter>;
+  const lines = fields.map((field) => `${field}: ${JSON.stringify(front[field])}`);
+  return `---\n${lines.join("\n")}\n---\n${body}`;
+}
+
+/**
  * Checks one article against the contract and renders it. Rules that need the
  * other articles (duplicate slugs and keywords) belong to the caller.
  */
