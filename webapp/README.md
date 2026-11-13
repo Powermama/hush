@@ -6,6 +6,7 @@ Deployable apps live in `apps/`, shared libraries in `packages/`.
 | Path | Package | What it is |
 | --- | --- | --- |
 | [`apps/web`](apps/web/README.md) | `@hush/web` | The Vite/React website, browser proof verification and the Bun/Hono proof service |
+| [`packages/article`](packages/article/AGENTS.md) | `@hush/article` | The article contract and renderer: front matter, content rules, Markdown to HTML, authors and blog vocabulary |
 
 Install once at the workspace root, then work inside an app:
 

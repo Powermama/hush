@@ -1,34 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
-import type { BlogAuthorId } from "./authors.ts";
-
-export type BlogLanguage = "en" | "de";
-
-/**
- * Topic clusters from the content strategy (hush-seo skill). Articles name one by
- * id; the label appears on covers and cards. Unknown ids fail the build.
- */
-export const blogClusters = {
-  "local-dictation": { en: "Dictation without the cloud", de: "Diktat ohne Cloud" },
-  "dictation-on-mac": { en: "Dictation on Mac", de: "Diktat auf dem Mac" },
-  "local-ai": { en: "Local AI", de: "Lokale KI" },
-  "speech-models": { en: "Speech models", de: "Sprachmodelle" },
-  "voice-writing": { en: "Writing by voice", de: "Schreiben per Stimme" },
-  "typing-less": { en: "Typing less", de: "Weniger tippen" },
-  "verified-messages": { en: "Verified Messages", de: "Verified Messages" },
-} as const satisfies Record<string, Record<BlogLanguage, string>>;
-
-export type BlogClusterId = keyof typeof blogClusters;
-export const blogClusterIds = Object.keys(blogClusters) as [BlogClusterId, ...BlogClusterId[]];
-
-/** The editorial policy lives under each blog; its slug is reserved for articles. */
-export const editorialPolicySlugs: Record<BlogLanguage, string> = { en: "editorial-policy", de: "redaktionelle-richtlinien" };
-export function editorialPolicyPath(lang: BlogLanguage) {
-  return `${lang === "de" ? "/de/blog" : "/blog"}/${editorialPolicySlugs[lang]}`;
-}
-
-export type BlogArticleType = "how-to" | "comparison" | "guide" | "listicle" | "essay" | "news";
-
+import type { BlogAuthorId } from "@hush/article/authors";
+import type { BlogArticleType, BlogClusterId, BlogLanguage } from "@hush/article/taxonomy";
 
 /** Public metadata of a published article. Generated; HTML lives in its own chunk. */
 export type BlogPostMetadata = {

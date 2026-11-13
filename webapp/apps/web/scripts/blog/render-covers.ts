@@ -7,7 +7,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import sharp from "sharp";
 import { chromium } from "@playwright/test";
-import { coverTemplatePath, type BlogCoverPlan } from "./build-blog";
+import { type BlogCoverPlan } from "@hush/article";
+import { coverTemplatePath } from "./build-blog";
 
 const escapeHTML = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
   .replaceAll(">", "&gt;").replaceAll('"', "&quot;");

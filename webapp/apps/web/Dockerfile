@@ -8,6 +8,7 @@ WORKDIR /app
 # until a manifest changes.
 COPY --parents package.json bun.lock apps/*/package.json packages/*/package.json ./
 RUN bun install --frozen-lockfile --filter @hush/web
+COPY packages/article ./packages/article
 
 FROM dependencies AS build
 
@@ -33,6 +34,7 @@ ENV NODE_ENV=production \
 # Every workspace manifest, as in the dependencies stage.
 COPY --parents package.json bun.lock apps/*/package.json packages/*/package.json ./
 RUN bun install --frozen-lockfile --production --filter @hush/web
+COPY packages/article ./packages/article
 WORKDIR /app/apps/web
 COPY --from=build /app/apps/web/dist ./dist
 COPY --from=build /app/apps/web/dist-pages ./dist-pages
