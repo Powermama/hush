@@ -56,17 +56,18 @@
    including JS failure. */
 .hush-landing[data-opening="pending"] :is(.site-header, .hero-introduction, .hush-core, .orbit-app, .universe-paths, .universe-halo, .universe-texture, .hero-download-area) { animation: entrance-fallback .2s 3.6s both; }
 /* A flat, upright hush mark with a progress bar, centred in the window. It appears
-   0.3s after the first paint, which fast visits never reach, the bar fills toward
-   the 3.6s deadline, and both leave (filling up first) as soon as the entrance starts
-   or the fallback reveals the page. */
+   1s after the first paint, the limit below which a wait does not interrupt the
+   visitor, so fast visits never see it. The bar fills toward the 3.6s deadline,
+   and both leave (filling up first) as soon as the entrance starts or the
+   fallback reveals the page. */
 .landing-loader { position: fixed; inset: 0; z-index: 30; display: grid; place-content: center; justify-items: center; gap: 26px; pointer-events: none; opacity: 0; transition: opacity .4s ease, scale .4s ease; }
-.hush-landing[data-opening="pending"] .landing-loader { animation: loader-show .2s .3s both, loader-hide .35s 3.6s forwards; }
+.hush-landing[data-opening="pending"] .landing-loader { animation: loader-show .2s 1s both, loader-hide .35s 3.6s forwards; }
 .hush-landing:not([data-opening="pending"]) .landing-loader { scale: .97; visibility: hidden; transition: opacity .4s ease, scale .4s ease, visibility 0s .4s; }
 .landing-loader-mark { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(145deg, #42474c, #24272b); color: white; box-shadow: 0 6px 12px #24272b18, inset 0 1px 1px #fff6; }
 .landing-loader-mark svg { width: 100%; }
 .landing-loader-bar { width: 132px; height: 3px; border-radius: 3px; background: #e2e6ea; overflow: hidden; }
 .landing-loader-bar::after { content: ""; display: block; height: 100%; border-radius: inherit; background: #2b2f33; transform-origin: left; transform: scaleX(.05); }
-.hush-landing[data-opening="pending"] .landing-loader-bar::after { animation: loader-progress 3.3s .3s cubic-bezier(.3, .6, .3, 1) both; }
+.hush-landing[data-opening="pending"] .landing-loader-bar::after { animation: loader-progress 2.6s 1s cubic-bezier(.3, .6, .3, 1) both; }
 .hush-landing:not([data-opening="pending"]) .landing-loader-bar::after { transform: scaleX(1); transition: transform .25s ease-out; }
 .hush-landing[data-opening="playing"] > .site-header { animation: header-arrive 1.05s .12s cubic-bezier(.22,.68,.22,1) both; }
 .hush-landing[data-opening="playing"] .hero-introduction { animation: introduction-arrive .9s .55s both; }
