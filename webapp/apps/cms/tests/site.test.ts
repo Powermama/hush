@@ -74,6 +74,9 @@ describe.skipIf(!serverUrl)("CMS site", () => {
     await call("POST", "/v1/posts", JSON.stringify(validPost({ slug: "still-a-draft", keyword: "still a draft" })));
 
     expect((await call("GET", "/v1/site/export", undefined, undefined, "nope")).status).toBe(401);
+    const revisionResponse = await app.request("/v1/site/revision");
+    expect(revisionResponse.headers.get("cache-control")).toBe("no-store");
+    expect(Number(await revisionResponse.text())).toBe(await revision());
     const exported = await read(await call("GET", "/v1/site/export", undefined, undefined, reader));
     expect(exported.revision).toBe(await revision());
     expect(exported.files.map((file: { path: string }) => file.path)).toEqual(["en/exported.md"]);

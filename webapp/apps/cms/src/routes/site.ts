@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 //
-// What the website build reads: the export of published posts and the image
-// originals it lists. Both need posts:read; the build holds a read-only token.
+// What the website build reads: the site revision (public, so the build can
+// fetch it with Dockerfile ADD, which re-runs the export step only when it
+// changes), the export of published posts and the image originals it lists.
+// The last two need posts:read; the build holds a read-only token.
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { eq } from "drizzle-orm";
 import { requireScope, type AuthVariables } from "../auth/tokens";
-import { media } from "../db/schema";
+import { media, siteState } from "../db/schema";
 import { originalKey, type Cms } from "../media/service";
 import { exportSite } from "../site/export";
 import { errorSchema, validationHook } from "./errors";
@@ -35,6 +37,15 @@ export function siteRoutes(cms: Cms) {
   const app = new OpenAPIHono<{ Variables: AuthVariables }>({ defaultHook: validationHook });
   app.use("/v1/site/export", requireScope(cms.db, "posts:read"));
   app.use("/v1/media/:sha256", requireScope(cms.db, "posts:read"));
+
+  app.openapi(createRoute({
+    method: "get", path: "/v1/site/revision", operationId: "getSiteRevision", tags: ["Site"],
+    description: "The current site revision as plain text. Public: it reveals only a count of changes.",
+    responses: { 200: { description: "The revision", content: { "text/plain": { schema: z.string() } } } },
+  }), async (context) => {
+    const [state] = await cms.db.select({ revision: siteState.revision }).from(siteState);
+    return context.text(`${state!.revision}\n`, 200, { "cache-control": "no-store" });
+  });
 
   app.openapi(createRoute({
     method: "get", path: "/v1/site/export", operationId: "exportSite", tags: ["Site"], security,

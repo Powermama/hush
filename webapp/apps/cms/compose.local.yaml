@@ -14,7 +14,7 @@ services:
     environment:
       <<: *cms-local
       PORT: "3100"
-    ports:
+    ports: !override
       - "${HUSH_CMS_COMPOSE_PORT:-3100}:3100"
     volumes:
       - hush_local_cms_media:/app/data/media

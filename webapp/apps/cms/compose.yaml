@@ -1,8 +1,8 @@
 # The hush CMS stack: the API, its scheduler (publishing due posts and daily
 # backups) and its own PostgreSQL. Coolify deploys this file as a Docker
 # Compose resource; any Docker Compose host runs it the same way. It publishes
-# no host ports. compose.local.yaml adds what local development needs, and
-# webapp/compose.yaml includes both. Secrets are references: their values live
+# the API on the host's loopback only. compose.local.yaml adds what local
+# development needs, and webapp/compose.yaml includes both. Secrets are references: their values live
 # in the platform's secret store. Empty defaults keep local runs quiet; in
 # production the CMS refuses to start when a bucket lacks its keys, and
 # PostgreSQL refuses an empty password.
@@ -32,8 +32,10 @@ services:
     environment:
       <<: *cms-environment
       PORT: "3100"
-    expose:
-      - "3100"
+    # Only on the server's loopback: the website's build (Coolify builds with
+    # the host network) reads the export here. Nothing outside the server can.
+    ports:
+      - "127.0.0.1:3100:3100"
     depends_on:
       cms-postgres:
         condition: service_healthy

@@ -1531,6 +1531,27 @@
         }
       }
     },
+    "/v1/site/revision": {
+      "get": {
+        "operationId": "getSiteRevision",
+        "tags": [
+          "Site"
+        ],
+        "description": "The current site revision as plain text. Public: it reveals only a count of changes.",
+        "responses": {
+          "200": {
+            "description": "The revision",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/site/export": {
       "get": {
         "operationId": "exportSite",
