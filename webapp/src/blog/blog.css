@@ -174,21 +174,35 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-author-avatar-large { width: 64px; height: 64px; font-size: 22px; }
 .blog-author-avatar-small { width: 48px; height: 48px; font-size: 16px; }
 
-/* Author card after the article */
-.blog-author-card { display: flex; gap: 16px; max-width: 680px; margin: 56px auto 0; padding-top: 32px; border-top: 1px solid rgb(0 0 0 / 0.08); }
+/* Author card after the article: a light card in the download card's palette. */
+.blog-author-card {
+  position: relative; max-width: 680px; margin: 64px auto 0; padding: 28px; overflow: hidden;
+  border-radius: 24px; border: 1px solid rgb(0 0 0 / 0.07);
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgb(201 184 255 / 0.22), transparent 70%),
+    radial-gradient(60% 80% at 0% 100%, rgb(158 201 255 / 0.16), transparent 70%),
+    #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.03), 0 16px 40px rgb(31 32 30 / 0.05);
+}
 @media (min-width: 1024px) { .blog-author-card { margin-left: max(0px, calc((100% - 968px) / 2)); } }
 .blog-author-card p { margin: 0; }
-.blog-author-card-label { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
-.blog-author-card .blog-author-card-name { margin-top: 4px; font-size: 18px; font-weight: 600; }
-.blog-author-card-name a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.blog-author-card-role { font-size: 14px; color: var(--color-muted); }
-.blog-author-card .blog-author-card-bio { margin-top: 10px; font-size: 15px; line-height: 1.65; color: #2b2c29; }
-.blog-author-card .blog-author-card-links { display: flex; gap: 16px; margin-top: 10px; font-size: 14px; font-weight: 600; }
-.blog-author-card-links a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgb(0 0 0 / 0.2); }
+.blog-author-card-head { display: flex; align-items: center; gap: 18px; }
+.blog-author-card .blog-author-avatar { box-shadow: 0 0 0 4px #fff, 0 0 0 5px rgb(0 0 0 / 0.06), 0 10px 24px rgb(31 32 30 / 0.14); }
+.blog-author-card-label { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7667d7; }
+.blog-author-card .blog-author-card-name { margin-top: 3px; font-size: 22px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; }
+.blog-author-card-name a { color: var(--color-ink); }
+.blog-author-card-name a:hover, .blog-author-card-name a:focus-visible { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.blog-author-card-role { margin-top: 2px; font-size: 14px; color: var(--color-muted); }
+.blog-author-card .blog-author-card-bio { margin-top: 20px; font-size: 16px; line-height: 1.7; color: #2b2c29; }
+.blog-author-card-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-top: 22px; }
+.blog-author-card-foot .blog-author-links { margin: 0; }
+.blog-author-card-more { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--color-ink); }
+@media (max-width: 639px) { .blog-author-card { padding: 22px; } }
 .blog-author-identity h1 { margin: 0; font-size: clamp(30px, 5vw, 44px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; }
 .blog-author-role { margin: 6px 0 0; font-size: 15px; color: var(--color-muted); }
 .blog-author-bio { margin: 24px 0 0; font-size: 18px; line-height: 1.7; color: #2b2c29; }
 .blog-author-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.blog-author-header .blog-author-links { margin-top: 22px; }
 .blog-author-links a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid rgb(0 0 0 / 0.1); background: #fff; font-size: 14px; font-weight: 600; color: var(--color-ink); transition: border-color 0.2s; }
 .blog-author-links a:hover, .blog-author-links a:focus-visible { border-color: rgb(0 0 0 / 0.25); }
 .blog-external { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--color-soft); }

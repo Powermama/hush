@@ -5,7 +5,7 @@ import { blogCopy, type BlogLanguage } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
-import { BlogArrow, BlogAuthorAvatar, BlogHeader } from "./BlogArticlePage";
+import { BlogArrow, BlogAuthorAvatar, BlogExternalIcon, BlogHeader } from "./BlogArticlePage";
 import { BlogPostList } from "./BlogIndexPage";
 import "./blog.css";
 
@@ -33,7 +33,7 @@ export function BlogAuthorPage({ lang, author }: { lang: BlogLanguage; author: B
           <nav className="blog-author-links" aria-label={copy.authorElsewhere}>
             {profile.sameAs.map((link) => (
               <a key={link.url} href={link.url} rel="me noopener" target="_blank">
-                {link.label}<svg className="blog-external" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4h6v6M12 4 4.5 11.5" /></svg>
+                {link.label}<BlogExternalIcon />
               </a>
             ))}
           </nav>

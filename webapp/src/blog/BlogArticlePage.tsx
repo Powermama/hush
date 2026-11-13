@@ -41,18 +41,29 @@ function BlogAuthorCard({ lang, author }: { lang: BlogLanguage; author: BlogAuth
   const path = authorPath(lang, author);
   return (
     <aside className="blog-author-card" aria-label={blogCopy[lang].writtenBy}>
-      <BlogAuthorAvatar author={author} />
-      <div>
-        <p className="blog-author-card-label">{blogCopy[lang].writtenBy}</p>
-        <p className="blog-author-card-name"><a href={path} rel="author">{profile.name}</a></p>
-        <p className="blog-author-card-role">{profile.role[lang]}</p>
-        <p className="blog-author-card-bio">{profile.bio[lang]}</p>
-        <p className="blog-author-card-links">
-          {profile.sameAs.map((link) => <a key={link.url} href={link.url} rel="me noopener" target="_blank">{link.label}</a>)}
-        </p>
+      <div className="blog-author-card-head">
+        <BlogAuthorAvatar author={author} size="large" />
+        <div>
+          <p className="blog-author-card-label">{blogCopy[lang].writtenBy}</p>
+          <p className="blog-author-card-name"><a href={path} rel="author">{profile.name}</a></p>
+          <p className="blog-author-card-role">{profile.role[lang]}</p>
+        </div>
+      </div>
+      <p className="blog-author-card-bio">{profile.bio[lang]}</p>
+      <div className="blog-author-card-foot">
+        <span className="blog-author-links">
+          {profile.sameAs.map((link) => (
+            <a key={link.url} href={link.url} rel="me noopener" target="_blank">{link.label}<BlogExternalIcon /></a>
+          ))}
+        </span>
+        <a className="blog-author-card-more" href={path}>{blogCopy[lang].moreBy(profile.name.split(" ")[0]!)}<BlogArrow direction="forward" /></a>
       </div>
     </aside>
   );
+}
+
+export function BlogExternalIcon() {
+  return <svg className="blog-external" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4h6v6M12 4 4.5 11.5" /></svg>;
 }
 
 /** The author's portrait, or initials when there is none; shared by the article card and the author page. */
