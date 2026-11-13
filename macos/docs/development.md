@@ -38,7 +38,7 @@ disable validation globally.
 
 Ordinary dictation and local AI do not need the proof service. Debug builds point
 Verified Messages at `http://127.0.0.1:3000`; Release uses `https://behu.sh`.
-The service lives in [`webapp/`](../../webapp/README.md) in this monorepo.
+The service lives in [`webapp/`](../../webapp/apps/web/README.md) in this monorepo.
 Start it with `bun run dev` from that directory.
 
 For a development launch, endpoints can be overridden through the Xcode scheme

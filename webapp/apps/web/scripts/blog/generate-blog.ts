@@ -9,7 +9,7 @@
 //   public/blog/media/*.webp                  responsive article images (content-hashed)
 //   public/blog/covers/*.png                  social previews (content-hashed)
 //
-// Run from webapp/:  bun run blog:generate   (write)
+// Run from webapp/apps/web/:  bun run blog:generate   (write)
 //                    bun run blog:check      (fail if committed output is stale)
 // HUSH_BLOG_CONTENT_DIR selects another content directory (browser-test fixtures).
 import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";

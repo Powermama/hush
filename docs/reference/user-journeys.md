@@ -21,12 +21,12 @@ references, not a list of marketing claims.
 
 | Journey | Owning contract |
 | --- | --- |
-| Explore hush, navigate on mobile and reach a Mac download | [Visual landing](../../webapp/docs/user-journeys/visual-landing.md) |
-| Download the correct signed build | [Alpha download](../../webapp/docs/user-journeys/private-alpha-download.md) |
-| Understand the signed-message story | [Verified Messages landing](../../webapp/docs/user-journeys/verified-messages-landing.md) |
-| Open, decrypt and verify a private proof | [Proof recipient](../../webapp/docs/user-journeys/proof-recipient.md) |
-| Read legal and privacy information | [Legal information](../../webapp/docs/user-journeys/legal-information.md) |
-| Find public pages in search and preview shared links | [Public discovery](../../webapp/docs/user-journeys/search-discovery.md) |
+| Explore hush, navigate on mobile and reach a Mac download | [Visual landing](../../webapp/apps/web/docs/user-journeys/visual-landing.md) |
+| Download the correct signed build | [Alpha download](../../webapp/apps/web/docs/user-journeys/private-alpha-download.md) |
+| Understand the signed-message story | [Verified Messages landing](../../webapp/apps/web/docs/user-journeys/verified-messages-landing.md) |
+| Open, decrypt and verify a private proof | [Proof recipient](../../webapp/apps/web/docs/user-journeys/proof-recipient.md) |
+| Read legal and privacy information | [Legal information](../../webapp/apps/web/docs/user-journeys/legal-information.md) |
+| Find public pages in search and preview shared links | [Public discovery](../../webapp/apps/web/docs/user-journeys/search-discovery.md) |
 
 ## Change a journey
 

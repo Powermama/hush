@@ -11,16 +11,16 @@ from ci_scope import classify, full_scope, scope_for_event
 
 class ScopeTests(unittest.TestCase):
     def test_website_does_not_allocate_a_mac(self):
-        for path in ["webapp/src/landing/landing.css", "webapp/public/art/rose.glb",
-                     "webapp/shared/legal.ts", "webapp/shared/releases.ts",
-                     "webapp/tests/landing.spec.ts", "webapp/vite.config.ts"]:
+        for path in ["webapp/apps/web/src/landing/landing.css", "webapp/apps/web/public/art/rose.glb",
+                     "webapp/apps/web/shared/legal.ts", "webapp/apps/web/shared/releases.ts",
+                     "webapp/apps/web/tests/landing.spec.ts", "webapp/apps/web/vite.config.ts"]:
             with self.subTest(path=path):
                 self.assertEqual(classify([path]), dict(web=True, native=False, integration=False))
 
     def test_contract_and_service_changes_keep_native_integration(self):
-        for path in ["webapp/server/app.ts", "webapp/shared/contracts/proof.ts",
-                     "webapp/shared/provenance/canonical.ts", "webapp/openapi/hush-provenance.json",
-                     "webapp/package.json", "webapp/bun.lock", "webapp/tsconfig.json"]:
+        for path in ["webapp/apps/web/server/app.ts", "webapp/apps/web/shared/contracts/proof.ts",
+                     "webapp/apps/web/shared/provenance/canonical.ts", "webapp/apps/web/openapi/hush-provenance.json",
+                     "webapp/apps/web/package.json", "webapp/bun.lock", "webapp/apps/web/tsconfig.json"]:
             with self.subTest(path=path):
                 self.assertEqual(classify([path]), dict(web=True, native=False, integration=True))
 
@@ -32,12 +32,12 @@ class ScopeTests(unittest.TestCase):
 
     def test_documentation_does_not_start_product_builds(self):
         paths = ["README.md", "LICENSE", "macos/LICENSE", "macos/docs/settings.png",
-                 "docs/explanation/ci.md", "webapp/docs/user-journeys/legal-information.md",
+                 "docs/explanation/ci.md", "webapp/apps/web/docs/user-journeys/legal-information.md",
                  ".github/ISSUE_TEMPLATE/bug.yml"]
         self.assertEqual(classify(paths), dict(web=False, native=False, integration=False))
 
     def test_mixed_changes_run_both_components(self):
-        self.assertEqual(classify(["macos/Hush/App.swift", "webapp/src/main.tsx"]), full_scope())
+        self.assertEqual(classify(["macos/Hush/App.swift", "webapp/apps/web/src/main.tsx"]), full_scope())
 
     def test_workflow_or_unknown_configuration_runs_everything(self):
         for path in [".github/workflows/ci.yml", ".github/scripts/ci_scope.py",
@@ -62,7 +62,7 @@ class GitJourneyTests(unittest.TestCase):
         self.git("init", "-b", "main")
         self.git("config", "user.name", "CI fixture")
         self.git("config", "user.email", "ci@example.invalid")
-        self.commit("webapp/src/main.tsx", "initial")
+        self.commit("webapp/apps/web/src/main.tsx", "initial")
 
     def git(self, *args):
         return subprocess.check_output(["git", "-C", str(self.repo), *args], stderr=subprocess.PIPE).decode().strip()
@@ -84,7 +84,7 @@ class GitJourneyTests(unittest.TestCase):
 
     def test_pr_uses_merge_base_not_unrelated_base_branch_changes(self):
         self.git("checkout", "-b", "feature")
-        head = self.commit("webapp/src/main.tsx", "new website")
+        head = self.commit("webapp/apps/web/src/main.tsx", "new website")
         self.git("checkout", "main")
         base = self.commit("macos/Hush/App.swift", "unrelated native change")
         event = {"pull_request": {"base": {"sha": base}, "head": {"sha": head}}}
@@ -93,7 +93,7 @@ class GitJourneyTests(unittest.TestCase):
 
     def test_rename_out_of_component_still_checks_deleted_source(self):
         base = self.git("rev-parse", "HEAD")
-        self.git("mv", "webapp/src/main.tsx", "example.md")
+        self.git("mv", "webapp/apps/web/src/main.tsx", "example.md")
         self.git("commit", "-m", "rename")
         head = self.git("rev-parse", "HEAD")
         scope, _ = scope_for_event("push", dict(before=base, after=head), self.repo)

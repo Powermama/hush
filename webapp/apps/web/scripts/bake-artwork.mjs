@@ -2,7 +2,7 @@
 // filters at runtime. WebKit renders those filters on the CPU in its GPU
 // process, which stalls WebGL frame delivery on the same page.
 // Rebuild after changing a treatment or a source image.
-// Run from webapp: node scripts/bake-artwork.mjs
+// Run from webapp/apps/web: node scripts/bake-artwork.mjs
 import { readFile, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
 

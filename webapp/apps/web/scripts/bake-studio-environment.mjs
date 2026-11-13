@@ -1,5 +1,5 @@
 // Rebuild after changing Three.js's PMREM representation or RoomEnvironment.
-// Run from webapp: node scripts/bake-studio-environment.mjs
+// Run from webapp/apps/web: node scripts/bake-studio-environment.mjs
 import { createServer } from "node:http";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve, sep } from "node:path";

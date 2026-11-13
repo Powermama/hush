@@ -17,7 +17,7 @@ def classify(paths):
     scope = dict.fromkeys(full_scope(), False)
     for path in paths:
         if path.endswith(".md") or path.startswith(
-            ("docs/", "macos/docs/", "webapp/docs/", ".github/ISSUE_TEMPLATE/")
+            ("docs/", "macos/docs/", "webapp/apps/web/docs/", ".github/ISSUE_TEMPLATE/")
         ) or Path(path).name in {"LICENSE", "NOTICE"}:
             continue
         if path.startswith("macos/"):
@@ -25,9 +25,12 @@ def classify(paths):
         elif path.startswith("webapp/"):
             scope["web"] = True
             if path.startswith((
-                "webapp/server/", "webapp/openapi/", "webapp/shared/contracts/",
-                "webapp/shared/provenance/",
-            )) or path in {"webapp/package.json", "webapp/bun.lock", "webapp/tsconfig.json"}:
+                "webapp/apps/web/server/", "webapp/apps/web/openapi/",
+                "webapp/apps/web/shared/contracts/", "webapp/apps/web/shared/provenance/",
+            )) or path in {
+                "webapp/package.json", "webapp/bun.lock",
+                "webapp/apps/web/package.json", "webapp/apps/web/tsconfig.json",
+            }:
                 scope["integration"] = True
         else:
             # CI, root configuration and future components must not silently skip.
