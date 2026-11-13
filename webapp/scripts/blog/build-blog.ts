@@ -16,6 +16,7 @@ import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
+import { authorPath, blogAuthorIds, type BlogAuthorId } from "../../shared/authors";
 
 export const blogLanguages = ["en", "de"] as const;
 export type BlogLanguage = (typeof blogLanguages)[number];
@@ -30,8 +31,7 @@ export const frontMatterSchema = z.object({
   secondaryKeywords: z.array(z.string().min(2)).max(8),
   type: z.enum(["how-to", "comparison", "guide", "listicle", "news"]),
   cluster: z.string().min(2),
-  author: z.string().min(2),
-  authorUrl: z.url().startsWith("https://"),
+  author: z.enum(blogAuthorIds),
   published: z.iso.date(),
   updated: z.iso.date(),
   imageAlt: z.string().min(10).max(160),
@@ -63,8 +63,7 @@ export type BlogPost = {
   heading: string;
   type: FrontMatter["type"];
   cluster: string;
-  author: string;
-  authorUrl: string;
+  author: BlogAuthorId;
   published: string;
   updated: string;
   imageAlt: string;
@@ -200,6 +199,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
   for (const { front } of parsed) {
     knownPaths.add(blogPath(front.lang, front.slug));
     knownPaths.add(blogPath(front.lang));
+    knownPaths.add(authorPath(front.lang, front.author));
   }
 
   const keywords = new Map<string, string>();
@@ -323,7 +323,6 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       type: front.type,
       cluster: front.cluster,
       author: front.author,
-      authorUrl: front.authorUrl,
       published: front.published,
       updated: front.updated,
       imageAlt: front.imageAlt,

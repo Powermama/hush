@@ -9,12 +9,13 @@ written with the hush-seo skill and reviewed by the author before publishing.
 
 | ID | Journey | Test |
 | --- | --- | --- |
-| BLOG-001 | Read a prerendered article without JavaScript: one H1, the full body, `og:type article` and `BlogPosting` data with timezone-qualified dates and a real author URL. | `tests/blog.spec.ts` BLOG-001 |
+| BLOG-001 | Read a prerendered article without JavaScript: one H1, the full body, `og:type article` and `BlogPosting` data with timezone-qualified dates and the author as a `Person` identified by their author page. | `tests/blog.spec.ts` BLOG-001 |
 | BLOG-002 | The article hydrates without console or page errors and stays visible. | BLOG-002 |
 | BLOG-003 | Desktop gets the real download; phones and iPads get the "Get hush for Mac" handoff and never a disk image (LANDING-DOWNLOAD-002). | BLOG-003 |
-| BLOG-004 | Jump through the table of contents (collapsed on phones, sticky beside the text on wide screens) and continue to a related article from the same cluster. | BLOG-004 |
+| BLOG-004 | Jump through the table of contents (collapsed on phones, beside the opening on wide screens, highlighting the section being read) and continue to a related article from the same cluster. | BLOG-004 |
 | BLOG-005 | Each language lists only its own published articles. Drafts and unknown slugs return 404; the sitemap and the Atom feed list published articles only. | BLOG-005 |
 | BLOG-006 | No horizontal page scrolling (tables scroll in their own box) and no runtime CSS or SVG filters (LANDING-PAINT-001). | BLOG-006 |
+| BLOG-007 | The byline leads to the prerendered author page (`/authors/<id>`, `/de/autoren/<id>`) with `og:type profile`, `ProfilePage` data whose `Person` lists the author's profiles as `sameAs`, and the author's articles in that language. | BLOG-007 |
 
 The browser tests run in CI against fixture articles in
 `scripts/blog/fixtures/content`, generated only inside the CI job. With the

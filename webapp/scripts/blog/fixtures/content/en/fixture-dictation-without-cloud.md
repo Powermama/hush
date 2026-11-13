@@ -7,8 +7,7 @@ keyword: fixture dictation without cloud
 secondaryKeywords: ["fixture local dictation"]
 type: how-to
 cluster: fixture-cluster
-author: Fixture Author
-authorUrl: https://github.com/Powermama
+author: clemens-kressmann
 published: "2026-11-01"
 updated: "2026-11-10"
 imageAlt: A fixture illustration of a Mac with a waveform.

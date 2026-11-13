@@ -7,8 +7,7 @@ keyword: fixture dictation commands
 secondaryKeywords: []
 type: guide
 cluster: fixture-cluster
-author: Fixture Author
-authorUrl: https://github.com/Powermama
+author: clemens-kressmann
 published: "2026-11-05"
 updated: "2026-11-05"
 imageAlt: A fixture illustration of dictation commands.

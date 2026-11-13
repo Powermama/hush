@@ -24,7 +24,7 @@ test("BLOG-001 reads a prerendered article without JavaScript", async ({ browser
   expect(data).toMatchObject({
     "@type": "BlogPosting", headline: "Fixture article body heading",
     datePublished: "2026-11-01T00:00:00Z", dateModified: "2026-11-10T00:00:00Z",
-    author: { "@type": "Person", url: "https://github.com/Powermama" },
+    author: { "@type": "Person", name: "Clemens Kressmann", url: "https://behu.sh/authors/clemens-kressmann" },
   });
   await context.close();
 });
@@ -87,4 +87,26 @@ test("BLOG-006 never scrolls sideways and applies no runtime filters", async ({ 
     .filter((element) => getComputedStyle(element).filter !== "none")
     .map((element) => element.tagName));
   expect(filtered).toEqual([]);
+});
+
+test("BLOG-007 links bylines to a prerendered author profile with ProfilePage data", async ({ browser, page }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const plain = await context.newPage();
+  expect((await plain.goto("/authors/clemens-kressmann"))!.status()).toBe(200);
+  await expect(plain.locator("h1")).toHaveText("Clemens Kressmann");
+  await expect(plain.locator('meta[property="og:type"]')).toHaveAttribute("content", "profile");
+  const data = JSON.parse(await plain.locator('script[type="application/ld+json"]').innerText());
+  expect(data).toMatchObject({
+    "@type": "ProfilePage",
+    mainEntity: { "@type": "Person", name: "Clemens Kressmann", url: "https://behu.sh/authors/clemens-kressmann",
+      sameAs: ["https://www.linkedin.com/in/clemens-kressmann/", "https://github.com/Powermama"] },
+  });
+  await expect(plain.locator(".blog-index-list li")).toHaveCount(2);
+  await context.close();
+
+  await page.goto(article);
+  await page.locator(".blog-byline").getByRole("link", { name: "Clemens Kressmann" }).click();
+  await expect(page).toHaveURL(/\/authors\/clemens-kressmann$/);
+  await expect(page.locator(".blog-author-links").getByRole("link", { name: /LinkedIn/ })).toHaveAttribute("rel", "me noopener");
+  expect((await page.request.get("/de/autoren/clemens-kressmann")).status()).toBe(200);
 });

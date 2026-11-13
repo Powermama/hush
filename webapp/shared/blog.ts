@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
+import type { BlogAuthorId } from "./authors.ts";
+
 export type BlogLanguage = "en" | "de";
 
 /** Public metadata of a published article. Generated; HTML lives in its own chunk. */
@@ -12,8 +14,7 @@ export type BlogPostMetadata = {
   heading: string;
   type: "how-to" | "comparison" | "guide" | "listicle" | "news";
   cluster: string;
-  author: string;
-  authorUrl: string;
+  author: BlogAuthorId;
   published: string;
   updated: string;
   imageAlt: string;
@@ -35,6 +36,9 @@ export const blogCopy = {
     related: "Keep reading",
     allArticles: "All articles",
     readArticle: "Read article",
+    authorDescription: (name: string) => `Articles by ${name} on dictation, speech-to-text and local AI on Mac, with background and profiles.`,
+    authorArticles: "Articles",
+    authorElsewhere: "Elsewhere",
     ctaTitle: "Dictate on your Mac, with models that run locally",
     ctaDownload: "Download for Mac",
     ctaMobile: "Get hush for Mac",
@@ -65,6 +69,9 @@ export const blogCopy = {
     related: "Weiterlesen",
     allArticles: "Alle Artikel",
     readArticle: "Artikel lesen",
+    authorDescription: (name: string) => `Artikel von ${name} zu Diktat, Spracherkennung und lokaler KI auf dem Mac, mit Hintergrund und Profilen.`,
+    authorArticles: "Artikel",
+    authorElsewhere: "Profile",
     ctaTitle: "Diktieren auf dem Mac, mit Modellen, die lokal laufen",
     ctaDownload: "Für den Mac laden",
     ctaMobile: "hush für den Mac holen",

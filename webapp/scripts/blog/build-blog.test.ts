@@ -19,8 +19,7 @@ const front = {
   secondaryKeywords: "[]",
   type: "how-to",
   cluster: "local-dictation",
-  author: "Clemens Kressmann",
-  authorUrl: "https://github.com/Powermama",
+  author: "clemens-kressmann",
   published: "\"2026-11-01\"",
   updated: "\"2026-11-02\"",
   imageAlt: "A Mac with a dictation waveform.",
@@ -93,6 +92,10 @@ describe("blog content pipeline", () => {
 
   test("accepts a valid article", async () => {
     expect(await errorsFor({ "en/dictate-without-cloud.md": article() })).toBe("");
+  });
+
+  test("requires a registered author id", async () => {
+    expect(await errorsFor({ "en/dictate-without-cloud.md": article({ author: "Clemens Kressmann" }) })).toContain("front matter author");
   });
 
   test("rejects unknown front matter fields, such as the skill's German names", async () => {

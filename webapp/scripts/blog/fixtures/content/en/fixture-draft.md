@@ -7,8 +7,7 @@ keyword: fixture draft
 secondaryKeywords: []
 type: news
 cluster: fixture-cluster
-author: Fixture Author
-authorUrl: https://github.com/Powermama
+author: clemens-kressmann
 published: "2026-11-11"
 updated: "2026-11-11"
 imageAlt: A fixture illustration that should never appear.

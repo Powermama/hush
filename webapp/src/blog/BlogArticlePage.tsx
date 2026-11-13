@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
+import { authorPath, blogAuthors } from "../../shared/authors";
 import { blogCopy, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
@@ -68,7 +69,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
             <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
             <h1 id="article-title">{post.heading}</h1>
             <p className="blog-byline">
-              <span>{copy.by} <a href={post.authorUrl} rel="author">{post.author}</a></span>
+              <span>{copy.by} <a href={authorPath(lang, post.author)} rel="author">{blogAuthors[post.author].name}</a></span>
               <span>
                 {post.updated !== post.published
                   ? <>{copy.updated} <BlogDate lang={lang} value={post.updated} /></>

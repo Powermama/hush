@@ -14,6 +14,7 @@
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import sharp from "sharp";
+import { authorPath, blogAuthors } from "../../shared/authors";
 import { siteOrigin, staticSitePaths } from "../../shared/site";
 import { blogLanguages, blogPath, buildBlog, type BlogLanguage, type BlogPost } from "./build-blog";
 
@@ -65,9 +66,15 @@ const languagesWithPosts = blogLanguages.filter((lang) => posts.some((post) => p
 const routeLines = [
   ...languagesWithPosts.map((lang) => `    createRoute({ getParentRoute: () => parent, path: ${literal(blogPath(lang))}, component: () => <BlogIndexPage lang=${literal(lang)} /> }),`),
   ...posts.map((post) => `    createRoute({ getParentRoute: () => parent, path: ${literal(post.path)}, component: lazyRouteComponent(() => import(${literal(`./${moduleName(post)}`)}), "Article") }),`),
+  // One profile page per author and language they have published in.
+  ...[...new Set(posts.map((post) => `${post.lang} ${post.author}`))].map((key) => {
+    const [lang, author] = key.split(" ") as [BlogLanguage, BlogPost["author"]];
+    return `    createRoute({ getParentRoute: () => parent, path: ${literal(authorPath(lang, author))}, component: () => <BlogAuthorPage lang=${literal(lang)} author=${literal(author)} /> }),`;
+  }),
 ];
 outputs.set(`${generatedDir}/routes.generated.tsx`, routeLines.length
   ? `${header}import { createRoute, lazyRouteComponent, type AnyRoute } from "@tanstack/react-router";
+import { BlogAuthorPage } from "../BlogAuthorPage";
 import { BlogIndexPage } from "../BlogIndexPage";
 
 /** Blog routes exist only for languages with at least one published article. */
@@ -104,7 +111,7 @@ function feed(lang: BlogLanguage) {
       `    <link rel="alternate" type="text/html" href="${siteOrigin}${post.path}"/>`,
       `    <published>${post.published}T00:00:00Z</published>`,
       `    <updated>${post.updated}T00:00:00Z</updated>`,
-      `    <author><name>${escapeXML(post.author)}</name><uri>${escapeXML(post.authorUrl)}</uri></author>`,
+      `    <author><name>${escapeXML(blogAuthors[post.author].name)}</name><uri>${siteOrigin}${authorPath(post.lang, post.author)}</uri></author>`,
       `    <summary>${escapeXML(post.description)}</summary>`,
       "  </entry>",
     ]),

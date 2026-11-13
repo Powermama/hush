@@ -1,9 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026 Clemens Kressmann
-import type { BlogPosting } from "schema-dts";
+import type { BlogPosting, Person, ProfilePage } from "schema-dts";
+import { authorPath, blogAuthors, type BlogAuthorId } from "./authors.ts";
 import { siteOrigin, softwareDescription, type PageMetadata } from "./site.ts";
 
 const escapeHTML = (value: string) => value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+/** The author as one schema.org Person, identified by their profile page. */
+function personData(id: BlogAuthorId, language: "en" | "de") {
+  const author = blogAuthors[id];
+  const url = `${siteOrigin}${authorPath(language, id)}`;
+  return {
+    "@type": "Person", "@id": `${url}#person`, name: author.name, url,
+    description: author.bio[language], jobTitle: author.role[language],
+    sameAs: author.sameAs.map((profile) => profile.url),
+  } satisfies Person;
+}
 
 /** Only trusted public catalogue entries belong here, never proof contents. */
 export function renderPageHead(page: PageMetadata): string {
@@ -29,19 +41,27 @@ export function renderPageHead(page: PageMetadata): string {
     image: [image],
     datePublished: isoDate(article.published),
     dateModified: isoDate(article.modified),
-    author: { "@type": "Person", name: article.author, url: article.authorUrl },
+    author: personData(article.author, page.language),
     publisher: { "@type": "Organization", name: "hush", url: siteOrigin },
   } satisfies BlogPosting & { "@context": string };
+  const profileData = page.profile && {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    url: `${siteOrigin}${page.canonicalPath}`,
+    inLanguage: page.language,
+    dateModified: page.modified && isoDate(page.modified),
+    mainEntity: personData(page.profile.author, page.language),
+  } satisfies ProfilePage & { "@context": string };
   return [
     `<title>${title}</title>`,
     `<meta name="description" content="${description}">`,
     `<meta name="robots" content="${page.indexable ? "index, follow" : "noindex, nofollow"}">`,
     ...(page.indexable || page.canonicalPath !== "/" ? [`<link rel="canonical" href="${canonical}">`] : []),
-    `<meta property="og:type" content="${article ? "article" : "website"}">`,
+    `<meta property="og:type" content="${article ? "article" : page.profile ? "profile" : "website"}">`,
     ...(article ? [
       `<meta property="article:published_time" content="${isoDate(article.published)}">`,
       `<meta property="article:modified_time" content="${isoDate(article.modified)}">`,
-      `<meta property="article:author" content="${escapeHTML(article.authorUrl)}">`,
+      `<meta property="article:author" content="${siteOrigin}${authorPath(page.language, article.author)}">`,
     ] : []),
     `<meta property="og:site_name" content="hush">`,
     `<meta property="og:title" content="${title}">`,
@@ -61,6 +81,6 @@ export function renderPageHead(page: PageMetadata): string {
     ...(page.indexable ? ['<link rel="describedby" href="/llms.txt" type="text/plain">'] : []),
     ...(page.alternatePaths ? Object.entries({ ...page.alternatePaths, "x-default": page.alternatePaths.en }).map(([lang, path]) => `<link rel="alternate" hreflang="${lang}" href="${siteOrigin}${path}">`) : []),
     ...(page.canonicalPath === "/" && page.indexable ? [`<script type="application/ld+json">${JSON.stringify(softwareDescription).replaceAll("<", "\\u003c")}</script>`] : []),
-    ...(articleData ? [`<script type="application/ld+json">${JSON.stringify(articleData).replaceAll("<", "\\u003c")}</script>`] : []),
+    ...[articleData, profileData].filter(Boolean).map((data) => `<script type="application/ld+json">${JSON.stringify(data).replaceAll("<", "\\u003c")}</script>`),
   ].join("\n");
 }
