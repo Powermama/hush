@@ -2,22 +2,23 @@
 .blog-article-main,
 .blog-index-main { padding: 48px 20px 96px; }
 
-/* Article: on wide screens a quiet left margin (way back, sharing) beside the text, as on Notion. */
+/* Article: as on Notion, the text column is centred on the page and a quiet left
+   margin (way back, sharing) sits at the far left. The empty right column mirrors
+   the left one so the text stays exactly centred. */
 .blog-article { max-width: 680px; margin: 0 auto; }
-@media (min-width: 1024px) {
+.blog-share-margin { display: none; }
+@media (min-width: 1200px) {
   .blog-article {
-    display: grid; max-width: 952px; column-gap: 60px;
-    grid-template-columns: 212px minmax(0, 680px);
-    grid-template-areas: "back header" "share body";
+    display: grid; max-width: 1280px; column-gap: 40px;
+    grid-template-columns: minmax(180px, 1fr) minmax(0, 680px) minmax(180px, 1fr);
+    grid-template-areas: "back header ." "share body .";
   }
-  .blog-article > .blog-back { grid-area: back; align-self: start; margin-top: 12px; }
+  .blog-article > .blog-back { grid-area: back; align-self: start; justify-self: start; margin-top: 12px; }
   .blog-article-header { grid-area: header; }
-  .blog-share-margin { grid-area: share; align-self: start; }
+  .blog-share-margin { display: block; grid-area: share; align-self: start; justify-self: start; }
   .blog-body { grid-area: body; min-width: 0; }
   .blog-share-end { display: none; }
 }
-.blog-share-margin { display: none; }
-@media (min-width: 1024px) { .blog-share-margin { display: block; } }
 .blog-article-header { max-width: 680px; margin: 0 0 40px; }
 .blog-article-header h1 {
   font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -0.035em;

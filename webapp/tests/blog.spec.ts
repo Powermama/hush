@@ -135,6 +135,8 @@ test("BLOG-008 keeps the way back and sharing in a quiet margin, with no content
     } else {
       // As on Notion: back link and sharing sit left of the text column.
       expect(back!.x + back!.width).toBeLessThan(prose!.x);
+      // As on Notion, the text column is centred on the page, not beside the margin.
+      if (page.viewportSize()!.width >= 1200) expect(Math.abs(prose!.x + prose!.width / 2 - page.viewportSize()!.width / 2)).toBeLessThan(2);
       const share = page.locator(".blog-share-margin");
       await expect(share.getByRole("link", { name: "Share on LinkedIn" })).toBeVisible();
       expect((await share.boundingBox())!.x + (await share.boundingBox())!.width).toBeLessThan(prose!.x);
