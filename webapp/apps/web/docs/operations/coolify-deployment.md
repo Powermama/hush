@@ -114,7 +114,7 @@ No secret needs to be generated or pasted before the first deployment.
 - Later deployments reuse the same signing key automatically.
 - In production, hush refuses to start when the key file is missing and bootstrapping is not enabled. A mis-mounted or empty volume therefore fails the deployment loudly; it never silently mints a new identity that would invalidate existing proofs. During a rolling update the old instance keeps serving.
 
-Back up the `hush_objects` volume before publishing real proofs. Losing that volume loses the signing identity used by existing proofs.
+Back up the signing key as described in [Signing key backup](#signing-key-backup) before publishing real proofs. Losing it loses the signing identity used by existing proofs.
 
 For external key management, generate a key locally and provide the two output values as runtime-only Coolify secrets:
 
@@ -149,13 +149,63 @@ Both proof URL forms are supported by the same service:
 
 The redirect never receives or returns the fragment key.
 
-## Persistence and backups
+## Backups
 
-- `hush_postgres` stores proof metadata and aliases.
-- `hush_objects` stores encrypted proof blobs under `/app/data`.
-- The generated signing JWK is stored in `hush_objects` unless an external runtime secret overrides it.
+What production keeps, and what a restore needs:
 
-Back up both named volumes. If external key management is enabled, back up that signing key separately. A deployment is not recoverable from the Git repository alone.
+| Data | Where | Backup |
+| --- | --- | --- |
+| Proof metadata, installations, aliases | `hush-postgres` (PostgreSQL 17) | Daily to R2, see below |
+| Proof-signing key | `/app/data/service-key.json` in `hush-website`'s volume | Separately, see below. **Losing it is the one unrecoverable failure.** |
+| Encrypted proof blobs | `/app/data/objects` in the same volume | None: they expire within 90 days and cannot be decrypted without the recipient's link |
+
+A lost database is survivable: each Mac enrolls again automatically when the
+service no longer knows its installation, and only proofs that are still live
+stop resolving. A lost signing key is not: production refuses to start without
+it, and a new key cannot vouch for receipts signed by the old one.
+
+### Database backups
+
+`hush-postgres` → **Backups**: schedule `15 3 * * *` (UTC), database `hush`, S3
+on with the destination `hush-proof-backups (R2)` only, local copy deleted
+after upload, S3 retention 7 days, alert after 2 days without a backup.
+
+The destination (**Storages** → `hush-proof-backups (R2)`) uses an R2 Account
+API token with Object Read & Write on the bucket `hush-proof-backups` only,
+region `auto`, path-style URLs, TLS verification on. The bucket is non-public
+and its lifecycle rule `expire-after-9-days` deletes objects after 9 days, which
+bounds the privacy policy's 9-day promise even if Coolify's cleanup fails.
+
+**Restore drill** (after any change to backups, and at least every quarter):
+create a scratch PostgreSQL 17 database on the `automation` server, use
+**Import Backup** to restore the newest file from `hush-proof-backups`, and
+compare `select count(*) from proofs` and `select count(*) from installation_keys`
+with production. Then delete the scratch database. Never import into
+`hush-postgres` itself unless recovering from a loss, and follow
+[Backups and restores](../proof-retention.md#backups-and-restores) before
+serving restored proofs.
+
+### Signing key backup
+
+Keep one copy of the key **outside the server and outside the data buckets**,
+encrypted, so a lost volume or a compromised bucket cannot take it with them.
+Do this once now, and again whenever the key changes:
+
+1. Coolify → `hush-website` → **Terminal**: run `sha256sum /app/data/service-key.json`
+   and note the hash, then `cat /app/data/service-key.json`.
+2. Copy the JSON into a password manager item (for example "hush proof-signing
+   key, hush-production-1") with the hash in its notes. Never paste it into Git,
+   chat, tickets, email or an R2 bucket. Clear the terminal afterwards.
+3. Restore: compare the SHA-256, then put the file back unchanged at
+   `/app/data/service-key.json` in the volume (owner `bun`, mode `600`). The
+   file is `{ "id": ..., "privateJwk": {...} }`; to use runtime secrets instead,
+   set `HUSH_SERVICE_KEY_ID` to its `id` and the secret `HUSH_SERVICE_PRIVATE_JWK`
+   to its `privateJwk` object (see [Automatic secrets](#3-automatic-secrets)).
+   Either way the service starts with the same identity.
+
+If external key management is enabled, the key already lives outside the
+server; keep its password-manager copy the same way. A deployment is not
+recoverable from the Git repository alone.
 
 ## Optional external storage
 

@@ -31,13 +31,21 @@ app retains its installation ID. Keep any case evidence outside the public repo.
 
 ## Backups and restores
 
-Live cleanup does not erase historical backups. Inventory the actual Coolify,
-volume and database snapshots before promising a backup-deletion date. Restrict
-access and keep an explicit bounded retention schedule in private operations
-records. Before returning a restored backup to public traffic, reconcile
-revocations/deletions recorded after that backup and run cleanup to completion.
-If that reconciliation is unavailable, do not serve restored proofs. A database
-backup containing revocation hashes is sensitive even without message keys.
+Live cleanup does not erase backups; they age out instead, which is the
+documented approach regulators accept for erasure in backups. The proof
+database is backed up daily (see
+[Backups](operations/coolify-deployment.md#backups)) to the non-public R2 bucket
+`hush-proof-backups`, kept 7 days by the schedule and deleted after 9 days by
+the bucket's lifecycle rule, so an erased proof's metadata is gone from every
+regular backup within 9 days. The privacy policy states this bound. Other
+recovery copies, such as the November 2026 migration backup on the server,
+are not covered by it and need their own removal date.
+
+Restrict access to the backup bucket to the scoped token Coolify uses. Before
+returning a restored backup to public traffic, reconcile revocations/deletions
+recorded after that backup and run cleanup to completion. If that
+reconciliation is unavailable, do not serve restored proofs. A database backup
+containing revocation hashes is sensitive even without message keys.
 
 ## Local database verification
 
