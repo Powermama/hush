@@ -11,7 +11,11 @@ reach the other's data or secrets.
 ## `hush-cms` settings
 
 1. **Environment variables**: `CMS_DATABASE_URL` from `hush-cms-postgres`'s
-   internal connection URL. Nothing else from the website.
+   internal connection URL, and the image bucket: `CMS_S3_BUCKET=hush-blog-media`,
+   `CMS_S3_ENDPOINT` (`https://<account>.r2.cloudflarestorage.com`),
+   `CMS_S3_ACCESS_KEY_ID` and `CMS_S3_SECRET_ACCESS_KEY` from an R2 API token
+   limited to that bucket. Never the app-update bucket, which ships the Mac app.
+   Nothing else from the website.
 2. **Health check**: path `/health/ready`, port `3100`.
 3. **Scheduled Tasks**: `bun run cms:publish-due`, frequency `* * * * *`,
    container `hush-cms`. Its output lists the posts it published.

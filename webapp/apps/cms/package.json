@@ -14,7 +14,8 @@
     "cms:publish-due": "bun src/jobs/publish-due.ts",
     "cms:token": "bun src/commands/create-token.ts",
     "api:openapi": "bun src/export-openapi.ts",
-    "api:check": "bun run api:openapi && git diff --exit-code -- openapi/hush-cms.json"
+    "api:check": "bun run api:openapi && git diff --exit-code -- openapi/hush-cms.json",
+    "cms:import": "bun src/commands/import.ts"
   },
   "dependencies": {
     "@hono/zod-openapi": "1.1.5",
@@ -22,6 +23,7 @@
     "drizzle-orm": "0.45.2",
     "hono": "4.13.18",
     "postgres": "3.4.7",
+    "sharp": "0.35.5",
     "zod": "4.6.6"
   },
   "devDependencies": {

@@ -14,7 +14,12 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-API-006 | Unpublishing returns a post to draft and removes its rendition; publishing it again keeps its original date. | `tests/posts.test.ts` |
 | CMS-API-007 | Editing a live post re-validates it: an invalid edit is refused, a valid one is re-rendered. | `tests/posts.test.ts` |
 | CMS-API-008 | Any earlier revision can be restored. | `tests/posts.test.ts` |
+| CMS-MEDIA-001 | An article referencing `media/<slug>/<name>` cannot go live until that image is uploaded; once it is, the post renders a figure with responsive WebP sources (680 px and 2x) and the renditions exist in storage. | `tests/media.test.ts` |
+| CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
+| CMS-IMPORT-001 | `bun run cms:import <dir>` imports hush-seo Markdown articles with their images, keeps drafts as drafts and publishes the rest with their original dates, in an order that satisfies links between them. | `tests/import.test.ts` |
+| CMS-IMPORT-002 | Running the import again matches posts by language and slug and changes nothing but its revisions. | `tests/import.test.ts` |
 | CMS-ISOLATION-001 | The CMS imports nothing from the website and never reads the proof service's database URL or signing key. | `tests/boundary.test.ts` |
 
-Images, the import of existing articles, the website reading published posts
-and the admin UI arrive in later milestones of the CMS PRD.
+The import of the live article renders HTML byte-identical to the website's
+static build. The website reading published posts and the admin UI arrive in
+later milestones of the CMS PRD.
