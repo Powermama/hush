@@ -37,11 +37,11 @@ jobs:
         run: python3 .github/scripts/ci_scope.py
 
   web:
-    name: Web journeys
+    name: Web checks
     needs: changes
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: webapp/apps/web
@@ -83,19 +83,69 @@ jobs:
         run: bun run lint:tests
       - name: Verify the production image includes the prerender modules
         run: docker build --target build --tag hush-web-build-check --file Dockerfile ../..
+
+  web-journeys:
+    # Every browser journey runs on every web change, split across machines with
+    # Playwright sharding (https://playwright.dev/docs/test-sharding). Each shard
+    # keeps one worker, so software-rendered WebGL never contends.
+    name: Web journeys (${{ matrix.shard }}/3)
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    defaults:
+      run:
+        working-directory: webapp/apps/web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.9
+      - run: bun install --frozen-lockfile
+      - run: bun run build
       - run: bunx playwright install --with-deps chromium webkit
-      - run: bunx playwright test
-      # Blog journeys need articles; build once more with the fixture content.
-      # The committed output is untouched outside this job's workspace.
-      - name: Blog journeys with fixture articles
-        run: |
-          HUSH_BLOG_CONTENT_DIR=scripts/blog/fixtures/content bun run blog:generate
-          bun run build
-          bunx playwright test tests/blog.spec.ts
+      - run: bunx playwright test --shard=${{ matrix.shard }}/3
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
-          name: browser-failures
+          name: browser-failures-${{ matrix.shard }}
+          path: webapp/apps/web/test-results/
+          retention-days: 7
+
+  web-blog:
+    # Blog journeys need articles: build with the fixture content. The committed
+    # output is untouched outside this job's workspace.
+    name: Blog journeys
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: webapp/apps/web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.9
+      - run: bun install --frozen-lockfile
+      # Covers are rendered with Chromium, so the browsers come first.
+      - run: bunx playwright install --with-deps chromium webkit
+      - run: HUSH_BLOG_CONTENT_DIR=scripts/blog/fixtures/content bun run blog:generate
+      - run: bun run build
+      - run: bunx playwright test tests/blog.spec.ts
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: browser-failures-blog
           path: webapp/apps/web/test-results/
           retention-days: 7
 
@@ -172,7 +222,7 @@ jobs:
 
   result:
     name: CI result
-    needs: [changes, web, deployment, macos]
+    needs: [changes, web, web-journeys, web-blog, deployment, macos]
     if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     timeout-minutes: 2
@@ -184,6 +234,8 @@ jobs:
           NATIVE_REQUIRED: ${{ needs.changes.outputs.native }}
           INTEGRATION_REQUIRED: ${{ needs.changes.outputs.integration }}
           WEB_RESULT: ${{ needs.web.result }}
+          WEB_JOURNEYS_RESULT: ${{ needs.web-journeys.result }}
+          WEB_BLOG_RESULT: ${{ needs.web-blog.result }}
           DEPLOYMENT_RESULT: ${{ needs.deployment.result }}
           NATIVE_RESULT: ${{ needs.macos.result }}
         run: |
@@ -195,6 +247,8 @@ jobs:
               raise SystemExit('Missing or invalid component selection outputs.')
           expected = {
               'WEB_RESULT': os.environ['WEB_REQUIRED'] == 'true',
+              'WEB_JOURNEYS_RESULT': os.environ['WEB_REQUIRED'] == 'true',
+              'WEB_BLOG_RESULT': os.environ['WEB_REQUIRED'] == 'true',
               'DEPLOYMENT_RESULT': os.environ['WEB_REQUIRED'] == 'true',
               'NATIVE_RESULT': any(os.environ[key] == 'true' for key in ('NATIVE_REQUIRED', 'INTEGRATION_REQUIRED')),
           }

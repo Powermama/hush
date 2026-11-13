@@ -33,17 +33,25 @@ test("renders the visual landing page with a clear download", async ({ page, isM
   await page.screenshot({ path: testInfo.outputPath("visual-landing.png"), fullPage: true });
 });
 
-test("explains hardware, offline limits and the beta with native disclosures", async ({ page }) => {
-  await page.goto("/");
-  const hardware = page.locator("summary").filter({ hasText: "Will it work on my Mac?" });
-  await hardware.focus();
-  await page.keyboard.press("Enter");
-  await expect(page.getByText(/An 8 GB Mac can run transcription/)).toBeVisible();
-  await expect(page.getByText(/macOS 15 or later/)).toBeVisible();
-  await page.locator("summary").filter({ hasText: "Does it work offline?" }).click();
-  await expect(page.getByText(/Web searches, browsing, model downloads/)).toBeVisible();
-  await page.locator("summary").filter({ hasText: "What can the assistant do?" }).click();
-  await expect(page.getByText(/Complex tasks may still need your help/)).toBeVisible();
+test.describe("FAQ", () => {
+  // The page scrolls smoothly; a click computed while Playwright's own scroll
+  // still glides can miss on slow CI machines. The FAQ's behaviour does not
+  // depend on motion, so check it as a reduced-motion visitor, who scrolls
+  // instantly (styles.css).
+  test.use({ contextOptions: { reducedMotion: "reduce" } });
+
+  test("explains hardware, offline limits and the beta with native disclosures", async ({ page }) => {
+    await page.goto("/");
+    const hardware = page.locator("summary").filter({ hasText: "Will it work on my Mac?" });
+    await hardware.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByText(/An 8 GB Mac can run transcription/)).toBeVisible();
+    await expect(page.getByText(/macOS 15 or later/)).toBeVisible();
+    await page.locator("summary").filter({ hasText: "Does it work offline?" }).click();
+    await expect(page.getByText(/Web searches, browsing, model downloads/)).toBeVisible();
+    await page.locator("summary").filter({ hasText: "What can the assistant do?" }).click();
+    await expect(page.getByText(/Complex tasks may still need your help/)).toBeVisible();
+  });
 });
 
 test("keeps the landing usable when WebGL is unavailable", async ({ page }) => {

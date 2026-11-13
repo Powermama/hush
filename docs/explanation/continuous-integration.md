@@ -31,22 +31,31 @@ cancels obsolete runs for the same PR or branch.
 
 ## Coverage and resource choices
 
-Web checks retain backend tests, API drift detection, the production build and
-all Chromium desktop/mobile and WebKit journeys. Whenever web journeys run, the
-**Zero-downtime deployment** job also runs `webapp/apps/web/scripts/rolling-update-e2e.ts`:
-it builds the production image and replaces the web service twice under
-continuous load behind Traefik with a separate PostgreSQL, failing on any
-dropped request or changed signing key. **CI result** requires it. `bun run build` already runs
-`tsc -b`, so CI does not run that type check twice. Run `bun run lint` locally for
-a type-check-only pass. Swift and native build commands remain pinned to the
+Web changes run three kinds of jobs in parallel. **Web checks** runs the
+dependency audit, the blog output check, backend tests against PostgreSQL, API
+drift detection, the production build and the image build. **Web journeys**
+runs every Chromium desktop/mobile and WebKit journey, split across three
+machines with [Playwright sharding](https://playwright.dev/docs/test-sharding);
+`fullyParallel` splits by test, so each shard gets a third. **Blog journeys**
+builds with the fixture articles and runs the blog journeys. Nothing is
+selected away inside the website: a shared style or layout can break any
+journey, so every web change runs all of them, only faster.
+
+Whenever web journeys run, the **Zero-downtime deployment** job also runs
+`webapp/apps/web/scripts/rolling-update-e2e.ts`: it builds the production image
+and replaces the web service twice under continuous load behind Traefik with a
+separate PostgreSQL, failing on any dropped request or changed signing key.
+**CI result** requires every one of these jobs. Run `bun run lint` locally for a
+type-check-only pass. Swift and native build commands remain pinned to the
 existing toolchain and package lockfiles.
 
 Service-only changes still exercise the real Swift client against the local
 Hono service on macOS, but do not compile the unrelated desktop app. Native
 changes retain both Swift tests and the unsigned Release compilation.
 
-Playwright keeps one CI worker and its global timeout. Increasing concurrency
-previously caused contention in software-rendered WebGL tests. Its official
+Each Playwright shard keeps one CI worker and its global timeout. Increasing
+concurrency on one machine previously caused contention in software-rendered
+WebGL tests; sharding adds machines instead. Its official
 [CI guidance](https://playwright.dev/docs/ci) recommends one worker for stability
 and does not recommend caching browser binaries by default. In the sampled run,
 installing web dependencies took one second and browser setup took 43 seconds;
