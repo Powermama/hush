@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import sharp from "sharp";
 import { buildBlog } from "./build-blog";
 
 const fixtures = join(import.meta.dir, "fixtures/content");
@@ -53,7 +54,7 @@ afterEach(async () => {
   dirs = [];
 });
 
-async function contentWith(files: Record<string, string>) {
+async function contentWith(files: Record<string, string | Buffer>) {
   const dir = await mkdtemp(join(tmpdir(), "hush-blog-"));
   dirs.push(dir);
   for (const [path, content] of Object.entries(files)) {
@@ -62,6 +63,9 @@ async function contentWith(files: Record<string, string>) {
   }
   return dir;
 }
+
+const screenshot = () => sharp({ create: { width: 900, height: 450, channels: 3, background: "#ffffff" } }).png().toBuffer();
+const withImage = (markdown: string) => validBody.replace("Text.", markdown);
 
 async function errorsFor(files: Record<string, string>) {
   return (await buildBlog(await contentWith(files), staticPaths)).errors.join("\n");
@@ -166,5 +170,36 @@ describe("blog content pipeline", () => {
     }), staticPaths);
     expect(errors).toEqual([]);
     expect(posts).toEqual([]);
+  });
+
+  test("renders a standalone image as a figure with responsive WebP sources", async () => {
+    const { posts, errors } = await buildBlog(await contentWith({
+      "en/dictate-without-cloud.md": article({}, withImage('![Keyboard settings with the Dictation section](media/dictate-without-cloud/settings.png "Our test Mac")')),
+      "en/media/dictate-without-cloud/settings.png": await screenshot(),
+    }), staticPaths);
+    expect(errors).toEqual([]);
+    const html = posts[0]!.html;
+    expect(html).toContain("<figure><img");
+    expect(html).toMatch(/srcset="\/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-680\.webp 680w, \/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-900\.webp 900w"/);
+    expect(html).toContain('width="680" height="340"');
+    expect(html).toContain('loading="lazy"');
+    expect(html).toContain("<figcaption>Our test Mac</figcaption>");
+    expect(posts[0]!.images.map((image) => image.width)).toEqual([680, 900]);
+  });
+
+  test("rejects missing images, missing alt text, wrong folders and inline images", async () => {
+    const errors = (await buildBlog(await contentWith({
+      "en/dictate-without-cloud.md": article({}, withImage([
+        "![Keyboard settings](media/dictate-without-cloud/missing.png)",
+        "![](media/dictate-without-cloud/settings.png)",
+        "![Another article's image](media/other-article/settings.png)",
+        "Inline ![Keyboard settings inline](media/dictate-without-cloud/settings.png) image.",
+      ].join("\n\n"))),
+      "en/media/dictate-without-cloud/settings.png": await screenshot(),
+    }), staticPaths)).errors.join("\n");
+    expect(errors).toContain('"media/dictate-without-cloud/missing.png" does not exist');
+    expect(errors).toContain("needs alt text of 10 to 160 characters");
+    expect(errors).toContain("must live in media/dictate-without-cloud/");
+    expect(errors).toContain("an image must stand alone in its own paragraph");
   });
 });

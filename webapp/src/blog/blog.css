@@ -82,6 +82,10 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-prose li::marker { color: var(--color-soft); }
 .blog-prose strong { font-weight: 600; color: var(--color-ink); }
 .blog-prose code { font-size: 0.88em; padding: 0.15em 0.35em; border-radius: 6px; background: rgb(0 0 0 / 0.05); }
+/* Screenshots: full column width in a quiet frame, caption below. */
+.blog-prose figure { margin: 2em 0; }
+.blog-prose figure img { display: block; width: 100%; height: auto; border-radius: 14px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px rgb(31 32 30 / 0.06); }
+.blog-prose figcaption { margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--color-muted); }
 /* Code blocks scroll inside their own box, like tables. */
 .blog-prose pre { margin: 0 0 1.25em; padding: 14px 18px; overflow-x: auto; border-radius: 12px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); font-size: 0.85em; line-height: 1.6; }
 .blog-prose pre code { padding: 0; border-radius: 0; background: none; font-size: inherit; }

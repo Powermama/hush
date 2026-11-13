@@ -4,8 +4,10 @@
 // Reads Markdown articles, validates them against the hush blog contract and
 // renders them to HTML. Pure apart from reading the content directory, so it
 // can be tested against fixtures. The writer lives in generate-blog.ts.
+import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import sharp from "sharp";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
@@ -44,6 +46,14 @@ export type FrontMatter = z.infer<typeof frontMatterSchema>;
 
 export type TocEntry = { id: string; text: string };
 
+/** One responsive rendition the generator writes to public/. */
+export type BlogImageOutput = { source: string; path: string; width: number };
+
+// Article images render at most 680 CSS px wide; the second size serves 2x screens.
+const imageWidths = [680, 1360];
+const imageSizes = "(min-width: 768px) 680px, calc(100vw - 40px)";
+const imagePath = /^media\/([a-z0-9-]+)\/([a-z0-9-]+)\.(png|jpe?g|webp)$/;
+
 export type BlogPost = {
   slug: string;
   lang: BlogLanguage;
@@ -63,6 +73,8 @@ export type BlogPost = {
   html: string;
   /** Internal only: used for duplicate checks, never rendered. */
   keyword: string;
+  /** Internal only: image renditions the generator must write. */
+  images: BlogImageOutput[];
 };
 
 const faqHeadings: Record<BlogLanguage, string> = {
@@ -84,8 +96,32 @@ export function blogPath(lang: BlogLanguage, slug?: string) {
   return slug ? `${base}/${slug}` : base;
 }
 
-type MdNode = { type: string; depth?: number; url?: string; value?: string; children?: MdNode[] };
-type HastNode = { type: string; tagName?: string; properties?: { id?: string }; value?: string; children?: HastNode[] };
+type MdNode = { type: string; depth?: number; url?: string; alt?: string; title?: string | null; value?: string; children?: MdNode[] };
+type HastNode = { type: string; tagName?: string; properties?: Record<string, unknown>; value?: string; children?: HastNode[] };
+
+type ArticleImage = { url: string; alt: string; title?: string; width: number; height: number; renditions: BlogImageOutput[] };
+
+/** Validates an article image and plans its WebP renditions. */
+async function planImage(contentDir: string, lang: string, slug: string, node: MdNode, problems: string[]): Promise<ArticleImage | undefined> {
+  const url = node.url ?? "";
+  const match = imagePath.exec(url);
+  if (!match) { problems.push(`image "${url}" must be media/${slug}/<name>.png|jpg|webp`); return; }
+  if (match[1] !== slug) { problems.push(`image "${url}" must live in media/${slug}/`); return; }
+  const alt = (node.alt ?? "").trim();
+  if (alt.length < 10 || alt.length > 160) problems.push(`image "${url}" needs alt text of 10 to 160 characters`);
+  const source = join(contentDir, lang, url);
+  let bytes: Buffer;
+  try { bytes = await readFile(source); } catch { problems.push(`image "${url}" does not exist`); return; }
+  const { width, height } = await sharp(bytes).metadata();
+  if (!width || !height) { problems.push(`image "${url}" cannot be read`); return; }
+  if (width < imageWidths[0]!) problems.push(`image "${url}" is ${width}px wide; provide at least ${imageWidths[0]}px`);
+  // Content-hashed names: a changed image gets new URLs, so caches never serve a stale one.
+  const hash = createHash("sha256").update(bytes).digest("hex").slice(0, 10);
+  const renditions = [...new Set(imageWidths.map((target) => Math.min(target, width)))].map((target) => ({
+    source, width: target, path: `/blog/media/${slug}-${match[2]}-${hash}-${target}.webp`,
+  }));
+  return { url, alt, title: node.title ?? undefined, width, height, renditions };
+}
 
 function walk<T extends { children?: T[] }>(node: T, visit: (node: T) => void) {
   visit(node);
@@ -182,7 +218,11 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
     keywords.set(keywordKey, file);
 
     const headings: Array<{ depth: number; text: string }> = [];
+    const imageNodes: MdNode[] = [];
     walk(tree, (node) => {
+      if (node.type === "image") imageNodes.push(node);
+      if (node.type === "paragraph" && node.children?.some((child) => child.type === "image")
+        && (node.children.length !== 1)) problems.push("an image must stand alone in its own paragraph");
       if (node.type === "heading") headings.push({ depth: node.depth!, text: text(node) });
       if (node.type === "link") {
         const url = node.url ?? "";
@@ -215,6 +255,12 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       if (lower.includes(phrase)) problems.push(`contains the banned phrase "${phrase}"`);
     }
 
+    const images = new Map<string, ArticleImage>();
+    for (const node of imageNodes) {
+      const image = await planImage(contentDir, lang, front.slug, node, problems);
+      if (image) images.set(image.url, image);
+    }
+
     if (problems.length) {
       errors.push(...problems.map((problem) => `${file}: ${problem}`));
       continue;
@@ -239,6 +285,30 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       if (node.type === "element" && node.tagName === "h2" && node.properties?.id) {
         toc.push({ id: String(node.properties.id), text: text(node) });
       }
+      // A paragraph holding only an image becomes a figure with responsive WebP sources.
+      const only = node.children?.length === 1 ? node.children[0] : undefined;
+      if (node.type === "element" && node.tagName === "p" && only?.tagName === "img") {
+        const image = images.get(String(only.properties?.src));
+        if (!image) return;
+        const first = image.renditions[0]!;
+        const img: HastNode = {
+          type: "element", tagName: "img", children: [], properties: {
+            src: first.path,
+            srcSet: image.renditions.map((rendition) => `${rendition.path} ${rendition.width}w`).join(", "),
+            sizes: imageSizes,
+            width: first.width,
+            height: Math.round(image.height * first.width / image.width),
+            alt: image.alt,
+            loading: "lazy",
+            decoding: "async",
+          },
+        };
+        node.tagName = "figure";
+        node.properties = {};
+        node.children = image.title
+          ? [img, { type: "element", tagName: "figcaption", properties: {}, children: [{ type: "text", value: image.title }] }]
+          : [img];
+      }
     });
     const html = unified().use(rehypeStringify).stringify(hast as never);
     const words = body.split(/\s+/).filter(Boolean).length;
@@ -261,6 +331,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       toc,
       html,
       keyword: front.keyword,
+      images: [...images.values()].flatMap((image) => image.renditions),
     });
   }
 
