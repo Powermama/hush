@@ -41,6 +41,10 @@ services:
     command: ["bun", "run", "cms:scheduler"]
     environment:
       <<: *cms-environment
+    # The image's healthcheck polls the API on port 3100, which the scheduler
+    # does not serve; restart: unless-stopped covers a crashed scheduler.
+    healthcheck:
+      disable: true
     depends_on:
       cms:
         condition: service_healthy
