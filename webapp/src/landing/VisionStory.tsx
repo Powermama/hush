@@ -15,7 +15,7 @@ function Portrait({ decorative = false }: { decorative?: boolean }) {
     src={artwork.aristotle.src}
     srcSet={artwork.aristotle.srcSet}
     sizes="(max-width: 760px) 95vw, 650px"
-    width="960" height="1000" loading="lazy" decoding="async"
+    width="960" height="1000" loading="lazy" decoding="async" fetchPriority="low"
     alt={decorative ? "" : m.thought_portrait_alt()}
   />;
 }
@@ -57,10 +57,11 @@ export function VisionStory() {
           <img
             src={artwork.liberty.src}
             srcSet={artwork.liberty.srcSet}
-            sizes="100vw" width="1280" height="1016" loading="lazy" decoding="async"
+            sizes="100vw" width="1280" height="1016" loading="lazy" decoding="async" fetchPriority="low"
             alt={m.freedom_alt()}
           />
-          <div className="freedom-image-echo" aria-hidden="true" />
+          {/* An image rather than a CSS background, so it loads lazily and after the hero scene. */}
+          <div className="freedom-image-echo" aria-hidden="true"><img src={artwork.libertyEcho.src} alt="" loading="lazy" decoding="async" fetchPriority="low" /></div>
           <span className="freedom-overprint" aria-hidden="true">liberté.</span>
           <div className="freedom-copy">
             <h2 id="freedom-title"><span>{m.freedom_title_1()}</span><span>{m.freedom_title_2()}</span></h2>
@@ -79,7 +80,7 @@ export function VisionStory() {
               src={artwork.geographer.src}
               srcSet={artwork.geographer.srcSet}
               sizes="(max-width: 760px) 65vw, 380px"
-              width="960" height="1076" loading="lazy" decoding="async"
+              width="960" height="1076" loading="lazy" decoding="async" fetchPriority="low"
               alt={m.intelligence_alt()}
             />
             <div className="local-window-label"><span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" /><b>{m.intelligence_window_label()}</b><div className="window-companion" role="img" aria-label={m.intelligence_companion_label()}><HushMascotArtwork state="thinking" portrait /></div></div>

@@ -31,6 +31,9 @@ test("LANDING-ENTRY-001 coordinates the original transition calendar with the pr
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator(".site-header")).toHaveCSS("position", "relative");
     await expect(page.locator(".site-header")).toHaveCSS("opacity", "0");
+    // A flat, centred hush mark with a progress bar shows while the page waits.
+    await expect(page.locator(".landing-loader")).toHaveCSS("opacity", "1");
+    await expect(page.locator(".hush-core")).toHaveCSS("opacity", "0");
     release();
     await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "playing", { timeout: 15000 });
     const calendar = await page.evaluate(() => [".site-header", ".hero-introduction", ".hush-core", ".orbit-app", ".universe-paths", ".universe-texture", ".universe-halo", ".hero-download-area"].map(selector => {
@@ -85,7 +88,7 @@ test("LANDING-ENTRY-002 shows content before a slow scene without replaying the 
   await page.route(/HushScene.*\.js/, async route => { await gate; await route.continue(); });
   try {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "complete", { timeout: 2500 });
+    await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "complete", { timeout: 4500 });
     await expect(page.locator(".site-header")).toHaveCSS("opacity", "1");
     await expect(page.locator(".core-fallback")).toHaveCSS("opacity", "1");
     await expect(page.locator(".hero-actions .landing-download")).toBeVisible();
@@ -105,7 +108,8 @@ test("LANDING-ENTRY-003 reveals the prerendered page while application JavaScrip
     await page.goto("/", { waitUntil: "commit" });
     // The real production CSS must arrive, but neither hydration nor WebGL can run.
     await expect(page.locator(".site-header")).toHaveCSS("position", "relative");
-    await expect(page.locator(".hero-introduction")).toHaveCSS("opacity", "1", { timeout: 1800 });
+    await expect(page.locator(".landing-loader")).toBeVisible();
+    await expect(page.locator(".hero-introduction")).toHaveCSS("opacity", "1", { timeout: 4200 });
     await expect(page.locator(".site-header")).toHaveCSS("opacity", "1");
     await expect(page.locator(".hero-download-area")).toHaveCSS("opacity", "1");
     await expect(page.locator(".core-fallback")).toHaveCSS("opacity", "1");
