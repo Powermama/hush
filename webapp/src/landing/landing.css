@@ -52,20 +52,21 @@
 .orbit-app > span { font-size: 11px; color: #626973; }
 .orbit-app:hover .orbit-tile { transform: translateY(-4px); }
 /* While the loader shows, a prepared scene starts one shared timeline. CSS alone
-   reveals the composition within 3.2s if hydration or graphics miss that window,
+   reveals the composition within 3.8s if hydration or graphics miss that window,
    including JS failure. */
-.hush-landing[data-opening="pending"] :is(.site-header, .hero-introduction, .hush-core, .orbit-app, .universe-paths, .universe-halo, .universe-texture, .hero-download-area) { animation: entrance-fallback .2s 3s both; }
-/* A flat, upright hush mark with a progress bar, centred in the window. It is part
-   of the first paint, the bar fills toward the 3s deadline, and both leave (filling
-   up first) as soon as the entrance starts or the fallback reveals the page. */
+.hush-landing[data-opening="pending"] :is(.site-header, .hero-introduction, .hush-core, .orbit-app, .universe-paths, .universe-halo, .universe-texture, .hero-download-area) { animation: entrance-fallback .2s 3.6s both; }
+/* A flat, upright hush mark with a progress bar, centred in the window. It appears
+   0.3s after the first paint, which fast visits never reach, the bar fills toward
+   the 3.6s deadline, and both leave (filling up first) as soon as the entrance starts
+   or the fallback reveals the page. */
 .landing-loader { position: fixed; inset: 0; z-index: 30; display: grid; place-content: center; justify-items: center; gap: 26px; pointer-events: none; opacity: 0; transition: opacity .4s ease, scale .4s ease; }
-.hush-landing[data-opening="pending"] .landing-loader { opacity: 1; animation: loader-hide .35s 3s forwards; }
+.hush-landing[data-opening="pending"] .landing-loader { animation: loader-show .2s .3s both, loader-hide .35s 3.6s forwards; }
 .hush-landing:not([data-opening="pending"]) .landing-loader { scale: .97; visibility: hidden; transition: opacity .4s ease, scale .4s ease, visibility 0s .4s; }
 .landing-loader-mark { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(145deg, #42474c, #24272b); color: white; box-shadow: 0 6px 12px #24272b18, inset 0 1px 1px #fff6; }
 .landing-loader-mark svg { width: 100%; }
 .landing-loader-bar { width: 132px; height: 3px; border-radius: 3px; background: #e2e6ea; overflow: hidden; }
 .landing-loader-bar::after { content: ""; display: block; height: 100%; border-radius: inherit; background: #2b2f33; transform-origin: left; transform: scaleX(.05); }
-.hush-landing[data-opening="pending"] .landing-loader-bar::after { animation: loader-progress 2.9s cubic-bezier(.3, .6, .3, 1) both; }
+.hush-landing[data-opening="pending"] .landing-loader-bar::after { animation: loader-progress 3.3s .3s cubic-bezier(.3, .6, .3, 1) both; }
 .hush-landing:not([data-opening="pending"]) .landing-loader-bar::after { transform: scaleX(1); transition: transform .25s ease-out; }
 .hush-landing[data-opening="playing"] > .site-header { animation: header-arrive 1.05s .12s cubic-bezier(.22,.68,.22,1) both; }
 .hush-landing[data-opening="playing"] .hero-introduction { animation: introduction-arrive .9s .55s both; }
@@ -96,6 +97,7 @@
 @keyframes header-arrive { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes entrance-fallback { from { opacity: 0; } to { opacity: 1; } }
 @keyframes core-arrive { from { opacity: 0; } to { opacity: 1; } }
+@keyframes loader-show { from { opacity: 0; } to { opacity: 1; } }
 @keyframes loader-hide { to { opacity: 0; } }
 @keyframes loader-progress { to { transform: scaleX(.92); } }
 @keyframes orbit-arrive { from { opacity: 0; translate: 0 18px; scale: .9; } to { opacity: 1; translate: 0 0; scale: 1; } }

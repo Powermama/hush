@@ -88,7 +88,7 @@ test("LANDING-ENTRY-002 shows content before a slow scene without replaying the 
   await page.route(/HushScene.*\.js/, async route => { await gate; await route.continue(); });
   try {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "complete", { timeout: 4500 });
+    await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "complete", { timeout: 5000 });
     await expect(page.locator(".site-header")).toHaveCSS("opacity", "1");
     await expect(page.locator(".core-fallback")).toHaveCSS("opacity", "1");
     await expect(page.locator(".hero-actions .landing-download")).toBeVisible();
@@ -109,7 +109,7 @@ test("LANDING-ENTRY-003 reveals the prerendered page while application JavaScrip
     // The real production CSS must arrive, but neither hydration nor WebGL can run.
     await expect(page.locator(".site-header")).toHaveCSS("position", "relative");
     await expect(page.locator(".landing-loader")).toBeVisible();
-    await expect(page.locator(".hero-introduction")).toHaveCSS("opacity", "1", { timeout: 4200 });
+    await expect(page.locator(".hero-introduction")).toHaveCSS("opacity", "1", { timeout: 4800 });
     await expect(page.locator(".site-header")).toHaveCSS("opacity", "1");
     await expect(page.locator(".hero-download-area")).toHaveCSS("opacity", "1");
     await expect(page.locator(".core-fallback")).toHaveCSS("opacity", "1");
