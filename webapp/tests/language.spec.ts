@@ -15,6 +15,10 @@ test("LANG-001 prerenders the German landing page with its own metadata and href
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
   await expect(page.locator("h1")).toHaveText("Die Sprachebene für deinen Mac.");
   await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute("content", "de_DE");
+  // German download buttons say "Download", as German Mac users expect, never "Laden".
+  const html = await page.content();
+  expect(html).toContain("Download für Mac");
+  expect(html).not.toMatch(/>\s*(Für den Mac laden|Laden)\s*</);
   for (const [lang, href] of [["en", "https://behu.sh/"], ["de", "https://behu.sh/de"], ["x-default", "https://behu.sh/"]]) {
     await expect(page.locator(`link[rel="alternate"][hreflang="${lang}"]`)).toHaveAttribute("href", href);
   }

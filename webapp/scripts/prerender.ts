@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026 Clemens Kressmann
-import { landingPaths, sitePages, siteOrigin, privatePageMetadata } from "../shared/site";
+import { landingPaths, sitePages, siteOrigin, privatePageMetadata, notFoundPages, notFoundDocumentKey, type SiteLanguage } from "../shared/site";
 import { renderPageHead } from "../shared/site-head";
 import { rm } from "node:fs/promises";
 import { externalizeScripts } from "./prerender/externalize-scripts";
@@ -52,6 +52,20 @@ for (const [path, metadata] of Object.entries(sitePages)) {
   const externalized = externalizeScripts(html);
   for (const asset of externalized.assets) await Bun.write(`dist${asset.path}`, asset.code);
   pages[path] = externalized.html;
+}
+// Unknown addresses get the not-found page in the address's language, sent by the
+// server with status 404. The router renders it for any path no route matches.
+for (const [language, metadata] of Object.entries(notFoundPages) as [SiteLanguage, typeof privatePageMetadata][]) {
+  const response = await render(`${siteOrigin}${language === "de" ? "/de" : ""}/__not-found`);
+  let html = await response.text();
+  if (response.status !== 404 || !html.includes('id="not-found-title"')) {
+    throw new Error(`Cannot prerender the ${language} not-found page: ${response.status}`);
+  }
+  html = html.replace('<html lang="en">', `<html lang="${language}">`);
+  html = html.replace("<head>", () => `<head>${pageHead(metadata)}`);
+  const externalized = externalizeScripts(html);
+  for (const asset of externalized.assets) await Bun.write(`dist${asset.path}`, asset.code);
+  pages[notFoundDocumentKey(language)] = externalized.html;
 }
 // The build manifest is only for this script; never serve it.
 await rm("dist/.vite", { recursive: true, force: true });
