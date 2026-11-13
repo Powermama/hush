@@ -41,6 +41,24 @@ The endpoint is `https://<account-id>.r2.cloudflarestorage.com`. Never use the
 app-update bucket `hush`, which ships the Mac app. Copy each value straight from
 Cloudflare into Coolify; it must not pass through Git, `.env` files or chat.
 
+## Website deploys and IndexNow
+
+The scheduler keeps behu.sh in step with the CMS (`src/site/deploy.ts`): when
+the site serves an older revision than the CMS holds, it asks Coolify to deploy
+`hush-website`, whose build pulls the export; once the new revision is live it
+submits the changed pages to IndexNow.
+
+1. Coolify **Settings > Advanced**: API access on, **Allowed IPs** only the
+   `automation` server's address, so the API answers nothing else.
+2. **Keys & Tokens > API tokens**: a token named `hush-cms deploy` with only
+   the `deploy` permission, scoped to the `hush-website` resource.
+3. In hush-cms, locked and runtime only: `CMS_SITE_URL`, `CMS_COOLIFY_URL`,
+   `CMS_COOLIFY_TOKEN`, `CMS_COOLIFY_WEBSITE_UUID` and `CMS_INDEXNOW_KEY` (the
+   key the website serves at `/<key>.txt`).
+4. A read-only CMS token for the website build:
+   `bun run cms:token --name website-build --scopes posts:read`, stored in
+   `hush-website` as described in the website's deployment guide.
+
 ## After the first deploy
 
 1. Create the owner's token in the `cms` container's terminal:
