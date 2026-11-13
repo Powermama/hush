@@ -1,0 +1,32 @@
+# Blog
+
+The blog publishes English and German articles as two independent programs:
+each article targets its own market's keywords, and no article is a
+translation of another. Articles are Markdown files in `content/blog/<lang>/`,
+written with the hush-seo skill and reviewed by the author before publishing.
+
+## Journeys
+
+| ID | Journey | Test |
+| --- | --- | --- |
+| BLOG-001 | Read a prerendered article without JavaScript: one H1, the full body, `og:type article` and `BlogPosting` data with timezone-qualified dates and a real author URL. | `tests/blog.spec.ts` BLOG-001 |
+| BLOG-002 | The article hydrates without console or page errors and stays visible. | BLOG-002 |
+| BLOG-003 | Desktop gets the real download; phones and iPads get the "Get hush for Mac" handoff and never a disk image (LANDING-DOWNLOAD-002). | BLOG-003 |
+| BLOG-004 | Jump through the table of contents (collapsed on phones, sticky beside the text on wide screens) and continue to a related article from the same cluster. | BLOG-004 |
+| BLOG-005 | Each language lists only its own published articles. Drafts and unknown slugs return 404; the sitemap and the Atom feed list published articles only. | BLOG-005 |
+| BLOG-006 | No horizontal page scrolling (tables scroll in their own box) and no runtime CSS or SVG filters (LANDING-PAINT-001). | BLOG-006 |
+
+The browser tests run in CI against fixture articles in
+`scripts/blog/fixtures/content`, generated only inside the CI job. With the
+committed content they skip, so they never depend on real articles.
+
+## Guarantees
+
+- `/blog` and `/de/blog` exist only when that language has a published article,
+  so an empty blog is never served or indexed. The footer links to the English
+  blog once it exists.
+- `bun run blog:check` fails when the committed generated files are stale.
+  `scripts/blog/build-blog.test.ts` covers validation: strict front matter
+  fields and lengths, one H1 and ordered headings, the FAQ section per language,
+  em dashes and banned phrases, raw HTML, unsafe link schemes, dead or
+  cross-language internal links, duplicate keywords per language and drafts.

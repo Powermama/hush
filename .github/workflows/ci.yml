@@ -55,13 +55,22 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Check dependency advisories
         run: bun audit
-      - run: bun test server scripts/prerender
+      - name: Check committed blog output
+        run: bun run blog:check
+      - run: bun test server scripts/prerender scripts/blog
       - run: bun run api:check
       - run: bun run build
       - name: Verify the production image includes the prerender modules
         run: docker build --target build --tag hush-web-build-check .
       - run: bunx playwright install --with-deps chromium webkit
       - run: bunx playwright test
+      # Blog journeys need articles; build once more with the fixture content.
+      # The committed output is untouched outside this job's workspace.
+      - name: Blog journeys with fixture articles
+        run: |
+          HUSH_BLOG_CONTENT_DIR=scripts/blog/fixtures/content bun run blog:generate
+          bun run build
+          bunx playwright test tests/blog.spec.ts
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:

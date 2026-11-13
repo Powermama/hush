@@ -17,6 +17,7 @@ import {
 import { findRelease } from "../../shared/releases";
 import { ImprintPage, PrivacyPolicyPage } from "../legal/LegalPages";
 import { VerifiedMessagesPage } from "../verified/VerifiedMessagesPage";
+import { createBlogRoutes } from "../blog/generated/routes.generated";
 
 const rootRoute = createRootRoute({ component: () => <Outlet /> });
 const landingRoute = createRoute({
@@ -80,6 +81,7 @@ const routeTree = rootRoute.addChildren([
     privacyPolicyRoute,
     germanImprintRoute,
     germanPrivacyPolicyRoute,
+    ...createBlogRoutes(rootRoute),
   ]);
 
 export function createAppRouter() {

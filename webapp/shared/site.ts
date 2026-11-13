@@ -2,6 +2,8 @@
 // Copyright 2026 Clemens Kressmann
 import { legalConfig } from "./legal.ts";
 import { releases, releasePath } from "./releases.ts";
+import { blogCopy, type BlogLanguage } from "./blog.ts";
+import { blogPosts } from "./blog-posts.generated.ts";
 
 export const siteOrigin = "https://behu.sh";
 export type PageMetadata = {
@@ -12,6 +14,15 @@ export type PageMetadata = {
   language: "en" | "de";
   alternatePaths?: { en: string; de: string };
   modified?: string;
+  /** Present for blog articles: drives og:type article and BlogPosting data. */
+  article?: {
+    heading: string;
+    author: string;
+    authorUrl: string;
+    published: string;
+    modified: string;
+    imageAlt: string;
+  };
 };
 
 export const sitePages: Record<string, PageMetadata> = {
@@ -74,3 +85,30 @@ export const softwareDescription = {
   license: "https://github.com/Powermama/hush/blob/main/LICENSING.md",
   sameAs: ["https://github.com/Powermama/hush"],
 };
+
+/** Site paths that exist independently of the blog (blog articles may link to them). */
+export function staticSitePaths(): string[] {
+  return Object.keys(sitePages).filter((path) => !/^(\/de)?\/blog(\/|$)/.test(path));
+}
+
+// Blog pages exist only for languages with at least one published article, so
+// an empty blog is never served or indexed.
+for (const lang of ["en", "de"] as BlogLanguage[]) {
+  const articles = blogPosts.filter((post) => post.lang === lang);
+  if (!articles.length) continue;
+  const copy = blogCopy[lang];
+  sitePages[copy.indexPath] = {
+    title: copy.indexTitle, description: copy.indexDescription, canonicalPath: copy.indexPath,
+    indexable: true, language: lang, modified: articles.map((post) => post.updated).sort().at(-1),
+  };
+  for (const post of articles) {
+    sitePages[post.path] = {
+      title: post.title, description: post.description, canonicalPath: post.path,
+      indexable: true, language: lang, modified: post.updated,
+      article: {
+        heading: post.heading, author: post.author, authorUrl: post.authorUrl,
+        published: post.published, modified: post.updated, imageAlt: post.imageAlt,
+      },
+    };
+  }
+}
