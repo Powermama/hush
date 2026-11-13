@@ -27,6 +27,7 @@ references, not a list of marketing claims.
 | Open, decrypt and verify a private proof | [Proof recipient](../../webapp/apps/web/docs/user-journeys/proof-recipient.md) |
 | Read legal and privacy information | [Legal information](../../webapp/apps/web/docs/user-journeys/legal-information.md) |
 | Find public pages in search and preview shared links | [Public discovery](../../webapp/apps/web/docs/user-journeys/search-discovery.md) |
+| Manage blog posts through the CMS API | [CMS journeys](../../webapp/apps/cms/docs/user-journeys/cms.md) |
 
 ## Change a journey
 

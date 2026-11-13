@@ -22,6 +22,7 @@ jobs:
     timeout-minutes: 3
     outputs:
       web: ${{ steps.scope.outputs.web }}
+      cms: ${{ steps.scope.outputs.cms }}
       native: ${{ steps.scope.outputs.native }}
       integration: ${{ steps.scope.outputs.integration }}
     steps:
@@ -170,6 +171,44 @@ jobs:
       - name: Replace the web service under continuous load
         run: bun scripts/rolling-update-e2e.ts
 
+  cms:
+    name: CMS service
+    needs: changes
+    if: needs.changes.outputs.cms == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: webapp/apps/cms
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: hush_test
+          POSTGRES_USER: hush
+          POSTGRES_PASSWORD: hush-test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hush -d hush_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      HUSH_TEST_DATABASE_URL: postgresql://hush:hush-test@127.0.0.1:5432/hush_test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.9
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      # Journeys run against PostgreSQL; each test file creates and drops its own database.
+      - run: bun test
+      - run: bun run api:check
+      - name: Build the production image
+        run: docker build --tag hush-cms-build-check --file Dockerfile ../..
+
   macos:
     name: Native build and proof integration
     needs: changes
@@ -222,7 +261,7 @@ jobs:
 
   result:
     name: CI result
-    needs: [changes, web, web-journeys, web-blog, deployment, macos]
+    needs: [changes, web, web-journeys, web-blog, deployment, cms, macos]
     if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     timeout-minutes: 2
@@ -231,25 +270,28 @@ jobs:
         env:
           SCOPE_RESULT: ${{ needs.changes.result }}
           WEB_REQUIRED: ${{ needs.changes.outputs.web }}
+          CMS_REQUIRED: ${{ needs.changes.outputs.cms }}
           NATIVE_REQUIRED: ${{ needs.changes.outputs.native }}
           INTEGRATION_REQUIRED: ${{ needs.changes.outputs.integration }}
           WEB_RESULT: ${{ needs.web.result }}
           WEB_JOURNEYS_RESULT: ${{ needs.web-journeys.result }}
           WEB_BLOG_RESULT: ${{ needs.web-blog.result }}
           DEPLOYMENT_RESULT: ${{ needs.deployment.result }}
+          CMS_RESULT: ${{ needs.cms.result }}
           NATIVE_RESULT: ${{ needs.macos.result }}
         run: |
           python3 - <<'PY'
           import os
           if os.environ['SCOPE_RESULT'] != 'success':
               raise SystemExit('Component selection failed or was cancelled.')
-          if any(os.environ[key] not in {'true', 'false'} for key in ('WEB_REQUIRED', 'NATIVE_REQUIRED', 'INTEGRATION_REQUIRED')):
+          if any(os.environ[key] not in {'true', 'false'} for key in ('WEB_REQUIRED', 'CMS_REQUIRED', 'NATIVE_REQUIRED', 'INTEGRATION_REQUIRED')):
               raise SystemExit('Missing or invalid component selection outputs.')
           expected = {
               'WEB_RESULT': os.environ['WEB_REQUIRED'] == 'true',
               'WEB_JOURNEYS_RESULT': os.environ['WEB_REQUIRED'] == 'true',
               'WEB_BLOG_RESULT': os.environ['WEB_REQUIRED'] == 'true',
               'DEPLOYMENT_RESULT': os.environ['WEB_REQUIRED'] == 'true',
+              'CMS_RESULT': os.environ['CMS_REQUIRED'] == 'true',
               'NATIVE_RESULT': any(os.environ[key] == 'true' for key in ('NATIVE_REQUIRED', 'INTEGRATION_REQUIRED')),
           }
           for key, required in expected.items():
