@@ -8,7 +8,9 @@
 import { and, asc, desc, eq, inArray, lte, sql } from "drizzle-orm";
 import type { Database } from "../db/client";
 import { postRenditions, postRevisions, postSecondaryKeywords, posts } from "../db/schema";
+import { writeRenditions, type Cms } from "../media/service";
 import { checkPost } from "./contract";
+import { PostError } from "./errors";
 import { postFields, type PostFields, type PostPatch } from "./fields";
 
 type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
@@ -18,11 +20,7 @@ export type PostStatus = (typeof posts.$inferSelect)["status"];
 export type Rendition = Omit<typeof postRenditions.$inferSelect, "postId">;
 export type Post = typeof posts.$inferSelect & { secondaryKeywords: string[]; rendition: Rendition | null };
 
-export class PostError extends Error {
-  constructor(readonly status: 404 | 409 | 422, readonly code: string, message: string, readonly problems: string[] = []) {
-    super(message);
-  }
-}
+export { PostError };
 
 const withRelations = {
   secondaryKeywords: { columns: { keyword: true as const }, orderBy: [asc(postSecondaryKeywords.position)] },
@@ -95,9 +93,10 @@ async function write(db: Database, actor: string, change: {
 }
 
 /** Validates and renders for going live; throws with the contract's problems. */
-async function render(db: Database, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date) {
-  const { post, problems } = await checkPost(db, id, fields, publishedAt, updatedAt);
+async function render(cms: Cms, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date) {
+  const { post, problems } = await checkPost(cms, id, fields, publishedAt, updatedAt);
   if (!post || problems.length) throw new PostError(422, "contract_failed", "The post does not meet the article contract.", problems);
+  await writeRenditions(cms, post.images);
   return { heading: post.heading, html: post.html, toc: post.toc, readingMinutes: post.readingMinutes };
 }
 
@@ -116,30 +115,35 @@ export function createDraft(db: Database, fields: PostFields, actor: string) {
   return write(db, actor, { fields });
 }
 
-export async function updatePost(db: Database, id: string, patch: PostPatch, actor: string) {
-  const post = await load(db, id);
+export async function updatePost(cms: Cms, id: string, patch: PostPatch, actor: string) {
+  const post = await load(cms.db, id);
   const fields = postFields.parse({ ...editableFields(post), ...patch });
   const updatedAt = new Date();
   // A live post changes only to another valid version.
-  const rendition = post.status === "draft" ? undefined : await render(db, id, fields, post.publishedAt!, updatedAt);
-  return write(db, actor, { id, fields, row: { updatedAt }, rendition });
+  const rendition = post.status === "draft" ? undefined : await render(cms, id, fields, post.publishedAt!, updatedAt);
+  return write(cms.db, actor, { id, fields, row: { updatedAt }, rendition });
 }
 
-export async function schedulePost(db: Database, id: string, at: Date, actor: string) {
+export async function schedulePost(cms: Cms, id: string, at: Date, actor: string) {
   if (at.getTime() <= Date.now()) throw new PostError(422, "not_in_future", "Schedule a time in the future, or publish now.");
-  const post = await load(db, id);
+  const post = await load(cms.db, id);
   if (post.status === "published") throw new PostError(409, "already_published", "Unpublish the post before scheduling it.");
-  const rendition = await render(db, id, editableFields(post), at, at);
-  return write(db, actor, { id, row: { status: "scheduled", publishedAt: at }, rendition });
+  const rendition = await render(cms, id, editableFields(post), at, at);
+  return write(cms.db, actor, { id, row: { status: "scheduled", publishedAt: at }, rendition });
 }
 
-export async function publishPost(db: Database, id: string, actor: string) {
-  const post = await load(db, id);
+/**
+ * @param dates an imported article's original publication and update dates;
+ * otherwise a post published before keeps its date and a new one goes live now.
+ */
+export async function publishPost(cms: Cms, id: string, actor: string, dates?: { publishedAt: Date; updatedAt: Date }) {
+  const post = await load(cms.db, id);
   if (post.status === "published") return post;
-  // A post published before keeps its original date; a scheduled one goes live now.
-  const publishedAt = post.publishedAt && post.publishedAt.getTime() <= Date.now() ? post.publishedAt : new Date();
-  const rendition = await render(db, id, editableFields(post), publishedAt, post.updatedAt);
-  return write(db, actor, { id, row: { status: "published", publishedAt }, rendition });
+  const publishedAt = dates?.publishedAt
+    ?? (post.publishedAt && post.publishedAt.getTime() <= Date.now() ? post.publishedAt : new Date());
+  const updatedAt = dates?.updatedAt ?? post.updatedAt;
+  const rendition = await render(cms, id, editableFields(post), publishedAt, updatedAt);
+  return write(cms.db, actor, { id, row: { status: "published", publishedAt, updatedAt }, rendition });
 }
 
 export async function unpublishPost(db: Database, id: string, actor: string) {
@@ -154,10 +158,10 @@ export async function listRevisions(db: Database, id: string) {
   return db.select().from(postRevisions).where(eq(postRevisions.postId, id)).orderBy(desc(postRevisions.createdAt), desc(postRevisions.id));
 }
 
-export async function restoreRevision(db: Database, id: string, revisionId: string, actor: string) {
-  const [revision] = await db.select().from(postRevisions).where(and(eq(postRevisions.id, revisionId), eq(postRevisions.postId, id)));
+export async function restoreRevision(cms: Cms, id: string, revisionId: string, actor: string) {
+  const [revision] = await cms.db.select().from(postRevisions).where(and(eq(postRevisions.id, revisionId), eq(postRevisions.postId, id)));
   if (!revision) throw new PostError(404, "not_found", "No revision with this id for this post.");
-  return updatePost(db, id, postFields.parse(revision.snapshot), actor);
+  return updatePost(cms, id, postFields.parse(revision.snapshot), actor);
 }
 
 /**

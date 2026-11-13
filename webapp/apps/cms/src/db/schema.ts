@@ -42,6 +42,23 @@ export const postSecondaryKeywords = pgTable("post_secondary_keywords", {
   keyword: text("keyword").notNull(),
 }, (table) => [primaryKey({ columns: [table.postId, table.position] })]);
 
+/**
+ * Images a post's Markdown references as media/<slug>/<name>. The original is
+ * stored once under originals/<sha256>; its WebP renditions are written when the
+ * post goes live.
+ */
+export const media = pgTable("media", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  postId: uuid("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  contentType: text("content_type").notNull(),
+  sha256: text("sha256").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [uniqueIndex("media_post_name").on(table.postId, table.name)]);
+
 /** What a scheduled or published post renders to, after passing the article contract. */
 export const postRenditions = pgTable("post_renditions", {
   postId: uuid("post_id").primaryKey().references(() => posts.id, { onDelete: "cascade" }),

@@ -8,13 +8,13 @@ import { frontMatterSchema, renderArticle, type BlogPost } from "@hush/article";
 import { authorPath } from "@hush/article/authors";
 import { blogPath, editorialPolicyPath, linkableSitePaths, type BlogLanguage } from "@hush/article/taxonomy";
 import { and, eq, ne, sql } from "drizzle-orm";
-import type { Database } from "../db/client";
+import { loadMedia, type Cms } from "../media/service";
 import { posts } from "../db/schema";
 import type { PostFields } from "./fields";
 
 const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 
-export async function checkPost(db: Database, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date)
+export async function checkPost({ db, ...cms }: Cms, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date)
   : Promise<{ post?: BlogPost; problems: string[] }> {
   const { markdown, ...metadata } = fields;
   const front = frontMatterSchema.safeParse({
@@ -42,8 +42,7 @@ export async function checkPost(db: Database, id: string, fields: PostFields, pu
   }
   const rendered = await renderArticle({ front: front.data, body: markdown }, {
     knownPaths,
-    // Media storage arrives with the import; until then articles cannot embed images.
-    loadImage: async () => undefined,
+    loadImage: (url) => loadMedia({ db, ...cms }, id, fields.slug, url),
     coverSeed: [],
   });
   return { post: rendered.post, problems: [...problems, ...rendered.problems] };

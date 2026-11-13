@@ -5,9 +5,13 @@
 // script uses it, against a real PostgreSQL database.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { sql } from "drizzle-orm";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createApp } from "../src/app";
 import { createToken } from "../src/auth/tokens";
 import type { Database } from "../src/db/client";
+import { LocalMediaStore } from "../src/media/store";
 import { publishDuePosts } from "../src/posts/service";
 import { createTestDatabase, serverUrl } from "./database";
 import { validPost } from "./fixtures";
@@ -21,7 +25,7 @@ describe.skipIf(!serverUrl)("CMS API", () => {
   beforeAll(async () => {
     database = await createTestDatabase();
     db = database.db;
-    app = createApp(db);
+    app = createApp({ db, media: new LocalMediaStore(await mkdtemp(join(tmpdir(), "hush-cms-media-"))) });
     tokens.reader = await createToken(db, { name: "reader", scopes: ["posts:read"] });
     tokens.writer = await createToken(db, { name: "agent", scopes: ["posts:read", "posts:write"] });
     tokens.publisher = await createToken(db, { name: "owner", scopes: ["posts:read", "posts:write", "posts:publish"] });

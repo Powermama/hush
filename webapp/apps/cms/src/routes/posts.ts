@@ -3,7 +3,8 @@
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { requireScope, type AuthVariables } from "../auth/tokens";
 import { errorSchema, validationHook } from "./errors";
-import type { Database } from "../db/client";
+import { bodyLimit } from "hono/body-limit";
+import { listMedia, maxImageBytes, uploadMedia, type Cms } from "../media/service";
 import { postFields, postPatch } from "../posts/fields";
 import {
   createDraft, getPost, listPosts, listRevisions, publishPost, restoreRevision, schedulePost, unpublishPost, updatePost,
@@ -50,7 +51,8 @@ const errors = {
 const idParam = z.object({ id: z.uuid() });
 const security = [{ bearer: [] }];
 
-export function postRoutes(db: Database) {
+export function postRoutes(cms: Cms) {
+  const { db } = cms;
   const app = new OpenAPIHono<{ Variables: AuthVariables }>({ defaultHook: validationHook });
 
   app.use("/v1/posts", async (context, next) => requireScope(db, context.req.method === "GET" ? "posts:read" : "posts:write")(context, next));
@@ -85,21 +87,21 @@ export function postRoutes(db: Database) {
     description: "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused.",
     request: { params: idParam, body: { required: true, content: { "application/json": { schema: postPatch } } } },
     responses: { 200: json(postSchema, "The updated post"), ...errors },
-  }), async (context) => context.json(serialize(await updatePost(db, context.req.valid("param").id, context.req.valid("json"), context.var.actor)), 200));
+  }), async (context) => context.json(serialize(await updatePost(cms, context.req.valid("param").id, context.req.valid("json"), context.var.actor)), 200));
 
   app.openapi(createRoute({
     method: "post", path: "/v1/posts/{id}/schedule", operationId: "schedulePost", tags: ["Lifecycle"], security,
     request: { params: idParam, body: { required: true, content: { "application/json": { schema: z.object({ publishedAt: z.iso.datetime() }) } } } },
     responses: { 200: json(postSchema, "The scheduled post"), ...errors },
   }), async (context) => context.json(serialize(await schedulePost(
-    db, context.req.valid("param").id, new Date(context.req.valid("json").publishedAt), context.var.actor,
+    cms, context.req.valid("param").id, new Date(context.req.valid("json").publishedAt), context.var.actor,
   )), 200));
 
   app.openapi(createRoute({
     method: "post", path: "/v1/posts/{id}/publish", operationId: "publishPost", tags: ["Lifecycle"], security,
     request: { params: idParam },
     responses: { 200: json(postSchema, "The published post"), ...errors },
-  }), async (context) => context.json(serialize(await publishPost(db, context.req.valid("param").id, context.var.actor)), 200));
+  }), async (context) => context.json(serialize(await publishPost(cms, context.req.valid("param").id, context.var.actor)), 200));
 
   app.openapi(createRoute({
     method: "post", path: "/v1/posts/{id}/unpublish", operationId: "unpublishPost", tags: ["Lifecycle"], security,
@@ -122,7 +124,47 @@ export function postRoutes(db: Database) {
     responses: { 200: json(postSchema, "The post with the revision's content"), ...errors },
   }), async (context) => {
     const { id, revisionId } = context.req.valid("param");
-    return context.json(serialize(await restoreRevision(db, id, revisionId, context.var.actor)), 200);
+    return context.json(serialize(await restoreRevision(cms, id, revisionId, context.var.actor)), 200);
+  });
+
+  const mediaSchema = z.object({
+    id: z.uuid(), name: z.string(), contentType: z.string(), sha256: z.string(),
+    sizeBytes: z.number().int(), width: z.number().int(), height: z.number().int(), createdAt: z.iso.datetime(),
+  }).openapi("Media");
+  const serializeMedia = (row: Awaited<ReturnType<typeof listMedia>>[number]) => mediaSchema.parse({ ...row, createdAt: row.createdAt.toISOString() });
+
+  app.use("/v1/posts/:id/media", requireScope(db, "posts:read"));
+  app.use("/v1/posts/:id/media/:name", requireScope(db, "posts:write"));
+  app.use("/v1/posts/:id/media/:name", bodyLimit({
+    maxSize: maxImageBytes,
+    onError: (context) => context.json({ error: { code: "too_large", message: "Images may be at most 10 MB." } }, 413),
+  }));
+
+  app.openapi(createRoute({
+    method: "get", path: "/v1/posts/{id}/media", operationId: "listMedia", tags: ["Media"], security,
+    request: { params: idParam },
+    responses: { 200: json(z.object({ media: z.array(mediaSchema) }), "Images of the post, by name"), 401: errors[401], 403: errors[403], 404: errors[404] },
+  }), async (context) => {
+    const { id } = context.req.valid("param");
+    await getPost(db, id);
+    return context.json({ media: (await listMedia(db, id)).map(serializeMedia) }, 200);
+  });
+
+  const binary = z.string().openapi({ type: "string", format: "binary" });
+  app.openapi(createRoute({
+    method: "put", path: "/v1/posts/{id}/media/{name}", operationId: "uploadMedia", tags: ["Media"], security,
+    description: "Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it.",
+    request: {
+      params: idParam.extend({ name: z.string() }),
+      body: { required: true, content: { "image/png": { schema: binary }, "image/jpeg": { schema: binary }, "image/webp": { schema: binary } } },
+    },
+    responses: { 200: json(mediaSchema, "The stored image"), 401: errors[401], 403: errors[403], 404: errors[404], 413: json(errorSchema, "Larger than 10 MB"), 422: json(errorSchema, "Not a valid image or name") },
+  }), async (context) => {
+    const { id, name } = context.req.valid("param");
+    await getPost(db, id);
+    const bytes = new Uint8Array(await context.req.arrayBuffer());
+    const row = await uploadMedia(cms, id, name, bytes, context.req.header("content-type") ?? "");
+    return context.json(serializeMedia(row), 200);
   });
 
   return app;

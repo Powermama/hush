@@ -4,12 +4,13 @@ import { createApp } from "./app";
 import { connectDatabase } from "./db/client";
 import { migrateDatabase } from "./db/migrate";
 import { loadConfig } from "./config";
+import { createMediaStore } from "./media/store";
 
 const config = loadConfig();
 await migrateDatabase(config.databaseUrl);
 const { db, close } = connectDatabase(config.databaseUrl);
 let draining = false;
-const app = createApp(db, { isDraining: () => draining });
+const app = createApp({ db, media: createMediaStore(config.media) }, { isDraining: () => draining });
 const server = Bun.serve({ port: config.port, fetch: app.fetch });
 console.info(JSON.stringify({ level: "info", message: "hush CMS listening", port: server.port, environment: config.environment }));
 
