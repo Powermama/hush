@@ -29,6 +29,9 @@ WebKit:
   mismatches. Existing entrance/mobile/proof journeys verify interactive behaviour.
 - SEARCH-003: Discovery files contain only indexable public destinations;
   private responses retain their headers; unknown URLs return 404.
+- SEARCH-004: Every page links the favicon as ICO (48 px), SVG and 96 px PNG
+  plus a 180 px Apple touch icon; the home page names the site (WebSite) and
+  its publisher with a 512 px logo (Organization), which articles reuse.
 
 Update the catalogue and this contract when adding a public page. See
 `../search-discovery.md` for generation, deployment and ongoing search measurement.

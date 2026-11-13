@@ -3,7 +3,7 @@
 import type { BlogPosting, BreadcrumbList, Person, ProfilePage } from "schema-dts";
 import { blogCopy } from "./blog.ts";
 import { authorPath, blogAuthors, type BlogAuthorId } from "@hush/article/authors";
-import { landingPaths, siteOrigin, softwareDescription, type PageMetadata } from "./site.ts";
+import { landingPaths, organizationData, siteOrigin, softwareDescription, websiteData, type PageMetadata } from "./site.ts";
 
 const escapeHTML = (value: string) => value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
@@ -47,7 +47,7 @@ export function renderPageHead(page: PageMetadata): string {
     datePublished: isoDate(article.published),
     dateModified: isoDate(article.modified),
     author: personData(article.author, page.language),
-    publisher: { "@type": "Organization", name: "hush", url: siteOrigin },
+    publisher: organizationData,
   } satisfies BlogPosting & { "@context": string };
   // Articles and author pages sit under the blog: Home > Blog > page.
   const blog = blogCopy[page.language];
@@ -68,6 +68,10 @@ export function renderPageHead(page: PageMetadata): string {
     dateModified: page.modified && isoDate(page.modified),
     mainEntity: personData(page.profile.author, page.language),
   } satisfies ProfilePage & { "@context": string };
+  // The home page names the site and its publisher for search engines.
+  const homeData = page.canonicalPath === "/" && page.indexable
+    ? [websiteData, { "@context": "https://schema.org", ...organizationData }]
+    : [];
   return [
     `<title>${title}</title>`,
     `<meta name="description" content="${description}">`,
@@ -99,6 +103,6 @@ export function renderPageHead(page: PageMetadata): string {
     ...(landingPaths.includes(page.canonicalPath) && page.indexable ? [`<script type="application/ld+json">${JSON.stringify(softwareDescription(page)).replaceAll("<", "\\u003c")}</script>`] : []),
     // Language choice (public/language.js): async, so it never blocks the first paint.
     ...(page.alternatePaths ? ['<script src="/language.js" async></script>'] : []),
-    ...[articleData, profileData, breadcrumbData].filter(Boolean).map((data) => `<script type="application/ld+json">${JSON.stringify(data).replaceAll("<", "\\u003c")}</script>`),
+    ...[...homeData, articleData, profileData, breadcrumbData].filter(Boolean).map((data) => `<script type="application/ld+json">${JSON.stringify(data).replaceAll("<", "\\u003c")}</script>`),
   ].join("\n");
 }
