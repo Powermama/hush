@@ -48,16 +48,36 @@ the site serves an older revision than the CMS holds, it asks Coolify to deploy
 `hush-website`, whose build pulls the export; once the new revision is live it
 submits the changed pages to IndexNow.
 
-1. Coolify **Settings > Advanced**: API access on, **Allowed IPs** only the
-   `automation` server's address, so the API answers nothing else.
-2. **Keys & Tokens > API tokens**: a token named `hush-cms deploy` with only
-   the `deploy` permission, scoped to the `hush-website` resource.
-3. In hush-cms, locked and runtime only: `CMS_SITE_URL`, `CMS_COOLIFY_URL`,
-   `CMS_COOLIFY_TOKEN`, `CMS_COOLIFY_WEBSITE_UUID` and `CMS_INDEXNOW_KEY` (the
-   key the website serves at `/<key>.txt`).
-4. A read-only CMS token for the website build:
+The CMS reaches Coolify's API only over a private network, never the internet:
+
+1. **Hetzner private network** `hush-private`, `172.16.0.0/16` (subnet
+   `172.16.0.0/24`, zone eu-central): the Coolify server is `172.16.0.2`, the
+   app server `172.16.0.3`. Not `10.x`: Coolify gives Docker the `10.0.0.0/8`
+   pools, and the app server's Docker uses `172.17` to `172.31`.
+2. **Hetzner Cloud Firewall** `coolify-host` on the Coolify server: 80 and 443
+   only from Cloudflare's ranges (https://www.cloudflare.com/ips/), SSH and
+   ICMP; 8000, 6001 and 6002 are closed publicly (the dashboard, realtime and
+   terminal run through 443). Cloud firewalls filter before Docker, which
+   bypasses UFW; private network traffic is not filtered.
+3. Coolify **Settings > Advanced**: API access on, **Allowed IPs** `172.16.0.3`.
+4. **Cloudflare custom rule** "Block public Coolify API" on the Coolify domain:
+   `(http.host eq "admin.decentralfreedom.com" and starts_with(lower(url_decode(http.request.uri.path)), "/api"))`
+   with action Block, so the API is unreachable through the public hostname.
+5. **Keys & Tokens > API tokens**: `hush-cms deploy`, only the `deploy`
+   permission, scoped to the `hush-website` resource, one year. Renew it before
+   it expires; the scheduler turns unhealthy when deploys fail.
+6. In hush-cms, locked and runtime only: `CMS_SITE_URL=https://behu.sh`,
+   `CMS_COOLIFY_URL=http://172.16.0.2:8000`, `CMS_COOLIFY_TOKEN`,
+   `CMS_COOLIFY_WEBSITE_UUID` and `CMS_INDEXNOW_KEY` (the key the website
+   serves at `/<key>.txt`).
+7. A read-only CMS token for the website build:
    `bun run cms:token --name website-build --scopes posts:read`, stored in
    `hush-website` as described in the website's deployment guide.
+
+Check after changes: from the `cms` container a request to
+`http://172.16.0.2:8000/api/v1/applications/<website uuid>` with the deploy
+token answers "Missing required permissions: read" (the IP is allowed, the
+token is limited), and from the internet every `/api` path answers 403.
 
 ## After the first deploy
 
