@@ -235,6 +235,10 @@ jobs:
       - name: Install the service dependencies
         working-directory: webapp/apps/web
         run: bun install --frozen-lockfile
+      # The service imports the generated blog catalogue, which is not committed.
+      - name: Generate the blog
+        working-directory: webapp/apps/web
+        run: bun run blog:generate
       - name: Test Swift against the local service
         run: |
           cd webapp/apps/web
