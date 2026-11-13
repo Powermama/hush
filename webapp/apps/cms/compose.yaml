@@ -41,10 +41,14 @@ services:
     command: ["bun", "run", "cms:scheduler"]
     environment:
       <<: *cms-environment
-    # The image's healthcheck polls the API on port 3100, which the scheduler
-    # does not serve; restart: unless-stopped covers a crashed scheduler.
+    # Healthy while ticks succeed: the scheduler touches its heartbeat file
+    # after each tick without errors, once a minute.
     healthcheck:
-      disable: true
+      test: ["CMD-SHELL", "find /tmp/cms-scheduler-heartbeat -mmin -5 | grep -q ."]
+      interval: 30s
+      timeout: 5s
+      start_period: 2m
+      retries: 3
     depends_on:
       cms:
         condition: service_healthy
