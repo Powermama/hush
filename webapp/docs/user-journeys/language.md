@@ -10,7 +10,7 @@ addresses readers with "du"; the German blog keeps the neutral form.
 
 | ID | Journey | Test |
 | --- | --- | --- |
-| LANG-001 | `/de` is prerendered in German with `html lang="de"`, `og:locale de_DE`, its own `SoftwareApplication` data (free offer) and `hreflang` links between `/`, `/de` and `x-default`. | `tests/language.spec.ts` LANG-001 |
+| LANG-001 | `/de` is prerendered in German with `html lang="de"`, `og:locale de_DE`, its own `SoftwareApplication` data (free offer) and `hreflang` links between `/`, `/de` and `x-default`. Download buttons say "Download", not "Laden". | `tests/language.spec.ts` LANG-001 |
 | LANG-002 | A device whose first language is German goes from `/` to `/de` on its visit to the home page. Every other address, and every other device language, stays where it is. | LANG-002 |
 | LANG-003 | The footer switcher (under the logo) opens the same page in the other language where one exists and remembers the choice, which then wins over the device language. | LANG-003 |
 | LANG-004 | A page whose language differs from the device's first language offers the other version in a slim bar; dismissing it keeps the current language. | LANG-004 |
