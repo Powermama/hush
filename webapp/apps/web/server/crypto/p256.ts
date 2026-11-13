@@ -37,6 +37,12 @@ export type ServiceSigningKey = {
   id: string;
   privateKey: CryptoKey;
   publicJwk: PublicServiceJwk;
+  /**
+   * Every public key this service has signed receipts with, by key id,
+   * including the current one. A receipt is verified with the key it names,
+   * so replacing the private key never breaks earlier proofs.
+   */
+  publicKeys: Record<string, PublicServiceJwk>;
 };
 
 export type PublicServiceJwk = {
@@ -60,11 +66,8 @@ export async function createEphemeralServiceKey(): Promise<ServiceSigningKey> {
   );
   const raw = await crypto.subtle.exportKey("raw", pair.publicKey);
   const fingerprint = await sha256(new Uint8Array(raw));
-  return {
-    id: `hush-${fingerprint.slice(0, 16)}`,
-    privateKey: pair.privateKey,
-    publicJwk,
-  };
+  const id = `hush-${fingerprint.slice(0, 16)}`;
+  return { id, privateKey: pair.privateKey, publicJwk, publicKeys: { [id]: publicJwk } };
 }
 
 export async function importServiceKey(
@@ -86,7 +89,7 @@ export async function importServiceKey(
     ext: true,
     key_ops: ["verify"],
   });
-  return { id, privateKey, publicJwk };
+  return { id, privateKey, publicJwk, publicKeys: { [id]: publicJwk } };
 }
 
 export async function signP256(

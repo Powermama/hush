@@ -56,11 +56,12 @@ describe("Hush provenance API", () => {
   let repository: SQLiteProofRepository;
   let objects: MemoryObjectStore;
   let app: ReturnType<typeof createApp>;
+  let serviceKey: Awaited<ReturnType<typeof createEphemeralServiceKey>>;
 
   beforeEach(async () => {
     repository = new SQLiteProofRepository();
     objects = new MemoryObjectStore();
-    const serviceKey = await createEphemeralServiceKey();
+    serviceKey = await createEphemeralServiceKey();
     const service = new ProofService(
       repository,
       objects,
@@ -265,6 +266,26 @@ describe("Hush provenance API", () => {
         copyArrayBuffer(utf8(canonicalReceipt(publicProof.receipt))),
       ),
     ).toBe(true);
+
+    // Replacing the signing key (deleting service-key.json) keeps earlier
+    // receipts verifiable: each proof returns the key its receipt names.
+    const rotatedKey = await createEphemeralServiceKey();
+    const rotatedApp = createApp({
+      proofService: new ProofService(repository, objects, {
+        ...rotatedKey,
+        publicKeys: { ...serviceKey.publicKeys, ...rotatedKey.publicKeys },
+      }, "http://hush.test"),
+      allowedOrigin: "http://hush.test",
+    });
+    const afterRotation = await requestJson<PublicProof>(rotatedApp, `/v1/proofs/${reservation.slug}`, undefined, 200);
+    expect(afterRotation.receipt.keyId).toBe(serviceKey.id);
+    expect(afterRotation.servicePublicKey).toEqual(serviceKey.publicJwk);
+    expect(afterRotation.servicePublicKey).not.toEqual(rotatedKey.publicJwk);
+    const keySetResponse = await rotatedApp.request("/.well-known/jwks.json");
+    expect(keySetResponse.status).toBe(200);
+    const keySet = await keySetResponse.json() as { keys: Array<{ kid: string; alg: string; use: string; x: string }> };
+    expect(keySet.keys.map((key) => key.kid).sort()).toEqual([serviceKey.id, rotatedKey.id].sort());
+    expect(keySet.keys.every((key) => key.alg === "ES256" && key.use === "sig" && !("d" in key))).toBe(true);
 
     const contentResponse = await app.request(`/v1/proofs/${reservation.slug}/content`);
     expect(contentResponse.status).toBe(200);

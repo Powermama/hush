@@ -335,14 +335,26 @@ export class ProofService {
     return new URL(`/p/${proof.slug}`, this.publicBaseUrl).toString();
   }
 
+  /** Every receipt-signing public key, as a JSON Web Key Set (RFC 7517). */
+  publicKeySet() {
+    return {
+      keys: Object.entries(this.serviceKey.publicKeys).map(([kid, jwk]) => ({
+        kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y, kid, use: "sig", alg: "ES256",
+      })),
+    };
+  }
+
   async getPublicProof(slug: string) {
     const proof = await this.requirePublishedProof(slug);
     const status = this.publicStatus(proof);
+    const receipt = JSON.parse(proof.receiptJson!) as ServiceReceipt;
     return {
       status,
-      receipt: JSON.parse(proof.receiptJson!) as ServiceReceipt,
+      receipt,
       receiptSignature: proof.receiptSignature!,
-      servicePublicKey: this.serviceKey.publicJwk,
+      // The key the receipt names. An unknown id gets the current key, so the
+      // signature check in the browser fails closed instead of passing.
+      servicePublicKey: this.serviceKey.publicKeys[receipt.keyId] ?? this.serviceKey.publicJwk,
       ciphertextUrl: new URL(`/v1/proofs/${proof.slug}/content`, this.publicBaseUrl)
         .toString(),
     };

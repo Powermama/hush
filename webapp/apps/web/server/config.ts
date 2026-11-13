@@ -1,8 +1,9 @@
-import { link, mkdir, unlink, writeFile } from "node:fs/promises";
+import { link, mkdir, rename, unlink, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import {
   createEphemeralServiceKey,
   importServiceKey,
+  type PublicServiceJwk,
   type ServiceSigningKey,
 } from "./crypto/p256";
 
@@ -14,10 +15,9 @@ export type ServerConfig = {
   dataDirectory: string;
   databaseUrl?: string;
   allowedOrigin: string;
+  /** Id of a key supplied through HUSH_SERVICE_PRIVATE_JWK; generated keys name themselves. */
   serviceKeyId?: string;
   servicePrivateJwk?: JsonWebKey;
-  /** Allows a production service to create its first signing key. Off by default. */
-  allowServiceKeyBootstrap: boolean;
   /** Rejects proof writes with 503 while every read keeps working (data migrations). */
   readOnly: boolean;
   /** How long a stopping instance keeps serving before it closes its listener. */
@@ -61,7 +61,6 @@ export function loadConfig(env = process.env): ServerConfig {
     allowedOrigin: env.HUSH_ALLOWED_ORIGIN ?? new URL(publicBaseUrl).origin,
     serviceKeyId: env.HUSH_SERVICE_KEY_ID,
     servicePrivateJwk: privateJwk,
-    allowServiceKeyBootstrap: env.HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP === "1",
     readOnly: env.HUSH_READ_ONLY === "1",
     shutdownDrainMs: boundedInteger(env.HUSH_SHUTDOWN_DRAIN_MS, 10_000, 0, 60_000, "HUSH_SHUTDOWN_DRAIN_MS"),
     s3,
@@ -103,58 +102,65 @@ function normalizeBaseUrl(
   return url.toString();
 }
 
+/**
+ * The service's receipt-signing key. Nobody needs to know or back it up: when
+ * none exists, the service generates one, and every public key it ever signed
+ * with stays in service-public-keys.json next to it, so receipts verify with
+ * the key they name. Replacing the key (delete service-key.json and restart)
+ * therefore never breaks earlier proofs. Both files live in the data volume
+ * with the encrypted proofs; losing the volume loses those proofs anyway.
+ */
 export async function loadServiceKey(
   config: ServerConfig,
 ): Promise<ServiceSigningKey> {
-  if (config.servicePrivateJwk) {
-    return importServiceKey(
-      config.serviceKeyId ?? "hush-production-1",
-      config.servicePrivateJwk,
-    );
-  }
-  if (config.environment === "test") {
+  if (config.environment === "test" && !config.servicePrivateJwk) {
     return createEphemeralServiceKey();
   }
-  const keyPath = join(config.dataDirectory, "service-key.json");
-  const file = Bun.file(keyPath);
-  if (await file.exists()) {
-    const stored = (await file.json()) as { id: string; privateJwk: JsonWebKey };
-    return importServiceKey(stored.id, stored.privateJwk);
-  }
-  // A missing key in production almost always means a lost or mis-mounted data
-  // volume. Minting a new key would silently invalidate every existing proof,
-  // so fail closed unless the operator explicitly bootstraps a new deployment.
-  if (config.environment === "production" && !config.allowServiceKeyBootstrap) {
-    throw new Error(
-      `Service signing key not found at ${keyPath}. Mount the existing data volume, ` +
-      "or set HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP=1 once to create the first key.",
-    );
-  }
-  const generatedKey = await createEphemeralServiceKey();
-  const privateJwk = await crypto.subtle.exportKey(
-    "jwk",
-    generatedKey.privateKey,
-  );
-  const id = config.serviceKeyId ?? generatedKey.id;
-  await mkdir(config.dataDirectory, { recursive: true, mode: 0o700 });
+  const signing = config.servicePrivateJwk
+    ? await importServiceKey(config.serviceKeyId ?? "hush-production-1", config.servicePrivateJwk)
+    : await loadOrCreateKeyFile(config.dataDirectory);
+  const publicKeys = await rememberPublicKey(config.dataDirectory, signing.id, signing.publicJwk);
+  return { ...signing, publicKeys };
+}
 
-  const temporaryPath = `${keyPath}.${crypto.randomUUID()}.tmp`;
-  await writeFile(
-    temporaryPath,
-    JSON.stringify({ id, privateJwk }, null, 2),
-    { flag: "wx", mode: 0o600 },
-  );
-  try {
-    await link(temporaryPath, keyPath);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-  } finally {
-    await unlink(temporaryPath);
+async function loadOrCreateKeyFile(dataDirectory: string) {
+  const keyPath = join(dataDirectory, "service-key.json");
+  if (!(await Bun.file(keyPath).exists())) {
+    const generated = await createEphemeralServiceKey();
+    const privateJwk = await crypto.subtle.exportKey("jwk", generated.privateKey);
+    await mkdir(dataDirectory, { recursive: true, mode: 0o700 });
+    // Instances starting together race through link(): exactly one key wins and
+    // every instance then reads that one.
+    const temporaryPath = `${keyPath}.${crypto.randomUUID()}.tmp`;
+    await writeFile(temporaryPath, JSON.stringify({ id: generated.id, privateJwk }, null, 2), { flag: "wx", mode: 0o600 });
+    try {
+      await link(temporaryPath, keyPath);
+      console.info(JSON.stringify({ level: "info", message: "Generated a new service signing key", keyId: generated.id }));
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    } finally {
+      await unlink(temporaryPath);
+    }
   }
-
-  const stored = (await Bun.file(keyPath).json()) as {
-    id: string;
-    privateJwk: JsonWebKey;
-  };
+  const stored = (await Bun.file(keyPath).json()) as { id: string; privateJwk: JsonWebKey };
   return importServiceKey(stored.id, stored.privateJwk);
+}
+
+/** Adds the public key to service-public-keys.json (kept forever) and returns them all. */
+async function rememberPublicKey(dataDirectory: string, id: string, publicJwk: PublicServiceJwk) {
+  const registryPath = join(dataDirectory, "service-public-keys.json");
+  const file = Bun.file(registryPath);
+  const known = (await file.exists() ? await file.json() : {}) as Record<string, PublicServiceJwk>;
+  if (known[id]) {
+    if (JSON.stringify(known[id]) !== JSON.stringify(publicJwk)) {
+      throw new Error(`Service key id ${id} is already registered for a different key`);
+    }
+    return known;
+  }
+  const updated = { ...known, [id]: publicJwk };
+  await mkdir(dataDirectory, { recursive: true, mode: 0o700 });
+  const temporaryPath = `${registryPath}.${crypto.randomUUID()}.tmp`;
+  await writeFile(temporaryPath, JSON.stringify(updated, null, 2), { mode: 0o644 });
+  await rename(temporaryPath, registryPath);
+  return updated;
 }

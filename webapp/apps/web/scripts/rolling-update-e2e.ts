@@ -162,7 +162,7 @@ async function scenario(kind: "control" | "rolling") {
   ]);
 
   // The first instance creates the deployment's signing key exactly once.
-  await startApp(`${prefix}-a`, { HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP: "1" });
+  await startApp(`${prefix}-a`);
   await waitHealthy(`${prefix}-a`);
   await waitFor(async () => (await fetch(`${base}/health/ready`)).ok, "proxy route");
   const keyBefore = await keyDigest(`${prefix}-a`);
