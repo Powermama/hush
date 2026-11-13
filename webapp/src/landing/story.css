@@ -83,16 +83,6 @@
 .open-source-manifesto a:hover { text-decoration: underline; }
 .open-source-manifesto a svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.5; }
 .vision-story a:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; border-radius: 2px; }
-/* Shared companion artwork, also used on the Verified Messages page. */
-.hush-mascot { position: relative; display: block; width: 100%; aspect-ratio: 200 / 190; overflow: visible; }
-.mascot-fallback { display: block; width: 100%; height: 100%; }
-.hush-mascot canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
-.hush-mascot[data-scene="ready"] canvas { opacity: 1; }
-.hush-mascot[data-scene="ready"] .mascot-fallback { opacity: 0; }
-.mascot-character { transform-box: fill-box; transform-origin: 50% 80%; }
-.hush-mascot-listening .mascot-character { transform: rotate(-7deg); }
-.hush-mascot-thinking .mascot-character { transform: rotate(6deg); }
-.hush-mascot-recording .mascot-character { transform: rotate(-4deg); }
 /* Body behind the marble, fingers in front. Both layers share one coordinate space. */
 .thought-companion, .thought-companion-grip { position: absolute; width: 26%; aspect-ratio: 200 / 190; left: 28%; bottom: 34%; translate: 0 30%; pointer-events: none; }
 .thought-companion { z-index: 6; }

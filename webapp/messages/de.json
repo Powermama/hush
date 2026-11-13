@@ -59,6 +59,7 @@
   "mascot_listening": "hush hört zu, ein kleiner grafitgrauer Begleiter mit ausdrucksstarken Augen und Kopfhörern.",
   "mascot_thinking": "hush denkt nach, ein kleiner grafitgrauer Begleiter, der über eine Idee grübelt.",
   "mascot_recording": "hush nimmt eine Idee auf, ein kleiner grafitgrauer Begleiter mit Mikrofon.",
+  "mascot_sad": "hush ein wenig verloren und traurig, ein kleiner grafitgrauer Begleiter mit hängenden Armen und einer Träne.",
   "faq_title": "Gut\nzu wissen.",
   "faq_mac_q": "Läuft hush auf meinem Mac?",
   "faq_mac_a": "hush braucht einen Mac mit Apple Silicon (M1 oder neuer) und macOS 15 oder neuer. Für die Transkription reichen 8 GB Arbeitsspeicher. Für den optionalen KI-Assistenten empfehlen wir 16 GB, damit genug Platz für deine anderen Apps bleibt.",
@@ -107,5 +108,10 @@
   "handoff_share_title": "hush für den Mac",
   "handoff_share_text": "Die Sprachebene für deinen Mac.",
   "handoff_email_subject": "hush auf meinem Mac ausprobieren",
-  "handoff_email_body": "hush ist die Sprachebene für deinen Mac.\n\nÖffne diesen Link auf deinem Mac, um hush zu laden:\n{url}\n\nFür Macs mit Apple Silicon und macOS 15 oder neuer."
+  "handoff_email_body": "hush ist die Sprachebene für deinen Mac.\n\nÖffne diesen Link auf deinem Mac, um hush zu laden:\n{url}\n\nFür Macs mit Apple Silicon und macOS 15 oder neuer.",
+  "not_found_code": "Fehler 404",
+  "not_found_title": "Diese Seite hat sich verlaufen.",
+  "not_found_body": "Der Link ist vielleicht veraltet oder vertippt. Alles andere ist noch da, wo du es gelassen hast.",
+  "not_found_home": "Zur Startseite",
+  "not_found_blog": "Zum Blog"
 }
