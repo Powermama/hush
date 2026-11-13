@@ -7,6 +7,7 @@ import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
 import { BlogArrow, BlogAuthorAvatar, BlogExternalIcon, BlogHeader } from "./BlogArticlePage";
 import { BlogPostList } from "./BlogIndexPage";
+import { BlogDownloadBand } from "./BlogDownloadBand";
 import "./blog.css";
 
 /** Profile page for one author in one blog language; bylines and BlogPosting data point here. */
@@ -43,6 +44,7 @@ export function BlogAuthorPage({ lang, author }: { lang: BlogLanguage; author: B
           <BlogPostList lang={lang} posts={posts} />
         </section>
       </main>
+      <BlogDownloadBand lang={lang} />
       <Footer />
     </div>
   );

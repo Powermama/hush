@@ -5,6 +5,7 @@ import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
 import { BlogArrow, BlogDate, BlogHeader } from "./BlogArticlePage";
+import { BlogDownloadBand } from "./BlogDownloadBand";
 import "./blog.css";
 
 /** Article cards, shared by the blog index and author pages. */
@@ -42,6 +43,7 @@ export function BlogIndexPage({ lang }: { lang: BlogLanguage }) {
         </header>
         <BlogPostList lang={lang} posts={posts} />
       </main>
+      <BlogDownloadBand lang={lang} />
       <Footer />
     </div>
   );

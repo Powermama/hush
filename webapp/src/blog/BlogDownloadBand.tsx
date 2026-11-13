@@ -51,7 +51,8 @@ function useDictationLoop(stage: React.RefObject<HTMLElement | null>, examples: 
   return { state: sequence[step]!.state, seconds, example };
 }
 
-export function BlogDownloadCard({ lang }: { lang: BlogLanguage }) {
+/** Full-width download band above the footer of every blog page. */
+export function BlogDownloadBand({ lang }: { lang: BlogLanguage }) {
   const copy = blogCopy[lang];
   const stage = useRef<HTMLDivElement>(null);
   const demos = copy.ctaDemos;
@@ -60,32 +61,34 @@ export function BlogDownloadCard({ lang }: { lang: BlogLanguage }) {
   const words = demo.text.split(/\s+/).length;
   const typed = state === "drafted";
   return (
-    <section className="blog-cta" aria-labelledby="blog-cta-title">
-      <div className="blog-cta-stage" ref={stage} aria-hidden="true">
-        <div className="blog-cta-window">
-          <div className="blog-cta-window-bar"><i /><i /><i /><span>{demo.title}</span></div>
-          {demo.fields.map(([label, value]) => (
-            <div className="blog-cta-window-field" key={label}><span>{label}</span>{value}</div>
-          ))}
-          <p className="blog-cta-window-text" data-typed={typed}>
-            <span>{demo.text}</span><i className="blog-cta-caret" />
-          </p>
+    <section className="blog-download-band" aria-labelledby="blog-cta-title">
+      <div className="blog-download-inner">
+        <div className="blog-cta-body">
+          <h2 id="blog-cta-title">{copy.ctaTitle}</h2>
+          <p>{copy.ctaBody}</p>
+          <DownloadLink variant="custom" className="gap-2 bg-ink text-white shadow-lg shadow-black/10 hover:bg-black" mobileLabel={copy.ctaMobile}>
+            <AppleIcon />{copy.ctaDownload}
+          </DownloadLink>
         </div>
-        <HushHud
-          state={state}
-          className="blog-cta-hud"
-          copy={{
-            listening: { label: "Listening", detail: `0:0${Math.min(seconds, 9)}` },
-            drafted: { label: `${words} words`, detail: `inserted into ${demo.app}` },
-          }}
-        />
-      </div>
-      <div className="blog-cta-body">
-        <h2 id="blog-cta-title">{copy.ctaTitle}</h2>
-        <p>{copy.ctaBody}</p>
-        <DownloadLink variant="custom" className="gap-2 bg-ink text-white shadow-lg shadow-black/10 hover:bg-black" mobileLabel={copy.ctaMobile}>
-          <AppleIcon />{copy.ctaDownload}
-        </DownloadLink>
+        <div className="blog-cta-stage" ref={stage} aria-hidden="true">
+          <div className="blog-cta-window">
+            <div className="blog-cta-window-bar"><i /><i /><i /><span>{demo.title}</span></div>
+            {demo.fields.map(([label, value]) => (
+              <div className="blog-cta-window-field" key={label}><span>{label}</span>{value}</div>
+            ))}
+            <p className="blog-cta-window-text" data-typed={typed}>
+              <span>{demo.text}</span><i className="blog-cta-caret" />
+            </p>
+          </div>
+          <HushHud
+            state={state}
+            className="blog-cta-hud"
+            copy={{
+              listening: { label: "Listening", detail: `0:0${Math.min(seconds, 9)}` },
+              drafted: { label: `${words} words`, detail: `inserted into ${demo.app}` },
+            }}
+          />
+        </div>
       </div>
     </section>
   );

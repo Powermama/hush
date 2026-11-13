@@ -1,6 +1,6 @@
 /* hush blog. Reading-first layout; no CSS filters (LANDING-PAINT-001). */
 .blog-article-main,
-.blog-index-main { padding: 48px 20px 112px; }
+.blog-index-main { padding: 48px 20px 96px; }
 
 .blog-article { max-width: 1040px; margin: 0 auto; }
 .blog-article-header { max-width: 680px; margin: 0 auto 32px; }
@@ -140,19 +140,30 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-share-end { max-width: 680px; margin: 40px auto 0; }
 @media (max-width: 1023px) { .blog-author-card { margin-top: 28px; } .blog-share-status:empty { display: none; } }
 
-/* Download card: replays one dictation with the app's HUD. */
-.blog-cta { max-width: 680px; margin: 40px auto 0; border-radius: 24px; overflow: hidden; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 16px 40px rgb(31 32 30 / 0.07); }
-@media (min-width: 1024px) { .blog-cta { margin-left: var(--blog-text-left); } }
+/* Download band: full width above the footer, in a lavender tint of the hush aurora,
+   with text on the left and a replayed dictation on the right. */
+.blog-download-band {
+  padding: 80px 20px;
+  background:
+    radial-gradient(60% 120% at 100% 0%, rgb(158 201 255 / 0.28), transparent 70%),
+    radial-gradient(50% 110% at 0% 100%, rgb(255 179 199 / 0.22), transparent 70%),
+    #eeebf6;
+  border-top: 1px solid rgb(118 103 215 / 0.12);
+}
+.blog-download-inner { display: grid; gap: 40px; align-items: center; max-width: 1152px; margin: 0 auto; }
+@media (min-width: 900px) { .blog-download-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 64px; } }
+.blog-cta-body h2 { margin: 0; font-size: clamp(28px, 4vw, 40px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; color: var(--color-ink); text-wrap: balance; }
+.blog-cta-body p { margin: 16px 0 28px; max-width: 460px; font-size: 16px; line-height: 1.65; color: var(--color-muted); }
 /* A cropped piece of a Mac screen: the Mail window runs off the right and
    bottom edges, the HUD floats where the app shows it. */
 .blog-cta-stage {
-  position: relative; height: 320px; overflow: hidden;
+  position: relative; height: 340px; overflow: hidden; border-radius: 22px; border: 1px solid rgb(255 255 255 / 0.8);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 24px 60px rgb(64 52 140 / 0.14);
   background:
     radial-gradient(120% 90% at 15% 0%, rgb(255 179 199 / 0.32), transparent 60%),
     radial-gradient(110% 90% at 90% 10%, rgb(158 201 255 / 0.34), transparent 62%),
     radial-gradient(90% 80% at 50% 110%, rgb(201 184 255 / 0.4), transparent 70%),
-    #f4f2f8;
-  border-bottom: 1px solid rgb(0 0 0 / 0.06);
+    #f8f6fc;
 }
 .blog-cta-window {
   position: absolute; top: 34px; left: 44px; right: -40px; bottom: -40px;
@@ -174,16 +185,13 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 @keyframes blog-caret { 50% { opacity: 0; } }
 .blog-cta-hud { position: absolute; left: 50%; bottom: 22px; width: min(calc(100% - 32px), 380px); translate: -50% 0; }
 /* The HUD is on screen from the start here; its landing entrance animates a blur filter. */
-.blog-cta .blog-cta-hud { animation: none; }
+.blog-download-band .blog-cta-hud { animation: none; }
 @media (max-width: 639px) {
   .blog-cta-stage { height: 340px; }
   .blog-cta-window { left: 20px; top: 24px; }
   .blog-cta-window-text { font-size: 13.5px; padding-right: 40px; }
 }
 @media (prefers-reduced-motion: reduce) { .blog-cta-window-text[data-typed="true"] span, .blog-cta-caret { animation: none; } }
-.blog-cta-body { padding: 26px 28px 28px; }
-.blog-cta-body h2 { margin: 0; font-size: 22px; line-height: 1.25; letter-spacing: -0.02em; font-weight: 600; }
-.blog-cta-body p { margin: 10px 0 20px; font-size: 15px; line-height: 1.6; color: var(--color-muted); }
 
 /* Related and index lists */
 /* Same left edge and width as the article column plus its table of contents. */

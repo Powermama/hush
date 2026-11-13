@@ -6,7 +6,7 @@ import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
 import { Header } from "../layout/Header";
-import { BlogDownloadCard } from "./BlogDownloadCard";
+import { BlogDownloadBand } from "./BlogDownloadBand";
 import { BlogShare } from "./BlogShare";
 import { useActiveSection } from "./useActiveSection";
 import "./blog.css";
@@ -135,7 +135,6 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
           </div>
           <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-end" />
           <BlogAuthorCard lang={lang} author={post.author} />
-          <BlogDownloadCard lang={lang} />
         </article>
         {related.length > 0 && (
           <section className="blog-related" aria-labelledby="blog-related-title">
@@ -154,6 +153,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
           </section>
         )}
       </main>
+      <BlogDownloadBand lang={lang} />
       <Footer />
     </div>
   );

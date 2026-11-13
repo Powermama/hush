@@ -41,7 +41,7 @@ test("BLOG-002 hydrates without errors and keeps the article", async ({ page }) 
 
 test("BLOG-003 offers the right download action for the device", async ({ page, isMobile }) => {
   await page.goto(article);
-  const cta = page.locator(".blog-cta");
+  const cta = page.locator(".blog-download-band");
   if (isMobile) {
     // Phones get the send-to-Mac handoff, never a disk image.
     await expect(cta.getByRole("button", { name: "Get hush for Mac" })).toBeVisible();
