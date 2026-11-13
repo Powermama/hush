@@ -12,6 +12,8 @@ import { PROOF_RETENTION_MS, CLEANUP_BATCH_SIZE } from "./retention-policy";
 
 // Run the same contract against an isolated Postgres database when supplied.
 const postgresURL = process.env.HUSH_TEST_DATABASE_URL;
+// CI provides PostgreSQL; never let the production backend's contract skip there.
+if (process.env.CI && !postgresURL) throw new Error("HUSH_TEST_DATABASE_URL is required in CI");
 for (const backend of postgresURL ? ["sqlite", "postgres"] : ["sqlite"]) {
   test(`${backend}: retention removes eligible data, preserves active proofs, retries storage failure`, async () => {
     const directory = await mkdtemp(join(tmpdir(), "hush-retention-"));

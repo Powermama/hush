@@ -23,7 +23,11 @@ test("LANDING-ENTRY-005 preserves interactive scripts under CSP regardless of HT
     // from the document being tested.
     await writeFile(join(directory, "dist-ssr/entry-server.js"), `
       const document = await Bun.file(new URL("./document.html", import.meta.url)).text();
-      export async function render() { return new Response(document); }
+      export async function render(url) {
+        // Like the real renderer, unknown addresses answer 404 with the not-found page.
+        if (new URL(url).pathname.endsWith("/__not-found")) return new Response('<html lang="en"><head></head><body><h1 id="not-found-title">Not found</h1></body></html>', { status: 404 });
+        return new Response(document);
+      }
     `);
 
     for (const [open, close] of [["script", "script"], ["SCRIPT", "SCRIPT"], ["ScRiPt", "sCrIpT"], ["script ", "script data-end='ignored'"], ["script\n", "script\t"]]) {
