@@ -1,10 +1,12 @@
 # Deploy the CMS on Coolify
 
-The CMS stack is defined in [`webapp/docker-compose.cms.yaml`](../../../../docker-compose.cms.yaml):
+The CMS stack is defined in [`webapp/apps/cms/compose.yaml`](../../compose.yaml):
 the API (`cms`), its clock (`cms-scheduler`: due posts every minute, a daily
 backup) and its own PostgreSQL. Coolify deploys it as one Docker Compose
 resource from Git, so nothing about the stack is configured by hand except
-secret values. Any Docker Compose host runs the same file.
+secret values. Any Docker Compose host runs the same file; locally,
+`webapp/compose.yaml` includes it with `compose.local.yaml` (local password,
+volumes instead of R2, a host port).
 
 A Compose resource restarts on deploy instead of rolling over. That is fine for
 this internal service: publishing calls retry and the scheduler catches up on
@@ -16,11 +18,11 @@ updates.
 1. Project `hush` → environment `production` → **New Resource** → **Git
    Repository (with GitHub App)** → `Powermama/hush`, branch `main`.
 2. Build pack **Docker Compose**. Base Directory `/webapp`, Docker Compose
-   Location `/docker-compose.cms.yaml`. Name it `hush-cms`.
+   Location `/apps/cms/compose.yaml`. Name it `hush-cms`.
 3. Server `automation`, destination network `hush`, so the website can reach
    the CMS in M2. No domain until the admin UI ships.
 4. **Watch Paths**: `webapp/apps/cms/**`, `webapp/packages/**`,
-   `webapp/docker-compose.cms.yaml`, `webapp/package.json`, `webapp/bun.lock`.
+   `webapp/package.json`, `webapp/bun.lock`.
 
 ## Secrets
 
