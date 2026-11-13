@@ -17,8 +17,10 @@ updates.
 
 1. Project `hush` → environment `production` → **New Resource** → **Git
    Repository (with GitHub App)** → `Powermama/hush`, branch `main`.
-2. Build pack **Docker Compose**. Base Directory `/webapp`, Docker Compose
-   Location `/apps/cms/compose.yaml`. Name it `hush-cms`.
+2. Build pack **Docker Compose**. Base Directory `/webapp/apps/cms`, Docker
+   Compose Location `/compose.yaml`. Coolify runs Compose with the Base
+   Directory as its project directory, so the build context `../..` then
+   resolves to `webapp/`. Name it `hush-cms`.
 3. Server `automation`, destination network `hush`, so the website can reach
    the CMS in M2. No domain until the admin UI ships.
 4. **Watch Paths**: `webapp/apps/cms/**`, `webapp/packages/**`,
