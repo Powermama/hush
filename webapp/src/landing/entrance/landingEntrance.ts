@@ -16,3 +16,10 @@ export function startLandingEntrance(entry: HTMLElement | null) {
   entry.dataset.opening = "playing";
   return true;
 }
+
+/** Without a scene there is nothing left to wait for: play the entrance with the
+    static artwork now instead of at the CSS deadline. */
+export function startLandingEntranceWithoutScene(entry: HTMLElement | null) {
+  if (!entry || !startLandingEntrance(entry)) return;
+  setTimeout(() => { if (entry.dataset.opening === "playing") entry.dataset.opening = "complete"; }, 3000);
+}

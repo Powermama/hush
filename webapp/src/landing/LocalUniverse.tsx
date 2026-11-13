@@ -1,6 +1,7 @@
 import { shadowedAppIcons } from "../media/appIcons";
 import { useEffect, useRef, type CSSProperties } from "react";
 import { ResponsiveField } from "./ResponsiveField";
+import { startLandingEntranceWithoutScene } from "./entrance/landingEntrance";
 import { m } from "../paraglide/messages";
 
 export function WaveMark({ className = "" }: { className?: string }) {
@@ -18,6 +19,11 @@ const apps = [
   { name: "Notion", file: "notion", x: 76, y: 82 },
   { name: "Figma", file: "figma", x: 50, y: 96 },
 ];
+
+function showFallback(host: HTMLElement) {
+  host.dataset.scene = "fallback";
+  startLandingEntranceWithoutScene(host.closest<HTMLElement>(".hush-landing"));
+}
 
 export function LocalUniverse() {
   const host = useRef<HTMLDivElement>(null);
@@ -41,11 +47,11 @@ export function LocalUniverse() {
       if (!cancelled && host.current) {
         dispose = await mountHushScene(host.current, controller.signal);
         if (cancelled) { dispose?.(); return; }
-        if (!dispose) host.current.dataset.scene = "fallback";
+        if (!dispose) showFallback(host.current);
       }
     }).catch(() => {
       if (cancelled) return;
-      if (host.current) host.current.dataset.scene = "fallback";
+      if (host.current) showFallback(host.current);
     });
     return () => {
       cancelled = true;

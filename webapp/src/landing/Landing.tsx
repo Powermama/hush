@@ -31,6 +31,8 @@ export function Landing({ lang = "en" }: { lang?: SiteLanguage }) {
   useLandingEntrance(root);
   return <div className="hush-landing" id="top" data-opening="pending" ref={root}>
     <DocumentMetadata {...sitePages[lang === "de" ? "/de" : "/"]!} />
+    {/* First-visit loader: CSS shows it only while the entrance waits for the scene. */}
+    <div className="landing-loader" aria-hidden="true"><span className="landing-loader-mark"><WaveMark /></span><span className="landing-loader-bar" /></div>
     <a className="landing-skip" href="#main">{m.skip_to_content()}</a>
     <Header progress />
     <main id="main">
