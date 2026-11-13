@@ -6,7 +6,7 @@ lang: en
 keyword: fixture dictation without cloud
 secondaryKeywords: ["fixture local dictation"]
 type: how-to
-cluster: fixture-cluster
+cluster: local-dictation
 author: clemens-kressmann
 published: "2026-11-01"
 updated: "2026-11-10"

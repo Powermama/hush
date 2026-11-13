@@ -6,7 +6,7 @@ lang: en
 keyword: fixture draft
 secondaryKeywords: []
 type: news
-cluster: fixture-cluster
+cluster: local-dictation
 author: clemens-kressmann
 published: "2026-11-11"
 updated: "2026-11-11"

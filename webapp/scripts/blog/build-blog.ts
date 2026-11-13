@@ -17,6 +17,7 @@ import { unified } from "unified";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import { authorPath, blogAuthorIds, type BlogAuthorId } from "../../shared/authors";
+import { blogClusterIds, type BlogClusterId } from "../../shared/blog";
 
 export const blogLanguages = ["en", "de"] as const;
 export type BlogLanguage = (typeof blogLanguages)[number];
@@ -30,7 +31,7 @@ export const frontMatterSchema = z.object({
   keyword: z.string().min(2),
   secondaryKeywords: z.array(z.string().min(2)).max(8),
   type: z.enum(["how-to", "comparison", "guide", "listicle", "essay", "news"]),
-  cluster: z.string().min(2),
+  cluster: z.enum(blogClusterIds),
   author: z.enum(blogAuthorIds),
   published: z.iso.date(),
   updated: z.iso.date(),
@@ -62,7 +63,7 @@ export type BlogPost = {
   description: string;
   heading: string;
   type: FrontMatter["type"];
-  cluster: string;
+  cluster: BlogClusterId;
   author: BlogAuthorId;
   published: string;
   updated: string;

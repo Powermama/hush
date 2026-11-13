@@ -6,7 +6,7 @@ lang: en
 keyword: fixture dictation commands
 secondaryKeywords: []
 type: essay
-cluster: fixture-cluster
+cluster: local-dictation
 author: clemens-kressmann
 published: "2026-11-05"
 updated: "2026-11-05"

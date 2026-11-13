@@ -4,6 +4,23 @@ import type { BlogAuthorId } from "./authors.ts";
 
 export type BlogLanguage = "en" | "de";
 
+/**
+ * Topic clusters from the content strategy (hush-seo skill). Articles name one by
+ * id; the label appears on covers and cards. Unknown ids fail the build.
+ */
+export const blogClusters = {
+  "local-dictation": { en: "Dictation without the cloud", de: "Diktat ohne Cloud" },
+  "dictation-on-mac": { en: "Dictation on Mac", de: "Diktat auf dem Mac" },
+  "local-ai": { en: "Local AI", de: "Lokale KI" },
+  "speech-models": { en: "Speech models", de: "Sprachmodelle" },
+  "voice-writing": { en: "Writing by voice", de: "Schreiben per Stimme" },
+  "typing-less": { en: "Typing less", de: "Weniger tippen" },
+  "verified-messages": { en: "Verified Messages", de: "Verified Messages" },
+} as const satisfies Record<string, Record<BlogLanguage, string>>;
+
+export type BlogClusterId = keyof typeof blogClusters;
+export const blogClusterIds = Object.keys(blogClusters) as [BlogClusterId, ...BlogClusterId[]];
+
 export type BlogArticleType = "how-to" | "comparison" | "guide" | "listicle" | "essay" | "news";
 
 /**
@@ -24,7 +41,7 @@ export type BlogPostMetadata = {
   description: string;
   heading: string;
   type: BlogArticleType;
-  cluster: string;
+  cluster: BlogClusterId;
   author: BlogAuthorId;
   published: string;
   updated: string;
