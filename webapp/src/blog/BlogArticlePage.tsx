@@ -2,14 +2,13 @@
 // Copyright (c) 2026 Clemens Kressmann
 import { useMemo } from "react";
 import { authorPath, blogAuthors, type BlogAuthor, type BlogAuthorId } from "../../shared/authors";
-import { blogCopy, hasReadingSidebar, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
+import { blogCopy, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
 import { Header } from "../layout/Header";
 import { BlogDownloadBand } from "./BlogDownloadBand";
 import { BlogShare } from "./BlogShare";
-import { useActiveSection } from "./useActiveSection";
 import "./blog.css";
 
 const dateFormat = (lang: BlogLanguage) => new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-US", {
@@ -85,55 +84,37 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
   if (!post) throw new Error(`Unknown blog article ${lang}/${slug}`);
   const copy = blogCopy[lang];
   const related = relatedPosts(post);
-  const active = useActiveSection(post.toc.map((entry) => entry.id));
-  // Keep the HTML prop stable while the current section changes. Reassigning
-  // innerHTML replaces the reader's selected text and reloads figure nodes.
   const articleHTML = useMemo(() => ({ __html: html }), [html]);
-  const sidebar = hasReadingSidebar(post.type);
-  const toc = sidebar && post.toc.length > 1 && (
-    <nav aria-label={copy.onThisPage} className="blog-toc">
-      <p className="blog-toc-title">{copy.onThisPage}</p>
-      <ol>
-        {post.toc.map((entry) => (
-          <li key={entry.id}>
-            <a href={`#${entry.id}`} aria-current={entry.id === active ? "location" : undefined}>{entry.text}</a>
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
 
   return (
     <div className="min-h-screen bg-canvas text-ink" lang={lang}>
       <DocumentMetadata title={post.title} description={post.description} canonicalPath={post.path} language={lang} />
       <BlogHeader lang={lang} />
       <main className="blog-article-main">
-        <article className={`blog-article ${sidebar ? "blog-article-guide" : "blog-article-essay"}`} aria-labelledby="article-title">
+        {/* As on Notion: a quiet left margin with the way back and sharing, no contents sidebar. */}
+        <article className="blog-article" aria-labelledby="article-title">
+          <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
           <header className="blog-article-header">
-            <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
-            <h1 id="article-title">{post.heading}</h1>
-            <p className="blog-byline">
-              <span>{copy.by} <a href={authorPath(lang, post.author)} rel="author">{blogAuthors[post.author].name}</a></span>
+            <p className="blog-meta">
               <span>{copy.published} <BlogDate lang={lang} value={post.published} /></span>
               {post.updated !== post.published && <span>{copy.updated} <BlogDate lang={lang} value={post.updated} /></span>}
               <span>{copy.readingTime(post.readingMinutes)}</span>
             </p>
+            <h1 id="article-title">{post.heading}</h1>
+            <a className="blog-byline" href={authorPath(lang, post.author)} rel="author">
+              <BlogAuthorAvatar author={post.author} />
+              <span>
+                <span className="blog-byline-name">{copy.by} {blogAuthors[post.author].name}</span>
+                <span className="blog-byline-role">{blogAuthors[post.author].role[lang]}</span>
+              </span>
+            </a>
           </header>
-          {toc && <details className="blog-toc-mobile"><summary>{copy.onThisPage}</summary>{toc}</details>}
-          <div className="blog-article-layout">
-            {/* Wide screens: a quiet, sticky margin column with the contents and sharing. */}
-            {sidebar && (
-              <aside className="blog-sidebar">
-                <div className="blog-sidebar-sticky">
-                  {toc}
-                  <BlogShare lang={lang} path={post.path} title={post.title} />
-                </div>
-              </aside>
-            )}
+          <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-margin" />
+          <div className="blog-body">
             <div className="blog-prose" data-blog-body="" dangerouslySetInnerHTML={articleHTML} />
+            <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-end" />
+            <BlogAuthorCard lang={lang} author={post.author} />
           </div>
-          <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-end" />
-          <BlogAuthorCard lang={lang} author={post.author} />
         </article>
         {related.length > 0 && (
           <section className="blog-related" aria-labelledby="blog-related-title">

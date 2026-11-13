@@ -29,14 +29,6 @@ export function editorialPolicyPath(lang: BlogLanguage) {
 
 export type BlogArticleType = "how-to" | "comparison" | "guide" | "listicle" | "essay" | "news";
 
-/**
- * Long guides get the margin column with contents and sharing, as on Intercom,
- * AFFiNE and Ahrefs. Essays and news read as one calm column, as on Notion and
- * Linear, with sharing after the text.
- */
-export function hasReadingSidebar(type: BlogArticleType) {
-  return type !== "essay" && type !== "news";
-}
 
 /** Public metadata of a published article. Generated; HTML lives in its own chunk. */
 export type BlogPostMetadata = {
@@ -68,7 +60,6 @@ export const blogCopy = {
     readingTime: (minutes: number) => `${minutes} min read`,
     published: "Published",
     updated: "Updated",
-    onThisPage: "On this page",
     related: "Keep reading",
     allArticles: "All articles",
     readArticle: "Read article",
@@ -111,7 +102,6 @@ export const blogCopy = {
     readingTime: (minutes: number) => `${minutes} Min. Lesezeit`,
     published: "Veröffentlicht",
     updated: "Aktualisiert",
-    onThisPage: "Auf dieser Seite",
     related: "Weiterlesen",
     allArticles: "Alle Artikel",
     readArticle: "Artikel lesen",

@@ -60,12 +60,10 @@ test("BLOG-003 offers the right download action for the device", async ({ page, 
   }
 });
 
-test("BLOG-004 navigates with the table of contents and related articles", async ({ page, isMobile }) => {
-  await page.goto(article);
-  if (isMobile) await page.locator(".blog-toc-mobile summary").click();
-  const toc = page.locator(isMobile ? ".blog-toc-mobile" : ".blog-sidebar");
-  await toc.getByRole("link", { name: "Frequently asked questions" }).click();
-  await expect(page).toHaveURL(/#frequently-asked-questions$/);
+test("BLOG-004 links section headings and continues to related articles", async ({ page }) => {
+  // No contents sidebar: headings carry their own anchors for links and search results.
+  await page.goto(`${article}#frequently-asked-questions`);
+  await expect(page.locator("#frequently-asked-questions")).toBeInViewport();
   await page.locator(".blog-related").getByRole("link", { name: /Second fixture heading/ }).click();
   await expect(page).toHaveURL(/\/blog\/fixture-dictation-commands$/);
   await expect(page.getByText("The second fixture links back")).toBeVisible();
@@ -116,24 +114,33 @@ test("BLOG-007 links bylines to a prerendered author profile with ProfilePage da
   await context.close();
 
   await page.goto(article);
-  await page.locator(".blog-byline").getByRole("link", { name: "Clemens Kressmann" }).click();
+  await page.locator(".blog-article-header .blog-byline").click();
   await expect(page).toHaveURL(/\/authors\/clemens-kressmann$/);
   await expect(page.locator(".blog-author-links").getByRole("link", { name: /LinkedIn/ })).toHaveAttribute("rel", "me noopener");
   expect((await page.request.get("/de/autoren/clemens-kressmann")).status()).toBe(200);
 });
 
-test("BLOG-008 lays out guides with a contents margin and essays as one column", async ({ page, isMobile }) => {
-  await page.goto(article);
-  if (!isMobile) {
-    await expect(page.locator(".blog-sidebar .blog-toc")).toBeVisible();
-    await expect(page.locator(".blog-sidebar .blog-share")).toBeVisible();
-    await expect(page.locator(".blog-share-end")).toBeHidden();
+test("BLOG-008 keeps the way back and sharing in a quiet margin, with no contents sidebar", async ({ page, isMobile }) => {
+  for (const path of [article, "/blog/fixture-dictation-commands"]) {
+    await page.goto(path);
+    await expect(page.locator("nav.blog-toc, .blog-sidebar, details.blog-toc-mobile")).toHaveCount(0);
+    const back = await page.locator(".blog-article > .blog-back").boundingBox();
+    // The chevron is an inline 16px icon, never a full-size SVG.
+    expect((await page.locator(".blog-article > .blog-back .blog-arrow").boundingBox())!.width).toBeLessThanOrEqual(16);
+    expect(back!.height).toBeLessThan(30);
+    const prose = await page.locator(".blog-prose").boundingBox();
+    if (isMobile) {
+      await expect(page.locator(".blog-share-margin")).toBeHidden();
+      await expect(page.locator(".blog-share-end").getByRole("button").first()).toBeVisible();
+    } else {
+      // As on Notion: back link and sharing sit left of the text column.
+      expect(back!.x + back!.width).toBeLessThan(prose!.x);
+      const share = page.locator(".blog-share-margin");
+      await expect(share.getByRole("link", { name: "Share on LinkedIn" })).toBeVisible();
+      expect((await share.boundingBox())!.x + (await share.boundingBox())!.width).toBeLessThan(prose!.x);
+      await expect(page.locator(".blog-share-end")).toBeHidden();
+    }
   }
-  await page.goto("/blog/fixture-dictation-commands");
-  await expect(page.locator(".blog-sidebar")).toHaveCount(0);
-  await expect(page.locator(".blog-toc-mobile")).toHaveCount(0);
-  await expect(page.locator(".blog-share-end")).toBeVisible();
-  await expect(page.locator(".blog-share-end").getByRole(isMobile ? "button" : "link", { name: isMobile ? /Share|Copy link/ : "Share on LinkedIn" }).first()).toBeVisible();
 });
 
 test("BLOG-009 serves the article artwork only as a social preview", async ({ page, request }) => {
@@ -182,10 +189,9 @@ test("BLOG-011 opens the author profile from the padded edge of the author card"
   await expect(page.locator("h1")).toHaveText("Clemens Kressmann");
 });
 
-test("BLOG-012 preserves selected article text while scrolling between sections", async ({ page }) => {
+test("BLOG-012 preserves selected article text while scrolling", async ({ page }) => {
   await page.goto(article);
   await page.waitForLoadState("networkidle");
-  await expect(page.locator('.blog-toc a[aria-current="location"]')).toHaveCount(0);
   const selected = await page.locator(".blog-prose > p").first().evaluate((paragraph) => {
     const range = document.createRange();
     range.selectNodeContents(paragraph);
@@ -196,7 +202,7 @@ test("BLOG-012 preserves selected article text while scrolling between sections"
   });
   expect(selected).not.toBe("");
   await page.locator("#frequently-asked-questions").evaluate((heading) => heading.scrollIntoView());
-  await expect(page.locator('.blog-toc a[aria-current="location"]').first()).toHaveAttribute("aria-current", "location");
+  await page.waitForTimeout(300);
   await expect.poll(() => page.evaluate(() => window.getSelection()!.toString())).toBe(selected);
 });
 
