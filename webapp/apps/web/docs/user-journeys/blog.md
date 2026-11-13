@@ -35,6 +35,13 @@ committed content they skip, so they never depend on real articles.
   so an empty blog is never served or indexed. The footer links to the English
   blog once it exists.
 - `bun run blog:check` fails when the committed generated files are stale.
+- Production builds the blog from the hush CMS (Dockerfile target
+  `runtime-cms`): `scripts/blog/pull-cms.ts` writes the published posts and
+  their hash-verified images in the same layout as `content/blog`, and the
+  unchanged generator builds them. Any CMS error fails the build, so a partial
+  blog never ships (`scripts/blog/pull-cms.test.ts`). The site serves the CMS
+  revision it was built from at `/blog/revision.txt`, never cached, so the CMS
+  knows when a change is live.
 - All missing article images and social previews are prepared before metadata,
   routes or feeds change. A failed conversion or browser launch preserves the
   previous output, covered by `scripts/blog/generate-blog.test.ts`.

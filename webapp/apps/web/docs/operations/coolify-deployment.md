@@ -253,6 +253,14 @@ running version uses it.
 6. **Environment Variables** (runtime only): `NODE_ENV=production`, `PORT=3000`, `HUSH_PUBLIC_BASE_URL=https://behu.sh`, `HUSH_DATA_DIR=/app/data`, `HUSH_SERVICE_KEY_ID`, and `DATABASE_URL` from the `hush-postgres` resource's internal connection URL.
 7. **Persistent Storage**: one volume mounted at `/app/data`.
 8. Automatic deployment settings stay as in "Automatic website deployments" above.
+9. **Blog from the CMS**: under **Build**, set **Docker Build Stage Target** to
+   `runtime-cms` and enable **Use Docker Build Secrets**. Add `HUSH_CMS_TOKEN`
+   (a read-only token from `bun run cms:token --name website-build --scopes
+   posts:read` in the `cms` container) as a locked variable that is available
+   at build time and not at runtime. The build reads the CMS on the server's
+   loopback (`127.0.0.1:3100`, Coolify builds with the host network), so the
+   CMS must be deployed on the same server. Without these settings the image
+   builds the default target `runtime`, with the blog from `content/blog`.
 
 ### Verify the contract before every infrastructure change
 
