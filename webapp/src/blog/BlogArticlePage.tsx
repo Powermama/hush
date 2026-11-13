@@ -42,23 +42,18 @@ function BlogAuthorCard({ lang, author }: { lang: BlogLanguage; author: BlogAuth
   const path = authorPath(lang, author);
   return (
     <aside className="blog-author-card" aria-label={blogCopy[lang].writtenBy}>
-      <div className="blog-author-card-head">
-        <BlogAuthorAvatar author={author} size="large" />
-        <div>
-          <p className="blog-author-card-label">{blogCopy[lang].writtenBy}</p>
-          <p className="blog-author-card-name"><a href={path} rel="author">{profile.name}</a></p>
-          <p className="blog-author-card-role">{profile.role[lang]}</p>
-        </div>
-      </div>
-      <p className="blog-author-card-bio">{profile.bio[lang]}</p>
-      <div className="blog-author-card-foot">
-        <span className="blog-author-links">
-          {profile.sameAs.map((link) => (
-            <a key={link.url} href={link.url} rel="me noopener" target="_blank">{link.label}<BlogExternalIcon /></a>
-          ))}
+      <a className="blog-author-card-link" href={path} rel="author">
+        <span className="blog-author-card-head">
+          <BlogAuthorAvatar author={author} size="large" />
+          <span>
+            <span className="blog-author-card-label">{blogCopy[lang].writtenBy}</span>
+            <span className="blog-author-card-name">{profile.name}</span>
+            <span className="blog-author-card-role">{profile.role[lang]}</span>
+          </span>
         </span>
-        <a className="blog-author-card-more" href={path}>{blogCopy[lang].moreBy(profile.name.split(" ")[0]!)}<BlogArrow direction="forward" /></a>
-      </div>
+        <span className="blog-author-card-bio">{profile.bio[lang]}</span>
+        <span className="blog-author-card-more">{blogCopy[lang].viewProfile}<BlogArrow direction="forward" /></span>
+      </a>
     </aside>
   );
 }

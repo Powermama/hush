@@ -51,6 +51,55 @@ function useDictationLoop(stage: React.RefObject<HTMLElement | null>, examples: 
   return { state: sequence[step]!.state, seconds, example };
 }
 
+type Demo = (typeof blogCopy)[BlogLanguage]["ctaDemos"][number];
+
+/** The text dictated into the window, with a blinking caret until it arrives. */
+function Typed({ text, typed, className }: { text: string; typed: boolean; className: string }) {
+  return <p className={className} data-typed={typed}><span>{text}</span><i className="blog-cta-caret" /></p>;
+}
+
+/** One app per demo, each with its own look: Mail, a team chat and a coding agent in Terminal. */
+function DemoWindow({ demo, typed }: { demo: Demo; typed: boolean }) {
+  if (demo.kind === "slack") {
+    return (
+      <div className="blog-cta-window" data-kind="slack">
+        <div className="blog-cta-window-bar"><i /><i /><i /><span>{demo.app}</span></div>
+        <div className="blog-chat">
+          <div className="blog-chat-sidebar" aria-hidden="true"><b /><b className="is-active" /><b /><b /></div>
+          <div className="blog-chat-main">
+            <p className="blog-chat-channel">{demo.title}</p>
+            <div className="blog-chat-message">
+              <span className="blog-chat-avatar">{demo.from[0]}</span>
+              <div><strong>{demo.from}</strong><p>{demo.earlier}</p></div>
+            </div>
+            <div className="blog-chat-composer"><Typed text={demo.text} typed={typed} className="blog-cta-window-text" /></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (demo.kind === "terminal") {
+    return (
+      <div className="blog-cta-window" data-kind="terminal">
+        <div className="blog-cta-window-bar"><i /><i /><i /><span>{demo.title}</span></div>
+        <div className="blog-terminal">
+          <p className="blog-terminal-line"><span className="blog-terminal-path">~/hush</span> % {demo.prompt}</p>
+          <div className="blog-terminal-box"><span className="blog-terminal-prompt">&gt;</span><Typed text={demo.text} typed={typed} className="blog-cta-window-text" /></div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="blog-cta-window" data-kind="mail">
+      <div className="blog-cta-window-bar"><i /><i /><i /><span>{demo.title}</span></div>
+      {demo.fields.map(([label, value]) => (
+        <div className="blog-cta-window-field" key={label}><span>{label}</span>{value}</div>
+      ))}
+      <Typed text={demo.text} typed={typed} className="blog-cta-window-text" />
+    </div>
+  );
+}
+
 /** Full-width download band above the footer of every blog page. */
 export function BlogDownloadBand({ lang }: { lang: BlogLanguage }) {
   const copy = blogCopy[lang];
@@ -71,15 +120,7 @@ export function BlogDownloadBand({ lang }: { lang: BlogLanguage }) {
           </DownloadLink>
         </div>
         <div className="blog-cta-stage" ref={stage} aria-hidden="true">
-          <div className="blog-cta-window">
-            <div className="blog-cta-window-bar"><i /><i /><i /><span>{demo.title}</span></div>
-            {demo.fields.map(([label, value]) => (
-              <div className="blog-cta-window-field" key={label}><span>{label}</span>{value}</div>
-            ))}
-            <p className="blog-cta-window-text" data-typed={typed}>
-              <span>{demo.text}</span><i className="blog-cta-caret" />
-            </p>
-          </div>
+          <DemoWindow demo={demo} typed={typed} />
           <HushHud
             state={state}
             className="blog-cta-hud"
