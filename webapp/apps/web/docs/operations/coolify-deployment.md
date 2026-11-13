@@ -45,7 +45,7 @@ HUSH_COMPOSE_PORT=4300 docker compose up --build
 
 ## 1. Create the service
 
-For a new installation, create a resource from `Powermama/hush` and select Docker Compose as the build pack. For the existing production installation, update its source configuration in place and follow the [migration record](../../../docs/monorepo-migration.md) to preserve the database, keys and volumes.
+For a new installation, create a resource from `Powermama/hush` and select Docker Compose as the build pack. For the existing production installation, update its source configuration in place and follow the [migration record](../../../../../docs/monorepo-migration.md) to preserve the database, keys and volumes.
 
 - Base directory: `/webapp`
 - Docker Compose location: `/docker-compose.coolify.yaml`
@@ -209,7 +209,7 @@ running version uses it.
 
 ### Coolify settings for `hush-web`
 
-1. **General**: build pack Dockerfile, base directory `/webapp`, Dockerfile location `/Dockerfile`, port `3000`, domain `https://behu.sh`. Leave **Ports Mappings** empty; a published host port disables rolling updates.
+1. **General**: build pack Dockerfile, base directory `/webapp` (the workspace root, so shared packages are in the build context), Dockerfile location `/apps/web/Dockerfile`, port `3000`, domain `https://behu.sh`. Leave **Ports Mappings** empty; a published host port disables rolling updates.
 2. **Advanced**: keep the default container naming. Do not set a custom container name or IP; each disables rolling updates.
 3. **Health Check**: enable it with path `/health/ready`, port `3000`, interval 5 seconds, timeout 2 seconds, retries 3, start period 10 seconds. The dashboard check replaces the image's slower `HEALTHCHECK`.
 4. **Advanced > Operations > Stop Grace Period**: 30 seconds (Coolify's default). The drain (10 seconds) plus in-flight requests must finish well inside it.

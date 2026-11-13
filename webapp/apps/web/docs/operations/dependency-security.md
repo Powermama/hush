@@ -58,7 +58,8 @@ vulnerabilities. Advisory databases change. The existing web CI job runs `bun au
 
 ## Temporary development overrides
 
-`package.json` pins two transitive overrides while upstream parents retain old
+The workspace root `webapp/package.json` pins two transitive overrides (Bun applies
+overrides only from the workspace root) while upstream parents retain old
 ranges. Both are development dependencies, not the deployed proof-service API:
 
 - `basic-ftp` 6.2.6 replaces the vulnerable version beneath Lighthouse CI's
@@ -77,7 +78,7 @@ Do not add runtime dependencies merely to control a transitive version.
 
 Run `bun install --frozen-lockfile`, `bun audit`, `bun run lint`,
 `bun test server`, `bun run api:check`, `bun run build`, and
-`bunx playwright test` from `webapp/`. The upload and storage regression tests
+`bunx playwright test` from `webapp/apps/web/`. The upload and storage regression tests
 are in `server/app.test.ts` and `server/storage/s3-object-store.test.ts`.
 
 After merging, confirm GitHub re-evaluates its alerts and Coolify deploys the

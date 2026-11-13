@@ -13,5 +13,7 @@
 - Run commands in the component directory unless documentation says otherwise.
 - Never treat a passing build, secret scan or notarization as legal clearance.
 
-`macos/` contains the native app; `webapp/` contains the website and proof service.
+`macos/` contains the native app; `webapp/` is a Bun workspace with deployable
+apps in `webapp/apps/` (the website and proof service in `apps/web`) and shared
+libraries in `webapp/packages/`.
 Both directories are part of this repository, not submodules.

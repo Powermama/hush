@@ -44,7 +44,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: webapp
+        working-directory: webapp/apps/web
     # Server contracts that production runs on PostgreSQL are tested against it,
     # not only against the SQLite stand-in.
     services:
@@ -79,7 +79,7 @@ jobs:
       - run: bun run api:check
       - run: bun run build
       - name: Verify the production image includes the prerender modules
-        run: docker build --target build --tag hush-web-build-check .
+        run: docker build --target build --tag hush-web-build-check --file Dockerfile ../..
       - run: bunx playwright install --with-deps chromium webkit
       - run: bunx playwright test
       # Blog journeys need articles; build once more with the fixture content.
@@ -93,7 +93,7 @@ jobs:
         if: failure()
         with:
           name: browser-failures
-          path: webapp/test-results/
+          path: webapp/apps/web/test-results/
           retention-days: 7
 
   deployment:
@@ -104,7 +104,7 @@ jobs:
     timeout-minutes: 25
     defaults:
       run:
-        working-directory: webapp
+        working-directory: webapp/apps/web
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -139,11 +139,11 @@ jobs:
       - name: Test the proof package
         run: swift test --package-path macos/Packages/HushProvenance --force-resolved-versions
       - name: Install the service dependencies
-        working-directory: webapp
+        working-directory: webapp/apps/web
         run: bun install --frozen-lockfile
       - name: Test Swift against the local service
         run: |
-          cd webapp
+          cd webapp/apps/web
           NODE_ENV=test PORT=4300 HUSH_PUBLIC_BASE_URL=http://127.0.0.1:4300 bun server/index.ts > "$RUNNER_TEMP/hush-service.log" 2>&1 &
           service_pid=$!
           trap 'kill "$service_pid" 2>/dev/null || true' EXIT
@@ -154,7 +154,7 @@ jobs:
             sleep 1
           done
           if [ "$ready" != 1 ]; then cat "$RUNNER_TEMP/hush-service.log"; exit 1; fi
-          cd ..
+          cd ../../..
           HUSH_PROVENANCE_E2E_BASE_URL=http://127.0.0.1:4300 swift test --package-path macos/Packages/HushProvenance --force-resolved-versions --filter enrollsAndPublishesWithHonoService
       - name: Compile the native Release configuration
         if: needs.changes.outputs.native == 'true'

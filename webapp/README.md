@@ -1,52 +1,22 @@
-# hush website and proof service
+# hush web workspace
 
-This directory contains the Vite/React website, browser proof verification and
-the Bun/Hono service. It is part of the [hush monorepo](../README.md).
+A [Bun workspace](https://bun.sh/docs/install/workspaces) with one lockfile.
+Deployable apps live in `apps/`, shared libraries in `packages/`.
 
-Use Bun 1.3.9 and the checked-in lockfile:
+| Path | Package | What it is |
+| --- | --- | --- |
+| [`apps/web`](apps/web/README.md) | `@hush/web` | The Vite/React website, browser proof verification and the Bun/Hono proof service |
+
+Install once at the workspace root, then work inside an app:
 
 ```sh
 cd webapp
 bun install --frozen-lockfile
-bun run dev
+bun run dev            # the website and its API, same as in apps/web
 ```
 
-Vite serves the website at `http://localhost:5173`. The development API runs on
-port 3000. The service is needed for Verified Messages, not local dictation.
+Each app has its own Dockerfile, built from this directory so it can use shared
+packages: `docker build --file apps/web/Dockerfile .`. Dependency `overrides`
+belong in this directory's `package.json`; Bun ignores them in workspace members.
 
-## Checks
-
-```sh
-bun run lint
-bun test server
-bun run api:check
-bun run build
-bunx playwright install chromium webkit
-bunx playwright test
-```
-
-Browser tests launch their own local test service on port 4173. Read
-[the proof-recipient contract](docs/user-journeys/proof-recipient.md) before
-changing verification, cryptography or private-link behaviour.
-
-Public pages are prerendered through TanStack Router during the Vite build.
-See [search and link previews](docs/search-discovery.md) for the shared metadata
-catalogue, generated sitemap/llms.txt, Open Graph artwork and Search Console
-follow-through. Private proofs remain client-only.
-
-## Deployment
-
-From the monorepo root, the existing local Compose stack remains available:
-
-```sh
-docker compose -f webapp/compose.yaml up --build
-```
-
-For production, follow [the Coolify guide](docs/operations/coolify-deployment.md)
-and the [migration record](../docs/monorepo-migration.md). Keep the existing
-database and proof-object volumes when changing the source repository.
-
-Original website and service code use **[AGPL-3.0-only](../LICENSE)**. Artwork
-attribution is in [CREDITS.md](public/art/CREDITS.md); dependencies and assets
-retain their own licenses. See [licensing scope and release obligations](../LICENSING.md),
-including the source offer for modified network versions.
+Licensed [AGPL-3.0-only](../LICENSE); see [LICENSING.md](../LICENSING.md).

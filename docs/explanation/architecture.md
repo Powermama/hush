@@ -35,8 +35,8 @@ or revised text; it does not always originate from a microphone recording.
 | Local language models | [LLMRuntime.swift](../../macos/Hush/Hush/PostProcessing/LLMRuntime.swift) | [Personas](../../macos/docs/user-journeys/persona-wheel.md) |
 | Assistant and desktop actions | [Assistant/](../../macos/Hush/Hush/Assistant) | [Assistant journeys](../../macos/docs/user-journeys/hey-hush.md) |
 | Native signed-message logic | [HushProvenance](../../macos/Packages/HushProvenance) | [Author journey](../../macos/docs/user-journeys/verified-messages.md) |
-| API and service | [server/app.ts](../../webapp/server/app.ts) | [OpenAPI](../../webapp/openapi/hush-provenance.json) |
-| Browser verification | [useProofVerification.ts](../../webapp/src/provenance/useProofVerification.ts) | [Recipient journey](../../webapp/docs/user-journeys/proof-recipient.md) |
+| API and service | [server/app.ts](../../webapp/apps/web/server/app.ts) | [OpenAPI](../../webapp/apps/web/openapi/hush-provenance.json) |
+| Browser verification | [useProofVerification.ts](../../webapp/apps/web/src/provenance/useProofVerification.ts) | [Recipient journey](../../webapp/apps/web/docs/user-journeys/proof-recipient.md) |
 
 ## Data boundaries
 

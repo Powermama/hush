@@ -5,7 +5,7 @@ import CoreGraphics
 // icon grid. Ink squircle (superellipse), white 4-bar waveform (the "hush" glyph),
 // peach dot (the "hush•" period). Vector-drawn at each native size, no downscaling.
 //
-// Palette (from webapp/src/styles.css):
+// Palette (from webapp/apps/web/src/styles.css):
 //   ink #1F201E · canvas white bars · peach #F78D6B
 
 // ─── Colours ──────────────────────────────────────────────────────────────────

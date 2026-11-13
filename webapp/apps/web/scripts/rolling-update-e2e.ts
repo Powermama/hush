@@ -16,7 +16,7 @@
 // requests. PostgreSQL runs as its own container, and every instance shares one
 // data volume, as on the server.
 //
-// Run from webapp/: bun scripts/rolling-update-e2e.ts [--skip-build]
+// Run from webapp/apps/web/: bun scripts/rolling-update-e2e.ts [--skip-build]
 // Requires Docker. Uses only containers, a network and a volume prefixed hush-e2e.
 
 const prefix = "hush-e2e";
@@ -197,7 +197,7 @@ const skipBuild = Bun.argv.includes("--skip-build");
 try {
   if (!skipBuild) {
     console.log("Building the production image ...");
-    await docker(["build", "-t", image, "."]);
+    await docker(["build", "-t", image, "--file", "Dockerfile", "../.."]);
   }
   const control = await scenario("control");
   console.log(`control (stop, then start): ${control.total} requests, ${control.failures.length} failed`);

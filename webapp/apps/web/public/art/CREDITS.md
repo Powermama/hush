@@ -7,7 +7,7 @@ Unused archive images remain in `public/art/`.
 ## Studio lighting
 
 - `src/landing/assets/studio-lighting.ktx2.gz` is generated from Three.js's `RoomEnvironment` with its PMREM filter. It contains lighting, not a photograph or generated illustration.
-- Rebuild with `node scripts/bake-studio-environment.mjs` from `webapp/`, using the pinned Three.js version. Six half-float reflection levels are stored in KTX2 and gzip-compressed for delivery; each level is area-downsampled by two before packaging.
+- Rebuild with `node scripts/bake-studio-environment.mjs` from `webapp/apps/web/`, using the pinned Three.js version. Six half-float reflection levels are stored in KTX2 and gzip-compressed for delivery; each level is area-downsampled by two before packaging.
 - Source: [Three.js RoomEnvironment](https://github.com/mrdoob/three.js/blob/r187/examples/jsm/environments/RoomEnvironment.js), MIT. The notice is preserved in `/third-party/three-LICENSE.txt`. The MIT-licensed `ktx-parse` reader's notice is in `/third-party/ktx-parse-LICENSE.txt`.
 
 These are existing public-domain artworks and an openly licensed photograph, not AI-generated images. The website applies its own colour treatments, cropping and displaced collage strips. Colour treatments are baked into derived files by `scripts/bake-artwork.mjs` from the untreated sources listed below; pages run no image filters. No endorsement by an artist, photographer or museum is implied.

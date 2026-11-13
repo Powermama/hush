@@ -80,7 +80,7 @@ next deployment. Retain the existing resource, data and signing key.
 7. Keep the old source configuration available for rollback. Only archive the
    old repositories after the new deployment and release workflow are validated.
 
-The [deployment guide](../webapp/docs/operations/coolify-deployment.md) describes
+The [deployment guide](../webapp/apps/web/docs/operations/coolify-deployment.md) describes
 service operation. A local equivalent is:
 
 ```sh

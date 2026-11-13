@@ -2,7 +2,7 @@
 
 Bug reports, documentation, accessibility improvements and code all help.
 The [native development guide](macos/docs/development.md) and
-[web guide](webapp/README.md) explain how to run each part.
+[web guide](webapp/apps/web/README.md) explain how to run each part.
 
 ## Your first contribution
 

@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 // Reuse the website's pinned Playwright dependency. No separate toolchain.
-const require = createRequire(new URL("../../webapp/package.json", import.meta.url));
+const require = createRequire(new URL("../../webapp/apps/web/package.json", import.meta.url));
 const { chromium } = require("@playwright/test");
 const browser = await chromium.launch();
 try {

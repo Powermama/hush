@@ -103,7 +103,7 @@ toolchain requirements, testing, local proof-service setup, and packaging.
 | Directory | What lives here |
 | --- | --- |
 | [`macos/`](macos/README.md) | The native Swift app, local inference, desktop actions and distribution tools. |
-| [`webapp/`](webapp/README.md) | The Vite website, browser verification and Bun/Hono proof service. |
+| [`webapp/`](webapp/README.md) | The web workspace: the Vite website with browser verification and the Bun/Hono proof service (`apps/web`). |
 
 To run the website and service locally:
 
@@ -145,7 +145,7 @@ Use it, remix it and share improvements under the same terms, including in
 covered modified hosted versions. Commercial use is allowed.
 
 The earlier [native MIT grant](macos/LICENSE) remains valid. Model weights,
-dependencies and [artwork](webapp/public/art/CREDITS.md) retain their own terms
+dependencies and [artwork](webapp/apps/web/public/art/CREDITS.md) retain their own terms
 and attribution. Read [licensing scope and contributions](LICENSING.md) for the
 boundaries and release obligations.
 

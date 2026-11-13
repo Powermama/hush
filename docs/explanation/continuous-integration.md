@@ -33,7 +33,7 @@ cancels obsolete runs for the same PR or branch.
 
 Web checks retain backend tests, API drift detection, the production build and
 all Chromium desktop/mobile and WebKit journeys. Whenever web journeys run, the
-**Zero-downtime deployment** job also runs `webapp/scripts/rolling-update-e2e.ts`:
+**Zero-downtime deployment** job also runs `webapp/apps/web/scripts/rolling-update-e2e.ts`:
 it builds the production image and replaces the web service twice under
 continuous load behind Traefik with a separate PostgreSQL, failing on any
 dropped request or changed signing key. **CI result** requires it. `bun run build` already runs

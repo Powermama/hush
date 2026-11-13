@@ -1,11 +1,11 @@
 # Website and proof-service documentation
 
-[All hush docs](../../docs/README.md) · [Run locally](../README.md) ·
-[Contribute](../../CONTRIBUTING.md)
+[All hush docs](../../../../docs/README.md) · [Run locally](../README.md) ·
+[Contribute](../../../../CONTRIBUTING.md)
 
 | Task | Guide |
 | --- | --- |
-| Find behaviour and browser tests | [Shared journey index](../../docs/reference/user-journeys.md) |
+| Find behaviour and browser tests | [Shared journey index](../../../../docs/reference/user-journeys.md) |
 | Understand proof verification | [Recipient contract](user-journeys/proof-recipient.md) |
 | Maintain search and social previews | [Search discovery](search-discovery.md) |
 | Deploy or move the service | [Coolify deployment](operations/coolify-deployment.md) |
