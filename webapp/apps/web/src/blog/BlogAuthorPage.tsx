@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
-import { authorPath, blogAuthors, type BlogAuthorId } from "../../shared/authors";
-import { blogCopy, type BlogLanguage } from "../../shared/blog";
+import { authorPath, blogAuthors, type BlogAuthorId } from "@hush/article/authors";
+import { type BlogLanguage } from "@hush/article/taxonomy";
+import { blogCopy } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";

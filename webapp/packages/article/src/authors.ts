@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 //
-// Blog authors. Articles name an author by id in their front matter; the build
+// Blog authors. Articles name an author by id in their front matter; the contract
 // rejects unknown ids. Each author gets a profile page per blog language, which
 // bylines and BlogPosting data link to, with sameAs links to the same person
 // elsewhere (Google's author markup guidance).
-import type { BlogLanguage } from "./blog.ts";
+import type { BlogLanguage } from "./taxonomy.ts";
 
 export type BlogAuthor = {
   name: string;

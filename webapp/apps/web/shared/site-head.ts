@@ -2,7 +2,7 @@
 // Copyright 2026 Clemens Kressmann
 import type { BlogPosting, BreadcrumbList, Person, ProfilePage } from "schema-dts";
 import { blogCopy } from "./blog.ts";
-import { authorPath, blogAuthors, type BlogAuthorId } from "./authors.ts";
+import { authorPath, blogAuthors, type BlogAuthorId } from "@hush/article/authors";
 import { landingPaths, siteOrigin, softwareDescription, type PageMetadata } from "./site.ts";
 
 const escapeHTML = (value: string) => value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
