@@ -7,6 +7,7 @@ import aristotle from "./art/aristotle-blue.webp?url";
 import aristotleSmall from "./art/aristotle-blue-small.webp?url";
 import liberty from "./art/liberty-coral.webp?url";
 import libertySmall from "./art/liberty-coral-small.webp?url";
+import libertyEcho from "./art/liberty-coral-echo.webp?url";
 import geographer from "./art/geographer-muted.webp?url";
 import geographerSmall from "./art/geographer-muted-small.webp?url";
 import printingPress from "./art/printing-press-print.webp?url";
@@ -23,6 +24,7 @@ import robotPortraitSmall from "./art/robot-portrait-teal-small.webp?url";
 export const artwork = {
   aristotle: { src: aristotle, srcSet: `${aristotleSmall} 480w, ${aristotle} 960w` },
   liberty: { src: liberty, srcSet: `${libertySmall} 768w, ${liberty} 1280w` },
+  libertyEcho: { src: libertyEcho },
   geographer: { src: geographer, srcSet: `${geographerSmall} 480w, ${geographer} 960w` },
   printingPress: { src: printingPress, srcSet: `${printingPressSmall} 450w, ${printingPress} 751w` },
   printingPressEcho: { src: printingPressEcho, srcSet: `${printingPressEchoSmall} 450w, ${printingPressEcho} 751w` },

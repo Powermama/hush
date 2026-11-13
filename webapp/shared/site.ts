@@ -84,6 +84,14 @@ export const privatePageMetadata: PageMetadata = {
   canonicalPath: "/", indexable: false, language: "en",
 };
 
+/** The not-found page, prerendered once per language and served with status 404. */
+export const notFoundPages: Record<SiteLanguage, PageMetadata> = {
+  en: { title: "Page not found - hush", description: "This page does not exist on behu.sh.", canonicalPath: "/", indexable: false, language: "en" },
+  de: { title: "Seite nicht gefunden - hush", description: "Diese Seite gibt es auf behu.sh nicht.", canonicalPath: "/de", indexable: false, language: "de" },
+};
+/** Prerendered documents for unknown addresses, keyed in pages.json by language. */
+export const notFoundDocumentKey = (language: SiteLanguage) => `404:${language}`;
+
 /** SoftwareApplication data for a landing page in its language; free is stated as a zero-price offer. */
 export const softwareDescription = (page: PageMetadata) => ({
   "@context": "https://schema.org",

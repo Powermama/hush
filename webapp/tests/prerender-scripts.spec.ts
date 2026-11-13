@@ -23,11 +23,20 @@ test("LANDING-ENTRY-005 preserves interactive scripts under CSP regardless of HT
     // from the document being tested.
     await writeFile(join(directory, "dist-ssr/entry-server.js"), `
       const document = await Bun.file(new URL("./document.html", import.meta.url)).text();
-      export async function render() { return new Response(document); }
+      export async function render(url) {
+        // Like the real renderer, unknown addresses answer 404 with the not-found page.
+        if (new URL(url).pathname.endsWith("/__not-found")) return new Response('<html lang="en"><head></head><body><h1 id="not-found-title">Not found</h1></body></html>', { status: 404 });
+        return new Response(document);
+      }
     `);
 
     for (const [open, close] of [["script", "script"], ["SCRIPT", "SCRIPT"], ["ScRiPt", "sCrIpT"], ["script ", "script data-end='ignored'"], ["script\n", "script\t"]]) {
       await writeFile(join(directory, "dist/index.html"), '<html><head><!--hush-head-start--><!--hush-head-end--></head><body></body></html>');
+      // Prerendering preloads the landing scene from the build manifest, then removes it.
+      await mkdir(join(directory, "dist/.vite"), { recursive: true });
+      await writeFile(join(directory, "dist/.vite/manifest.json"), JSON.stringify({
+        "src/landing/HushScene.ts": { file: "assets/HushScene.js", isDynamicEntry: true, assets: ["assets/studio-lighting.ktx2.gz"] },
+      }));
       const document = `<html lang="en"><head></head><body><h1>Prerender fixture</h1><button id="action">Open menu</button><${open}>window.$_TSR = {}; document.querySelector('#action').addEventListener('click', event => { event.currentTarget.textContent = 'Menu opened'; });</${close}></body></html>`;
       await writeFile(join(directory, "dist-ssr/document.html"), document);
       await run("bun", ["scripts/prerender.ts"], { cwd: directory });
