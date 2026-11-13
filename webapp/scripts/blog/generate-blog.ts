@@ -17,6 +17,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import sharp from "sharp";
 import { authorPath, blogAuthors } from "../../shared/authors";
+import { editorialPolicyPath } from "../../shared/blog";
 import { siteOrigin, staticSitePaths } from "../../shared/site";
 import { blogLanguages, blogPath, buildBlog, type BlogImageOutput, type BlogLanguage, type BlogPost } from "./build-blog";
 import { renderCovers } from "./render-covers";
@@ -68,6 +69,7 @@ export function Article() {
 const languagesWithPosts = blogLanguages.filter((lang) => posts.some((post) => post.lang === lang));
 const routeLines = [
   ...languagesWithPosts.map((lang) => `    createRoute({ getParentRoute: () => parent, path: ${literal(blogPath(lang))}, component: () => <BlogIndexPage lang=${literal(lang)} /> }),`),
+  ...languagesWithPosts.map((lang) => `    createRoute({ getParentRoute: () => parent, path: ${literal(editorialPolicyPath(lang))}, component: () => <BlogEditorialPolicyPage lang=${literal(lang)} /> }),`),
   ...posts.map((post) => `    createRoute({ getParentRoute: () => parent, path: ${literal(post.path)}, component: lazyRouteComponent(() => import(${literal(`./${moduleName(post)}`)}), "Article") }),`),
   // One profile page per author and language they have published in.
   ...[...new Set(posts.map((post) => `${post.lang} ${post.author}`))].map((key) => {
@@ -78,6 +80,7 @@ const routeLines = [
 outputs.set(`${generatedDir}/routes.generated.tsx`, routeLines.length
   ? `${header}import { createRoute, lazyRouteComponent, type AnyRoute } from "@tanstack/react-router";
 import { BlogAuthorPage } from "../BlogAuthorPage";
+import { BlogEditorialPolicyPage } from "../BlogEditorialPolicyPage";
 import { BlogIndexPage } from "../BlogIndexPage";
 
 /** Blog routes exist only for languages with at least one published article. */

@@ -199,3 +199,14 @@ test("BLOG-012 preserves selected article text while scrolling between sections"
   await expect(page.locator('.blog-toc a[aria-current="location"]').first()).toHaveAttribute("aria-current", "location");
   await expect.poll(() => page.evaluate(() => window.getSelection()!.toString())).toBe(selected);
 });
+
+test("BLOG-013 explains the editorial policy, linked from the footer", async ({ page, request }) => {
+  await page.goto(article);
+  await page.locator("footer").getByRole("link", { name: "Editorial policy" }).click();
+  await expect(page).toHaveURL(/\/blog\/editorial-policy$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Editorial policy" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "How we use AI" })).toBeVisible();
+  await expect(page.getByText("There are no affiliate links")).toBeVisible();
+  expect((await request.get("/de/blog/redaktionelle-richtlinien")).status()).toBe(200);
+  expect(await (await request.get("/sitemap.xml")).text()).toContain("/blog/editorial-policy");
+});

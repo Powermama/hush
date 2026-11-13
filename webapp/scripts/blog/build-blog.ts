@@ -17,7 +17,7 @@ import { unified } from "unified";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import { authorPath, blogAuthorIds, type BlogAuthorId } from "../../shared/authors";
-import { blogClusterIds, type BlogClusterId } from "../../shared/blog";
+import { blogClusterIds, editorialPolicyPath, editorialPolicySlugs, type BlogClusterId } from "../../shared/blog";
 
 export const blogLanguages = ["en", "de"] as const;
 export type BlogLanguage = (typeof blogLanguages)[number];
@@ -233,6 +233,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
     knownPaths.add(blogPath(front.lang, front.slug));
     knownPaths.add(blogPath(front.lang));
     knownPaths.add(authorPath(front.lang, front.author));
+    knownPaths.add(editorialPolicyPath(front.lang));
   }
 
   const keywords = new Map<string, string>();
@@ -243,6 +244,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
     const lang = front.lang;
     const problems: string[] = [];
 
+    if (front.slug === editorialPolicySlugs[lang]) problems.push(`slug "${front.slug}" is reserved for the editorial policy`);
     const slugKey = `${lang}:${front.slug}`;
     if (slugs.has(slugKey)) problems.push(`slug already used by ${slugs.get(slugKey)}`);
     slugs.set(slugKey, file);

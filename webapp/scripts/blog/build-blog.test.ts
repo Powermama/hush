@@ -244,4 +244,9 @@ describe("blog content pipeline", () => {
     expect(errors).toContain("must come before the first section");
     expect(errors).toContain("only one [!TLDR] summary is allowed");
   });
+
+  test("reserves the editorial policy slug in each language", async () => {
+    const errors = await errorsFor({ "en/editorial-policy.md": article({ slug: "editorial-policy" }) });
+    expect(errors).toContain('slug "editorial-policy" is reserved for the editorial policy');
+  });
 });

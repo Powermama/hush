@@ -21,6 +21,12 @@ export const blogClusters = {
 export type BlogClusterId = keyof typeof blogClusters;
 export const blogClusterIds = Object.keys(blogClusters) as [BlogClusterId, ...BlogClusterId[]];
 
+/** The editorial policy lives under each blog; its slug is reserved for articles. */
+export const editorialPolicySlugs: Record<BlogLanguage, string> = { en: "editorial-policy", de: "redaktionelle-richtlinien" };
+export function editorialPolicyPath(lang: BlogLanguage) {
+  return `${lang === "de" ? "/de/blog" : "/blog"}/${editorialPolicySlugs[lang]}`;
+}
+
 export type BlogArticleType = "how-to" | "comparison" | "guide" | "listicle" | "essay" | "news";
 
 /**
@@ -66,6 +72,9 @@ export const blogCopy = {
     related: "Keep reading",
     allArticles: "All articles",
     readArticle: "Read article",
+    editorialTitle: "Editorial policy - hush blog",
+    editorialHeading: "Editorial policy",
+    editorialDescription: "How the hush blog researches, tests, writes and corrects its articles: primary sources with dates, our own tests, reviewed AI use and no affiliate links.",
     writtenBy: "Written by",
     share: "Share",
     copyLink: "Copy link",
@@ -106,6 +115,9 @@ export const blogCopy = {
     related: "Weiterlesen",
     allArticles: "Alle Artikel",
     readArticle: "Artikel lesen",
+    editorialTitle: "Redaktionelle Richtlinien - hush Blog",
+    editorialHeading: "Redaktionelle Richtlinien",
+    editorialDescription: "Wie der hush Blog Artikel recherchiert, testet, schreibt und korrigiert: Primärquellen mit Datum, eigene Tests, geprüfter KI-Einsatz, keine Affiliate-Links.",
     writtenBy: "Geschrieben von",
     share: "Teilen",
     copyLink: "Link kopieren",

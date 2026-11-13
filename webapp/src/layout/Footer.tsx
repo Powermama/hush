@@ -22,6 +22,7 @@ export function Footer() {
               <a className="transition hover:text-ink" href="/verified-messages">Verified Messages</a>
               <a className="transition hover:text-ink" href="/releases">Releases</a>
               {hasBlog && <a className="transition hover:text-ink" href="/blog">Blog</a>}
+              {hasBlog && <a className="transition hover:text-ink" href="/blog/editorial-policy">Editorial policy</a>}
               <a className="transition hover:text-ink" href="mailto:hello@behu.sh">Contact</a>
             </div>
           </nav>

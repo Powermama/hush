@@ -2,7 +2,7 @@
 // Copyright 2026 Clemens Kressmann
 import { legalConfig } from "./legal.ts";
 import { releases, releasePath } from "./releases.ts";
-import { blogCopy, type BlogLanguage } from "./blog.ts";
+import { blogCopy, editorialPolicyPath, type BlogLanguage } from "./blog.ts";
 import { blogPosts } from "./blog-posts.generated.ts";
 import { authorPath, blogAuthors, type BlogAuthorId } from "./authors.ts";
 
@@ -115,6 +115,10 @@ for (const lang of ["en", "de"] as BlogLanguage[]) {
       },
     };
   }
+  sitePages[editorialPolicyPath(lang)] = {
+    title: copy.editorialTitle, description: copy.editorialDescription,
+    canonicalPath: editorialPolicyPath(lang), indexable: true, language: lang,
+  };
   for (const author of new Set(articles.map((post) => post.author))) {
     // build-blog rejects unknown authors; this only skips stale generated data
     // while the generator itself imports this module to regenerate it.
