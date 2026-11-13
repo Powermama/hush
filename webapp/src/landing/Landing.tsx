@@ -28,7 +28,7 @@ export function Landing() {
   return <div className="hush-landing" id="top" data-opening="pending" ref={root}>
     <DocumentMetadata {...sitePages["/"]} />
     <a className="landing-skip" href="#main">Skip to content</a>
-    <Header />
+    <Header progress />
     <main id="main">
       <section className="landing-hero" aria-labelledby="hero-title">
         <div className="hero-introduction">

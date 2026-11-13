@@ -51,7 +51,7 @@ Inspect screenshots for material quality, readable copy, the app constellation, 
 
 LANDING-NAV-001: home, Verified Messages, releases and legal pages use one full-width Header component. Right-aligned links include the public app GitHub repository, Verified Messages, a disabled Community placeholder and the existing download. Privacy and releases remain in the footer. On mobile the compact header shows the brand, an Apple-marked “Get started on macOS” action immediately left of the menu toggle. The expanded menu fills the viewport, hides the compact header action, and shows large links with a single Apple-marked download action at its bottom. The hero remains below the header in document flow. Escape or the close toggle closes the menu; keyboard focus returns to the toggle. At 320px the logo mark remains while its wordmark yields space to the controls.
 
-LANDING-NAV-002: headers scroll away normally. Only a thin reading-progress line stays fixed at the top, without dots or section markers. It follows native scrolling in both directions and recalculates on content-size changes. Reduced motion removes easing.
+LANDING-NAV-002: headers scroll away normally. On the main landing page only, a thin reading-progress line stays fixed at the top, without dots or section markers. It follows native scrolling in both directions and recalculates on content-size changes. Reduced motion removes easing.
 
 LANDING-NAV-003: an open mobile menu locks the page against background scrolling
 and keeps keyboard focus within the header. Closing restores the original page

@@ -21,7 +21,7 @@ Footer legal link selected
 - English is the default language across the site.
 - German translations use stable `/de/` URLs and preserve the same section structure.
 - All four legal routes use the shared public correspondence address, including the operator's name and the separate c/o delivery line. Tests must use this public address, not a residential address.
-- Public headers share the same component and remain in document flow. Only the thin reading-progress line remains fixed while scrolling.
+- Public headers share the same component and remain in document flow. The reading-progress line belongs to the main landing page only.
 - Home and the EN/DE language switch sit together above the document title, aligned to the reading column on desktop and mobile. The title leads the document, with its update date below it. These local controls stay separate from the global navigation and remain keyboard accessible.
 - Placeholder operator, hosting, or supervisory-authority data must remain `noindex, nofollow` and excluded from the sitemap.
 - The privacy policy must distinguish local app processing from network features such as downloads, update checks, and optional Verified Messages.
