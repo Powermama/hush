@@ -62,7 +62,7 @@ export const blogPosts: readonly BlogPostMetadata[] = [
         "text": "Sources and how we tested"
       }
     ],
-    "socialImage": "/blog/covers/dictation-not-working-on-mac-e66392b038-social.png",
-    "cardImage": "/blog/covers/dictation-not-working-on-mac-e66392b038-card.webp"
+    "socialImage": "/blog/covers/dictation-not-working-on-mac-1a713f799c-social.png",
+    "cardImage": "/blog/covers/dictation-not-working-on-mac-1a713f799c-card.webp"
   }
 ];
