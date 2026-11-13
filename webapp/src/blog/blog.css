@@ -78,6 +78,9 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-prose a { color: #1c5d8a; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 .blog-prose a:hover { color: var(--color-ink); }
 .blog-prose ul, .blog-prose ol { padding-left: 1.3em; }
+/* Tailwind's reset removes list markers; articles need them back. */
+.blog-prose ul { list-style: disc; }
+.blog-prose ol { list-style: decimal; }
 .blog-prose li { margin: 0.35em 0; }
 .blog-prose li::marker { color: var(--color-soft); }
 .blog-prose strong { font-weight: 600; color: var(--color-ink); }
@@ -97,7 +100,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-prose th { font-weight: 600; color: var(--color-ink); background: rgb(0 0 0 / 0.025); }
 
 /* Download card: replays one dictation with the app's HUD. */
-.blog-cta { max-width: 680px; margin: 64px auto 0; border-radius: 24px; overflow: hidden; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 16px 40px rgb(31 32 30 / 0.07); }
+.blog-cta { max-width: 680px; margin: 40px auto 0; border-radius: 24px; overflow: hidden; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 16px 40px rgb(31 32 30 / 0.07); }
 @media (min-width: 1024px) { .blog-cta { margin-left: max(0px, calc((100% - 968px) / 2)); } }
 /* A cropped piece of a Mac screen: the Mail window runs off the right and
    bottom edges, the HUD floats where the app shows it. */
@@ -167,7 +170,21 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 /* Author profile */
 .blog-author-header { max-width: 760px; margin: 0 auto 48px; }
 .blog-author-identity { display: flex; align-items: center; gap: 18px; }
-.blog-author-avatar { display: grid; place-items: center; flex: none; width: 64px; height: 64px; border-radius: 50%; background: var(--color-ink); color: #fff; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.blog-author-avatar { display: grid; place-items: center; flex: none; border-radius: 50%; background: var(--color-ink); color: #fff; font-weight: 600; letter-spacing: -0.02em; }
+.blog-author-avatar-large { width: 64px; height: 64px; font-size: 22px; }
+.blog-author-avatar-small { width: 48px; height: 48px; font-size: 16px; }
+
+/* Author card after the article */
+.blog-author-card { display: flex; gap: 16px; max-width: 680px; margin: 56px auto 0; padding-top: 32px; border-top: 1px solid rgb(0 0 0 / 0.08); }
+@media (min-width: 1024px) { .blog-author-card { margin-left: max(0px, calc((100% - 968px) / 2)); } }
+.blog-author-card p { margin: 0; }
+.blog-author-card-label { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
+.blog-author-card .blog-author-card-name { margin-top: 4px; font-size: 18px; font-weight: 600; }
+.blog-author-card-name a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.blog-author-card-role { font-size: 14px; color: var(--color-muted); }
+.blog-author-card .blog-author-card-bio { margin-top: 10px; font-size: 15px; line-height: 1.65; color: #2b2c29; }
+.blog-author-card .blog-author-card-links { display: flex; gap: 16px; margin-top: 10px; font-size: 14px; font-weight: 600; }
+.blog-author-card-links a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgb(0 0 0 / 0.2); }
 .blog-author-identity h1 { margin: 0; font-size: clamp(30px, 5vw, 44px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; }
 .blog-author-role { margin: 6px 0 0; font-size: 15px; color: var(--color-muted); }
 .blog-author-bio { margin: 24px 0 0; font-size: 18px; line-height: 1.7; color: #2b2c29; }

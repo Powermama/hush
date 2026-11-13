@@ -5,7 +5,7 @@ import { blogCopy, type BlogLanguage } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
-import { BlogArrow, BlogHeader } from "./BlogArticlePage";
+import { BlogArrow, BlogAuthorAvatar, BlogHeader } from "./BlogArticlePage";
 import { BlogPostList } from "./BlogIndexPage";
 import "./blog.css";
 
@@ -15,7 +15,6 @@ export function BlogAuthorPage({ lang, author }: { lang: BlogLanguage; author: B
   const profile = blogAuthors[author];
   const posts = blogPosts.filter((post) => post.lang === lang && post.author === author);
   const path = authorPath(lang, author);
-  const initials = profile.name.split(" ").map((part) => part[0]).join("");
   return (
     <div className="min-h-screen bg-canvas text-ink" lang={lang}>
       <DocumentMetadata title={`${profile.name} - ${profile.role[lang]}`} description={copy.authorDescription(profile.name)} canonicalPath={path} language={lang} />
@@ -24,7 +23,7 @@ export function BlogAuthorPage({ lang, author }: { lang: BlogLanguage; author: B
         <header className="blog-author-header">
           <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
           <div className="blog-author-identity">
-            <span className="blog-author-avatar" aria-hidden="true">{initials}</span>
+            <BlogAuthorAvatar name={profile.name} size="large" />
             <div>
               <h1>{profile.name}</h1>
               <p className="blog-author-role">{profile.role[lang]}</p>

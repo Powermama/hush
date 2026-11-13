@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
-import { authorPath, blogAuthors } from "../../shared/authors";
+import { authorPath, blogAuthors, type BlogAuthorId } from "../../shared/authors";
 import { blogCopy, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
@@ -33,6 +33,32 @@ export function BlogArrow({ direction }: { direction: "back" | "forward" }) {
         : <><path className="blog-arrow-shaft" d="M14 8H3" /><path className="blog-arrow-head" d="M9.5 3.5 14 8l-4.5 4.5" /></>}
     </svg>
   );
+}
+
+/** The author again after the article, as the best-read blogs do: who wrote it and how they work. */
+function BlogAuthorCard({ lang, author }: { lang: BlogLanguage; author: BlogAuthorId }) {
+  const profile = blogAuthors[author];
+  const path = authorPath(lang, author);
+  return (
+    <aside className="blog-author-card" aria-label={blogCopy[lang].writtenBy}>
+      <BlogAuthorAvatar name={profile.name} />
+      <div>
+        <p className="blog-author-card-label">{blogCopy[lang].writtenBy}</p>
+        <p className="blog-author-card-name"><a href={path} rel="author">{profile.name}</a></p>
+        <p className="blog-author-card-role">{profile.role[lang]}</p>
+        <p className="blog-author-card-bio">{profile.bio[lang]}</p>
+        <p className="blog-author-card-links">
+          {profile.sameAs.map((link) => <a key={link.url} href={link.url} rel="me noopener" target="_blank">{link.label}</a>)}
+        </p>
+      </div>
+    </aside>
+  );
+}
+
+/** Initials until a portrait exists; shared by the byline card and the author page. */
+export function BlogAuthorAvatar({ name, size = "small" }: { name: string; size?: "small" | "large" }) {
+  const initials = name.split(" ").map((part) => part[0]).join("");
+  return <span className={`blog-author-avatar blog-author-avatar-${size}`} aria-hidden="true">{initials}</span>;
 }
 
 export function BlogHeader({ lang }: { lang: BlogLanguage }) {
@@ -70,11 +96,8 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
             <h1 id="article-title">{post.heading}</h1>
             <p className="blog-byline">
               <span>{copy.by} <a href={authorPath(lang, post.author)} rel="author">{blogAuthors[post.author].name}</a></span>
-              <span>
-                {post.updated !== post.published
-                  ? <>{copy.updated} <BlogDate lang={lang} value={post.updated} /></>
-                  : <>{copy.published} <BlogDate lang={lang} value={post.published} /></>}
-              </span>
+              <span>{copy.published} <BlogDate lang={lang} value={post.published} /></span>
+              {post.updated !== post.published && <span>{copy.updated} <BlogDate lang={lang} value={post.updated} /></span>}
               <span>{copy.readingTime(post.readingMinutes)}</span>
             </p>
           </header>
@@ -83,6 +106,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
             <div className="blog-prose" data-blog-body="" dangerouslySetInnerHTML={{ __html: html }} />
             {toc && <aside className="blog-toc-desktop">{toc}</aside>}
           </div>
+          <BlogAuthorCard lang={lang} author={post.author} />
           <BlogDownloadCard lang={lang} />
         </article>
         {related.length > 0 && (
