@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026 Clemens Kressmann
-import type { BlogPosting, Person, ProfilePage } from "schema-dts";
+import type { BlogPosting, BreadcrumbList, Person, ProfilePage } from "schema-dts";
+import { blogCopy } from "./blog.ts";
 import { authorPath, blogAuthors, type BlogAuthorId } from "./authors.ts";
 import { siteOrigin, softwareDescription, type PageMetadata } from "./site.ts";
 
@@ -45,6 +46,17 @@ export function renderPageHead(page: PageMetadata): string {
     author: personData(article.author, page.language),
     publisher: { "@type": "Organization", name: "hush", url: siteOrigin },
   } satisfies BlogPosting & { "@context": string };
+  // Articles and author pages sit under the blog: Home > Blog > page.
+  const blog = blogCopy[page.language];
+  const breadcrumbData = (article || page.profile) && {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "hush", item: `${siteOrigin}/` },
+      { "@type": "ListItem", position: 2, name: blog.heading, item: `${siteOrigin}${blog.indexPath}` },
+      { "@type": "ListItem", position: 3, name: article ? article.heading : blogAuthors[page.profile!.author].name },
+    ],
+  } satisfies BreadcrumbList & { "@context": string };
   const profileData = page.profile && {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
@@ -82,6 +94,6 @@ export function renderPageHead(page: PageMetadata): string {
     ...(page.indexable ? ['<link rel="describedby" href="/llms.txt" type="text/plain">'] : []),
     ...(page.alternatePaths ? Object.entries({ ...page.alternatePaths, "x-default": page.alternatePaths.en }).map(([lang, path]) => `<link rel="alternate" hreflang="${lang}" href="${siteOrigin}${path}">`) : []),
     ...(page.canonicalPath === "/" && page.indexable ? [`<script type="application/ld+json">${JSON.stringify(softwareDescription).replaceAll("<", "\\u003c")}</script>`] : []),
-    ...[articleData, profileData].filter(Boolean).map((data) => `<script type="application/ld+json">${JSON.stringify(data).replaceAll("<", "\\u003c")}</script>`),
+    ...[articleData, profileData, breadcrumbData].filter(Boolean).map((data) => `<script type="application/ld+json">${JSON.stringify(data).replaceAll("<", "\\u003c")}</script>`),
   ].join("\n");
 }

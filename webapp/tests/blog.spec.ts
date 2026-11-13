@@ -20,7 +20,16 @@ test("BLOG-001 reads a prerendered article without JavaScript", async ({ browser
   await expect(page.locator("h1")).toHaveText("Fixture article body heading");
   await expect(page.getByText("This fixture paragraph answers the question first.")).toBeVisible();
   await expect(page.locator('meta[property="og:type"]')).toHaveAttribute("content", "article");
-  const data = JSON.parse(await page.locator('script[type="application/ld+json"]').innerText());
+  const scripts = await page.locator('script[type="application/ld+json"]').allInnerTexts();
+  const data = JSON.parse(scripts[0]!);
+  expect(JSON.parse(scripts.at(-1)!)).toMatchObject({
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { position: 1, name: "hush", item: "https://behu.sh/" },
+      { position: 2, name: "The hush blog", item: "https://behu.sh/blog" },
+      { position: 3, name: "Fixture article body heading" },
+    ],
+  });
   expect(data).toMatchObject({
     "@type": "BlogPosting", headline: "Fixture article body heading",
     datePublished: "2026-11-01T00:00:00Z", dateModified: "2026-11-10T00:00:00Z",
@@ -95,7 +104,7 @@ test("BLOG-007 links bylines to a prerendered author profile with ProfilePage da
   expect((await plain.goto("/authors/clemens-kressmann"))!.status()).toBe(200);
   await expect(plain.locator("h1")).toHaveText("Clemens Kressmann");
   await expect(plain.locator('meta[property="og:type"]')).toHaveAttribute("content", "profile");
-  const data = JSON.parse(await plain.locator('script[type="application/ld+json"]').innerText());
+  const data = JSON.parse((await plain.locator('script[type="application/ld+json"]').allInnerTexts())[0]!);
   expect(data).toMatchObject({
     "@type": "ProfilePage",
     mainEntity: { "@type": "Person", name: "Clemens Kressmann", url: "https://behu.sh/authors/clemens-kressmann",
@@ -132,7 +141,16 @@ test("BLOG-009 serves the article artwork only as a social preview", async ({ pa
   const image = await page.locator('meta[property="og:image"]').getAttribute("content");
   expect(image).toMatch(/^https:\/\/behu\.sh\/blog\/covers\/fixture-dictation-without-cloud-[a-f0-9]{10}-social\.png$/);
   await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute("content", image!);
-  const data = JSON.parse(await page.locator('script[type="application/ld+json"]').innerText());
+  const scripts = await page.locator('script[type="application/ld+json"]').allInnerTexts();
+  const data = JSON.parse(scripts[0]!);
+  expect(JSON.parse(scripts.at(-1)!)).toMatchObject({
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { position: 1, name: "hush", item: "https://behu.sh/" },
+      { position: 2, name: "The hush blog", item: "https://behu.sh/blog" },
+      { position: 3, name: "Fixture article body heading" },
+    ],
+  });
   expect(data.image).toEqual([image]);
   const response = await request.get(new URL(image!).pathname);
   expect(response.status()).toBe(200);
