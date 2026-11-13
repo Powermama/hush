@@ -3,6 +3,8 @@ import { legalConfig } from "../../shared/legal";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
 import { Header } from "../layout/Header";
+import { BlogArrow } from "../blog/BlogArticlePage";
+import "../blog/blog.css";
 
 type LegalLanguage = "en" | "de";
 type LegalPageKind = "imprint" | "privacy";
@@ -14,49 +16,14 @@ const routes: Record<LegalLanguage, Record<LegalPageKind, string>> = {
 
 const labels = {
   en: {
-    navigation: "Legal navigation",
     home: "Home",
     updated: "Last updated",
   },
   de: {
-    navigation: "Rechtliche Navigation",
     home: "Startseite",
     updated: "Stand",
   },
 } as const;
-
-function LanguageSwitch({
-  language,
-  page,
-}: {
-  language: LegalLanguage;
-  page: LegalPageKind;
-}) {
-  return (
-    <div
-      className="flex rounded-full bg-black/5 p-1 text-xs font-semibold"
-      role="group"
-      aria-label={language === "en" ? "Language" : "Sprache"}
-    >
-      {(["en", "de"] as const).map((option) => (
-        <a
-          key={option}
-          href={routes[option][page]}
-          className={`inline-flex min-h-10 min-w-11 items-center justify-center rounded-full px-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
-            language === option
-              ? "bg-white text-ink shadow-sm"
-              : "text-muted hover:text-ink"
-          }`}
-          lang={option}
-          hrefLang={option}
-          aria-current={language === option ? "page" : undefined}
-        >
-          {option.toUpperCase()}
-        </a>
-      ))}
-    </div>
-  );
-}
 
 function LegalShell({
   language,
@@ -86,29 +53,20 @@ function LegalShell({
         language={language}
       />
       <Header />
-      <main className="px-5 pb-28 pt-8 sm:pt-12">
-        <article className="mx-auto max-w-3xl">
-          <nav aria-label={copy.navigation} className="mb-9 flex items-center justify-between gap-4 border-b border-black/10 pb-5 sm:mb-11 sm:pb-6">
-            <a
-              className="inline-flex min-h-11 items-center gap-2 rounded text-sm font-medium text-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
-              href="/"
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="m10 5-7 7 7 7M3 12h18" />
-              </svg>
-              {copy.home}
-            </a>
-            <LanguageSwitch language={language} page={page} />
-          </nav>
-          <header>
-            <h1 className="break-words font-display text-5xl font-bold tracking-[-0.05em] [hyphens:auto] sm:text-6xl">
+      <main className="blog-article-main">
+        {/* Same layout as a blog article: the way home sits in the left margin. The
+            footer switcher changes the language. */}
+        <article className="blog-article" aria-labelledby="legal-title">
+          <a className="blog-back" href={language === "de" ? "/de" : "/"}><BlogArrow direction="back" />{copy.home}</a>
+          <header className="blog-article-header">
+            <h1 id="legal-title" className="break-words font-display text-5xl font-bold tracking-[-0.05em] [hyphens:auto] sm:text-6xl">
               {title}
             </h1>
             <p className="mt-5 text-sm text-muted">
               {copy.updated}: {updatedAt}
             </p>
           </header>
-          <div className="legal-copy mt-12 space-y-12 text-[17px] leading-8 text-muted sm:mt-14">
+          <div className="blog-body legal-copy space-y-12 text-[17px] leading-8 text-muted">
             {children}
           </div>
         </article>

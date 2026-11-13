@@ -122,9 +122,20 @@ export function mountMascotScene(host: HTMLElement, state: MascotState) {
       const cheek = sphere(.068, blush, face, x, -.05, .19);
       cheek.scale.set(1.25, .55, .25);
     }
-    const smile = curve([[-.1, 0, 0], [0, -.06, .02], [.1, 0, 0]], .018, ceramic, face);
+    const sad = state === "sad";
+    // Sad: a frown, worried brows, a tear and resting dots where the voice bars usually move.
+    const smile = curve(sad ? [[-.1, -.03, 0], [0, .035, .02], [.1, -.03, 0]] : [[-.1, 0, 0], [0, -.06, .02], [.1, 0, 0]], .018, ceramic, face);
     smile.position.set(0, -.11, .22);
-    [.12, .25, .19, .10].forEach((h, i) => plate(.036, h, .018, .018, silver, face, (i - 1.5) * .13, -.36, .18));
+    if (sad) {
+      for (const side of [-1, 1]) {
+        curve([[side * .15, .61, .25], [side * .26, .60, .26], [side * .38, .55, .25]], .016, ceramic, face);
+      }
+      const tear = sphere(.045, glass, face, .33, -.10, .27);
+      tear.scale.set(.8, 1.3, .6);
+      for (let i = 0; i < 4; i++) plate(.036, .036, .018, .018, silver, face, (i - 1.5) * .13, -.36, .18);
+    } else {
+      [.12, .25, .19, .10].forEach((h, i) => plate(.036, h, .018, .018, silver, face, (i - 1.5) * .13, -.36, .18));
+    }
 
     for (const x of [-.38, .38]) {
       curve([[x * .85, -.46, 0], [x, -.80, .06], [x * 1.15, -.91, .16]], .055, graphite, character);
@@ -144,12 +155,16 @@ export function mountMascotScene(host: HTMLElement, state: MascotState) {
     }
     const leftArm = state === "recording"
       ? [[-.58, -.12, 0], [-.85, -.41, .12], [-.98, -.08, .23]]
-      : [[-.58, -.12, 0], [-.87, -.29, .05], [-.86, -.53, .16]];
+      : state === "sad"
+        ? [[-.58, -.12, 0], [-.74, -.44, .06], [-.70, -.72, .14]]
+        : [[-.58, -.12, 0], [-.87, -.29, .05], [-.86, -.53, .16]];
     const rightArm = state === "listening"
       ? [[.58, -.1, 0], [.9, .05, .08], [.82, .44, .16]]
       : state === "thinking"
         ? [[.58, -.1, 0], [.88, -.39, .10], [.40, -.20, .31]]
-        : [[.58, -.1, 0], [.85, -.30, .08], [1.0, -.08, .18]];
+        : state === "sad"
+          ? [[.58, -.1, 0], [.74, -.42, .06], [.70, -.70, .14]]
+          : [[.58, -.1, 0], [.85, -.30, .08], [1.0, -.08, .18]];
     if (state === "listening") {
       character.add(leftShoulder, rightShoulder);
       leftShoulder.position.set(-.58, -.1, 0);
@@ -175,7 +190,7 @@ export function mountMascotScene(host: HTMLElement, state: MascotState) {
       sphere(.07, glass, accessory, .97, 1.04, 0);
       const idea = mesh(new THREE.OctahedronGeometry(.17, 0), glow, accessory, 1.12, 1.30, 0);
       idea.scale.set(.75, 1.2, .6);
-    } else {
+    } else if (state === "recording") {
       const mic = new THREE.Group();
       accessory.add(mic);
       mic.position.set(-.98, .07, .25);
@@ -195,7 +210,8 @@ export function mountMascotScene(host: HTMLElement, state: MascotState) {
     const ropePath = rope?.querySelector("path");
     const ropeAnchor = rope?.querySelector("circle");
     const grip = new THREE.Vector3();
-    const base = { x: -.06, y: state === "thinking" ? -.18 : .15, z: state === "listening" ? .14 : -.08 };
+    // Sad looks down with its head slightly tilted.
+    const base = { x: sad ? .14 : -.06, y: state === "thinking" ? -.18 : .15, z: state === "listening" ? .14 : sad ? .1 : -.08 };
     let targetX = base.x, targetY = base.y;
     let frame = 0, visible = false, disposed = false, lost = false;
     let gestureStarted = -Infinity;
@@ -248,7 +264,7 @@ export function mountMascotScene(host: HTMLElement, state: MascotState) {
       }
       for (const [index, gaze] of pupils.entries()) {
         gaze.position.x = (index ? .27 : -.27) + (state === "thinking" ? .035 : -.015) + (character.rotation.y - base.y) * .13;
-        gaze.position.y = state === "thinking" ? .065 : .015;
+        gaze.position.y = state === "thinking" ? .065 : sad ? -.05 : .015;
       }
       try { renderer.render(scene, camera); host.dataset.scene = "ready"; }
       catch { lost = true; showFallback(); return; }

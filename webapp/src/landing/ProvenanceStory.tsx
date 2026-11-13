@@ -11,7 +11,7 @@ function PrintingPress({ decorative = false }: { decorative?: boolean }) {
     src={image.src}
     srcSet={image.srcSet}
     sizes="(max-width: 760px) 65vw, 420px"
-    width="751" height="879" loading="lazy" decoding="async"
+    width="751" height="879" loading="lazy" decoding="async" fetchPriority="low"
     alt={decorative ? "" : m.provenance_alt()}
   />;
 }

@@ -43,7 +43,8 @@
 .freedom-art { position: relative; height: clamp(720px, 72vw, 1040px); isolation: isolate; }
 .freedom-art > img { position: absolute; width: 100%; height: 116%; top: -16%; left: 0; object-fit: cover; object-position: 50% 40%; mask-image: linear-gradient(transparent, #000 20%, #000 70%, transparent); opacity: .72; }
 .freedom-art::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(0deg, var(--story-ink), transparent 50%); }
-.freedom-image-echo { position: absolute; inset: -16% 0 0; background: url('../media/art/liberty-coral-echo.webp') 50% 40% / cover; clip-path: polygon(60% 0, 68% 0, 56% 100%, 48% 100%); translate: 22px 0; opacity: .35; mask-image: linear-gradient(transparent, #000 20%, #000 60%, transparent); }
+.freedom-image-echo { position: absolute; inset: -16% 0 0; clip-path: polygon(60% 0, 68% 0, 56% 100%, 48% 100%); translate: 22px 0; opacity: .35; mask-image: linear-gradient(transparent, #000 20%, #000 60%, transparent); }
+.freedom-image-echo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
 .freedom-overprint { position: absolute; top: 7%; left: 3%; font: italic clamp(180px, 27vw, 430px)/1 Georgia, serif; color: transparent; -webkit-text-stroke: 1px #f1d6cd55; rotate: -7deg; pointer-events: none; }
 .freedom-copy { position: relative; z-index: 2; max-width: 1280px; margin: auto; padding: 21% 4vw 0; color: #f2edf7; }
 .freedom-copy h2 { font-size: clamp(72px, 10.4vw, 152px); font-weight: 500; letter-spacing: -.075em; line-height: .88; margin: 0; }
@@ -82,16 +83,6 @@
 .open-source-manifesto a:hover { text-decoration: underline; }
 .open-source-manifesto a svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.5; }
 .vision-story a:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; border-radius: 2px; }
-/* Shared companion artwork, also used on the Verified Messages page. */
-.hush-mascot { position: relative; display: block; width: 100%; aspect-ratio: 200 / 190; overflow: visible; }
-.mascot-fallback { display: block; width: 100%; height: 100%; }
-.hush-mascot canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
-.hush-mascot[data-scene="ready"] canvas { opacity: 1; }
-.hush-mascot[data-scene="ready"] .mascot-fallback { opacity: 0; }
-.mascot-character { transform-box: fill-box; transform-origin: 50% 80%; }
-.hush-mascot-listening .mascot-character { transform: rotate(-7deg); }
-.hush-mascot-thinking .mascot-character { transform: rotate(6deg); }
-.hush-mascot-recording .mascot-character { transform: rotate(-4deg); }
 /* Body behind the marble, fingers in front. Both layers share one coordinate space. */
 .thought-companion, .thought-companion-grip { position: absolute; width: 26%; aspect-ratio: 200 / 190; left: 28%; bottom: 34%; translate: 0 30%; pointer-events: none; }
 .thought-companion { z-index: 6; }

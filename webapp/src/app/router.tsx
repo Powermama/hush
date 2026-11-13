@@ -19,8 +19,9 @@ import { findRelease } from "../../shared/releases";
 import { ImprintPage, PrivacyPolicyPage } from "../legal/LegalPages";
 import { VerifiedMessagesPage } from "../verified/VerifiedMessagesPage";
 import { createBlogRoutes } from "../blog/generated/routes.generated";
+import { NotFoundPage } from "../not-found/NotFoundPage";
 
-const rootRoute = createRootRoute({ component: () => <Outlet /> });
+const rootRoute = createRootRoute({ component: () => <Outlet />, notFoundComponent: NotFoundPage });
 const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",

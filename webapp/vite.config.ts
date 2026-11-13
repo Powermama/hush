@@ -14,6 +14,17 @@ export default defineConfig({
       return html.replace("<!--hush-head-start--><!--hush-head-end-->", `<!--hush-head-start-->${renderPageHead(page)}<!--hush-head-end-->`);
     },
   }],
+  // Dev server only: pre-bundle three.js with the add-ons the scenes use, so they
+  // share one instance. Otherwise late-discovered add-ons bring their own copy and
+  // the rose falls back to its 2D drawing.
+  optimizeDeps: {
+    include: [
+      "three",
+      "three/addons/loaders/GLTFLoader.js",
+      "three/addons/environments/RoomEnvironment.js",
+      "three/addons/utils/BufferGeometryUtils.js",
+    ],
+  },
   server: {
     proxy: {
       "/v1": "http://127.0.0.1:3000",
@@ -24,6 +35,8 @@ export default defineConfig({
   build: {
     target: "es2022",
     cssMinify: "lightningcss",
+    // scripts/prerender.ts reads it to preload the landing scene on first visits.
+    manifest: true,
     rolldownOptions: {
       output: {
         codeSplitting: {

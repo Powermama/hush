@@ -9,7 +9,7 @@ import { SQLiteProofRepository } from "./repositories/sqlite-proof-repository";
 import { LocalProofObjectStore } from "./storage/local-object-store";
 import { S3ProofObjectStore } from "./storage/s3-object-store";
 import { latestRelease, releasePath } from "../shared/releases";
-import { sitePages } from "../shared/site";
+import { notFoundDocumentKey, sitePages } from "../shared/site";
 import {
   HTML_CACHE_CONTROL,
   cacheControlForStaticPath,
@@ -87,6 +87,18 @@ app.use("*", serveStatic({
   onFound: (path, context) => context.header("cache-control", cacheControlForStaticPath(path)),
 }));
 registerRootProofAlias(app, proofService);
+// Browsers asking for an unknown page get the not-found page with status 404;
+// API clients and other requests keep the JSON error from createApp.
+app.notFound((context) => {
+  const html = renderedPages[notFoundDocumentKey(/^\/de(\/|$)/.test(context.req.path) ? "de" : "en")];
+  const wantsPage = ["GET", "HEAD"].includes(context.req.method) && (context.req.header("accept") ?? "").includes("text/html");
+  if (html && wantsPage && !/^\/(v1|health|openapi\.json)(\/|$)/.test(context.req.path)) {
+    context.header("cache-control", "no-store");
+    context.header("x-robots-tag", "noindex, nofollow");
+    return context.html(html, 404);
+  }
+  return context.json({ error: { code: "not_found", message: "Route not found.", requestId: context.get("requestId") } }, 404);
+});
 
 const cleanup = startProofCleanup(repository, objects);
 const server = Bun.serve({
