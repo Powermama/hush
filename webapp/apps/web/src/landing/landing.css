@@ -124,7 +124,7 @@
 @media (max-width: 420px) {
   .hero-introduction h1 { font-size: 36px; }
   .local-universe { height: 310px; }
-  .hush-core { width: 270px; height: 290px; }
+  .hush-core { width: 236px; height: 254px; }
   .core-fallback { width: 125px; height: 125px; }
   .core-fallback > i, .core-fallback > div { border-radius: 28px; }
   .orbit-tile { width: 44px; height: 44px; padding: 6px; border-radius: 13px; }
