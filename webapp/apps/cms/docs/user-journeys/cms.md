@@ -18,6 +18,9 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
 | CMS-IMPORT-001 | `bun run cms:import <dir>` imports hush-seo Markdown articles with their images, keeps drafts as drafts and publishes the rest with their original dates, in an order that satisfies links between them. | `tests/import.test.ts` |
 | CMS-IMPORT-002 | Running the import again matches posts by language and slug and changes nothing but its revisions. | `tests/import.test.ts` |
+| CMS-BACKUP-001 | A backup restores into a fresh database with every post, keyword and token intact. | `scripts/backup-drill.sh` (CI) |
+| CMS-BACKUP-002 | Backups are named by time, listed newest first and kept for the configured days; the newest is never removed. | `tests/backups.test.ts` |
+| CMS-SCHEDULER-001 | The scheduler publishes due posts every minute and takes a backup whenever the newest is a day old. | `src/jobs/scheduler.ts`, CMS-API-005 |
 | CMS-ISOLATION-001 | The CMS imports nothing from the website and never reads the proof service's database URL or signing key. | `tests/boundary.test.ts` |
 
 The import of the live article renders HTML byte-identical to the website's

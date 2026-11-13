@@ -35,6 +35,64 @@ services:
       - hush_local_postgres:/var/lib/postgresql/data
     restart: unless-stopped
 
+  # The blog CMS runs apart from the proof service, with its own database.
+  cms:
+    build:
+      context: .
+      dockerfile: apps/cms/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: "3100"
+      CMS_DATABASE_URL: postgresql://cms:cms-local@cms-postgres:5432/cms
+      CMS_MEDIA_DIR: /app/data/media
+      CMS_BACKUP_DIR: /app/data/backups
+    ports:
+      - "${HUSH_CMS_COMPOSE_PORT:-3100}:3100"
+    volumes:
+      - hush_local_cms_media:/app/data/media
+      - hush_local_cms_backups:/app/data/backups
+    depends_on:
+      cms-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Publishes due posts every minute and keeps a daily backup.
+  cms-scheduler:
+    build:
+      context: .
+      dockerfile: apps/cms/Dockerfile
+    command: ["bun", "run", "cms:scheduler"]
+    environment:
+      NODE_ENV: development
+      CMS_DATABASE_URL: postgresql://cms:cms-local@cms-postgres:5432/cms
+      CMS_MEDIA_DIR: /app/data/media
+      CMS_BACKUP_DIR: /app/data/backups
+    volumes:
+      - hush_local_cms_media:/app/data/media
+      - hush_local_cms_backups:/app/data/backups
+    depends_on:
+      cms:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cms-postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: cms
+      POSTGRES_USER: cms
+      POSTGRES_PASSWORD: cms-local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cms -d cms"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - hush_local_cms_postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+
 volumes:
   hush_local_objects:
   hush_local_postgres:
+  hush_local_cms_media:
+  hush_local_cms_backups:
+  hush_local_cms_postgres:

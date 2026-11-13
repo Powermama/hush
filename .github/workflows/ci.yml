@@ -208,6 +208,9 @@ jobs:
       - run: bun run api:check
       - name: Build the production image
         run: docker build --tag hush-cms-build-check --file Dockerfile ../..
+      # A backup counts only once it has been restored.
+      - name: Back up and restore the database
+        run: scripts/backup-drill.sh
 
   macos:
     name: Native build and proof integration
