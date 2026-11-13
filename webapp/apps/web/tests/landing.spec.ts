@@ -307,12 +307,15 @@ test("discloses the confirmed host and processing limits in both languages", asy
     const article = page.locator("article");
     await expect(article.getByText(/Hetzner Online GmbH, Industriestr\. 25, 91710 Gunzenhausen/)).toBeVisible();
     await expect(article.getByText(german ? /Serverstandort: Deutschland/ : /Server location: Germany/)).toBeVisible();
-    await expect(article.getByText(german ? /Stand: 11\. November 2026/ : /Last updated: 11 November 2026/)).toBeVisible();
+    await expect(article.getByText(german ? /Stand: 13\. November 2026/ : /Last updated: 13 November 2026/)).toBeVisible();
     await expect(article.locator('a[href="https://www.cloudflare.com/cloudflare-customer-dpa/"]')).toBeVisible();
     await expect(article.getByText(/iCloud Mail/)).toBeVisible();
     await expect(article.locator('a[href="https://www.apple.com/legal/privacy/"]')).toBeVisible();
     await expect(article.getByText(german ? /24 Stunden nach Ablauf oder Widerruf/ : /24 hours after expiry or revocation/)).toBeVisible();
     await expect(article.getByText(german ? /innerhalb von zwei Minuten/ : /within two minutes/)).toBeVisible();
+    // Regular proof-database backups are bounded; other recovery copies are not promised.
+    await expect(article.getByText(german ? /nach höchstens 9 Tagen automatisch gelöscht/ : /deleted automatically after at most 9 days/)).toBeVisible();
+    await expect(article.getByText(german ? /keine feste Löschfrist/ : /no fixed erasure deadline/)).toBeVisible();
     await expect(article.getByText(/\[Add|\[Hosting|must be documented before publication|vor Veröffentlichung die tatsächlich/)).toHaveCount(0);
     await page.goto(german ? "/de/impressum" : "/impressum");
     await expect(page.getByText(german ? /Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG/ : /VAT identification number under Section 27a/)).toBeVisible();
