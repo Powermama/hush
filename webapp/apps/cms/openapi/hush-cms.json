@@ -1,0 +1,1243 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "hush CMS",
+    "version": "1.0.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Post": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 50,
+            "maxLength": 60
+          },
+          "description": {
+            "type": "string",
+            "minLength": 140,
+            "maxLength": 160
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "en",
+              "de"
+            ]
+          },
+          "keyword": {
+            "type": "string",
+            "minLength": 2
+          },
+          "secondaryKeywords": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 2
+            },
+            "maxItems": 8
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "how-to",
+              "comparison",
+              "guide",
+              "listicle",
+              "essay",
+              "news"
+            ]
+          },
+          "cluster": {
+            "type": "string",
+            "enum": [
+              "local-dictation",
+              "dictation-on-mac",
+              "local-ai",
+              "speech-models",
+              "voice-writing",
+              "typing-less",
+              "verified-messages"
+            ]
+          },
+          "author": {
+            "type": "string",
+            "enum": [
+              "clemens-kressmann"
+            ]
+          },
+          "imageAlt": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 160
+          },
+          "markdown": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "scheduled",
+              "published"
+            ]
+          },
+          "publishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rendition": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "heading": {
+                "type": "string"
+              },
+              "html": {
+                "type": "string"
+              },
+              "toc": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "text"
+                  ]
+                }
+              },
+              "readingMinutes": {
+                "type": "integer"
+              },
+              "renderedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "heading",
+              "html",
+              "toc",
+              "readingMinutes",
+              "renderedAt"
+            ],
+            "description": "What the post renders to; present while it is scheduled or published."
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "slug",
+          "lang",
+          "keyword",
+          "secondaryKeywords",
+          "type",
+          "cluster",
+          "author",
+          "imageAlt",
+          "markdown",
+          "id",
+          "status",
+          "publishedAt",
+          "createdAt",
+          "updatedAt",
+          "rendition"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "problems": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Revision": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "scheduled",
+              "published"
+            ]
+          },
+          "snapshot": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 50,
+                "maxLength": 60
+              },
+              "description": {
+                "type": "string",
+                "minLength": 140,
+                "maxLength": 160
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "lang": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "de"
+                ]
+              },
+              "keyword": {
+                "type": "string",
+                "minLength": 2
+              },
+              "secondaryKeywords": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "maxItems": 8
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "how-to",
+                  "comparison",
+                  "guide",
+                  "listicle",
+                  "essay",
+                  "news"
+                ]
+              },
+              "cluster": {
+                "type": "string",
+                "enum": [
+                  "local-dictation",
+                  "dictation-on-mac",
+                  "local-ai",
+                  "speech-models",
+                  "voice-writing",
+                  "typing-less",
+                  "verified-messages"
+                ]
+              },
+              "author": {
+                "type": "string",
+                "enum": [
+                  "clemens-kressmann"
+                ]
+              },
+              "imageAlt": {
+                "type": "string",
+                "minLength": 10,
+                "maxLength": 160
+              },
+              "markdown": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "title",
+              "description",
+              "slug",
+              "lang",
+              "keyword",
+              "secondaryKeywords",
+              "type",
+              "cluster",
+              "author",
+              "imageAlt",
+              "markdown"
+            ],
+            "additionalProperties": false
+          },
+          "actor": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "postId",
+          "status",
+          "snapshot",
+          "actor",
+          "createdAt"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/v1/posts": {
+      "get": {
+        "operationId": "listPosts",
+        "tags": [
+          "Posts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "en",
+                "de"
+              ]
+            },
+            "required": false,
+            "name": "lang",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "scheduled",
+                "published"
+              ]
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Posts, most recently changed first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "posts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Post"
+                      }
+                    }
+                  },
+                  "required": [
+                    "posts"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDraft",
+        "tags": [
+          "Posts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 50,
+                    "maxLength": 60
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 140,
+                    "maxLength": 160
+                  },
+                  "slug": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                  },
+                  "lang": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "de"
+                    ]
+                  },
+                  "keyword": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "secondaryKeywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 2
+                    },
+                    "maxItems": 8
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "how-to",
+                      "comparison",
+                      "guide",
+                      "listicle",
+                      "essay",
+                      "news"
+                    ]
+                  },
+                  "cluster": {
+                    "type": "string",
+                    "enum": [
+                      "local-dictation",
+                      "dictation-on-mac",
+                      "local-ai",
+                      "speech-models",
+                      "voice-writing",
+                      "typing-less",
+                      "verified-messages"
+                    ]
+                  },
+                  "author": {
+                    "type": "string",
+                    "enum": [
+                      "clemens-kressmann"
+                    ]
+                  },
+                  "imageAlt": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 160
+                  },
+                  "markdown": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "title",
+                  "description",
+                  "slug",
+                  "lang",
+                  "keyword",
+                  "secondaryKeywords",
+                  "type",
+                  "cluster",
+                  "author",
+                  "imageAlt",
+                  "markdown"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicts with the post's state or another post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/posts/{id}": {
+      "get": {
+        "operationId": "getPost",
+        "tags": [
+          "Posts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updatePost",
+        "tags": [
+          "Posts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 50,
+                    "maxLength": 60
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 140,
+                    "maxLength": 160
+                  },
+                  "slug": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                  },
+                  "lang": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "de"
+                    ]
+                  },
+                  "keyword": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "secondaryKeywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 2
+                    },
+                    "maxItems": 8
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "how-to",
+                      "comparison",
+                      "guide",
+                      "listicle",
+                      "essay",
+                      "news"
+                    ]
+                  },
+                  "cluster": {
+                    "type": "string",
+                    "enum": [
+                      "local-dictation",
+                      "dictation-on-mac",
+                      "local-ai",
+                      "speech-models",
+                      "voice-writing",
+                      "typing-less",
+                      "verified-messages"
+                    ]
+                  },
+                  "author": {
+                    "type": "string",
+                    "enum": [
+                      "clemens-kressmann"
+                    ]
+                  },
+                  "imageAlt": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 160
+                  },
+                  "markdown": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicts with the post's state or another post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The post does not meet the article contract",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/posts/{id}/schedule": {
+      "post": {
+        "operationId": "schedulePost",
+        "tags": [
+          "Lifecycle"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "publishedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "publishedAt"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The scheduled post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicts with the post's state or another post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The post does not meet the article contract",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/posts/{id}/publish": {
+      "post": {
+        "operationId": "publishPost",
+        "tags": [
+          "Lifecycle"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The published post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicts with the post's state or another post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The post does not meet the article contract",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/posts/{id}/unpublish": {
+      "post": {
+        "operationId": "unpublishPost",
+        "tags": [
+          "Lifecycle"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The post, back to draft",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/posts/{id}/revisions": {
+      "get": {
+        "operationId": "listRevisions",
+        "tags": [
+          "Revisions"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revisions, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "revisions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Revision"
+                      }
+                    }
+                  },
+                  "required": [
+                    "revisions"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/posts/{id}/revisions/{revisionId}/restore": {
+      "post": {
+        "operationId": "restoreRevision",
+        "tags": [
+          "Revisions"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "revisionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The post with the revision's content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicts with the post's state or another post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The post does not meet the article contract",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

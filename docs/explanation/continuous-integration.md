@@ -8,14 +8,21 @@ Git diff. Draft pull requests do not allocate product build runners. Marking a
 draft ready starts its checks; converting it back to a draft cancels older work.
 Manual workflow runs always check both components.
 
-| Change | Web journeys | Swift package and service integration | Native Release build |
-| --- | --- | --- | --- |
-| Website UI, assets, legal contact or browser tests | Yes | No | No |
-| Proof service, shared proof contracts, OpenAPI or web dependencies | Yes | Yes | No |
-| Native source, resources, packages or build scripts | No | Yes | Yes |
-| Both components | Yes | Yes | Yes |
-| Documentation, licenses or issue forms only | No | No | No |
-| CI configuration, an unknown root component or an unavailable comparison | Yes | Yes | Yes |
+| Change | Web journeys | CMS service | Swift package and service integration | Native Release build |
+| --- | --- | --- | --- | --- |
+| Website UI, assets, legal contact or browser tests (`webapp/apps/web`) | Yes | No | No | No |
+| Proof service, shared proof contracts or OpenAPI | Yes | No | Yes | No |
+| The CMS (`webapp/apps/cms`) | No | Yes | No | No |
+| A shared package (`webapp/packages/*`) | Apps that depend on it | Apps that depend on it | No | No |
+| Workspace root: manifest, lockfile, Docker or Compose files | Yes | Yes | Yes | No |
+| Native source, resources, packages or build scripts | No | No | Yes | Yes |
+| Documentation, licenses or issue forms only | No | No | No | No |
+| CI configuration, an unknown app, package or root component, or an unavailable comparison | Yes | Yes | Yes | Yes |
+
+Which apps a shared package affects is read from the workspace manifests
+(`workspace:*` dependencies, including packages that depend on packages), so a
+new package or app needs no CI change to be scoped correctly. A merge-queue run
+(`merge_group`) always checks everything.
 
 Component selection itself has tests, including real Git histories with
 multi-commit pushes, divergent PR branches, renamed/deleted files and rewritten

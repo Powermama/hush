@@ -9,29 +9,72 @@ import re
 import subprocess
 
 
+# Each deployable web app has its own CI job, named after its folder.
+WEB_APPS = ("web", "cms")
+REPOSITORY = Path(__file__).resolve().parents[2]
+
+
 def full_scope():
-    return {"web": True, "native": True, "integration": True}
+    return {**dict.fromkeys(WEB_APPS, True), "native": True, "integration": True}
 
 
-def classify(paths):
+def workspace_dependents(root=REPOSITORY):
+    """Map each webapp/packages/<name> folder to the apps that depend on it.
+
+    Read from the workspace manifests, including packages that depend on other
+    packages, so a shared change runs exactly the apps that use it.
+    """
+    webapp = root / "webapp"
+    names = {}
+    requires = {}
+    for manifest in [*webapp.glob("apps/*/package.json"), *webapp.glob("packages/*/package.json")]:
+        data = json.loads(manifest.read_text())
+        key = f"{manifest.parent.parent.name}/{manifest.parent.name}"
+        names[data["name"]] = key
+        requires[key] = {dep for section in ("dependencies", "devDependencies")
+                         for dep, version in data.get(section, {}).items() if str(version).startswith("workspace:")}
+    dependents = {}
+    for package in (key for key in requires if key.startswith("packages/")):
+        users, frontier = set(), {package}
+        while frontier:
+            current = frontier.pop()
+            for key, deps in requires.items():
+                if key not in users and any(names.get(dep) == current for dep in deps):
+                    users.add(key)
+                    frontier.add(key)
+        dependents[package.split("/", 1)[1]] = {key.split("/", 1)[1] for key in users if key.startswith("apps/")}
+    return dependents
+
+
+def classify(paths, dependents=None):
     scope = dict.fromkeys(full_scope(), False)
     for path in paths:
         if path.endswith(".md") or path.startswith(
-            ("docs/", "macos/docs/", "webapp/apps/web/docs/", ".github/ISSUE_TEMPLATE/")
-        ) or Path(path).name in {"LICENSE", "NOTICE"}:
+            ("docs/", "macos/docs/", ".github/ISSUE_TEMPLATE/")
+        ) or re.match(r"webapp/(apps|packages)/[^/]+/docs/", path) or Path(path).name in {"LICENSE", "NOTICE"}:
             continue
         if path.startswith("macos/"):
             scope["native"] = scope["integration"] = True
-        elif path.startswith("webapp/"):
-            scope["web"] = True
-            if path.startswith((
+        elif match := re.match(r"webapp/apps/([^/]+)/", path):
+            app = match.group(1)
+            if app not in WEB_APPS:
+                return full_scope()  # A new app must not silently skip CI.
+            scope[app] = True
+            if app == "web" and path.startswith((
                 "webapp/apps/web/server/", "webapp/apps/web/openapi/",
                 "webapp/apps/web/shared/contracts/", "webapp/apps/web/shared/provenance/",
-            )) or path in {
-                "webapp/package.json", "webapp/bun.lock",
-                "webapp/apps/web/package.json", "webapp/apps/web/tsconfig.json",
-            }:
+            )) or path in {"webapp/apps/web/package.json", "webapp/apps/web/tsconfig.json"}:
                 scope["integration"] = True
+        elif match := re.match(r"webapp/packages/([^/]+)/", path):
+            dependents = workspace_dependents() if dependents is None else dependents
+            users = dependents.get(match.group(1))
+            if users is None:
+                return full_scope()
+            for app in users:
+                scope[app] = True
+        elif path.startswith("webapp/"):
+            # Workspace root: manifest, lockfile, Docker and Compose files affect every app.
+            scope.update(dict.fromkeys(WEB_APPS, True), integration=True)
         else:
             # CI, root configuration and future components must not silently skip.
             return full_scope()
