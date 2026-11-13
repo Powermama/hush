@@ -30,7 +30,7 @@ test("flower stays bounded during scrolling and resizing", async ({ page }) => {
 test("flower keeps its static artwork without WebGL", async ({ page }) => {
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (kind: string, ...args: unknown[]) {
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind: string, ...args: unknown[]) {
       if (kind === "webgl2" || kind === "webgl") return null;
       return Reflect.apply(original, this, [kind, ...args]);
     } as typeof original;
@@ -87,7 +87,7 @@ test("rose opens with native scroll and closes when scrolling back", async ({ pa
   // Preserve the drawing buffer only in this test so pixel reads are deterministic.
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (kind: string, options: object = {}) {
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind: string, options: object = {}) {
       return Reflect.apply(original, this, [kind, kind === "webgl2" ? { ...options, preserveDrawingBuffer: true } : options]);
     } as typeof original;
   });
@@ -108,7 +108,7 @@ test("rose opens with native scroll and closes when scrolling back", async ({ pa
     gl.readPixels(0, canvas.height - height, canvas.width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
     let left = canvas.width, right = 0;
     for (let y = 0; y < height; y++) for (let x = 0; x < canvas.width; x++) {
-      if (pixels[(y * canvas.width + x) * 4 + 3] > 32) { left = Math.min(left, x); right = Math.max(right, x); }
+      if ((pixels[(y * canvas.width + x) * 4 + 3] ?? 0) > 32) { left = Math.min(left, x); right = Math.max(right, x); }
     }
     return (right - left) / canvas.width;
   });

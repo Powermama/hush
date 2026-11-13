@@ -79,6 +79,9 @@ jobs:
       - run: bun test server scripts/prerender scripts/blog
       - run: bun run api:check
       - run: bun run build
+      # The build type-checks the app; the browser journeys need their own pass.
+      - name: Type-check the browser journeys
+        run: bun run lint:tests
       - name: Verify the production image includes the prerender modules
         run: docker build --target build --tag hush-web-build-check --file Dockerfile ../..
 

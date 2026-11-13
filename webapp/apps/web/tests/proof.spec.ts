@@ -631,7 +631,7 @@ async function signMessage(privateKey: CryptoKey, message: string): Promise<stri
 }
 
 async function digest(bytes: Uint8Array): Promise<string> {
-  return encode(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)));
+  return encode(new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array(bytes))));
 }
 
 function encode(bytes: Uint8Array): string {
