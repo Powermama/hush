@@ -28,8 +28,10 @@ pages retain noindex/no-store. `/releases/latest` redirects to the current versi
 
 ## Blog
 
-Published articles from `content/blog/<lang>/` enter the same catalogue through
-the generated `shared/blog-posts.generated.ts`, so canonical URLs, the sitemap
+Published articles enter the same catalogue through
+`shared/blog-posts.generated.ts`, generated at build time from the hush CMS in
+production (from `content/blog/<lang>/` or test fixtures otherwise), so
+canonical URLs, the sitemap
 (`lastmod` from each article's `updated` date), `llms.txt` and prerendering work
 as for every other page. Articles get `og:type article` and `BlogPosting`
 structured data; FAQPage and HowTo markup are not used because Google no longer
@@ -49,7 +51,8 @@ bun run test:seo
 ```
 
 `bun run site:generate` generates `public/sitemap.xml` and `public/llms.txt` from
-the public catalogue. Edit their generator, never the generated files. Sitemap
+the public catalogue during every build. They list the blog, so like the blog
+output they are not committed. Edit their generator. Sitemap
 lastmod dates describe real content updates, not arbitrary build times.
 
 `bun run test:seo` uses the pinned GoogleChrome Lighthouse CI package and

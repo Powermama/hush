@@ -7,7 +7,9 @@ import { blogCopy } from "./blog.ts";
 import { blogPosts } from "./blog-posts.generated.ts";
 import { authorPath, blogAuthors, type BlogAuthorId } from "@hush/article/authors";
 
-export const siteOrigin = "https://behu.sh";
+import { siteOrigin } from "./origin.ts";
+
+export { siteOrigin };
 export type SiteLanguage = "en" | "de";
 export type PageMetadata = {
   title: string;

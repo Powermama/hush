@@ -13,3 +13,15 @@ apps/web/src/paraglide/
 .env
 .env.*
 !.env.production.example
+
+# Blog output and the files listing it: generated at build time from the CMS
+# (production) or from content/blog, never committed
+apps/web/shared/blog-posts.generated.ts
+apps/web/src/blog/generated/
+apps/web/public/blog/
+apps/web/public/de/blog/
+apps/web/public/sitemap.xml
+apps/web/public/llms.txt
+# Local article previews; published articles live in the CMS
+apps/web/content/blog/*/*
+!apps/web/content/blog/*/.gitkeep
