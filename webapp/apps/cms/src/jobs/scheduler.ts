@@ -2,8 +2,10 @@
 // Copyright (c) 2026 Clemens Kressmann
 //
 // The CMS's clock, run as its own process (cms-scheduler in Compose; a CronJob
-// on Kubernetes): every minute it publishes scheduled posts that are due, and
-// whenever the newest backup is a day old it takes a new one. Both steps are
+// on Kubernetes): every minute it publishes scheduled posts that are due,
+// deploys the website when it is behind the CMS and tells search engines about
+// changed pages (src/site/deploy.ts), and whenever the newest backup is a day
+// old it takes a new one. Both steps are
 // idempotent, so a restart or a second instance does no harm. After a tick
 // without errors it touches a heartbeat file, which the Compose healthcheck
 // requires to be recent.
@@ -11,6 +13,7 @@ import { backupDatabase, backupTime, listBackups } from "../backups/backups";
 import { loadConfig } from "../config";
 import { connectDatabase } from "../db/client";
 import { publishDuePosts } from "../posts/service";
+import { syncSite } from "../site/deploy";
 import { createObjectStore } from "../storage/object-store";
 
 const heartbeatPath = "/tmp/cms-scheduler-heartbeat";
@@ -32,6 +35,16 @@ async function tick() {
   } catch (error) {
     healthy = false;
     log("error", "Publishing due posts failed", { error: String(error) });
+  }
+  if (config.site) {
+    try {
+      const { live, notified, deployRequested } = await syncSite(db, config.site);
+      if (deployRequested) log("info", "Requested a website deploy", { liveRevision: live });
+      if (notified.length) log("info", "Submitted changed pages to IndexNow", { urls: notified });
+    } catch (error) {
+      healthy = false;
+      log("error", "Syncing the website failed", { error: String(error) });
+    }
   }
   try {
     const newest = (await listBackups(backups))[0];

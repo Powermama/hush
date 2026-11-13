@@ -13,7 +13,7 @@ export type Cms = { db: Database; media: ObjectStore };
 
 const imageTypes: Record<string, string> = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp" };
 export const maxImageBytes = 10 * 1024 * 1024;
-const originalKey = (sha256: string) => `originals/${sha256}`;
+export const originalKey = (sha256: string) => `originals/${sha256}`;
 
 /** Stores an image a post references as media/<slug>/<name>, replacing one of the same name. */
 export async function uploadMedia(cms: Cms, postId: string, name: string, bytes: Uint8Array, contentType: string) {
@@ -34,7 +34,7 @@ export async function uploadMedia(cms: Cms, postId: string, name: string, bytes:
   return row!;
 }
 
-export function listMedia(db: Database, postId: string) {
+export function listMedia(db: Pick<Database, "select">, postId: string) {
   return db.select().from(media).where(eq(media.postId, postId)).orderBy(media.name);
 }
 

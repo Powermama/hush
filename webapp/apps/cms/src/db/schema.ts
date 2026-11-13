@@ -9,8 +9,8 @@
 // contents is a value of the rendered document; neither is queried inside.
 // Authors and clusters are ids validated against @hush/article.
 import type { TocEntry } from "@hush/article";
-import { relations } from "drizzle-orm";
-import { index, integer, jsonb, pgEnum, pgTable, primaryKey, smallint, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { bigint, check, index, integer, jsonb, pgEnum, pgTable, primaryKey, smallint, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 export const postStatus = pgEnum("post_status", ["draft", "scheduled", "published"]);
 export const tokenScope = pgEnum("token_scope", ["posts:read", "posts:write", "posts:publish"]);
@@ -78,6 +78,30 @@ export const postRevisions = pgTable("post_revisions", {
   actor: text("actor").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [index("post_revisions_post_created").on(table.postId, table.createdAt)]);
+
+/**
+ * What the website shows, as a revision number. Every change to a public page
+ * (publish, live edit, unpublish, a due post) takes the next revision in its
+ * post's transaction; the export carries the revision it reflects and the
+ * built site serves it back. One row; updating it serialises revisions in
+ * commit order. The rest of the row is the deploy loop's own state.
+ */
+export const siteState = pgTable("site_state", {
+  id: smallint("id").primaryKey().default(1),
+  revision: bigint("revision", { mode: "number" }).notNull().default(0),
+  /** Highest revision whose pages search engines were told about. */
+  notifiedRevision: bigint("notified_revision", { mode: "number" }).notNull().default(0),
+  /** The revision the last requested deploy is meant to make live, and when it was asked for. */
+  deployRevision: bigint("deploy_revision", { mode: "number" }),
+  deployRequestedAt: timestamp("deploy_requested_at", { withTimezone: true }),
+}, (table) => [check("site_state_single_row", sql`${table.id} = 1`)]);
+
+/** The public pages each site revision changed. */
+export const siteChanges = pgTable("site_changes", {
+  revision: bigint("revision", { mode: "number" }).notNull(),
+  path: text("path").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [primaryKey({ columns: [table.revision, table.path] })]);
 
 /** Bearer tokens for agents and scripts. Only a SHA-256 hash is stored. */
 export const apiTokens = pgTable("api_tokens", {
