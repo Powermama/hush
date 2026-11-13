@@ -29,7 +29,7 @@ export const frontMatterSchema = z.object({
   lang: z.enum(blogLanguages),
   keyword: z.string().min(2),
   secondaryKeywords: z.array(z.string().min(2)).max(8),
-  type: z.enum(["how-to", "comparison", "guide", "listicle", "news"]),
+  type: z.enum(["how-to", "comparison", "guide", "listicle", "essay", "news"]),
   cluster: z.string().min(2),
   author: z.enum(blogAuthorIds),
   published: z.iso.date(),
@@ -76,9 +76,24 @@ export type BlogPost = {
   images: BlogImageOutput[];
 };
 
+// A blockquote starting with [!TLDR] (GitHub alert syntax) becomes the summary box.
+const tldrMarker = "[!TLDR]";
+const tldrTitles: Record<BlogLanguage, string> = { en: "In short", de: "Kurz gesagt" };
+
+function isTldr(node: { children?: Array<{ type: string; tagName?: string; children?: Array<{ type: string; value?: string }> }> }) {
+  const first = node.children?.find((child) => child.type === "paragraph" || child.tagName === "p");
+  const text = first?.children?.[0];
+  return text?.type === "text" && (text.value ?? "").trimStart().startsWith(tldrMarker);
+}
+
 const faqHeadings: Record<BlogLanguage, string> = {
   en: "Frequently asked questions",
   de: "Häufige Fragen",
+};
+// The FAQ and the sources section close the article; the page sets them apart from the body.
+const sourcesHeadings: Record<BlogLanguage, string> = {
+  en: "Sources and how we tested",
+  de: "Quellen und Testaufbau",
 };
 
 // Mirrors the hush-seo skill profile (section 4). Matched case-insensitively.
@@ -219,7 +234,12 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
 
     const headings: Array<{ depth: number; text: string }> = [];
     const imageNodes: MdNode[] = [];
+    let tldrCount = 0;
     walk(tree, (node) => {
+      if (node.type === "blockquote" && isTldr(node)) {
+        tldrCount++;
+        if (headings.some((heading) => heading.depth === 2)) problems.push(`the ${tldrMarker} summary must come before the first section`);
+      }
       if (node.type === "image") imageNodes.push(node);
       if (node.type === "paragraph" && node.children?.some((child) => child.type === "image")
         && (node.children.length !== 1)) problems.push("an image must stand alone in its own paragraph");
@@ -237,6 +257,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       if (node.type === "html") problems.push("raw HTML is not allowed in articles");
     });
 
+    if (tldrCount > 1) problems.push(`only one ${tldrMarker} summary is allowed`);
     const h1 = headings.filter((heading) => heading.depth === 1);
     if (h1.length !== 1) problems.push(`must contain exactly one H1, found ${h1.length}`);
     if (headings[0] && headings[0].depth !== 1) problems.push("the first heading must be the H1");
@@ -284,6 +305,16 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
     walk(hast, (node) => {
       if (node.type === "element" && node.tagName === "h2" && node.properties?.id) {
         toc.push({ id: String(node.properties.id), text: text(node) });
+        if ([faqHeadings[lang], sourcesHeadings[lang]].includes(text(node).trim())) node.properties.className = ["blog-appendix"];
+      }
+      if (node.type === "element" && node.tagName === "blockquote" && isTldr(node as never)) {
+        const first = node.children!.find((child) => child.tagName === "p")!;
+        const marker = first.children![0]!;
+        marker.value = marker.value!.replace(tldrMarker, "").replace(/^\s+/, "");
+        if (!marker.value && first.children!.length === 1) node.children = node.children!.filter((child) => child !== first);
+        node.tagName = "aside";
+        node.properties = { className: ["blog-tldr"], ariaLabel: tldrTitles[lang] };
+        node.children = [{ type: "element", tagName: "p", properties: { className: ["blog-tldr-title"] }, children: [{ type: "text", value: tldrTitles[lang] }] }, ...node.children!];
       }
       // A paragraph holding only an image becomes a figure with responsive WebP sources.
       const only = node.children?.length === 1 ? node.children[0] : undefined;

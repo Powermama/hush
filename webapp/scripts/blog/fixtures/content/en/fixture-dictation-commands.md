@@ -5,7 +5,7 @@ slug: fixture-dictation-commands
 lang: en
 keyword: fixture dictation commands
 secondaryKeywords: []
-type: guide
+type: essay
 cluster: fixture-cluster
 author: clemens-kressmann
 published: "2026-11-05"

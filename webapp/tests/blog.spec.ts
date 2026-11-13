@@ -54,7 +54,7 @@ test("BLOG-003 offers the right download action for the device", async ({ page, 
 test("BLOG-004 navigates with the table of contents and related articles", async ({ page, isMobile }) => {
   await page.goto(article);
   if (isMobile) await page.locator(".blog-toc-mobile summary").click();
-  const toc = page.locator(isMobile ? ".blog-toc-mobile" : ".blog-toc-desktop");
+  const toc = page.locator(isMobile ? ".blog-toc-mobile" : ".blog-sidebar");
   await toc.getByRole("link", { name: "Frequently asked questions" }).click();
   await expect(page).toHaveURL(/#frequently-asked-questions$/);
   await page.locator(".blog-related").getByRole("link", { name: /Second fixture heading/ }).click();
@@ -111,4 +111,18 @@ test("BLOG-007 links bylines to a prerendered author profile with ProfilePage da
   await expect(page).toHaveURL(/\/authors\/clemens-kressmann$/);
   await expect(page.locator(".blog-author-links").getByRole("link", { name: /LinkedIn/ })).toHaveAttribute("rel", "me noopener");
   expect((await page.request.get("/de/autoren/clemens-kressmann")).status()).toBe(200);
+});
+
+test("BLOG-008 lays out guides with a contents margin and essays as one column", async ({ page, isMobile }) => {
+  await page.goto(article);
+  if (!isMobile) {
+    await expect(page.locator(".blog-sidebar .blog-toc")).toBeVisible();
+    await expect(page.locator(".blog-sidebar .blog-share")).toBeVisible();
+    await expect(page.locator(".blog-share-end")).toBeHidden();
+  }
+  await page.goto("/blog/fixture-dictation-commands");
+  await expect(page.locator(".blog-sidebar")).toHaveCount(0);
+  await expect(page.locator(".blog-toc-mobile")).toHaveCount(0);
+  await expect(page.locator(".blog-share-end")).toBeVisible();
+  await expect(page.locator(".blog-share-end").getByRole(isMobile ? "button" : "link", { name: isMobile ? /Share|Copy link/ : "Share on LinkedIn" }).first()).toBeVisible();
 });

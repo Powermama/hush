@@ -32,14 +32,20 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 }
 .blog-byline a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgb(0 0 0 / 0.2); }
 
-.blog-article-layout { display: grid; gap: 48px; justify-content: center; grid-template-columns: minmax(0, 680px); }
+.blog-article-layout { display: grid; gap: 60px; justify-content: center; grid-template-columns: minmax(0, 680px); }
+/* Wide screens: a 212px margin column on the left (contents and sharing), the text beside it.
+   Everything else in the article lines up with the text column through --blog-text-left. */
 @media (min-width: 1024px) {
-  .blog-article-layout { grid-template-columns: minmax(0, 680px) 240px; }
-  .blog-article-header { margin-left: max(0px, calc((100% - 968px) / 2)); }
+  .blog-article-guide { --blog-text-left: max(0px, calc((100% - 952px) / 2 + 272px)); }
+  .blog-article-guide .blog-article-layout { grid-template-columns: 212px minmax(0, 680px); }
+  .blog-article-guide .blog-article-header { margin-left: var(--blog-text-left); }
 }
+/* Essays and news: one centred column, nothing in the margins. */
+.blog-article-essay { --blog-text-left: auto; }
 
-/* Table of contents: collapsed under the header on small screens, beside the opening on wide ones.
-   Not sticky: the best-read SaaS blogs give the text the stage once reading starts. */
+/* Contents: collapsed under the header on small screens. On wide screens it stays in the
+   left margin while reading, quiet grey with the current section in ink, as on the
+   best-read long-form SaaS guides (Intercom, AFFiNE, Ahrefs). */
 .blog-toc-mobile { max-width: 680px; margin: 0 auto 32px; border: 1px solid rgb(0 0 0 / 0.08); border-radius: 14px; background: #fff; }
 .blog-toc-mobile > summary { cursor: pointer; padding: 14px 18px; font-size: 14px; font-weight: 600; list-style: none; }
 .blog-toc-mobile > summary::-webkit-details-marker { display: none; }
@@ -49,10 +55,12 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 @media (prefers-reduced-motion: reduce) { .blog-toc-mobile > summary::after { transition: none; } }
 .blog-toc-mobile .blog-toc { padding: 0 18px 16px; }
 .blog-toc-mobile .blog-toc-title { display: none; }
-.blog-toc-desktop { display: none; }
+.blog-sidebar { display: none; }
 @media (min-width: 1024px) {
   .blog-toc-mobile { display: none; }
-  .blog-toc-desktop { display: block; }
+  .blog-sidebar { display: block; }
+  .blog-sidebar-sticky { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); display: grid; gap: 32px; }
+  .blog-article-guide .blog-share-end { display: none; }
 }
 .blog-toc-title { margin: 0 0 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
 /* A quiet rail; the section being read gets the ink segment and full contrast. */
@@ -73,6 +81,8 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-prose > :first-child { margin-top: 0; }
 .blog-prose p, .blog-prose ul, .blog-prose ol, .blog-prose table, .blog-prose blockquote { margin: 0 0 1.25em; }
 .blog-prose h2 { font-size: 1.6em; line-height: 1.2; letter-spacing: -0.025em; font-weight: 600; margin: 2.2em 0 0.6em; color: var(--color-ink); scroll-margin-top: 96px; }
+/* FAQ and sources close the article: a rule sets them apart from the body. */
+.blog-prose h2.blog-appendix { margin-top: 2.6em; padding-top: 1.6em; border-top: 1px solid rgb(0 0 0 / 0.1); }
 .blog-prose h3 { font-size: 1.2em; line-height: 1.3; font-weight: 600; margin: 1.8em 0 0.5em; color: var(--color-ink); scroll-margin-top: 96px; }
 .blog-prose h4 { font-size: 1em; font-weight: 600; margin: 1.5em 0 0.4em; }
 .blog-prose a { color: #1c5d8a; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
@@ -99,9 +109,40 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-prose th, .blog-prose td { padding: 10px 14px; border-bottom: 1px solid rgb(0 0 0 / 0.08); text-align: left; vertical-align: top; min-width: 120px; }
 .blog-prose th { font-weight: 600; color: var(--color-ink); background: rgb(0 0 0 / 0.025); }
 
+/* TL;DR summary box at the start of an article ("> [!TLDR]" in Markdown). */
+.blog-prose .blog-tldr {
+  margin: 0 0 1.6em; padding: 20px 22px 6px; border-radius: 18px; border: 1px solid rgb(118 103 215 / 0.18);
+  background: radial-gradient(90% 120% at 100% 0%, rgb(201 184 255 / 0.22), transparent 70%), #fbfaff;
+}
+.blog-prose .blog-tldr-title { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7667d7; }
+.blog-prose .blog-tldr ul { list-style: none; padding: 0; margin: 0 0 14px; }
+.blog-prose .blog-tldr li { position: relative; margin: 0; padding: 9px 0 9px 30px; border-top: 1px solid rgb(118 103 215 / 0.12); font-size: 0.94em; line-height: 1.55; }
+.blog-prose .blog-tldr li:first-child { border-top: 0; }
+.blog-prose .blog-tldr li::before {
+  content: ""; position: absolute; left: 2px; top: 13px; width: 16px; height: 16px; border-radius: 50%; background: #7667d7; }
+.blog-prose .blog-tldr li::after {
+  content: ""; position: absolute; left: 7px; top: 17px; width: 6px; height: 4px; border: solid #fff; border-width: 0 0 1.6px 1.6px; transform: rotate(-45deg);
+}
+.blog-prose .blog-tldr p:not(.blog-tldr-title) { margin: 0 0 14px; }
+
+/* Share: in the margin column on wide screens, after the article on small ones. */
+.blog-share-title { margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
+.blog-share-actions { display: flex; gap: 8px; }
+.blog-share-actions > a, .blog-share-actions > button {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid rgb(0 0 0 / 0.08);
+  background: #fff; color: var(--color-muted); cursor: pointer; transition: color 0.2s, border-color 0.2s;
+}
+.blog-share-actions > a:hover, .blog-share-actions > button:hover, .blog-share-actions > a:focus-visible, .blog-share-actions > button:focus-visible { color: var(--color-ink); border-color: rgb(0 0 0 / 0.2); }
+.blog-share-actions svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.blog-share-actions svg.blog-share-filled { fill: currentColor; stroke: none; }
+.blog-share-actions > .blog-share-native { display: inline-flex; gap: 8px; width: auto; padding: 0 16px; font-size: 14px; font-weight: 600; color: var(--color-ink); }
+.blog-share-status { min-height: 1.2em; margin: 8px 0 0; font-size: 12px; color: var(--color-muted); }
+.blog-share-end { max-width: 680px; margin: 40px auto 0; }
+@media (max-width: 1023px) { .blog-author-card { margin-top: 28px; } .blog-share-status:empty { display: none; } }
+
 /* Download card: replays one dictation with the app's HUD. */
 .blog-cta { max-width: 680px; margin: 40px auto 0; border-radius: 24px; overflow: hidden; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 16px 40px rgb(31 32 30 / 0.07); }
-@media (min-width: 1024px) { .blog-cta { margin-left: max(0px, calc((100% - 968px) / 2)); } }
+@media (min-width: 1024px) { .blog-cta { margin-left: var(--blog-text-left); } }
 /* A cropped piece of a Mac screen: the Mail window runs off the right and
    bottom edges, the HUD floats where the app shows it. */
 .blog-cta-stage {
@@ -184,7 +225,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
     #fff;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.03), 0 16px 40px rgb(31 32 30 / 0.05);
 }
-@media (min-width: 1024px) { .blog-author-card { margin-left: max(0px, calc((100% - 968px) / 2)); } }
+@media (min-width: 1024px) { .blog-author-card { margin-left: var(--blog-text-left); } }
 .blog-author-card p { margin: 0; }
 .blog-author-card-head { display: flex; align-items: center; gap: 18px; }
 .blog-author-card .blog-author-avatar { box-shadow: 0 0 0 4px #fff, 0 0 0 5px rgb(0 0 0 / 0.06), 0 10px 24px rgb(31 32 30 / 0.14); }

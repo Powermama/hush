@@ -4,6 +4,17 @@ import type { BlogAuthorId } from "./authors.ts";
 
 export type BlogLanguage = "en" | "de";
 
+export type BlogArticleType = "how-to" | "comparison" | "guide" | "listicle" | "essay" | "news";
+
+/**
+ * Long guides get the margin column with contents and sharing, as on Intercom,
+ * AFFiNE and Ahrefs. Essays and news read as one calm column, as on Notion and
+ * Linear, with sharing after the text.
+ */
+export function hasReadingSidebar(type: BlogArticleType) {
+  return type !== "essay" && type !== "news";
+}
+
 /** Public metadata of a published article. Generated; HTML lives in its own chunk. */
 export type BlogPostMetadata = {
   slug: string;
@@ -12,7 +23,7 @@ export type BlogPostMetadata = {
   title: string;
   description: string;
   heading: string;
-  type: "how-to" | "comparison" | "guide" | "listicle" | "news";
+  type: BlogArticleType;
   cluster: string;
   author: BlogAuthorId;
   published: string;
@@ -37,6 +48,11 @@ export const blogCopy = {
     allArticles: "All articles",
     readArticle: "Read article",
     writtenBy: "Written by",
+    share: "Share",
+    copyLink: "Copy link",
+    linkCopied: "Link copied",
+    shareOn: (network: string) => `Share on ${network}`,
+    shareByEmail: "Share by email",
     moreBy: (firstName: string) => `All articles by ${firstName}`,
     authorDescription: (name: string) => `Articles by ${name} on dictation, speech-to-text and local AI on Mac, with background and profiles.`,
     authorArticles: "Articles",
@@ -72,6 +88,11 @@ export const blogCopy = {
     allArticles: "Alle Artikel",
     readArticle: "Artikel lesen",
     writtenBy: "Geschrieben von",
+    share: "Teilen",
+    copyLink: "Link kopieren",
+    linkCopied: "Link kopiert",
+    shareOn: (network: string) => `Auf ${network} teilen`,
+    shareByEmail: "Per E-Mail teilen",
     moreBy: (firstName: string) => `Alle Artikel von ${firstName}`,
     authorDescription: (name: string) => `Artikel von ${name} zu Diktat, Spracherkennung und lokaler KI auf dem Mac, mit Hintergrund und Profilen.`,
     authorArticles: "Artikel",

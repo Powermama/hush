@@ -86,6 +86,7 @@ describe("blog content pipeline", () => {
     expect(first.html).not.toContain("<h1");
     expect(first.html).toContain('<h2 id="how-does-the-fixture-render">');
     expect(first.toc.map((entry) => entry.id)).toEqual(["how-does-the-fixture-render", "frequently-asked-questions"]);
+    expect(first.html).toContain('<h2 id="frequently-asked-questions" class="blog-appendix">');
     expect(first.html).toContain("<table>");
     expect(posts.some((post) => post.slug === "fixture-draft")).toBe(false);
   });
@@ -204,5 +205,21 @@ describe("blog content pipeline", () => {
     expect(errors).toContain("needs alt text of 10 to 160 characters");
     expect(errors).toContain("must live in media/dictate-without-cloud/");
     expect(errors).toContain("an image must stand alone in its own paragraph");
+  });
+
+  test("turns a [!TLDR] blockquote before the first section into the summary box", async () => {
+    const body = validBody.replace("The answer comes first.", "The answer comes first.\n\n> [!TLDR]\n> - **Restart** the service.\n> - Pick the microphone.");
+    const { posts, errors } = await buildBlog(await contentWith({ "en/dictate-without-cloud.md": article({}, body) }), staticPaths);
+    expect(errors).toEqual([]);
+    expect(posts[0]!.html).toContain('<aside class="blog-tldr" aria-label="In short"><p class="blog-tldr-title">In short</p>');
+    expect(posts[0]!.html).toContain("<li><strong>Restart</strong> the service.</li>");
+    expect(posts[0]!.html).not.toContain("[!TLDR]");
+  });
+
+  test("allows one [!TLDR] summary, only before the first section", async () => {
+    const late = validBody.replace("Text.", "Text.\n\n> [!TLDR]\n> Late.").replace("The answer comes first.", "> [!TLDR]\n> Early.");
+    const errors = (await buildBlog(await contentWith({ "en/dictate-without-cloud.md": article({}, late) }), staticPaths)).errors.join("\n");
+    expect(errors).toContain("must come before the first section");
+    expect(errors).toContain("only one [!TLDR] summary is allowed");
   });
 });

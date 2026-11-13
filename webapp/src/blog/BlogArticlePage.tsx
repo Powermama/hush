@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 import { authorPath, blogAuthors, type BlogAuthor, type BlogAuthorId } from "../../shared/authors";
-import { blogCopy, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
+import { blogCopy, hasReadingSidebar, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
 import { Header } from "../layout/Header";
 import { BlogDownloadCard } from "./BlogDownloadCard";
+import { BlogShare } from "./BlogShare";
 import { useActiveSection } from "./useActiveSection";
 import "./blog.css";
 
@@ -89,7 +90,8 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
   const copy = blogCopy[lang];
   const related = relatedPosts(post);
   const active = useActiveSection(post.toc.map((entry) => entry.id));
-  const toc = post.toc.length > 1 && (
+  const sidebar = hasReadingSidebar(post.type);
+  const toc = sidebar && post.toc.length > 1 && (
     <nav aria-label={copy.onThisPage} className="blog-toc">
       <p className="blog-toc-title">{copy.onThisPage}</p>
       <ol>
@@ -107,7 +109,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
       <DocumentMetadata title={post.title} description={post.description} canonicalPath={post.path} language={lang} />
       <BlogHeader lang={lang} />
       <main className="blog-article-main">
-        <article className="blog-article" aria-labelledby="article-title">
+        <article className={`blog-article ${sidebar ? "blog-article-guide" : "blog-article-essay"}`} aria-labelledby="article-title">
           <header className="blog-article-header">
             <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
             <h1 id="article-title">{post.heading}</h1>
@@ -120,9 +122,18 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
           </header>
           {toc && <details className="blog-toc-mobile"><summary>{copy.onThisPage}</summary>{toc}</details>}
           <div className="blog-article-layout">
+            {/* Wide screens: a quiet, sticky margin column with the contents and sharing. */}
+            {sidebar && (
+              <aside className="blog-sidebar">
+                <div className="blog-sidebar-sticky">
+                  {toc}
+                  <BlogShare lang={lang} path={post.path} title={post.title} />
+                </div>
+              </aside>
+            )}
             <div className="blog-prose" data-blog-body="" dangerouslySetInnerHTML={{ __html: html }} />
-            {toc && <aside className="blog-toc-desktop">{toc}</aside>}
           </div>
+          <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-end" />
           <BlogAuthorCard lang={lang} author={post.author} />
           <BlogDownloadCard lang={lang} />
         </article>
