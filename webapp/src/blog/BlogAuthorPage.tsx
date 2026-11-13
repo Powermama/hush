@@ -41,7 +41,7 @@ export function BlogAuthorPage({ lang, author }: { lang: BlogLanguage; author: B
         </header>
         <section aria-labelledby="author-articles">
           <h2 id="author-articles" className="blog-author-section">{copy.authorArticles}</h2>
-          <BlogPostList lang={lang} posts={posts} />
+          <BlogPostList posts={posts} />
         </section>
       </main>
       <BlogDownloadBand lang={lang} />

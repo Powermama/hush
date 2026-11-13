@@ -49,7 +49,7 @@ const moduleName = (post: BlogPost) => `${post.lang}/${post.slug}`;
 
 const outputs = new Map<string, string>();
 
-const metadata = posts.map(({ html: _html, keyword: _keyword, images: _images, cover, ...post }) => ({ ...post, socialImage: cover.path }));
+const metadata = posts.map(({ html: _html, keyword: _keyword, images: _images, cover, ...post }) => ({ ...post, socialImage: cover.path, cardImage: cover.cardPath }));
 outputs.set("shared/blog-posts.generated.ts", `${header}import type { BlogPostMetadata } from "./blog.ts";
 
 export const blogPosts: readonly BlogPostMetadata[] = ${json(metadata)};
@@ -131,7 +131,7 @@ for (const lang of languagesWithPosts) outputs.set(`public${blogPath(lang)}/feed
 const mediaDir = "public/blog/media";
 const coversDir = "public/blog/covers";
 const imageFiles = new Map(posts.flatMap((post) => post.images).map((image) => [`public${image.path}`, image]));
-const coverFiles = new Set(posts.map((post) => `public${post.cover.path}`));
+const coverFiles = new Set(posts.flatMap((post) => [`public${post.cover.path}`, `public${post.cover.cardPath}`]));
 
 // Files a previous run produced that no longer have a source.
 async function staleFiles() {
@@ -168,9 +168,12 @@ for (const [path, image] of imageFiles) {
 }
 const missingCovers = [];
 for (const post of posts) {
-  const path = `public${post.cover.path}`;
-  if (await Bun.file(path).exists()) continue;
-  changed.push(path);
+  // The social PNG and the card WebP are rendered together; either missing re-renders both.
+  const paths = [`public${post.cover.path}`, `public${post.cover.cardPath}`];
+  const missing = [];
+  for (const path of paths) if (!await Bun.file(path).exists()) missing.push(path);
+  if (!missing.length) continue;
+  changed.push(...missing);
   missingCovers.push(post.cover);
 }
 const stale = await staleFiles();
@@ -187,7 +190,7 @@ if (!check) {
       await sharp(image.source).resize({ width: image.width }).webp({ quality: 82 }).toFile(staged);
     }
     await renderCovers(missingCovers, join(stagingDir, "public"));
-    for (const path of [...missingImages.keys(), ...missingCovers.map((cover) => `public${cover.path}`)]) {
+    for (const path of [...missingImages.keys(), ...missingCovers.flatMap((cover) => [`public${cover.path}`, `public${cover.cardPath}`])]) {
       await mkdir(dirname(path), { recursive: true });
       await copyFile(join(stagingDir, path), path);
     }

@@ -55,8 +55,10 @@ export type BlogCoverPlan = {
   hash: string;
   lang: BlogLanguage;
   title: string;
-  /** The 1200x630 PNG for link previews only. */
+  /** The 1200x630 PNG for link previews. */
   path: string;
+  /** The same artwork as an 800px WebP for article cards. */
+  cardPath: string;
 };
 
 export const coverTemplatePath = join(import.meta.dir, "cover-template.html");
@@ -415,6 +417,7 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       cover: {
         hash: coverHash, lang, title: heading,
         path: `${coverBase}-social.png`,
+        cardPath: `${coverBase}-card.webp`,
       },
     });
   }

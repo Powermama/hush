@@ -216,26 +216,40 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 
 /* Related and index lists */
 /* Same left edge and width as the article column plus its table of contents. */
-.blog-related { max-width: 968px; margin: 72px auto 0; }
+/* Related articles under an article: the same cards as the index. */
+.blog-related { max-width: 1160px; margin: 80px auto 0; }
 .blog-related h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); margin: 0 0 16px; }
-.blog-related ul, .blog-index-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
-@media (min-width: 768px) { .blog-related ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.blog-related li, .blog-index-list li { border-radius: 16px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); transition: border-color 0.2s; }
-.blog-related li:hover, .blog-index-list li:hover { border-color: rgb(0 0 0 / 0.16); }
-.blog-related a, .blog-index-list a { display: block; padding: 20px; height: 100%; }
-.blog-related-title { display: block; font-weight: 600; line-height: 1.35; color: var(--color-ink); }
-.blog-related-description { display: block; margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--color-muted); }
-.blog-related-more { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--color-ink); }
-.blog-related a:hover .blog-related-title, .blog-related a:focus-visible .blog-related-title { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.blog-related-more { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--color-ink); }
 
-.blog-index-header { max-width: 760px; margin: 0 auto 40px; }
-.blog-index-header h1 { font-size: clamp(36px, 6vw, 56px); line-height: 1.05; letter-spacing: -0.04em; font-weight: 600; margin: 0; }
-.blog-index-header p { margin: 14px 0 0; font-size: 17px; line-height: 1.6; color: var(--color-muted); }
-.blog-index-list { max-width: 760px; margin: 0 auto; }
-.blog-index-list h2 { margin: 0; font-size: 22px; line-height: 1.3; letter-spacing: -0.02em; font-weight: 600; }
-.blog-index-list p { margin: 8px 0 12px; font-size: 15px; line-height: 1.6; color: var(--color-muted); }
-.blog-index-meta { display: block; font-size: 13px; color: var(--color-muted); }
-.blog-index-list a:hover h2, .blog-index-list a:focus-visible h2 { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+/* Blog index: a tinted band with the title, lead and topic filters, then the card grid. */
+.blog-index-band { padding: 72px 20px 40px; background: radial-gradient(60% 140% at 100% 0%, rgb(201 184 255 / 0.18), transparent 70%), #f1eff6; border-bottom: 1px solid rgb(0 0 0 / 0.05); }
+.blog-index-band-inner { max-width: 1160px; margin: 0 auto; }
+.blog-index-band h1 { margin: 0; font-size: clamp(36px, 6vw, 56px); line-height: 1.05; letter-spacing: -0.04em; font-weight: 600; }
+.blog-index-band p { max-width: 640px; margin: 16px 0 0; font-size: 18px; line-height: 1.6; color: var(--color-muted); }
+.blog-topics { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.blog-topics button {
+  min-height: 42px; padding: 0 18px; border-radius: 999px; border: 1px solid rgb(0 0 0 / 0.1); background: #fff;
+  font-size: 14px; font-weight: 600; color: var(--color-ink); cursor: pointer; transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.blog-topics button:hover { border-color: rgb(0 0 0 / 0.24); }
+.blog-topics button[aria-pressed="true"] { background: var(--color-ink); border-color: var(--color-ink); color: #fff; }
+/* Same content edges as the band above: 1160px plus the 20px page padding on each side. */
+.blog-index-grid { max-width: 1200px; margin: 0 auto; padding: 48px 20px 96px; }
+
+/* Article card */
+.blog-card-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.blog-card { border-radius: 20px; overflow: hidden; background: #fff; border: 1px solid rgb(0 0 0 / 0.07); box-shadow: 0 1px 2px rgb(0 0 0 / 0.03); transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; }
+.blog-card:hover, .blog-card:focus-within { border-color: rgb(118 103 215 / 0.28); box-shadow: 0 1px 2px rgb(0 0 0 / 0.03), 0 18px 44px rgb(64 52 140 / 0.1); }
+.blog-card > a { display: flex; flex-direction: column; height: 100%; color: inherit; }
+.blog-card-image { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 630; object-fit: cover; background: #f3f0f8; border-bottom: 1px solid rgb(0 0 0 / 0.05); }
+.blog-card-body { display: flex; flex-direction: column; flex: 1; padding: 22px 24px 24px; }
+.blog-card-topic { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #6457c8; }
+.blog-card-title { margin: 10px 0 0; font-size: 20px; line-height: 1.3; letter-spacing: -0.02em; font-weight: 600; color: var(--color-ink); text-wrap: balance; }
+.blog-card > a:hover .blog-card-title, .blog-card > a:focus-visible .blog-card-title { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.blog-card-summary { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--color-muted); }
+.blog-card-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: auto; padding-top: 22px; }
+.blog-card-meta { font-size: 13px; color: var(--color-muted); }
+@media (prefers-reduced-motion: reduce) { .blog-card { transition: none; } }
 
 /* Author profile */
 .blog-author-header { max-width: 760px; margin: 0 auto 48px; }

@@ -8,6 +8,7 @@ import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
 import { Header } from "../layout/Header";
 import { BlogDownloadBand } from "./BlogDownloadBand";
+import { BlogPostList } from "./BlogIndexPage";
 import { BlogShare } from "./BlogShare";
 import "./blog.css";
 
@@ -125,17 +126,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
         {related.length > 0 && (
           <section className="blog-related" aria-labelledby="blog-related-title">
             <h2 id="blog-related-title">{copy.related}</h2>
-            <ul>
-              {related.map((item) => (
-                <li key={item.slug}>
-                  <a href={item.path}>
-                    <span className="blog-related-title">{item.heading}</span>
-                    <span className="blog-related-description">{item.description}</span>
-                    <span className="blog-related-more">{copy.readArticle}<BlogArrow direction="forward" /></span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <BlogPostList posts={related} headingLevel={3} />
           </section>
         )}
       </main>

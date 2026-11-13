@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 //
-// Renders 1200x630 social previews (PNG) from cover-template.html. Covers are
+// Renders 1200x630 social previews (PNG) and 800px card images (WebP) from cover-template.html. Covers are
 // committed; this only runs for covers whose files are missing.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -37,6 +37,7 @@ export async function renderCovers(covers: BlogCoverPlan[], publicDir = "public"
         const png = await page.screenshot({ type: "png" });
         await mkdir(dirname(`${publicDir}${cover.path}`), { recursive: true });
         await writeFile(`${publicDir}${cover.path}`, await sharp(png).png({ compressionLevel: 9 }).toBuffer());
+        await writeFile(`${publicDir}${cover.cardPath}`, await sharp(png).resize({ width: 800 }).webp({ quality: 84 }).toBuffer());
       } finally {
         await page.close();
       }

@@ -17,10 +17,13 @@ written with the hush-seo skill and reviewed by the author before publishing.
 | BLOG-006 | No horizontal page scrolling (tables scroll in their own box) and no runtime CSS or SVG filters (LANDING-PAINT-001). | BLOG-006 |
 | BLOG-007 | The byline leads to the prerendered author page (`/authors/<id>`, `/de/autoren/<id>`) with `og:type profile`, `ProfilePage` data whose `Person` lists the author's profiles as `sameAs`, and the author's articles in that language. | BLOG-007 |
 | BLOG-008 | Articles read as one centred column with no contents sidebar or menu, as on Notion, Linear and Stripe; sharing follows the text. | BLOG-008 |
-| BLOG-009 | Each article has a content-versioned 1200x630 PNG shared by Open Graph, Twitter and `BlogPosting` metadata. This artwork appears only in link previews, with no article hero or listing thumbnails. | BLOG-009 |
+| BLOG-009 | Each article has a content-versioned 1200x630 PNG shared by Open Graph, Twitter and `BlogPosting` metadata, and an 800px WebP of the same artwork on article cards. It never appears as a hero above the article text. | BLOG-009 |
 | BLOG-010 | Responsive article figures include a labelled full-size image link that opens in a new tab, including on phones. | BLOG-010 |
 | BLOG-011 | The entire author card, including its padding, opens the author profile. | BLOG-011 |
 | BLOG-012 | Scrolling keeps selected article text and figures intact. | BLOG-012 |
+| BLOG-013 | The footer links to the editorial policy, which explains research, testing, AI use, corrections and the absence of affiliate links in both blog languages. | BLOG-013 |
+| BLOG-014 | Code blocks have a localized copy button that copies the command and confirms with "Copied". | BLOG-014 |
+| BLOG-015 | The blog index shows a tinted header with topic filters and articles as cards with artwork, topic, summary, author and reading time. | BLOG-015 |
 
 The browser tests run in CI against fixture articles in
 `scripts/blog/fixtures/content`, generated only inside the CI job. With the

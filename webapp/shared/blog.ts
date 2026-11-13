@@ -48,6 +48,8 @@ export type BlogPostMetadata = {
   toc: ReadonlyArray<{ id: string; text: string }>;
   /** A 1200x630 PNG used only in link previews and structured data. */
   socialImage: string;
+  /** The same artwork as an 800px WebP for article cards. */
+  cardImage: string;
 };
 
 export const blogCopy = {
@@ -58,11 +60,14 @@ export const blogCopy = {
     heading: "The hush blog",
     lead: "Practical guides to dictation, speech-to-text and local AI on Mac.",
     readingTime: (minutes: number) => `${minutes} min read`,
+    readingTimeShort: (minutes: number) => `${minutes} min`,
     published: "Published",
     updated: "Updated",
     related: "Keep reading",
     allArticles: "All articles",
     readArticle: "Read article",
+    topics: "Topics",
+    allTopics: "All",
     editorialTitle: "Editorial policy - hush blog",
     editorialHeading: "Editorial policy",
     editorialDescription: "How the hush blog researches, tests, writes and corrects its articles: primary sources with dates, our own tests, reviewed AI use and no affiliate links.",
@@ -100,11 +105,14 @@ export const blogCopy = {
     heading: "Der hush Blog",
     lead: "Praktische Anleitungen zu Diktat, Spracherkennung und lokaler KI auf dem Mac.",
     readingTime: (minutes: number) => `${minutes} Min. Lesezeit`,
+    readingTimeShort: (minutes: number) => `${minutes} Min.`,
     published: "Veröffentlicht",
     updated: "Aktualisiert",
     related: "Weiterlesen",
     allArticles: "Alle Artikel",
     readArticle: "Artikel lesen",
+    topics: "Themen",
+    allTopics: "Alle",
     editorialTitle: "Redaktionelle Richtlinien - hush Blog",
     editorialHeading: "Redaktionelle Richtlinien",
     editorialDescription: "Wie der hush Blog Artikel recherchiert, testet, schreibt und korrigiert: Primärquellen mit Datum, eigene Tests, geprüfter KI-Einsatz, keine Affiliate-Links.",

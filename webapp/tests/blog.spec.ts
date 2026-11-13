@@ -72,7 +72,7 @@ test("BLOG-004 links section headings and continues to related articles", async 
 test("BLOG-005 lists articles per language and keeps drafts and unknown slugs out", async ({ page, request }) => {
   await page.goto("/blog");
   await expect(page.getByRole("heading", { level: 1, name: "The hush blog" })).toBeVisible();
-  await expect(page.locator(".blog-index-list li")).toHaveCount(2);
+  await expect(page.locator(".blog-card-grid .blog-card")).toHaveCount(2);
   await page.goto("/de/blog");
   await expect(page.getByRole("heading", { level: 1, name: "Der hush Blog" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
@@ -109,7 +109,7 @@ test("BLOG-007 links bylines to a prerendered author profile with ProfilePage da
       image: "https://behu.sh/media/authors/clemens-kressmann.webp",
       sameAs: ["https://www.linkedin.com/in/clemens-kressmann/", "https://github.com/Powermama"] },
   });
-  await expect(plain.locator(".blog-index-list li")).toHaveCount(2);
+  await expect(plain.locator(".blog-card-grid .blog-card")).toHaveCount(2);
   expect((await plain.request.get("/media/authors/clemens-kressmann.webp")).headers()["content-type"]).toBe("image/webp");
   await context.close();
 
@@ -145,7 +145,7 @@ test("BLOG-008 keeps the way back and sharing in a quiet margin, with no content
   }
 });
 
-test("BLOG-009 serves the article artwork only as a social preview", async ({ page, request }) => {
+test("BLOG-009 serves the article artwork as the social preview and on cards, never as an article hero", async ({ page, request }) => {
   await page.goto(article);
   const image = await page.locator('meta[property="og:image"]').getAttribute("content");
   expect(image).toMatch(/^https:\/\/behu\.sh\/blog\/covers\/fixture-dictation-without-cloud-[a-f0-9]{10}-social\.png$/);
@@ -166,9 +166,10 @@ test("BLOG-009 serves the article artwork only as a social preview", async ({ pa
   expect(response.headers()["content-type"]).toContain("image/png");
   const png = await response.body();
   expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1200, 630]);
-  await expect(page.locator('img[src*="/blog/covers/"]')).toHaveCount(0);
+  // On the article itself the artwork appears only on cards for other articles, never above the text.
+  await expect(page.locator('.blog-article img[src*="/blog/covers/"]')).toHaveCount(0);
   await page.goto("/blog");
-  await expect(page.locator('img[src*="/blog/covers/"]')).toHaveCount(0);
+  await expect(page.locator('.blog-card img[src*="/blog/covers/"][src$="-card.webp"]')).toHaveCount(2);
 });
 
 test("BLOG-010 opens a full-size article image in a new tab", async ({ page }) => {
@@ -228,4 +229,20 @@ test("BLOG-014 copies a command from a code block with one click", async ({ page
   await expect(button).toHaveText("Copied");
   if (browserName === "chromium") expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("killall corespeechd");
   await expect(button).toHaveText("Copy", { timeout: 4000 });
+});
+
+test("BLOG-015 lists articles as cards with artwork and filters them by topic", async ({ page, request }) => {
+  await page.goto("/blog");
+  const cards = page.locator(".blog-card-grid .blog-card");
+  await expect(cards).toHaveCount(2);
+  const image = cards.first().locator("img.blog-card-image");
+  await expect(image).toBeVisible();
+  expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(800);
+  expect((await request.get((await image.getAttribute("src"))!)).headers()["content-type"]).toBe("image/webp");
+  await expect(cards.first().locator(".blog-card-topic")).toHaveText("Dictation without the cloud");
+  const topics = page.getByRole("group", { name: "Topics" });
+  await expect(topics.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
+  await topics.getByRole("button", { name: "Dictation without the cloud" }).click();
+  await expect(topics.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "false");
+  await expect(cards).toHaveCount(2);
 });
