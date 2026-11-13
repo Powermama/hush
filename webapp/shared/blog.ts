@@ -127,7 +127,7 @@ export const blogCopy = {
     authorArticles: "Artikel",
     authorElsewhere: "Profile",
     ctaTitle: "Diktieren auf dem Mac, mit Modellen, die lokal laufen",
-    ctaDownload: "Für den Mac laden",
+    ctaDownload: "Download für Mac",
     ctaMobile: "hush für den Mac holen",
     ctaDemos: [
       { kind: "mail", app: "Mail", title: "Neue E-Mail", fields: [["An:", "Anna Weber"], ["Betreff:", "Feedback zum Pitch Deck"]],
