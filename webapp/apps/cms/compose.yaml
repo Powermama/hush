@@ -2,10 +2,10 @@
 # backups) and its own PostgreSQL. Coolify deploys this file as a Docker
 # Compose resource; any Docker Compose host runs it the same way. It publishes
 # the API on the host's loopback only. compose.local.yaml adds what local
-# development needs, and webapp/compose.yaml includes both. Secrets are references: their values live
-# in the platform's secret store. Empty defaults keep local runs quiet; in
-# production the CMS refuses to start when a bucket lacks its keys, and
-# PostgreSQL refuses an empty password.
+# development needs, and webapp/compose.yaml includes both. Secrets are
+# references: their values live in the platform's secret store. Empty defaults
+# keep local runs quiet; in production the CMS refuses to start when a bucket
+# lacks its keys, and PostgreSQL refuses an empty password.
 x-cms-environment: &cms-environment
   NODE_ENV: ${NODE_ENV:-production}
   CMS_DATABASE_URL: postgresql://cms:${SERVICE_PASSWORD_64_CMSPOSTGRES:-}@cms-postgres:5432/cms
