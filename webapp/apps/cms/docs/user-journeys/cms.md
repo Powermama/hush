@@ -17,12 +17,16 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-MEDIA-001 | An article referencing `media/<slug>/<name>` cannot go live until that image is uploaded; once it is, the post renders a figure with responsive WebP sources (680 px and 2x) and the renditions exist in storage. | `tests/media.test.ts` |
 | CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
 | CMS-IMPORT-001 | `bun run cms:import <dir>` imports hush-seo Markdown articles with their images, keeps drafts as drafts and publishes the rest with their original dates, in an order that satisfies links between them. | `tests/import.test.ts` |
-| CMS-IMPORT-002 | Running the import again matches posts by language and slug and changes nothing but its revisions. | `tests/import.test.ts` |
+| CMS-IMPORT-002 | Running the import again matches posts by language and slug; an unchanged article keeps its date, revisions and site revision. | `tests/import.test.ts` |
+| CMS-SITE-001 | `GET /v1/site/export` (read scope) returns every published post as a hush-seo Markdown file with its image list and the site revision; each file parses back and renders to exactly the stored HTML, and `GET /v1/media/{sha256}` returns the original image. | `tests/site.test.ts` |
+| CMS-SITE-002 | Publishing, editing a live post, unpublishing and a scheduled post going live each take the next site revision, recording the article and its blog index; edits to drafts do not. | `tests/site.test.ts` |
+| CMS-SITE-003 | When the live site serves an older revision, the scheduler asks Coolify for one website deploy per 20-minute window; once the site serves the revision, it submits every changed page to IndexNow exactly once. | `tests/site.test.ts` |
+| CMS-SITE-004 | IndexNow rate limits and server errors are retried on the next tick; a refusal (such as a missing key file) is logged and not retried. | `tests/site.test.ts` |
 | CMS-BACKUP-001 | A backup restores into a fresh database with every post, keyword and token intact. | `scripts/backup-drill.sh` (CI) |
 | CMS-BACKUP-002 | Backups are named by time, listed newest first and kept for the configured days; the newest is never removed. | `tests/backups.test.ts` |
 | CMS-SCHEDULER-001 | The scheduler publishes due posts every minute and takes a backup whenever the newest is a day old. | `src/jobs/scheduler.ts`, CMS-API-005 |
 | CMS-ISOLATION-001 | The CMS imports nothing from the website and never reads the proof service's database URL or signing key. | `tests/boundary.test.ts` |
 
 The import of the live article renders HTML byte-identical to the website's
-static build. The website reading published posts and the admin UI arrive in
-later milestones of the CMS PRD.
+static build. The website builds its blog from the export (M2); the admin UI
+arrives in a later milestone of the CMS PRD.

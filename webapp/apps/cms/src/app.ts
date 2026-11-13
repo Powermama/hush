@@ -7,6 +7,7 @@ import { PostError } from "./posts/service";
 import { healthRoutes } from "./routes/health";
 import { validationHook } from "./routes/errors";
 import { postRoutes } from "./routes/posts";
+import { siteRoutes } from "./routes/site";
 
 export function createApp(cms: Cms, options: { isDraining?: () => boolean } = {}) {
   const app = new OpenAPIHono({ defaultHook: validationHook });
@@ -22,6 +23,7 @@ export function createApp(cms: Cms, options: { isDraining?: () => boolean } = {}
   });
   app.route("/", healthRoutes(cms.db, options.isDraining ?? (() => false)));
   app.route("/", postRoutes(cms));
+  app.route("/", siteRoutes(cms));
   app.openAPIRegistry.registerComponent("securitySchemes", "bearer", { type: "http", scheme: "bearer" });
   app.doc31("/openapi.json", { openapi: "3.1.0", info: { title: "hush CMS", version: "1.0.0" } });
   return app;
