@@ -187,7 +187,11 @@ describe("blog content pipeline", () => {
     expect(html).toMatch(/srcset="\/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-680\.webp 680w, \/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-900\.webp 900w"/);
     expect(html).toContain('width="680" height="340"');
     expect(html).toContain('loading="lazy"');
-    expect(html).toContain("<figcaption>Our test Mac</figcaption>");
+    expect(html).toContain("<figcaption>Our test Mac");
+    expect(html).toMatch(/href="\/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-900\.webp"/);
+    expect(html).toContain('aria-label="Open full-size image (new tab): Keyboard settings with the Dictation section"');
+    expect(html).toContain('target="_blank" rel="noopener"');
+    expect(html).toContain("View full-size image</a></figcaption>");
     expect(posts[0]!.images.map((image) => image.width)).toEqual([680, 900]);
   });
 
@@ -205,6 +209,24 @@ describe("blog content pipeline", () => {
     expect(errors).toContain("needs alt text of 10 to 160 characters");
     expect(errors).toContain("must live in media/dictate-without-cloud/");
     expect(errors).toContain("an image must stand alone in its own paragraph");
+  });
+
+  test("versions social previews when the headline changes and separates languages", async () => {
+    const en = article();
+    const de = article({ lang: "de" }).replace("## Frequently asked questions", "## Häufige Fragen");
+    const dir = await contentWith({ "en/dictate-without-cloud.md": en, "de/dictate-without-cloud.md": de });
+    const first = await buildBlog(dir, staticPaths);
+    expect(first.errors).toEqual([]);
+    const english = first.posts.find(post => post.lang === "en")!;
+    const german = first.posts.find(post => post.lang === "de")!;
+    expect(english.cover.path).toMatch(/^\/blog\/covers\/dictate-without-cloud-[a-f0-9]{10}-social\.png$/);
+    expect(english.cover.path).not.toBe(german.cover.path);
+    expect((await buildBlog(dir, staticPaths)).posts).toEqual(first.posts);
+    await writeFile(join(dir, "en/dictate-without-cloud.md"), en.replace("# How to dictate on a Mac without the cloud", "# Local dictation on a Mac, step by step"));
+    const changed = await buildBlog(dir, staticPaths);
+    expect(changed.errors).toEqual([]);
+    expect(changed.posts.find(post => post.lang === "en")!.cover.path).not.toBe(english.cover.path);
+    expect(changed.posts.find(post => post.lang === "de")!.cover.path).toBe(german.cover.path);
   });
 
   test("turns a [!TLDR] blockquote before the first section into the summary box", async () => {

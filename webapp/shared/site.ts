@@ -22,6 +22,8 @@ export type PageMetadata = {
     published: string;
     modified: string;
     imageAlt: string;
+    /** Site path of the 1200x630 social preview. */
+    image: string;
   };
   /** Present for author pages: drives ProfilePage data. */
   profile?: { author: BlogAuthorId };
@@ -109,7 +111,7 @@ for (const lang of ["en", "de"] as BlogLanguage[]) {
       indexable: true, language: lang, modified: post.updated,
       article: {
         heading: post.heading, author: post.author,
-        published: post.published, modified: post.updated, imageAlt: post.imageAlt,
+        published: post.published, modified: post.updated, imageAlt: post.imageAlt, image: post.socialImage,
       },
     };
   }

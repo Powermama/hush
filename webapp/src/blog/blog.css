@@ -63,13 +63,13 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
   .blog-sidebar-sticky { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); display: grid; gap: 32px; }
   .blog-article-guide .blog-share-end { display: none; }
 }
-.blog-toc-title { margin: 0 0 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
+.blog-toc-title { margin: 0 0 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); }
 /* A quiet rail; the section being read gets the ink segment and full contrast. */
 .blog-toc ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid rgb(0 0 0 / 0.08); }
 .blog-toc li + li { margin-top: 2px; }
 .blog-toc a {
   display: block; margin-left: -1px; padding: 5px 0 5px 14px; border-left: 2px solid transparent;
-  font-size: 13.5px; line-height: 1.45; color: var(--color-soft);
+  font-size: 13.5px; line-height: 1.45; color: var(--color-muted);
   transition: color 0.2s, border-color 0.2s;
 }
 .blog-toc a:hover, .blog-toc a:focus-visible { color: var(--color-ink); }
@@ -100,6 +100,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-prose figure { margin: 2em 0; }
 .blog-prose figure img { display: block; width: 100%; height: auto; border-radius: 14px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px rgb(31 32 30 / 0.06); }
 .blog-prose figcaption { margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--color-muted); }
+.blog-prose .blog-image-full { display: flex; align-items: center; width: fit-content; min-height: 44px; font-size: 13px; }
 /* Code blocks scroll inside their own box, like tables. */
 .blog-prose pre { margin: 0 0 1.25em; padding: 14px 18px; overflow-x: auto; border-radius: 12px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); font-size: 0.85em; line-height: 1.6; }
 .blog-prose pre code { padding: 0; border-radius: 0; background: none; font-size: inherit; }
@@ -127,7 +128,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-prose .blog-tldr p:not(.blog-tldr-title) { margin: 0 0 14px; }
 
 /* Share: in the margin column on wide screens, after the article on small ones. */
-.blog-share-title { margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
+.blog-share-title { margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); }
 .blog-share-actions { display: flex; gap: 8px; }
 .blog-share-actions > a, .blog-share-actions > button {
   display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid rgb(0 0 0 / 0.08);
@@ -224,7 +225,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 /* Related and index lists */
 /* Same left edge and width as the article column plus its table of contents. */
 .blog-related { max-width: 968px; margin: 72px auto 0; }
-.blog-related h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); margin: 0 0 16px; }
+.blog-related h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); margin: 0 0 16px; }
 .blog-related ul, .blog-index-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
 @media (min-width: 768px) { .blog-related ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .blog-related li, .blog-index-list li { border-radius: 16px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); transition: border-color 0.2s; }
@@ -241,7 +242,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-index-list { max-width: 760px; margin: 0 auto; }
 .blog-index-list h2 { margin: 0; font-size: 22px; line-height: 1.3; letter-spacing: -0.02em; font-weight: 600; }
 .blog-index-list p { margin: 8px 0 12px; font-size: 15px; line-height: 1.6; color: var(--color-muted); }
-.blog-index-meta { display: block; font-size: 13px; color: var(--color-soft); }
+.blog-index-meta { display: block; font-size: 13px; color: var(--color-muted); }
 .blog-index-list a:hover h2, .blog-index-list a:focus-visible h2 { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 
 /* Author profile */
@@ -253,7 +254,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 
 /* Author card after the article: a light card in the download card's palette. */
 .blog-author-card {
-  position: relative; max-width: 680px; margin: 64px auto 0; padding: 28px; overflow: hidden;
+  position: relative; max-width: 680px; margin: 64px auto 0; overflow: hidden;
   border-radius: 24px; border: 1px solid rgb(0 0 0 / 0.07);
   background:
     radial-gradient(70% 90% at 100% 0%, rgb(201 184 255 / 0.22), transparent 70%),
@@ -263,7 +264,8 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 }
 @media (min-width: 1024px) { .blog-author-card { margin-left: var(--blog-text-left); } }
 /* A preview of the author: two lines of bio, the whole card links to the profile. */
-.blog-author-card-link { display: block; color: inherit; }
+.blog-author-card-link { display: block; padding: 28px; border-radius: inherit; color: inherit; }
+.blog-author-card-link:focus-visible { outline: 2px solid #7667d7; outline-offset: -3px; }
 .blog-author-card-head { display: flex; align-items: center; gap: 18px; }
 .blog-author-card-head > span:last-child { display: grid; }
 .blog-author-card .blog-author-avatar { box-shadow: 0 0 0 4px #fff, 0 0 0 5px rgb(0 0 0 / 0.06), 0 10px 24px rgb(31 32 30 / 0.14); }
@@ -278,7 +280,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-author-card { transition: border-color 0.2s, box-shadow 0.2s; }
 .blog-author-card:hover, .blog-author-card:focus-within { border-color: rgb(118 103 215 / 0.28); box-shadow: 0 1px 2px rgb(0 0 0 / 0.03), 0 20px 48px rgb(64 52 140 / 0.1); }
 .blog-author-card-link:hover .blog-author-card-name { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
-@media (max-width: 639px) { .blog-author-card { padding: 22px; } }
+@media (max-width: 639px) { .blog-author-card-link { padding: 22px; } }
 .blog-author-identity h1 { margin: 0; font-size: clamp(30px, 5vw, 44px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; }
 .blog-author-role { margin: 6px 0 0; font-size: 15px; color: var(--color-muted); }
 .blog-author-bio { margin: 24px 0 0; font-size: 18px; line-height: 1.7; color: #2b2c29; }
@@ -287,4 +289,4 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-author-links a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid rgb(0 0 0 / 0.1); background: #fff; font-size: 14px; font-weight: 600; color: var(--color-ink); transition: border-color 0.2s; }
 .blog-author-links a:hover, .blog-author-links a:focus-visible { border-color: rgb(0 0 0 / 0.25); }
 .blog-external { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--color-soft); }
-.blog-author-section { max-width: 760px; margin: 0 auto 16px; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
+.blog-author-section { max-width: 760px; margin: 0 auto 16px; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); }

@@ -23,6 +23,8 @@ This fixture paragraph answers the question first. It links to [the second fixtu
 
 A paragraph with **strong text** and an external [source](https://example.com/).
 
+![A synthetic image for testing responsive article figures](media/fixture-dictation-without-cloud/responsive-image.png "A generated test image, not a product screenshot.")
+
 ### A nested heading
 
 | Column A | Column B | Column C |

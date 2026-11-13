@@ -126,3 +126,58 @@ test("BLOG-008 lays out guides with a contents margin and essays as one column",
   await expect(page.locator(".blog-share-end")).toBeVisible();
   await expect(page.locator(".blog-share-end").getByRole(isMobile ? "button" : "link", { name: isMobile ? /Share|Copy link/ : "Share on LinkedIn" }).first()).toBeVisible();
 });
+
+test("BLOG-009 serves the article artwork only as a social preview", async ({ page, request }) => {
+  await page.goto(article);
+  const image = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect(image).toMatch(/^https:\/\/behu\.sh\/blog\/covers\/fixture-dictation-without-cloud-[a-f0-9]{10}-social\.png$/);
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute("content", image!);
+  const data = JSON.parse(await page.locator('script[type="application/ld+json"]').innerText());
+  expect(data.image).toEqual([image]);
+  const response = await request.get(new URL(image!).pathname);
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toContain("image/png");
+  const png = await response.body();
+  expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1200, 630]);
+  await expect(page.locator('img[src*="/blog/covers/"]')).toHaveCount(0);
+  await page.goto("/blog");
+  await expect(page.locator('img[src*="/blog/covers/"]')).toHaveCount(0);
+});
+
+test("BLOG-010 opens a full-size article image in a new tab", async ({ page }) => {
+  await page.goto(article);
+  const figure = page.locator(".blog-prose figure");
+  await figure.scrollIntoViewIfNeeded();
+  await expect.poll(() => figure.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  const link = figure.getByRole("link", { name: /Open full-size image \(new tab\)/ });
+  await expect(link).toHaveAttribute("href", /-900\.webp$/);
+  const [popup] = await Promise.all([page.waitForEvent("popup"), link.click()]);
+  await expect(popup).toHaveURL(/\/blog\/media\/.+-900\.webp$/);
+  await expect.poll(() => popup.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(900);
+  await popup.close();
+});
+
+test("BLOG-011 opens the author profile from the padded edge of the author card", async ({ page }) => {
+  await page.goto(article);
+  await page.locator(".blog-author-card").click({ position: { x: 10, y: 10 } });
+  await expect(page).toHaveURL(/\/authors\/clemens-kressmann$/);
+  await expect(page.locator("h1")).toHaveText("Clemens Kressmann");
+});
+
+test("BLOG-012 preserves selected article text while scrolling between sections", async ({ page }) => {
+  await page.goto(article);
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator('.blog-toc a[aria-current="location"]')).toHaveCount(0);
+  const selected = await page.locator(".blog-prose > p").first().evaluate((paragraph) => {
+    const range = document.createRange();
+    range.selectNodeContents(paragraph);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return selection.toString();
+  });
+  expect(selected).not.toBe("");
+  await page.locator("#frequently-asked-questions").evaluate((heading) => heading.scrollIntoView());
+  await expect(page.locator('.blog-toc a[aria-current="location"]').first()).toHaveAttribute("aria-current", "location");
+  await expect.poll(() => page.evaluate(() => window.getSelection()!.toString())).toBe(selected);
+});

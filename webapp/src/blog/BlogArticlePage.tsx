@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
+import { useMemo } from "react";
 import { authorPath, blogAuthors, type BlogAuthor, type BlogAuthorId } from "../../shared/authors";
 import { blogCopy, hasReadingSidebar, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
@@ -85,6 +86,9 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
   const copy = blogCopy[lang];
   const related = relatedPosts(post);
   const active = useActiveSection(post.toc.map((entry) => entry.id));
+  // Keep the HTML prop stable while the current section changes. Reassigning
+  // innerHTML replaces the reader's selected text and reloads figure nodes.
+  const articleHTML = useMemo(() => ({ __html: html }), [html]);
   const sidebar = hasReadingSidebar(post.type);
   const toc = sidebar && post.toc.length > 1 && (
     <nav aria-label={copy.onThisPage} className="blog-toc">
@@ -126,7 +130,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
                 </div>
               </aside>
             )}
-            <div className="blog-prose" data-blog-body="" dangerouslySetInnerHTML={{ __html: html }} />
+            <div className="blog-prose" data-blog-body="" dangerouslySetInnerHTML={articleHTML} />
           </div>
           <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-end" />
           <BlogAuthorCard lang={lang} author={post.author} />

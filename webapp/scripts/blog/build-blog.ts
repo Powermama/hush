@@ -47,6 +47,20 @@ export type FrontMatter = z.infer<typeof frontMatterSchema>;
 
 export type TocEntry = { id: string; text: string };
 
+/**
+ * The cover of an article, rendered from cover-template.html. The hash covers the
+ * template, renderer and every value shown, so changes produce new file names.
+ */
+export type BlogCoverPlan = {
+  hash: string;
+  lang: BlogLanguage;
+  title: string;
+  /** The 1200x630 PNG for link previews only. */
+  path: string;
+};
+
+export const coverTemplatePath = join(import.meta.dir, "cover-template.html");
+
 /** One responsive rendition the generator writes to public/. */
 export type BlogImageOutput = { source: string; path: string; width: number };
 
@@ -75,6 +89,7 @@ export type BlogPost = {
   keyword: string;
   /** Internal only: image renditions the generator must write. */
   images: BlogImageOutput[];
+  cover: BlogCoverPlan;
 };
 
 // A blockquote starting with [!TLDR] (GitHub alert syntax) becomes the summary box.
@@ -168,6 +183,8 @@ export type BuildResult = { posts: BlogPost[]; errors: string[] };
  */
 export async function buildBlog(contentDir: string, staticPaths: Iterable<string>): Promise<BuildResult> {
   const errors: string[] = [];
+  const coverTemplate = await readFile(coverTemplatePath, "utf8");
+  const coverRenderer = await readFile(join(import.meta.dir, "render-covers.ts"), "utf8");
   const parsed: Array<{ file: string; front: FrontMatter; tree: MdNode; body: string }> = [];
 
   for (const lang of blogLanguages) {
@@ -337,14 +354,25 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
         };
         node.tagName = "figure";
         node.properties = {};
-        node.children = image.title
-          ? [img, { type: "element", tagName: "figcaption", properties: {}, children: [{ type: "text", value: image.title }] }]
-          : [img];
+        node.children = [img, {
+          type: "element", tagName: "figcaption", properties: {}, children: [
+            ...(image.title ? [{ type: "text", value: image.title } as HastNode] : []),
+            {
+              type: "element", tagName: "a", properties: {
+                className: ["blog-image-full"], href: image.renditions.at(-1)!.path,
+                target: "_blank", rel: ["noopener"],
+                ariaLabel: lang === "de" ? `Bild in voller Größe öffnen (neuer Tab): ${image.alt}` : `Open full-size image (new tab): ${image.alt}`,
+              }, children: [{ type: "text", value: lang === "de" ? "Bild in voller Größe ansehen" : "View full-size image" }],
+            },
+          ],
+        }];
       }
     });
     const html = unified().use(rehypeStringify).stringify(hast as never);
     const words = body.split(/\s+/).filter(Boolean).length;
 
+    const coverHash = createHash("sha256").update(JSON.stringify([coverTemplate, coverRenderer, lang, heading])).digest("hex").slice(0, 10);
+    const coverBase = `/blog/covers/${front.slug}-${coverHash}`;
     posts.push({
       slug: front.slug,
       lang,
@@ -363,6 +391,10 @@ export async function buildBlog(contentDir: string, staticPaths: Iterable<string
       html,
       keyword: front.keyword,
       images: [...images.values()].flatMap((image) => image.renditions),
+      cover: {
+        hash: coverHash, lang, title: heading,
+        path: `${coverBase}-social.png`,
+      },
     });
   }
 

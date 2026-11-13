@@ -48,6 +48,8 @@ export type BlogPostMetadata = {
   imageAlt: string;
   readingMinutes: number;
   toc: ReadonlyArray<{ id: string; text: string }>;
+  /** A 1200x630 PNG used only in link previews and structured data. */
+  socialImage: string;
 };
 
 export const blogCopy = {

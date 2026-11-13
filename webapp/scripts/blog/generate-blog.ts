@@ -7,16 +7,19 @@
 //   src/blog/generated/<lang>/<slug>.tsx      one code-split module per article
 //   public/blog/feed.xml, public/de/blog/feed.xml   Atom feeds
 //   public/blog/media/*.webp                  responsive article images (content-hashed)
+//   public/blog/covers/*.png                  social previews (content-hashed)
 //
 // Run from webapp/:  bun run blog:generate   (write)
 //                    bun run blog:check      (fail if committed output is stale)
 // HUSH_BLOG_CONTENT_DIR selects another content directory (browser-test fixtures).
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import sharp from "sharp";
 import { authorPath, blogAuthors } from "../../shared/authors";
 import { siteOrigin, staticSitePaths } from "../../shared/site";
-import { blogLanguages, blogPath, buildBlog, type BlogLanguage, type BlogPost } from "./build-blog";
+import { blogLanguages, blogPath, buildBlog, type BlogImageOutput, type BlogLanguage, type BlogPost } from "./build-blog";
+import { renderCovers } from "./render-covers";
 
 const check = Bun.argv.includes("--check");
 const contentDir = process.env.HUSH_BLOG_CONTENT_DIR ?? "content/blog";
@@ -45,7 +48,7 @@ const moduleName = (post: BlogPost) => `${post.lang}/${post.slug}`;
 
 const outputs = new Map<string, string>();
 
-const metadata = posts.map(({ html: _html, keyword: _keyword, images: _images, ...post }) => post);
+const metadata = posts.map(({ html: _html, keyword: _keyword, images: _images, cover, ...post }) => ({ ...post, socialImage: cover.path }));
 outputs.set("shared/blog-posts.generated.ts", `${header}import type { BlogPostMetadata } from "./blog.ts";
 
 export const blogPosts: readonly BlogPostMetadata[] = ${json(metadata)};
@@ -121,15 +124,20 @@ function feed(lang: BlogLanguage) {
 }
 for (const lang of languagesWithPosts) outputs.set(`public${blogPath(lang)}/feed.xml`, feed(lang));
 
-// Image renditions carry a content hash in their name, so an existing file is current.
+// Image renditions and covers carry a content hash in their name, so an existing file is current.
 const mediaDir = "public/blog/media";
+const coversDir = "public/blog/covers";
 const imageFiles = new Map(posts.flatMap((post) => post.images).map((image) => [`public${image.path}`, image]));
+const coverFiles = new Set(posts.map((post) => `public${post.cover.path}`));
 
 // Files a previous run produced that no longer have a source.
 async function staleFiles() {
   const stale: string[] = [];
   for (const file of await readdir(mediaDir).catch(() => [] as string[])) {
     if (!imageFiles.has(`${mediaDir}/${file}`)) stale.push(`${mediaDir}/${file}`);
+  }
+  for (const file of await readdir(coversDir).catch(() => [] as string[])) {
+    if (!coverFiles.has(`${coversDir}/${file}`)) stale.push(`${coversDir}/${file}`);
   }
   for (const lang of blogLanguages) {
     const dir = `${generatedDir}/${lang}`;
@@ -142,25 +150,53 @@ async function staleFiles() {
 }
 
 const changed: string[] = [];
+const changedOutputs = new Map<string, string>();
 for (const [path, content] of outputs) {
   const current = await readFile(path, "utf8").catch(() => null);
   if (current === content) continue;
   changed.push(path);
-  if (!check) {
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, content);
-  }
+  changedOutputs.set(path, content);
 }
+const missingImages = new Map<string, BlogImageOutput>();
 for (const [path, image] of imageFiles) {
   if (await Bun.file(path).exists()) continue;
   changed.push(path);
-  if (!check) {
-    await mkdir(dirname(path), { recursive: true });
-    await sharp(image.source).resize({ width: image.width }).webp({ quality: 82 }).toFile(path);
-  }
+  missingImages.set(path, image);
+}
+const missingCovers = [];
+for (const post of posts) {
+  const path = `public${post.cover.path}`;
+  if (await Bun.file(path).exists()) continue;
+  changed.push(path);
+  missingCovers.push(post.cover);
 }
 const stale = await staleFiles();
-if (!check) for (const path of stale) await rm(path);
+
+if (!check) {
+  // A failed image conversion or browser launch must leave the previous site
+  // usable. Prepare every missing asset before changing metadata or removing
+  // old files, and keep incomplete renders outside the public directory.
+  const stagingDir = await mkdtemp(join(tmpdir(), "hush-blog-assets-"));
+  try {
+    for (const [path, image] of missingImages) {
+      const staged = join(stagingDir, path);
+      await mkdir(dirname(staged), { recursive: true });
+      await sharp(image.source).resize({ width: image.width }).webp({ quality: 82 }).toFile(staged);
+    }
+    await renderCovers(missingCovers, join(stagingDir, "public"));
+    for (const path of [...missingImages.keys(), ...missingCovers.map((cover) => `public${cover.path}`)]) {
+      await mkdir(dirname(path), { recursive: true });
+      await copyFile(join(stagingDir, path), path);
+    }
+    for (const [path, content] of changedOutputs) {
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, content);
+    }
+    for (const path of stale) await rm(path);
+  } finally {
+    await rm(stagingDir, { recursive: true, force: true });
+  }
+}
 
 if (check) {
   const problems = [...changed.map((path) => `${path} is out of date`), ...stale.map((path) => `${path} has no source`)];

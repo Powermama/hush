@@ -1,0 +1,78 @@
+<!doctype html>
+<!--
+  SPDX-License-Identifier: AGPL-3.0-only
+  Copyright (c) 2026 Clemens Kressmann
+
+  Open Graph template, rendered by scripts/blog/render-covers.ts at 1200x630.
+  Placeholders are filled in once and HTML-escaped.
+  Changing this file changes every cover's hash, so all covers re-render.
+-->
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 100vw; height: 100vh; overflow: hidden; }
+  body {
+    position: relative;
+    font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    color: #1f201e;
+    background:
+      radial-gradient(70% 90% at 0% 0%, rgb(255 179 199 / 0.42), transparent 62%),
+      radial-gradient(60% 80% at 100% 0%, rgb(158 201 255 / 0.5), transparent 64%),
+      radial-gradient(80% 70% at 60% 110%, rgb(201 184 255 / 0.55), transparent 70%),
+      #f3f0f8;
+  }
+  .copy { position: absolute; left: 6vw; top: 0; bottom: 0; width: 48vw; display: flex; flex-direction: column; justify-content: center; }
+  h1 { font-size: var(--title-size, 5.2vw); line-height: 1.04; letter-spacing: -0.04em; font-weight: 650; text-wrap: balance; }
+
+  /* A cropped Mac window, running off the right and bottom edges, with the HUD. */
+  .window {
+    position: absolute; left: 60vw; top: 12vh; right: -4vw; bottom: -6vh; border-radius: 1.4vw;
+    background: #fff; border: 1px solid rgb(0 0 0 / 0.07);
+    box-shadow: 0 0.4vw 1vw rgb(31 32 30 / 0.05), 0 3vw 7vw rgb(64 52 140 / 0.18);
+  }
+  .bar { display: flex; align-items: center; gap: 0.75vw; height: 4.4vw; padding: 0 1.6vw; border-bottom: 1px solid rgb(0 0 0 / 0.06); background: #f7f6f4; border-radius: 1.4vw 1.4vw 0 0; }
+  .bar i { width: 1.05vw; height: 1.05vw; border-radius: 50%; background: #ff5f57; }
+  .bar i:nth-child(2) { background: #febc2e; } .bar i:nth-child(3) { background: #28c840; }
+  .lines { padding: 2.6vw 2.2vw; display: grid; gap: 1.5vw; }
+  .lines b { display: block; height: 1.15vw; border-radius: 1vw; background: #ecebf1; }
+  .lines b:nth-child(1) { width: 78%; } .lines b:nth-child(2) { width: 92%; } .lines b:nth-child(3) { width: 64%; } .lines b:nth-child(4) { width: 85%; }
+  .hud {
+    position: absolute; left: 55vw; bottom: 9vh; width: 32vw; height: 6vw; display: flex; align-items: center; gap: 1.3vw;
+    padding: 0 1.4vw; border-radius: 2vw; background: rgb(255 255 255 / 0.96); border: 1px solid rgb(255 255 255 / 0.9);
+    box-shadow: 0 1.5vw 4vw rgb(31 32 30 / 0.18), inset 0 0 0 0.5px rgb(0 0 0 / 0.06);
+  }
+  .badge { display: grid; place-items: center; width: 3.8vw; height: 3.8vw; border-radius: 1.1vw; background: #1f201e; }
+  .badge svg { width: 1.9vw; height: 1.9vw; }
+  .label strong { display: block; font-size: 1.35vw; font-weight: 600; }
+  .label span { display: flex; align-items: center; gap: 0.5vw; font-size: 0.95vw; color: #6b6c68; font-family: "SF Mono", ui-monospace, monospace; }
+  .label span i { width: 0.55vw; height: 0.55vw; border-radius: 50%; background: #ff3b30; }
+  .wave { margin-left: auto; display: flex; align-items: center; gap: 0.32vw; height: 3.2vw; }
+  .wave i { width: 0.26vw; border-radius: 1vw; background: rgb(31 32 30 / 0.78); }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <h1 id="title">{{TITLE}}</h1>
+  </div>
+  <div class="window"><div class="bar"><i></i><i></i><i></i></div><div class="lines"><b></b><b></b><b></b><b></b></div></div>
+  <div class="hud">
+    <span class="badge"><svg viewBox="0 0 24 24"><path d="M4 10v4M9.3 6v12M14.7 8.5v7M20 10.5v3" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2.4"/></svg></span>
+    <span class="label"><strong>{{LISTENING}}</strong><span><i></i>0:04</span></span>
+    <span class="wave">
+      <i style="height:18%"></i><i style="height:32%"></i><i style="height:55%"></i><i style="height:38%"></i><i style="height:72%"></i><i style="height:48%"></i><i style="height:28%"></i><i style="height:64%"></i><i style="height:90%"></i><i style="height:46%"></i><i style="height:76%"></i><i style="height:34%"></i><i style="height:58%"></i><i style="height:24%"></i><i style="height:68%"></i><i style="height:40%"></i><i style="height:20%"></i>
+    </span>
+  </div>
+  <script>
+    // Shrink long titles until they fit beside the window.
+    const title = document.getElementById("title");
+    let size = 5.2;
+    while (size > 3 && title.getBoundingClientRect().height > innerHeight * 0.62) {
+      size -= 0.1;
+      document.documentElement.style.setProperty("--title-size", `${size}vw`);
+    }
+    document.body.dataset.ready = "true";
+  </script>
+</body>
+</html>

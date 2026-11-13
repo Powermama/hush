@@ -25,7 +25,7 @@ export function renderPageHead(page: PageMetadata): string {
   const canonical = escapeHTML(`${siteOrigin}${page.canonicalPath}`);
   const article = page.article;
   const verified = page.canonicalPath === "/verified-messages";
-  const image = `${siteOrigin}/social/${verified ? "verified-messages" : "hush"}.png`;
+  const image = `${siteOrigin}${article ? article.image : `/social/${verified ? "verified-messages" : "hush"}.png`}`;
   const imageAlt = article ? article.imageAlt : verified
     ? "Give your words their story back. A hush message mock-up with signed capture and edit history."
     : "The voice layer for your Mac. The hush listening HUD with a waveform beside an example message.";
