@@ -270,9 +270,9 @@ test("publishes legal drafts without indexing placeholder identities", async ({
   );
 
   await page.goto("/datenschutz");
-  const legalNavigation = page.getByRole("navigation", { name: "Legal navigation" });
-  await expect(legalNavigation.getByRole("link", { name: "Home", exact: true })).toBeVisible();
-  await expect(legalNavigation.getByRole("link", { name: "EN", exact: true })).toHaveAttribute("aria-current", "page");
+  // The way home sits where it does on blog pages; the footer switches language.
+  await expect(page.locator("article > a.blog-back")).toHaveText("Home");
+  await expect(page.getByRole("link", { name: "EN", exact: true })).toHaveCount(0);
   await expect(
     page.getByRole("heading", { level: 1, name: "Privacy policy" }),
   ).toBeVisible();
@@ -281,17 +281,15 @@ test("publishes legal drafts without indexing placeholder identities", async ({
   await expect(page.getByText(/24 hours after expiry or revocation/))
     .toBeVisible();
 
-  await page.getByRole("link", { name: "DE", exact: true }).click();
+  await page.locator("footer").getByRole("link", { name: "Deutsch" }).click();
   await expect(page).toHaveURL(/\/de\/datenschutz$/);
   await expect(
     page.getByRole("heading", { level: 1, name: "Datenschutzerklärung" }),
   ).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
   await expect(page.getByText("Entwurf mit Platzhaltern")).toHaveCount(0);
-  const germanNavigation = page.getByRole("navigation", { name: "Rechtliche Navigation" });
-  await expect(germanNavigation.getByRole("link", { name: "DE", exact: true })).toHaveAttribute("aria-current", "page");
-  await germanNavigation.getByRole("link", { name: "Startseite", exact: true }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await page.locator("article > a.blog-back").click();
+  await expect(page).toHaveURL(/\/de$/);
 });
 
 test("discloses the confirmed host and processing limits in both languages", async ({ page }) => {

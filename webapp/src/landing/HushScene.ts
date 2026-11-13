@@ -50,6 +50,10 @@ export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
   const entry = host.closest<HTMLElement>(".hush-landing");
   let started: number | undefined;
   let opening = !reducedMotion.matches && !document.hidden && window.scrollY < 100 && entry?.dataset.opening === "pending";
+  // A scene that arrives after the CSS fallback revealed the page (slow first
+  // visits) still settles in, shorter and gentler, while it crossfades over the
+  // static core. The visible text never moves again.
+  let late = false;
   let dockY = 0;
   let renderedWidth = 0, renderedHeight = 0;
   function begin() {
@@ -77,9 +81,13 @@ export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
     if (started === undefined) {
       started = now;
       if (opening) opening = startLandingEntrance(entry);
+      const inView = host.getBoundingClientRect().top < innerHeight;
+      late = !opening && !reducedMotion.matches && !document.hidden && inView;
     }
-    const progress = !opening || reducedMotion.matches ? 1 : Math.max(0, Math.min(1, (now - started) / 3000));
-    const ease = 1 - Math.pow(1 - progress, 4);
+    const duration = opening ? 3000 : late ? 1400 : 0;
+    const progress = !duration || reducedMotion.matches ? 1 : Math.max(0, Math.min(1, (now - started) / duration));
+    // A late arrival moves at 40% of the full assembly's distance.
+    const ease = 1 - Math.pow(1 - progress, 4) * (late ? 0.4 : 1);
     for (const [index, layer] of layers.entries()) {
       layer.object.position.set(layer.x + (1 - ease) * (index - 1) * 0.35,
         layer.y + (1 - ease) * (index - 1) * 1.6,
@@ -89,10 +97,11 @@ export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
     body.rotation.y += (targetY - body.rotation.y) * (reducedMotion.matches ? 1 : 0.12);
     body.scale.setScalar(1 - (1 - ease) * 0.35 + Math.sin(progress * Math.PI) * 0.12);
     body.rotation.z = -0.09 + (1 - ease) * 0.28;
-    host.style.translate = `0 ${dockY * (1 - ease)}px`;
+    host.style.translate = opening ? `0 ${dockY * (1 - ease)}px` : "";
     renderer.render(scene, camera);
     if (!ready) { ready = true; host.dataset.scene = "ready"; }
     if (opening && progress === 1) finish();
+    if (late && progress === 1) late = false;
     if (progress < 1 || Math.abs(targetX - body.rotation.x) + Math.abs(targetY - body.rotation.y) > 0.001) schedule();
   }
   function resize() {
