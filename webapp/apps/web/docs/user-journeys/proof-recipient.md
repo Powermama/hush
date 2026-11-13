@@ -32,6 +32,7 @@ Any missing key, invalid signature, mismatched commitment, altered ciphertext, e
 - Redirect responses omit a fragment so the browser preserves the private key client-side.
 - Compare RFC 3339 timestamps by exact instant and preserve millisecond precision through storage.
 - Verify exact proof ID, ciphertext hash, ciphertext size, commitment, Mac signature, service receipt, and expiry.
+- Verify each service receipt with the public key its `keyId` names. The service keeps every public key it has signed with and publishes them at `/.well-known/jwks.json`; replacing the private signing key never invalidates earlier receipts, and an unknown `keyId` fails verification.
 - Original audio is not part of the MVP proof payload.
 - The verified page must distinguish microphone capture, text typed inside Hush, and retained Hush output reopened for editing.
 - A text-origin proof must never display microphone, transcription, or audio claims.
@@ -84,7 +85,7 @@ Given a valid private proof, the recipient can distinguish recorded voice, clean
 
 | Journey | Automated evidence |
 | --- | --- |
-| VM-004 | `tests/proof.spec.ts` verifies initial decryption, fragment preservation, reload, and the recipient UI on desktop and mobile. `server/app.test.ts` verifies enrollment, publication, upload, completion, retrieval, receipt verification, and revocation. |
+| VM-004 | `tests/proof.spec.ts` verifies initial decryption, fragment preservation, reload, and the recipient UI on desktop and mobile. `server/app.test.ts` verifies enrollment, publication, upload, completion, retrieval, receipt verification (also after the signing key is replaced, with the key set listing both keys), and revocation. `server/config.test.ts` verifies key generation, reuse and rotation. |
 | VM-005 | `tests/proof.spec.ts` verifies the fail-closed missing-key state on desktop and mobile. |
 | VM-006 | `tests/proof.spec.ts` verifies a precision mismatch fails closed. `server/app.test.ts` verifies SQLite preserves a nonzero millisecond expiry through publication and receipt creation. |
 | VM-007 | `tests/proof.spec.ts` publishes through the real API, verifies the complete public root-alias redirect, and opens the forwarded canonical URL in a fresh page. `server/app.test.ts` verifies both alias paths, redirect destination, security headers, idempotency, and rejection of malformed or unknown codes. `server/config.test.ts` verifies that the production `/s/` base is derived from the canonical public origin. |
