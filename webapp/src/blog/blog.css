@@ -98,7 +98,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 /* A cropped piece of a Mac screen: the Mail window runs off the right and
    bottom edges, the HUD floats where the app shows it. */
 .blog-cta-stage {
-  position: relative; height: 300px; overflow: hidden;
+  position: relative; height: 320px; overflow: hidden;
   background:
     radial-gradient(120% 90% at 15% 0%, rgb(255 179 199 / 0.32), transparent 60%),
     radial-gradient(110% 90% at 90% 10%, rgb(158 201 255 / 0.34), transparent 62%),
@@ -126,7 +126,7 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 @keyframes blog-caret { 50% { opacity: 0; } }
 .blog-cta-hud { position: absolute; left: 50%; bottom: 22px; width: min(calc(100% - 32px), 380px); translate: -50% 0; }
 @media (max-width: 639px) {
-  .blog-cta-stage { height: 290px; }
+  .blog-cta-stage { height: 340px; }
   .blog-cta-window { left: 20px; top: 24px; }
   .blog-cta-window-text { font-size: 13.5px; padding-right: 40px; }
 }

@@ -9,13 +9,14 @@ import { HushHud, type HushHudState } from "../components/visuals/HushHud";
 // One dictation, as the app shows it: listen, process on the Mac, insert.
 const sequence: Array<{ state: HushHudState; ms: number }> = [
   { state: "listening", ms: 2600 },
-  { state: "processing", ms: 1500 },
+  { state: "processing", ms: 700 },
   { state: "drafted", ms: 3200 },
 ];
 
 /** Plays the HUD sequence while the card is on screen; reduced motion shows the result. */
-function useDictationLoop(stage: React.RefObject<HTMLElement | null>) {
+function useDictationLoop(stage: React.RefObject<HTMLElement | null>, examples: number) {
   const [step, setStep] = useState(0);
+  const [example, setExample] = useState(0);
   const [seconds, setSeconds] = useState(1);
   useEffect(() => {
     const element = stage.current;
@@ -34,6 +35,7 @@ function useDictationLoop(stage: React.RefObject<HTMLElement | null>) {
       if (sequence[current]!.state === "listening") clock = setInterval(() => setSeconds((value) => value + 1), 1000);
       timer = setTimeout(() => {
         current = (current + 1) % sequence.length;
+        if (current === 0) setExample((value) => (value + 1) % examples);
         if (visible) run();
       }, sequence[current]!.ms);
     };
@@ -45,24 +47,28 @@ function useDictationLoop(stage: React.RefObject<HTMLElement | null>) {
     });
     observer.observe(element);
     return () => { observer.disconnect(); clearTimeout(timer); clearInterval(clock); };
-  }, [stage]);
-  return { state: sequence[step]!.state, seconds };
+  }, [stage, examples]);
+  return { state: sequence[step]!.state, seconds, example };
 }
 
 export function BlogDownloadCard({ lang }: { lang: BlogLanguage }) {
   const copy = blogCopy[lang];
   const stage = useRef<HTMLDivElement>(null);
-  const { state, seconds } = useDictationLoop(stage);
+  const demos = copy.ctaDemos;
+  const { state, seconds, example } = useDictationLoop(stage, demos.length);
+  const demo = demos[example]!;
+  const words = demo.text.split(/\s+/).length;
   const typed = state === "drafted";
   return (
     <section className="blog-cta" aria-labelledby="blog-cta-title">
       <div className="blog-cta-stage" ref={stage} aria-hidden="true">
         <div className="blog-cta-window">
-          <div className="blog-cta-window-bar"><i /><i /><i /><span>{copy.ctaDemo.title}</span></div>
-          <div className="blog-cta-window-field"><span>{copy.ctaDemo.toLabel}</span>{copy.ctaDemo.to}</div>
-          <div className="blog-cta-window-field"><span>{copy.ctaDemo.subjectLabel}</span>{copy.ctaDemo.subject}</div>
+          <div className="blog-cta-window-bar"><i /><i /><i /><span>{demo.title}</span></div>
+          {demo.fields.map(([label, value]) => (
+            <div className="blog-cta-window-field" key={label}><span>{label}</span>{value}</div>
+          ))}
           <p className="blog-cta-window-text" data-typed={typed}>
-            <span>{copy.ctaDemo.text}</span><i className="blog-cta-caret" />
+            <span>{demo.text}</span><i className="blog-cta-caret" />
           </p>
         </div>
         <HushHud
@@ -70,7 +76,7 @@ export function BlogDownloadCard({ lang }: { lang: BlogLanguage }) {
           className="blog-cta-hud"
           copy={{
             listening: { label: "Listening", detail: `0:0${Math.min(seconds, 9)}` },
-            drafted: { label: copy.ctaDemo.words, detail: `inserted into ${copy.ctaDemo.app}` },
+            drafted: { label: `${words} words`, detail: `inserted into ${demo.app}` },
           }}
         />
       </div>

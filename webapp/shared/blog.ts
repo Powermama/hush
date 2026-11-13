@@ -39,10 +39,16 @@ export const blogCopy = {
     ctaDownload: "Download for Mac",
     ctaMobile: "Get hush for Mac",
     // The download card replays one dictation; HUD labels match the app.
-    ctaDemo: {
-      app: "Mail", title: "New Message", toLabel: "To:", to: "Anna", subjectLabel: "Subject:", subject: "Revised draft",
-      text: "Thanks for the notes. I'll send the revised draft on Friday morning.", words: "12 words",
-    },
+    // The download card replays one dictation per loop and switches examples.
+    // App names and HUD labels match the app, which is in English.
+    ctaDemos: [
+      { app: "Mail", title: "New Message", fields: [["To:", "Anna Weber"], ["Subject:", "Pitch deck feedback"]],
+        text: "Hi Anna, thanks for the sharp notes on the deck. I'll rework the pricing slide and send it before Friday's call." },
+      { app: "Slack", title: "# product", fields: [],
+        text: "Quick update: the onboarding flow is ready for review. If anything feels off, leave a comment and I'll fix it before tomorrow's release." },
+      { app: "Notes", title: "Launch ideas", fields: [],
+        text: "Open the launch post with the offline demo, show the real numbers from our test Mac, and keep the whole thing under six hundred words." },
+    ],
     ctaBody: "hush is free and open source. Your dictation and AI models run on your Mac; web search, model downloads, updates and optional Verified Messages use the internet.",
     by: "By",
   },
@@ -62,10 +68,14 @@ export const blogCopy = {
     ctaTitle: "Diktieren auf dem Mac, mit Modellen, die lokal laufen",
     ctaDownload: "Für den Mac laden",
     ctaMobile: "hush für den Mac holen",
-    ctaDemo: {
-      app: "Mail", title: "Neue E-Mail", toLabel: "An:", to: "Anna", subjectLabel: "Betreff:", subject: "Überarbeiteter Entwurf",
-      text: "Danke für die Notizen. Der überarbeitete Entwurf kommt am Freitagmorgen.", words: "10 words",
-    },
+    ctaDemos: [
+      { app: "Mail", title: "Neue E-Mail", fields: [["An:", "Anna Weber"], ["Betreff:", "Feedback zum Pitch Deck"]],
+        text: "Hallo Anna, danke für die klaren Anmerkungen. Die überarbeitete Preisfolie kommt vor dem Termin am Freitag." },
+      { app: "Slack", title: "# produkt", fields: [],
+        text: "Kurzes Update: Das neue Onboarding ist bereit für das Review. Anmerkungen bitte direkt als Kommentar, Korrekturen folgen vor dem Release morgen." },
+      { app: "Notes", title: "Ideen zum Launch", fields: [],
+        text: "Den Launch-Beitrag mit der Offline-Demo eröffnen, echte Messwerte vom Test-Mac zeigen und unter sechshundert Wörtern bleiben." },
+    ],
     ctaBody: "hush ist kostenlos und Open Source. Diktat und KI-Modelle laufen auf dem Mac; Websuche, Modell-Downloads, Updates und optionale Verified Messages nutzen das Internet.",
     by: "Von",
   },
