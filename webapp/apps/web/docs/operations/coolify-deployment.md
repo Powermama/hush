@@ -110,11 +110,9 @@ For stronger origin isolation, allow Cloudflare IP ranges at the server firewall
 No secret needs to be generated or pasted before the first deployment.
 
 - Coolify generates `SERVICE_PASSWORD_64_POSTGRES` once and keeps it stable across deployments.
-- On the very first production start, set `HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP=1` once. hush then generates a P-256 proof-signing key and atomically stores it at `/app/data/service-key.json` in the persistent data volume. Remove the variable after that start.
-- Later deployments reuse the same signing key automatically.
-- In production, hush refuses to start when the key file is missing and bootstrapping is not enabled. A mis-mounted or empty volume therefore fails the deployment loudly; it never silently mints a new identity that would invalidate existing proofs. During a rolling update the old instance keeps serving.
-
-Back up the signing key as described in [Signing key backup](#signing-key-backup) before publishing real proofs. Losing it loses the signing identity used by existing proofs.
+- hush generates its P-256 proof-signing key itself on first start and stores it at `/app/data/service-key.json` in the persistent data volume. Nobody sees it, and it is not backed up.
+- Every public key it has signed with is kept in `/app/data/service-public-keys.json` and published at `https://behu.sh/.well-known/jwks.json` (a JSON Web Key Set, RFC 7517). Each proof is verified with the key its receipt names (`keyId`), so a new key never breaks earlier proofs.
+- If the key file is ever missing, the next start generates a new key with a new id. Earlier proofs stay verifiable as long as the volume holds them; a lost volume loses the encrypted proofs too.
 
 For external key management, generate a key locally and provide the two output values as runtime-only Coolify secrets:
 
@@ -122,7 +120,7 @@ For external key management, generate a key locally and provide the two output v
 bun run key:generate hush-production-1
 ```
 
-Set `HUSH_SERVICE_KEY_ID` and `HUSH_SERVICE_PRIVATE_JWK`, mark the private JWK as a secret, and disable Build Variable. An environment key takes precedence over the volume-managed key. Do not replace either key after publishing proofs unless a deliberate signing-key migration is implemented.
+Set `HUSH_SERVICE_KEY_ID` and `HUSH_SERVICE_PRIVATE_JWK`, mark the private JWK as a secret, and disable Build Variable. An environment key takes precedence over the volume-managed key; its public key is added to the key set like any other. The generated key does not need this: `HUSH_SERVICE_KEY_ID` only names a key supplied this way.
 
 ## 4. Deploy
 
@@ -156,13 +154,13 @@ What production keeps, and what a restore needs:
 | Data | Where | Backup |
 | --- | --- | --- |
 | Proof metadata, installations, aliases | `hush-postgres` (PostgreSQL 17) | Daily to R2, see below |
-| Proof-signing key | `/app/data/service-key.json` in `hush-website`'s volume | Separately, see below. **Losing it is the one unrecoverable failure.** |
+| Proof-signing key | `/app/data/service-key.json` in `hush-website`'s volume | None by design: a lost or leaked key is replaced, see [Signing key rotation](#signing-key-rotation) |
 | Encrypted proof blobs | `/app/data/objects` in the same volume | None: they expire within 90 days and cannot be decrypted without the recipient's link |
 
 A lost database is survivable: each Mac enrolls again automatically when the
 service no longer knows its installation, and only proofs that are still live
-stop resolving. A lost signing key is not: production refuses to start without
-it, and a new key cannot vouch for receipts signed by the old one.
+stop resolving. A lost signing key is survivable too: the service generates a
+new one, and earlier receipts still verify with the public key they name.
 
 ### Database backups
 
@@ -185,27 +183,23 @@ with production. Then delete the scratch database. Never import into
 [Backups and restores](../proof-retention.md#backups-and-restores) before
 serving restored proofs.
 
-### Signing key backup
+### Signing key rotation
 
-Keep one copy of the key **outside the server and outside the data buckets**,
-encrypted, so a lost volume or a compromised bucket cannot take it with them.
-Do this once now, and again whenever the key changes:
+The private signing key is never shown, copied or backed up; only public keys
+are kept. Rotate it whenever it may have left the server, and otherwise about
+yearly:
 
-1. Coolify → `hush-website` → **Terminal**: run `sha256sum /app/data/service-key.json`
-   and note the hash, then `cat /app/data/service-key.json`.
-2. Copy the JSON into a password manager item (for example "hush proof-signing
-   key, hush-production-1") with the hash in its notes. Never paste it into Git,
-   chat, tickets, email or an R2 bucket. Clear the terminal afterwards.
-3. Restore: compare the SHA-256, then put the file back unchanged at
-   `/app/data/service-key.json` in the volume (owner `bun`, mode `600`). The
-   file is `{ "id": ..., "privateJwk": {...} }`; to use runtime secrets instead,
-   set `HUSH_SERVICE_KEY_ID` to its `id` and the secret `HUSH_SERVICE_PRIVATE_JWK`
-   to its `privateJwk` object (see [Automatic secrets](#3-automatic-secrets)).
-   Either way the service starts with the same identity.
+1. Coolify → `hush-website` → **Terminal**: `rm /app/data/service-key.json`.
+   This prints nothing and leaves `service-public-keys.json` in place.
+2. **Restart** `hush-website`. The new instance generates a new key with a new
+   id, logs "Generated a new service signing key" and adds its public key to
+   the key set; the old instance keeps serving until the new one is healthy.
+3. Check `https://behu.sh/.well-known/jwks.json`: it lists the new `kid` next to
+   the previous ones, and a known proof still verifies in the browser.
 
-If external key management is enabled, the key already lives outside the
-server; keep its password-manager copy the same way. A deployment is not
-recoverable from the Git repository alone.
+Keep retired public keys in the set while any proof signed with them can exist
+(proofs expire within 90 days). Never print or copy `service-key.json`; if it
+ever appears in a terminal log, chat or ticket, rotate.
 
 ## Optional external storage
 
@@ -304,8 +298,8 @@ production for at least a week.
 3. **Create `hush-web`** with the settings above, but on a temporary domain
    (for example `https://next.behu.sh`). Add the persistent storage, then copy
    the `hush_objects` contents into the new volume, preserving ownership for the
-   `bun` user (UID 1000). Do not set `HUSH_ALLOW_SERVICE_KEY_BOOTSTRAP`: if the
-   copy is wrong, the deployment fails instead of minting a new key.
+   `bun` user (UID 1000), including `service-key.json` and
+   `service-public-keys.json` so existing proofs keep their keys.
 4. **Verify on the temporary domain**: `/health/ready` is 200; the key file's
    SHA-256 matches step 1; a known private proof opens and verifies in its
    recipient's browser; the homepage, `/verified-messages` and `/releases`

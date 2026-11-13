@@ -335,6 +335,11 @@ export function createApp(input: {
     registerRootProofAlias(app, input.proofService);
   }
 
+  // Public receipt-signing keys, so anyone can verify a receipt by its key id.
+  app.get("/.well-known/jwks.json", (context) => {
+    context.header("cache-control", "public, max-age=300");
+    return context.json(input.proofService.publicKeySet());
+  });
   app.get("/health/live", (context) => context.json({ status: "ok" }));
   app.get("/health/ready", async (context) => {
     context.header("cache-control", "no-store");
