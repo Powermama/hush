@@ -9,6 +9,8 @@ import type { BlogLanguage } from "./blog.ts";
 
 export type BlogAuthor = {
   name: string;
+  /** Square portrait under public/, at least 192px, metadata stripped (no EXIF or location). */
+  image?: string;
   /** Profiles of the same person, in the order they are shown. */
   sameAs: Array<{ label: string; url: string }>;
   role: Record<BlogLanguage, string>;
@@ -18,6 +20,7 @@ export type BlogAuthor = {
 export const blogAuthors = {
   "clemens-kressmann": {
     name: "Clemens Kressmann",
+    image: "/media/authors/clemens-kressmann.webp",
     sameAs: [
       { label: "LinkedIn", url: "https://www.linkedin.com/in/clemens-kressmann/" },
       { label: "GitHub", url: "https://github.com/Powermama" },

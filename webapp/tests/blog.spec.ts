@@ -99,9 +99,11 @@ test("BLOG-007 links bylines to a prerendered author profile with ProfilePage da
   expect(data).toMatchObject({
     "@type": "ProfilePage",
     mainEntity: { "@type": "Person", name: "Clemens Kressmann", url: "https://behu.sh/authors/clemens-kressmann",
+      image: "https://behu.sh/media/authors/clemens-kressmann.webp",
       sameAs: ["https://www.linkedin.com/in/clemens-kressmann/", "https://github.com/Powermama"] },
   });
   await expect(plain.locator(".blog-index-list li")).toHaveCount(2);
+  expect((await plain.request.get("/media/authors/clemens-kressmann.webp")).headers()["content-type"]).toBe("image/webp");
   await context.close();
 
   await page.goto(article);

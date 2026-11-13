@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
-import { authorPath, blogAuthors, type BlogAuthorId } from "../../shared/authors";
+import { authorPath, blogAuthors, type BlogAuthor, type BlogAuthorId } from "../../shared/authors";
 import { blogCopy, type BlogLanguage, type BlogPostMetadata } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
@@ -41,7 +41,7 @@ function BlogAuthorCard({ lang, author }: { lang: BlogLanguage; author: BlogAuth
   const path = authorPath(lang, author);
   return (
     <aside className="blog-author-card" aria-label={blogCopy[lang].writtenBy}>
-      <BlogAuthorAvatar name={profile.name} />
+      <BlogAuthorAvatar author={author} />
       <div>
         <p className="blog-author-card-label">{blogCopy[lang].writtenBy}</p>
         <p className="blog-author-card-name"><a href={path} rel="author">{profile.name}</a></p>
@@ -55,10 +55,16 @@ function BlogAuthorCard({ lang, author }: { lang: BlogLanguage; author: BlogAuth
   );
 }
 
-/** Initials until a portrait exists; shared by the byline card and the author page. */
-export function BlogAuthorAvatar({ name, size = "small" }: { name: string; size?: "small" | "large" }) {
-  const initials = name.split(" ").map((part) => part[0]).join("");
-  return <span className={`blog-author-avatar blog-author-avatar-${size}`} aria-hidden="true">{initials}</span>;
+/** The author's portrait, or initials when there is none; shared by the article card and the author page. */
+export function BlogAuthorAvatar({ author, size = "small" }: { author: BlogAuthorId; size?: "small" | "large" }) {
+  const profile: BlogAuthor = blogAuthors[author];
+  const className = `blog-author-avatar blog-author-avatar-${size}`;
+  if (profile.image) {
+    const pixels = size === "large" ? 64 : 48;
+    return <img className={className} src={profile.image} alt="" width={pixels} height={pixels} loading="lazy" decoding="async" />;
+  }
+  const initials = profile.name.split(" ").map((part) => part[0]).join("");
+  return <span className={className} aria-hidden="true">{initials}</span>;
 }
 
 export function BlogHeader({ lang }: { lang: BlogLanguage }) {

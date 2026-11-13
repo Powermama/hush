@@ -13,6 +13,7 @@ function personData(id: BlogAuthorId, language: "en" | "de") {
   return {
     "@type": "Person", "@id": `${url}#person`, name: author.name, url,
     description: author.bio[language], jobTitle: author.role[language],
+    ...("image" in author ? { image: `${siteOrigin}${author.image}` } : {}),
     sameAs: author.sameAs.map((profile) => profile.url),
   } satisfies Person;
 }

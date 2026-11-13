@@ -23,7 +23,7 @@ export function BlogAuthorPage({ lang, author }: { lang: BlogLanguage; author: B
         <header className="blog-author-header">
           <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
           <div className="blog-author-identity">
-            <BlogAuthorAvatar name={profile.name} size="large" />
+            <BlogAuthorAvatar author={author} size="large" />
             <div>
               <h1>{profile.name}</h1>
               <p className="blog-author-role">{profile.role[lang]}</p>
