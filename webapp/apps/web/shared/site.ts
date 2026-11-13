@@ -2,9 +2,10 @@
 // Copyright 2026 Clemens Kressmann
 import { legalConfig } from "./legal.ts";
 import { releases, releasePath } from "./releases.ts";
-import { blogCopy, editorialPolicyPath, type BlogLanguage } from "./blog.ts";
+import { editorialPolicyPath, type BlogLanguage } from "@hush/article/taxonomy";
+import { blogCopy } from "./blog.ts";
 import { blogPosts } from "./blog-posts.generated.ts";
-import { authorPath, blogAuthors, type BlogAuthorId } from "./authors.ts";
+import { authorPath, blogAuthors, type BlogAuthorId } from "@hush/article/authors";
 
 export const siteOrigin = "https://behu.sh";
 export type SiteLanguage = "en" | "de";
@@ -113,10 +114,6 @@ export const softwareDescription = (page: PageMetadata) => ({
 export const landingPaths = ["/", "/de"];
 
 /** Site paths that exist independently of the blog (blog articles may link to them). */
-export function staticSitePaths(): string[] {
-  return Object.keys(sitePages).filter((path) => !/^(\/de)?\/(blog|authors|autoren)(\/|$)/.test(path));
-}
-
 // Blog pages exist only for languages with at least one published article, so
 // an empty blog is never served or indexed.
 for (const lang of ["en", "de"] as BlogLanguage[]) {

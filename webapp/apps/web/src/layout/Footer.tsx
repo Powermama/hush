@@ -1,6 +1,7 @@
 import { Logo } from "../components/Logo";
 import { blogPosts } from "../../shared/blog-posts.generated";
-import { blogCopy, editorialPolicyPath } from "../../shared/blog";
+import { editorialPolicyPath } from "@hush/article/taxonomy";
+import { blogCopy } from "../../shared/blog";
 import type { SiteLanguage } from "../../shared/site";
 import { LanguageSwitcher } from "../i18n/LanguageControls";
 import { m } from "../paraglide/messages";

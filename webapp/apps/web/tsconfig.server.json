@@ -14,5 +14,5 @@
     "allowImportingTsExtensions": true,
     "types": ["bun"]
   },
-  "include": ["server", "shared", "drizzle.config.ts", "scripts/prerender"]
+  "include": ["server", "shared", "drizzle.config.ts", "scripts/prerender", "scripts/blog"]
 }

@@ -2,7 +2,8 @@
 // Copyright (c) 2026 Clemens Kressmann
 import { useState } from "react";
 import { siX } from "simple-icons";
-import { blogCopy, type BlogLanguage } from "../../shared/blog";
+import { type BlogLanguage } from "@hush/article/taxonomy";
+import { blogCopy } from "../../shared/blog";
 import { siteOrigin } from "../../shared/site";
 import { useBrowserValue } from "../components/useBrowserValue";
 
