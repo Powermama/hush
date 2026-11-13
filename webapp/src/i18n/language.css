@@ -1,0 +1,35 @@
+/* Footer language switcher: globe, then the two languages; the current one in ink. */
+/* Footer language switcher: a quiet globe, then a segmented control whose white
+   thumb sits under the current language and glides when another is chosen. */
+.language-switcher { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; }
+.language-switcher > svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; color: var(--color-soft); }
+.language-switcher-track {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: 999px;
+  background: rgb(0 0 0 / 0.05); box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06);
+}
+.language-switcher-thumb {
+  position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 999px; background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 2px 8px rgb(31 32 30 / 0.08);
+  transition: translate 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.language-switcher-track[data-selected="de"] .language-switcher-thumb { translate: 100% 0; }
+.language-switcher-track a {
+  position: relative; z-index: 1; min-width: 84px; padding: 7px 16px; border-radius: 999px; text-align: center;
+  font-size: 13px; font-weight: 600; color: var(--color-muted); transition: color 0.2s;
+}
+.language-switcher-track a:hover { color: var(--color-ink); }
+.language-switcher-track a:focus-visible { outline: 2px solid #7667d7; outline-offset: 1px; }
+.language-switcher-track[data-selected="en"] a[lang="en"], .language-switcher-track[data-selected="de"] a[lang="de"] { color: var(--color-ink); }
+@media (prefers-reduced-motion: reduce) { .language-switcher-thumb, .language-switcher-track a { transition: none; } }
+
+/* Slim bar above the header offering the page in the reader's language. */
+.language-hint {
+  position: relative; z-index: 30; display: flex; align-items: center; justify-content: center; gap: 12px;
+  min-height: 44px; padding: 8px 52px 8px 20px; background: #eeebf6; border-bottom: 1px solid rgb(118 103 215 / 0.15);
+  font-size: 14px; color: var(--color-ink); text-align: center;
+}
+.language-hint p { margin: 0; }
+.language-hint a { font-weight: 600; color: #5546b8; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.language-hint button { position: absolute; right: 12px; top: 50%; translate: 0 -50%; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 999px; background: none; color: var(--color-muted); cursor: pointer; }
+.language-hint button:hover, .language-hint button:focus-visible { background: rgb(0 0 0 / 0.06); color: var(--color-ink); }
+.language-hint svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }

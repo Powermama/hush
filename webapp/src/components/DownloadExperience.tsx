@@ -12,6 +12,7 @@ import {
 } from "../../shared/releases";
 import { ButtonLink, buttonClassName } from "./ButtonLink";
 import { DownloadHandoff } from "./DownloadHandoff";
+import { m } from "../paraglide/messages";
 import { useBrowserValue } from "./useBrowserValue";
 
 type DownloadLinkProps = Omit<
@@ -19,7 +20,7 @@ type DownloadLinkProps = Omit<
   "href" | "onClick"
 > & { mobileLabel?: ReactNode };
 
-export function DownloadLink({ mobileLabel = "Get hush for Mac", ...props }: DownloadLinkProps) {
+export function DownloadLink({ mobileLabel = m.download_mobile(), ...props }: DownloadLinkProps) {
   const mobile = useBrowserValue(() => typeof navigator !== "undefined" && (
     /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
@@ -30,7 +31,7 @@ export function DownloadLink({ mobileLabel = "Get hush for Mac", ...props }: Dow
   if (!release) {
     return (
       <ButtonLink {...props} href="/releases">
-        Download coming soon
+        {m.download_coming_soon()}
       </ButtonLink>
     );
   }

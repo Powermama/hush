@@ -252,7 +252,8 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 @media (prefers-reduced-motion: reduce) { .blog-card { transition: none; } }
 
 /* Author profile */
-.blog-author-header { max-width: 760px; margin: 0 auto 48px; }
+.blog-author-header { margin-bottom: 0; }
+.blog-author-articles { max-width: 1160px; margin: 64px auto 0; }
 .blog-author-identity { display: flex; align-items: center; gap: 18px; }
 .blog-author-avatar { display: grid; place-items: center; flex: none; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08); background: var(--color-ink); color: #fff; font-weight: 600; letter-spacing: -0.02em; }
 .blog-author-avatar-large { width: 64px; height: 64px; font-size: 22px; }
@@ -294,10 +295,9 @@ a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forwar
 .blog-author-links a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid rgb(0 0 0 / 0.1); background: #fff; font-size: 14px; font-weight: 600; color: var(--color-ink); transition: border-color 0.2s; }
 .blog-author-links a:hover, .blog-author-links a:focus-visible { border-color: rgb(0 0 0 / 0.25); }
 .blog-external { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--color-soft); }
-.blog-author-section { max-width: 760px; margin: 0 auto 16px; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); }
+.blog-author-section { margin: 0 0 16px; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); }
 
 /* Editorial policy: one reading column. */
-.blog-policy { max-width: 680px; margin: 0 auto; }
 .blog-policy h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; }
-.blog-policy-lead { margin: 16px 0 40px; font-size: 19px; line-height: 1.6; color: var(--color-muted); }
-.blog-policy .blog-prose section:first-child h2 { margin-top: 0; }
+.blog-policy-lead { margin: 16px 0 0; font-size: 19px; line-height: 1.6; color: var(--color-muted); }
+.blog-policy .blog-body section:first-child h2 { margin-top: 0; }

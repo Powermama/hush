@@ -20,26 +20,29 @@ export function BlogAuthorPage({ lang, author }: { lang: BlogLanguage; author: B
     <div className="min-h-screen bg-canvas text-ink" lang={lang}>
       <DocumentMetadata title={`${profile.name} - ${profile.role[lang]}`} description={copy.authorDescription(profile.name)} canonicalPath={path} language={lang} />
       <BlogHeader lang={lang} />
-      <main className="blog-index-main">
-        <header className="blog-author-header">
+      <main className="blog-article-main">
+        {/* Same layout as an article: the way back sits in the left margin. */}
+        <div className="blog-article">
           <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
-          <div className="blog-author-identity">
-            <BlogAuthorAvatar author={author} size="large" />
-            <div>
-              <h1>{profile.name}</h1>
-              <p className="blog-author-role">{profile.role[lang]}</p>
+          <header className="blog-article-header blog-author-header">
+            <div className="blog-author-identity">
+              <BlogAuthorAvatar author={author} size="large" />
+              <div>
+                <h1>{profile.name}</h1>
+                <p className="blog-author-role">{profile.role[lang]}</p>
+              </div>
             </div>
-          </div>
-          <p className="blog-author-bio">{profile.bio[lang]}</p>
-          <nav className="blog-author-links" aria-label={copy.authorElsewhere}>
-            {profile.sameAs.map((link) => (
-              <a key={link.url} href={link.url} rel="me noopener" target="_blank">
-                {link.label}<BlogExternalIcon />
-              </a>
-            ))}
-          </nav>
-        </header>
-        <section aria-labelledby="author-articles">
+            <p className="blog-author-bio">{profile.bio[lang]}</p>
+            <nav className="blog-author-links" aria-label={copy.authorElsewhere}>
+              {profile.sameAs.map((link) => (
+                <a key={link.url} href={link.url} rel="me noopener" target="_blank">
+                  {link.label}<BlogExternalIcon />
+                </a>
+              ))}
+            </nav>
+          </header>
+        </div>
+        <section className="blog-author-articles" aria-labelledby="author-articles">
           <h2 id="author-articles" className="blog-author-section">{copy.authorArticles}</h2>
           <BlogPostList posts={posts} />
         </section>

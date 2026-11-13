@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from "react";
+import { m } from "../paraglide/messages";
 
 /** Locally served CC0 rose with a vector fallback; never a product control. */
 export function FreedomBloom() {
@@ -24,7 +25,7 @@ export function FreedomBloom() {
     observer.observe(node);
     return () => { disposed = true; controller.abort(); observer.disconnect(); dispose?.(); };
   }, []);
-  return <div ref={host} className="freedom-bloom" style={{ position: "relative", width: "100%", aspectRatio: "6 / 7", overflow: "hidden" }} role="img" aria-label="A sculptural pearl and lilac rose, an open bloom for ideas that belong to everyone.">
+  return <div ref={host} className="freedom-bloom" style={{ position: "relative", width: "100%", aspectRatio: "6 / 7", overflow: "hidden" }} role="img" aria-label={m.bloom_label()}>
     <svg className="bloom-fallback" viewBox="0 0 600 700" aria-hidden="true">
       <defs><linearGradient id={`${id}-petal`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#f4e9ee" /><stop offset=".5" stopColor="#d6c6df" /><stop offset="1" stopColor="#a695c0" /></linearGradient></defs>
       <path d="M308 640C325 500 210 436 300 300" fill="none" stroke="#9aa8b7" strokeWidth="7" />

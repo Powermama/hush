@@ -77,12 +77,15 @@ export function BlogEditorialPolicyPage({ lang }: { lang: BlogLanguage }) {
     <div className="min-h-screen bg-canvas text-ink" lang={lang}>
       <DocumentMetadata title={copy.editorialTitle} description={content.lead} canonicalPath={editorialPolicyPath(lang)} language={lang} />
       <BlogHeader lang={lang} />
-      <main className="blog-index-main">
-        <article className="blog-policy" aria-labelledby="policy-title">
+      <main className="blog-article-main">
+        {/* Same layout as an article: the way back sits in the left margin. */}
+        <article className="blog-article blog-policy" aria-labelledby="policy-title">
           <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
-          <h1 id="policy-title">{copy.editorialHeading}</h1>
-          <p className="blog-policy-lead">{content.lead}</p>
-          <div className="blog-prose">
+          <header className="blog-article-header">
+            <h1 id="policy-title">{copy.editorialHeading}</h1>
+            <p className="blog-policy-lead">{content.lead}</p>
+          </header>
+          <div className="blog-body blog-prose">
             {content.sections.map((section) => (
               <section key={section.heading}>
                 <h2>{section.heading}</h2>

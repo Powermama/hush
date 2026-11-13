@@ -7,7 +7,7 @@ test("public pages provide readable content and unique previews without JavaScri
   const page = await context.newPage();
   try {
     for (const [path, title, heading, image] of [
-      ["/", "hush - Local voice dictation and AI for Mac", "The voice layer for your Mac.", "hush"],
+      ["/", "hush - Free Dictation App for Mac, Speech to Text", "The voice layer for your Mac.", "hush"],
       ["/verified-messages", "Verified Messages - Signed message history with hush", "Make your voice more than a post.", "verified-messages"],
     ]) {
       const response = await page.goto(`${test.info().project.use.baseURL}${path}`);
@@ -20,7 +20,8 @@ test("public pages provide readable content and unique previews without JavaScri
       await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", `https://behu.sh${path}`);
       await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", `https://behu.sh/social/${image}.png`);
       await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute("content", "summary_large_image");
-      await expect(page.locator('footer a[href="/verified-messages"]')).toBeVisible();
+      // The product links, not the language switcher, which may also point to this page.
+      await expect(page.locator("footer").getByRole("link", { name: "Verified Messages" })).toBeVisible();
       const preview = await request.get(`/social/${image}.png`);
       expect(preview.status()).toBe(200);
       expect(preview.headers()["content-type"]).toContain("image/png");

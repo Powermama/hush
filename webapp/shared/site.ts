@@ -7,12 +7,13 @@ import { blogPosts } from "./blog-posts.generated.ts";
 import { authorPath, blogAuthors, type BlogAuthorId } from "./authors.ts";
 
 export const siteOrigin = "https://behu.sh";
+export type SiteLanguage = "en" | "de";
 export type PageMetadata = {
   title: string;
   description: string;
   canonicalPath: string;
   indexable: boolean;
-  language: "en" | "de";
+  language: SiteLanguage;
   alternatePaths?: { en: string; de: string };
   modified?: string;
   /** Present for blog articles: drives og:type article and BlogPosting data. */
@@ -31,9 +32,16 @@ export type PageMetadata = {
 
 export const sitePages: Record<string, PageMetadata> = {
   "/": {
-    title: "hush - Local voice dictation and AI for Mac",
+    title: "hush - Free Dictation App for Mac, Speech to Text",
     description: "Free, open-source voice dictation for Mac. Write across your apps with local AI, personal writing styles and a beta assistant. Built for Apple silicon.",
     canonicalPath: "/", indexable: true, language: "en",
+    alternatePaths: { en: "/", de: "/de" },
+  },
+  "/de": {
+    title: "hush - Kostenlose Diktier-App für den Mac mit lokaler KI",
+    description: "Kostenlose Open-Source-Diktier-App für den Mac: Sprache zu Text in allen Apps, mit lokaler KI, eigenen Schreibstilen und Beta-Assistent. Für Apple Silicon.",
+    canonicalPath: "/de", indexable: true, language: "de",
+    alternatePaths: { en: "/", de: "/de" },
   },
   "/verified-messages": {
     title: "Verified Messages - Signed message history with hush",
@@ -76,19 +84,25 @@ export const privatePageMetadata: PageMetadata = {
   canonicalPath: "/", indexable: false, language: "en",
 };
 
-export const softwareDescription = {
+/** SoftwareApplication data for a landing page in its language; free is stated as a zero-price offer. */
+export const softwareDescription = (page: PageMetadata) => ({
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "hush",
-  url: siteOrigin,
-  description: sitePages["/"]!.description,
+  url: `${siteOrigin}${page.canonicalPath}`,
+  description: page.description,
+  inLanguage: page.language,
   applicationCategory: "ProductivityApplication",
   operatingSystem: "macOS 15 or later",
   processorRequirements: "Apple silicon (M1 or later)",
   isAccessibleForFree: true,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   license: "https://github.com/Powermama/hush/blob/main/LICENSING.md",
   sameAs: ["https://github.com/Powermama/hush"],
-};
+});
+
+/** Pages that are a landing page, in either language. */
+export const landingPaths = ["/", "/de"];
 
 /** Site paths that exist independently of the blog (blog articles may link to them). */
 export function staticSitePaths(): string[] {

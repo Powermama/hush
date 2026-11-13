@@ -3,7 +3,7 @@
 import type { BlogPosting, BreadcrumbList, Person, ProfilePage } from "schema-dts";
 import { blogCopy } from "./blog.ts";
 import { authorPath, blogAuthors, type BlogAuthorId } from "./authors.ts";
-import { siteOrigin, softwareDescription, type PageMetadata } from "./site.ts";
+import { landingPaths, siteOrigin, softwareDescription, type PageMetadata } from "./site.ts";
 
 const escapeHTML = (value: string) => value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
@@ -19,6 +19,7 @@ function personData(id: BlogAuthorId, language: "en" | "de") {
   } satisfies Person;
 }
 
+
 /** Only trusted public catalogue entries belong here, never proof contents. */
 export function renderPageHead(page: PageMetadata): string {
   const title = escapeHTML(page.title);
@@ -29,7 +30,9 @@ export function renderPageHead(page: PageMetadata): string {
   const image = `${siteOrigin}${article ? article.image : `/social/${verified ? "verified-messages" : "hush"}.png`}`;
   const imageAlt = article ? article.imageAlt : verified
     ? "Give your words their story back. A hush message mock-up with signed capture and edit history."
-    : "The voice layer for your Mac. The hush listening HUD with a waveform beside an example message.";
+    : page.language === "de"
+      ? "Die Sprachebene für den Mac. Das hush HUD hört zu, mit Wellenform neben einer Beispielnachricht."
+      : "The voice layer for your Mac. The hush listening HUD with a waveform beside an example message.";
   // Dates are day-precise in the source; publish them as UTC midnight.
   const isoDate = (date: string) => `${date}T00:00:00Z`;
   const articleData = article && {
@@ -93,7 +96,9 @@ export function renderPageHead(page: PageMetadata): string {
     `<meta name="twitter:image:alt" content="${escapeHTML(imageAlt)}">`,
     ...(page.indexable ? ['<link rel="describedby" href="/llms.txt" type="text/plain">'] : []),
     ...(page.alternatePaths ? Object.entries({ ...page.alternatePaths, "x-default": page.alternatePaths.en }).map(([lang, path]) => `<link rel="alternate" hreflang="${lang}" href="${siteOrigin}${path}">`) : []),
-    ...(page.canonicalPath === "/" && page.indexable ? [`<script type="application/ld+json">${JSON.stringify(softwareDescription).replaceAll("<", "\\u003c")}</script>`] : []),
+    ...(landingPaths.includes(page.canonicalPath) && page.indexable ? [`<script type="application/ld+json">${JSON.stringify(softwareDescription(page)).replaceAll("<", "\\u003c")}</script>`] : []),
+    // Language choice (public/language.js): async, so it never blocks the first paint.
+    ...(page.alternatePaths ? ['<script src="/language.js" async></script>'] : []),
     ...[articleData, profileData, breadcrumbData].filter(Boolean).map((data) => `<script type="application/ld+json">${JSON.stringify(data).replaceAll("<", "\\u003c")}</script>`),
   ].join("\n");
 }

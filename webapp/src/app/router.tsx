@@ -7,6 +7,7 @@ import {
   useParams,
 } from "@tanstack/react-router";
 import { App } from "./App";
+import { Landing } from "../landing/Landing";
 import { ProofPage } from "../provenance/ProofPage";
 import {
   LatestReleasePage,
@@ -24,6 +25,11 @@ const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: App,
+});
+const germanLandingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/de",
+  component: () => <Landing lang="de" />,
 });
 const proofRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -72,6 +78,7 @@ const germanPrivacyPolicyRoute = createRoute({
 });
 const routeTree = rootRoute.addChildren([
     landingRoute,
+    germanLandingRoute,
     verifiedMessagesRoute,
     proofRoute,
     releasesRoute,

@@ -1,3 +1,5 @@
+import { paraglideVitePlugin } from "@inlang/paraglide-js";
+import paraglideConfig from "./project.inlang/paraglide.config.ts";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -5,7 +7,7 @@ import { sitePages, privatePageMetadata } from "./shared/site.ts";
 import { renderPageHead } from "./shared/site-head.ts";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), {
+  plugins: [paraglideVitePlugin({ project: "./project.inlang", ...paraglideConfig }), react(), tailwindcss(), {
     name: "hush-page-metadata",
     transformIndexHtml(html, context) {
       const page = sitePages[context.path === "/index.html" ? "/" : context.path] ?? privatePageMetadata;

@@ -1,6 +1,7 @@
 import { shadowedAppIcons } from "../media/appIcons";
 import { useEffect, useRef, type CSSProperties } from "react";
 import { ResponsiveField } from "./ResponsiveField";
+import { m } from "../paraglide/messages";
 
 export function WaveMark({ className = "" }: { className?: string }) {
   return <svg className={className} viewBox="0 0 80 80" fill="none" aria-hidden="true">
@@ -54,7 +55,7 @@ export function LocalUniverse() {
   }, []);
   return <div className="local-universe">
     <div className="universe-texture" aria-hidden="true"><ResponsiveField /></div>
-    <div className="universe-illustration" role="img" aria-label="hush connects your voice to familiar Mac apps: Mail, Messages, Notes, Slack, Chrome, Notion and Figma.">
+    <div className="universe-illustration" role="img" aria-label={m.universe_label()}>
     <div className="universe-halo" />
     <svg className="universe-paths" viewBox="0 0 1000 500" fill="none" aria-hidden="true">
       <ellipse cx="500" cy="250" rx="405" ry="205" />

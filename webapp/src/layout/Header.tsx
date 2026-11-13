@@ -3,12 +3,15 @@ import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { DownloadLink } from "../components/DownloadExperience";
 import { Logo } from "../components/Logo";
 import { PageProgress } from "./PageProgress";
+import { LanguageHint } from "../i18n/LanguageControls";
+import { m } from "../paraglide/messages";
+import { getLocale } from "../paraglide/runtime";
 import "./header.css";
 
 export function Header({
   theme = "light",
   currentPage,
-  navigationLabel = "Primary navigation",
+  navigationLabel = m.nav_primary(),
   progress = false,
   children,
 }: {
@@ -72,11 +75,11 @@ export function Header({
     };
   }, [menuOpen]);
   return (
-    <>{progress && <PageProgress />}<header ref={header} className="site-header" data-theme={theme} data-menu-open={menuOpen}>
+    <><LanguageHint />{progress && <PageProgress />}<header ref={header} className="site-header" data-theme={theme} data-menu-open={menuOpen}>
       <nav aria-label={navigationLabel}>
-        <div className="site-brand"><Logo href="/" /></div>
-        <div className="site-mobile-start"><DownloadLink variant="custom" className="site-compact-download" mobileLabel="Get started on macOS"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={siApple.path} fill="currentColor" /></svg>Get started on macOS</DownloadLink></div>
-        <button ref={toggle} className="site-menu-toggle" type="button" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} aria-controls={menuId} onClick={() => {
+        <div className="site-brand"><Logo href={getLocale() === "de" ? "/de" : "/"} /></div>
+        <div className="site-mobile-start"><DownloadLink variant="custom" className="site-compact-download" mobileLabel={m.nav_get_started()}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={siApple.path} fill="currentColor" /></svg>{m.nav_get_started()}</DownloadLink></div>
+        <button ref={toggle} className="site-menu-toggle" type="button" aria-label={menuOpen ? m.nav_close() : m.nav_open()} aria-expanded={menuOpen} aria-controls={menuId} onClick={() => {
           if (!menuOpen) menuOrigin.current = { left: window.scrollX, top: window.scrollY };
           setMenuOpen(open => !open);
         }}>
@@ -88,10 +91,10 @@ export function Header({
             GitHub
           </a>
           <a href="/verified-messages" aria-current={currentPage === "verified-messages" ? "page" : undefined}>Verified Messages</a>
-          <button className="site-community" type="button" disabled title="Community link coming soon" aria-label="Community, coming soon">
-            Community<span aria-hidden="true">Soon</span>
+          <button className="site-community" type="button" disabled title={m.nav_community_title()} aria-label={m.nav_community_label()}>
+            Community<span aria-hidden="true">{m.nav_soon()}</span>
           </button>
-          <DownloadLink variant="custom" className="site-header-download"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={siApple.path} fill="currentColor" /></svg>Download</DownloadLink>
+          <DownloadLink variant="custom" className="site-header-download"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={siApple.path} fill="currentColor" /></svg>{m.nav_download()}</DownloadLink>
         </div>
       </nav>
       {children && <div className="site-header-context">{children}</div>}
