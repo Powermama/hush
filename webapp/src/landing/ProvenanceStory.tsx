@@ -1,4 +1,6 @@
 import { artwork } from "../media/artwork";
+import { Lines } from "../i18n/Lines";
+import { m } from "../paraglide/messages";
 import "./provenance.css";
 
 const pressSource = "https://commons.wikimedia.org/wiki/File:Buchdrucker-1568.png";
@@ -10,7 +12,7 @@ function PrintingPress({ decorative = false }: { decorative?: boolean }) {
     srcSet={image.srcSet}
     sizes="(max-width: 760px) 65vw, 420px"
     width="751" height="879" loading="lazy" decoding="async"
-    alt={decorative ? "" : "Printers setting type and working a press in Jost Amman’s 1568 woodcut, reinterpreted in blue ink on a pale collage."}
+    alt={decorative ? "" : m.provenance_alt()}
   />;
 }
 
@@ -19,9 +21,9 @@ export function ProvenanceStory() {
   return <section className="story-provenance" aria-labelledby="provenance-title">
     <div className="provenance-inner">
       <div className="provenance-opening">
-        <h2 id="provenance-title">Reality has<br />a copy problem.</h2>
+        <h2 id="provenance-title"><Lines text={m.provenance_title()} /></h2>
         <div className="provenance-intro">
-          <p>The internet gave everyone a voice.<br />Now everything has an echo.</p>
+          <p><Lines text={m.provenance_body()} /></p>
         </div>
       </div>
 
@@ -31,13 +33,13 @@ export function ProvenanceStory() {
           <div className="press-echo" aria-hidden="true"><PrintingPress decorative /></div>
 
           <div className="provenance-noise" aria-hidden="true">
-            <span className="noise-repost">repost / rewrite / repeat / repost</span>
-            <span className="noise-human">human?</span>
-            <span className="noise-machine">generated.</span>
-            <span className="noise-question"><span>Who</span><span>said that?</span></span>
-            <span className="noise-copy">copy of a copy of a copy</span>
-            <span className="noise-bot">bot?</span>
-            <span className="noise-origin">original source unknown</span>
+            <span className="noise-repost">{m.provenance_noise_repost()}</span>
+            <span className="noise-human">{m.provenance_noise_human()}</span>
+            <span className="noise-machine">{m.provenance_noise_machine()}</span>
+            <span className="noise-question"><span>{m.provenance_noise_question_1()}</span><span>{m.provenance_noise_question_2()}</span></span>
+            <span className="noise-copy">{m.provenance_noise_copy()}</span>
+            <span className="noise-bot">{m.provenance_noise_bot()}</span>
+            <span className="noise-origin">{m.provenance_noise_origin()}</span>
           </div>
 
           <svg className="provenance-face" viewBox="0 0 240 300" fill="none" aria-hidden="true">
@@ -61,17 +63,17 @@ export function ProvenanceStory() {
             <path className="thread-main" d="M80 270H340C460 270 430 105 565 105H875C1005 105 1020 365 865 365H675C590 365 550 395 550 462V520" />
             <circle cx="80" cy="270" r="4" />
           </svg>
-          <span className="press-imprint" aria-hidden="true">From ink to infinity.</span>
+          <span className="press-imprint" aria-hidden="true">{m.provenance_imprint()}</span>
         </div>
         <figcaption className="art-credit provenance-credit">
-          <a href={pressSource} target="_blank" rel="noreferrer">The printing press, 1568</a>
-          <span>Jost Amman. Public domain.</span>
+          <a href={pressSource} target="_blank" rel="noreferrer">{m.provenance_credit_link()}</a>
+          <span>{m.provenance_credit()}</span>
         </figcaption>
       </figure>
 
       <div className="provenance-resolution">
-        <h3>Give your words<br />their story back.</h3>
-        <a className="provenance-link" href="/verified-messages">Discover Verified Messages<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg></a>
+        <h3><Lines text={m.provenance_resolution()} /></h3>
+        <a className="provenance-link" href="/verified-messages">{m.provenance_link()}<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg></a>
       </div>
     </div>
   </section>;

@@ -1,11 +1,12 @@
 import { useEffect, useId, useRef } from "react";
+import { m } from "../paraglide/messages";
 
 export type MascotState = "listening" | "thinking" | "recording";
 
-const descriptions: Record<MascotState, string> = {
-  listening: "hush listening, a little graphite companion with expressive eyes and headphones.",
-  thinking: "hush thinking, a little graphite companion considering an idea.",
-  recording: "hush recording an idea, a little graphite companion holding a microphone.",
+const descriptions: Record<MascotState, () => string> = {
+  listening: m.mascot_listening,
+  thinking: m.mascot_thinking,
+  recording: m.mascot_recording,
 };
 
 /** A character in the editorial artwork, never a live microphone or app control. */
@@ -28,7 +29,7 @@ export function HushMascot({ state }: { state: MascotState }) {
     observer.observe(state === "listening" ? node.closest(".thought-art") ?? node : node);
     return () => { cancelled = true; observer.disconnect(); dispose?.(); };
   }, [state]);
-  return <div ref={host} className={`hush-mascot hush-mascot-${state}`} role="img" aria-label={descriptions[state]}>
+  return <div ref={host} className={`hush-mascot hush-mascot-${state}`} role="img" aria-label={descriptions[state]()}>
     <HushMascotArtwork state={state} />
   </div>;
 }

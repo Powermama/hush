@@ -1,9 +1,10 @@
+import { m } from "../paraglide/messages";
 export function Logo({ href = "#top" }: { href?: string }) {
   return (
     <a
       href={href}
       className="flex items-center gap-2.5 rounded-md font-display text-lg font-bold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-      aria-label="hush home"
+      aria-label={m.nav_home()}
     >
       <span className="grid size-8 place-items-center rounded-[10px] bg-ink text-white">
         <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
