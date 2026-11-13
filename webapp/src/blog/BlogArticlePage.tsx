@@ -23,6 +23,17 @@ function relatedPosts(post: BlogPostMetadata) {
   return [...sameCluster, ...others.filter((candidate) => candidate.cluster !== post.cluster)].slice(0, 3);
 }
 
+/** A chevron that grows into a long arrow when its link is hovered. */
+export function BlogArrow({ direction }: { direction: "back" | "forward" }) {
+  return (
+    <svg className={`blog-arrow blog-arrow-${direction}`} viewBox="0 0 16 16" aria-hidden="true">
+      {direction === "back"
+        ? <><path className="blog-arrow-shaft" d="M2 8h11" /><path className="blog-arrow-head" d="M6.5 3.5 2 8l4.5 4.5" /></>
+        : <><path className="blog-arrow-shaft" d="M14 8H3" /><path className="blog-arrow-head" d="M9.5 3.5 14 8l-4.5 4.5" /></>}
+    </svg>
+  );
+}
+
 export function BlogHeader({ lang }: { lang: BlogLanguage }) {
   return <Header navigationLabel={lang === "de" ? "Blog-Navigation" : "Blog navigation"} />;
 }
@@ -54,7 +65,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
       <main className="blog-article-main">
         <article className="blog-article" aria-labelledby="article-title">
           <header className="blog-article-header">
-            <a className="blog-back" href={copy.indexPath}>{copy.allArticles}</a>
+            <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
             <h1 id="article-title">{post.heading}</h1>
             <p className="blog-byline">
               <span>{copy.by} <a href={post.authorUrl} rel="author">{post.author}</a></span>
@@ -82,6 +93,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
                   <a href={item.path}>
                     <span className="blog-related-title">{item.heading}</span>
                     <span className="blog-related-description">{item.description}</span>
+                    <span className="blog-related-more">{copy.readArticle}<BlogArrow direction="forward" /></span>
                   </a>
                 </li>
               ))}

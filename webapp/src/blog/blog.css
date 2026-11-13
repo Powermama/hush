@@ -9,9 +9,19 @@
   font-weight: 600; margin: 0; color: var(--color-ink); text-wrap: balance;
 }
 /* Way back to the index, aligned with the article column. */
-.blog-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; font-weight: 600; color: var(--color-muted); }
-.blog-back::before { content: "\2039"; font-size: 18px; line-height: 1; transform: translateY(-1px); }
+.blog-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 600; color: var(--color-muted); }
 .blog-back:hover, .blog-back:focus-visible { color: var(--color-ink); }
+/* Chevron that grows into a long arrow on hover. */
+.blog-arrow { width: 16px; height: 16px; flex: none; overflow: visible; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.blog-arrow-shaft { stroke-dasharray: 11; stroke-dashoffset: 11; transition: stroke-dashoffset 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+.blog-arrow-head { transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+a:hover > .blog-arrow .blog-arrow-shaft, a:focus-visible > .blog-arrow .blog-arrow-shaft,
+a:hover .blog-related-more .blog-arrow-shaft, a:focus-visible .blog-related-more .blog-arrow-shaft { stroke-dashoffset: 0; }
+.blog-arrow-back .blog-arrow-head { transform: translateX(4px); }
+a:hover > .blog-arrow-back .blog-arrow-head, a:focus-visible > .blog-arrow-back .blog-arrow-head { transform: none; }
+.blog-arrow-forward .blog-arrow-head { transform: translateX(-4px); }
+a:hover .blog-arrow-forward .blog-arrow-head, a:focus-visible .blog-arrow-forward .blog-arrow-head { transform: none; }
+@media (prefers-reduced-motion: reduce) { .blog-arrow-shaft, .blog-arrow-head { transition: none; } }
 .blog-byline { margin: 18px 0 0; display: flex; flex-wrap: wrap; column-gap: 0; row-gap: 2px; font-size: 14px; line-height: 1.6; color: var(--color-muted); }
 .blog-byline > span { white-space: nowrap; }
 .blog-byline > span + span::before { content: "·"; margin: 0 0.5em; color: var(--color-soft); }
@@ -28,7 +38,8 @@
   .blog-article-header { margin-left: max(0px, calc((100% - 968px) / 2)); }
 }
 
-/* Table of contents: collapsed under the header on small screens, sticky beside the text on wide ones. */
+/* Table of contents: collapsed under the header on small screens, beside the opening on wide ones.
+   Not sticky: the best-read SaaS blogs give the text the stage once reading starts. */
 .blog-toc-mobile { max-width: 680px; margin: 0 auto 32px; border: 1px solid rgb(0 0 0 / 0.08); border-radius: 14px; background: #fff; }
 .blog-toc-mobile > summary { cursor: pointer; padding: 14px 18px; font-size: 14px; font-weight: 600; list-style: none; }
 .blog-toc-mobile > summary::-webkit-details-marker { display: none; }
@@ -42,7 +53,6 @@
 @media (min-width: 1024px) {
   .blog-toc-mobile { display: none; }
   .blog-toc-desktop { display: block; }
-  .blog-toc-desktop .blog-toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); }
 }
 .blog-toc-title { margin: 0 0 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-soft); }
 /* A quiet rail; the section being read gets the ink segment and full contrast. */
@@ -136,6 +146,7 @@
 .blog-related a, .blog-index-list a { display: block; padding: 20px; height: 100%; }
 .blog-related-title { display: block; font-weight: 600; line-height: 1.35; color: var(--color-ink); }
 .blog-related-description { display: block; margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--color-muted); }
+.blog-related-more { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--color-ink); }
 .blog-related a:hover .blog-related-title, .blog-related a:focus-visible .blog-related-title { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 
 .blog-index-header { max-width: 760px; margin: 0 auto 40px; }
@@ -144,5 +155,5 @@
 .blog-index-list { max-width: 760px; margin: 0 auto; }
 .blog-index-list h2 { margin: 0; font-size: 22px; line-height: 1.3; letter-spacing: -0.02em; font-weight: 600; }
 .blog-index-list p { margin: 8px 0 12px; font-size: 15px; line-height: 1.6; color: var(--color-muted); }
-.blog-index-meta { font-size: 13px; color: var(--color-soft); }
+.blog-index-meta { display: block; font-size: 13px; color: var(--color-soft); }
 .blog-index-list a:hover h2, .blog-index-list a:focus-visible h2 { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }

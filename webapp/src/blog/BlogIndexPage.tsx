@@ -4,7 +4,7 @@ import { blogCopy, type BlogLanguage } from "../../shared/blog";
 import { blogPosts } from "../../shared/blog-posts.generated";
 import { DocumentMetadata } from "../components/DocumentMetadata";
 import { Footer } from "../layout/Footer";
-import { BlogDate, BlogHeader } from "./BlogArticlePage";
+import { BlogArrow, BlogDate, BlogHeader } from "./BlogArticlePage";
 import "./blog.css";
 
 export function BlogIndexPage({ lang }: { lang: BlogLanguage }) {
@@ -28,6 +28,7 @@ export function BlogIndexPage({ lang }: { lang: BlogLanguage }) {
                 <span className="blog-index-meta">
                   <BlogDate lang={lang} value={post.updated} /> · {copy.readingTime(post.readingMinutes)}
                 </span>
+                <span className="blog-related-more">{copy.readArticle}<BlogArrow direction="forward" /></span>
               </a>
             </li>
           ))}
