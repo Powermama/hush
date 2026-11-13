@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { LocalMediaStore } from "../src/media/store";
+import { LocalObjectStore } from "../src/storage/object-store";
 import { importArticles } from "../src/posts/import";
 import { listPosts, listRevisions } from "../src/posts/service";
 import { createTestDatabase, serverUrl } from "./database";
@@ -21,12 +21,12 @@ function article(fields: ReturnType<typeof validPost>, front: { published: strin
 
 describe.skipIf(!serverUrl)("CMS import", () => {
   let database: Awaited<ReturnType<typeof createTestDatabase>>;
-  let cms: { db: Awaited<ReturnType<typeof createTestDatabase>>["db"]; media: LocalMediaStore };
+  let cms: { db: Awaited<ReturnType<typeof createTestDatabase>>["db"]; media: LocalObjectStore };
   let content = "";
 
   beforeAll(async () => {
     database = await createTestDatabase();
-    cms = { db: database.db, media: new LocalMediaStore(await mkdtemp(join(tmpdir(), "hush-cms-media-"))) };
+    cms = { db: database.db, media: new LocalObjectStore(await mkdtemp(join(tmpdir(), "hush-cms-media-"))) };
     content = await mkdtemp(join(tmpdir(), "hush-cms-content-"));
     await mkdir(join(content, "en", "media", "linked-guide"), { recursive: true });
     // "linked-guide" links to "base-guide", so it can only go live after it.

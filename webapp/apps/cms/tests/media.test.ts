@@ -9,7 +9,7 @@ import { join } from "node:path";
 import sharp from "sharp";
 import { createApp } from "../src/app";
 import { createToken } from "../src/auth/tokens";
-import { LocalMediaStore } from "../src/media/store";
+import { LocalObjectStore } from "../src/storage/object-store";
 import { createTestDatabase, serverUrl } from "./database";
 import { validPost } from "./fixtures";
 
@@ -19,12 +19,12 @@ export const png = (width: number, height = 400) =>
 describe.skipIf(!serverUrl)("CMS media", () => {
   let database: Awaited<ReturnType<typeof createTestDatabase>>;
   let app: ReturnType<typeof createApp>;
-  let store: LocalMediaStore;
+  let store: LocalObjectStore;
   let token = "";
 
   beforeAll(async () => {
     database = await createTestDatabase();
-    store = new LocalMediaStore(await mkdtemp(join(tmpdir(), "hush-cms-media-")));
+    store = new LocalObjectStore(await mkdtemp(join(tmpdir(), "hush-cms-media-")));
     app = createApp({ db: database.db, media: store });
     token = await createToken(database.db, { name: "owner", scopes: ["posts:read", "posts:write", "posts:publish"] });
   });

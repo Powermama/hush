@@ -15,7 +15,10 @@
     "cms:token": "bun src/commands/create-token.ts",
     "api:openapi": "bun src/export-openapi.ts",
     "api:check": "bun run api:openapi && git diff --exit-code -- openapi/hush-cms.json",
-    "cms:import": "bun src/commands/import.ts"
+    "cms:import": "bun src/commands/import.ts",
+    "cms:backup": "bun src/commands/backup.ts",
+    "cms:restore": "bun src/commands/restore.ts",
+    "cms:scheduler": "bun src/jobs/scheduler.ts"
   },
   "dependencies": {
     "@hono/zod-openapi": "1.1.5",

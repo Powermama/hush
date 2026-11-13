@@ -1,8 +1,8 @@
 # Deploy hush on Coolify
 
-The production stack is defined in `webapp/docker-compose.coolify.yaml` from the monorepo root. It runs the hush web service and PostgreSQL, persists encrypted proof objects and database records, applies database migrations before startup, and reports readiness through `/health/ready`. Run this guide's shell commands from `webapp/`.
+Production runs the website as the Coolify Dockerfile application `hush-website` (rolling updates, see [Zero-downtime deployments](#zero-downtime-deployments)) next to the Coolify PostgreSQL database `hush-postgres`. The container persists encrypted proof objects, applies database migrations before startup, and reports readiness through `/health/ready`. Run this guide's shell commands from `webapp/`.
 
-The same container and topology can be exercised locally with the standard `compose.yaml`:
+The same image runs locally with the website and its database from `apps/web/compose.yaml`, included by the workspace's `compose.yaml` together with the CMS:
 
 ```sh
 docker compose up --build
@@ -45,15 +45,7 @@ HUSH_COMPOSE_PORT=4300 docker compose up --build
 
 ## 1. Create the service
 
-For a new installation, create a resource from `Powermama/hush` and select Docker Compose as the build pack. For the existing production installation, update its source configuration in place and follow the [migration record](../../../../../docs/monorepo-migration.md) to preserve the database, keys and volumes.
-
-- Base directory: `/webapp`
-- Docker Compose location: `/docker-compose.coolify.yaml`
-- Domain: `https://behu.sh`
-- Service and port: `web:3000`
-
-Coolify resolves the Compose location and build context from the base directory.
-These settings follow its [Docker Compose documentation](https://coolify.io/docs/applications/builds/docker-compose).
+For a new installation, create the Coolify PostgreSQL database `hush-postgres` and the Dockerfile application `hush-website` from `Powermama/hush`, configured as in [Coolify settings for `hush-web`](#coolify-settings-for-hush-web): base directory `/webapp`, Dockerfile location `/apps/web/Dockerfile`, port `3000`, domain `https://behu.sh`. A Docker Compose resource is not used for the website, because Coolify cannot roll Compose resources over without downtime. For the existing installation, the [migration record](../../../../../docs/monorepo-migration.md) explains how the database, keys and volumes were preserved.
 
 Select `main` and `HEAD` in Git Source. Keep `main` protected by the required
 pull-request checks; merge tested changes before deploying them.

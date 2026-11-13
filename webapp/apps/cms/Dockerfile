@@ -2,6 +2,9 @@
 # Built from the workspace root: docker build --file apps/cms/Dockerfile .
 FROM oven/bun:1.3.9-alpine
 
+# pg_dump and pg_restore for backups, matching the PostgreSQL 17 server.
+RUN apk add --no-cache postgresql17-client
+
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3100
@@ -14,7 +17,8 @@ COPY packages/article ./packages/article
 WORKDIR /app/apps/cms
 COPY apps/cms/src ./src
 
-RUN chown -R bun:bun /app
+# Local media and backups (CMS_MEDIA_DIR, CMS_BACKUP_DIR) live here when no bucket is configured.
+RUN mkdir -p /app/data/media /app/data/backups && chown -R bun:bun /app
 USER bun
 
 EXPOSE 3100

@@ -1,40 +1,8 @@
-services:
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-    environment:
-      NODE_ENV: development
-      PORT: "3000"
-      HUSH_PUBLIC_BASE_URL: http://127.0.0.1:3000
-      HUSH_SHORT_BASE_URL: http://127.0.0.1:3000
-      HUSH_ALLOWED_ORIGIN: http://127.0.0.1:3000
-      HUSH_DATA_DIR: /app/data
-      DATABASE_URL: postgresql://hush:hush-local@postgres:5432/hush
-    ports:
-      - "${HUSH_COMPOSE_PORT:-3000}:3000"
-    volumes:
-      - hush_local_objects:/app/data
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-
-  postgres:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_DB: hush
-      POSTGRES_USER: hush
-      POSTGRES_PASSWORD: hush-local
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hush -d hush"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    volumes:
-      - hush_local_postgres:/var/lib/postgresql/data
-    restart: unless-stopped
-
-volumes:
-  hush_local_objects:
-  hush_local_postgres:
+# Runs the whole web workspace locally: docker compose up --build
+# Each app owns its stack; this file only includes them
+# (https://docs.docker.com/compose/how-tos/multiple-compose-files/include/).
+include:
+  - apps/web/compose.yaml
+  - path:
+      - apps/cms/compose.yaml
+      - apps/cms/compose.local.yaml

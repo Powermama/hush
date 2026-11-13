@@ -7,9 +7,9 @@ import sharp from "sharp";
 import type { Database } from "../db/client";
 import { media } from "../db/schema";
 import { PostError } from "../posts/errors";
-import type { MediaStore } from "./store";
+import type { ObjectStore } from "../storage/object-store";
 
-export type Cms = { db: Database; media: MediaStore };
+export type Cms = { db: Database; media: ObjectStore };
 
 const imageTypes: Record<string, string> = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp" };
 export const maxImageBytes = 10 * 1024 * 1024;

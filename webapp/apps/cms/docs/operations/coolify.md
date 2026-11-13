@@ -1,34 +1,51 @@
 # Deploy the CMS on Coolify
 
-The CMS runs beside the website as its own Coolify resources, so neither can
-reach the other's data or secrets.
+The CMS stack is defined in [`webapp/apps/cms/compose.yaml`](../../compose.yaml):
+the API (`cms`), its clock (`cms-scheduler`: due posts every minute, a daily
+backup) and its own PostgreSQL. Coolify deploys it as one Docker Compose
+resource from Git, so nothing about the stack is configured by hand except
+secret values. Any Docker Compose host runs the same file; locally,
+`webapp/compose.yaml` includes it with `compose.local.yaml` (local password,
+volumes instead of R2, a host port).
 
-| Resource | Coolify type | Settings |
-| --- | --- | --- |
-| `hush-cms-postgres` | Database, PostgreSQL 17 | Scheduled backups enabled; restore drill before the CMS holds the only copy of articles |
-| `hush-cms` | Application, Dockerfile build pack | Base directory `/webapp`, Dockerfile location `/apps/cms/Dockerfile`, port `3100`, no public domain until the admin UI ships |
+A Compose resource restarts on deploy instead of rolling over. That is fine for
+this internal service: publishing calls retry and the scheduler catches up on
+its next tick. The public website stays a Dockerfile application with rolling
+updates.
 
-## `hush-cms` settings
+## Create the resource
 
-1. **Environment variables**: `CMS_DATABASE_URL` from `hush-cms-postgres`'s
-   internal connection URL, and the image bucket: `CMS_S3_BUCKET=hush-blog-media`,
-   `CMS_S3_ENDPOINT` (`https://<account>.r2.cloudflarestorage.com`),
-   `CMS_S3_ACCESS_KEY_ID` and `CMS_S3_SECRET_ACCESS_KEY` from an R2 API token
-   limited to that bucket. Never the app-update bucket, which ships the Mac app.
-   Nothing else from the website.
-2. **Health check**: path `/health/ready`, port `3100`.
-3. **Scheduled Tasks**: `bun run cms:publish-due`, frequency `* * * * *`,
-   container `hush-cms`. Its output lists the posts it published.
+1. Project `hush` → environment `production` → **New Resource** → **Git
+   Repository (with GitHub App)** → `Powermama/hush`, branch `main`.
+2. Build pack **Docker Compose**. Base Directory `/webapp`, Docker Compose
+   Location `/apps/cms/compose.yaml`. Name it `hush-cms`.
+3. Server `automation`, destination network `hush`, so the website can reach
+   the CMS in M2. No domain until the admin UI ships.
 4. **Watch Paths**: `webapp/apps/cms/**`, `webapp/packages/**`,
    `webapp/package.json`, `webapp/bun.lock`.
 
-## First token
+## Secrets
 
-Open a terminal in the `hush-cms` container and run:
+Coolify generates `SERVICE_PASSWORD_64_CMSPOSTGRES`. Set the rest under
+**Environment Variables**, each **locked** and **not available at build time**;
+the names are listed in [`apps/cms/.env.production.example`](../../.env.production.example):
 
-```sh
-bun run cms:token --name owner --scopes posts:read,posts:write,posts:publish --days 90
-```
+| Variables | Source |
+| --- | --- |
+| `CMS_S3_ENDPOINT`, `CMS_S3_ACCESS_KEY_ID`, `CMS_S3_SECRET_ACCESS_KEY` | Cloudflare R2 → Manage API tokens → a token with Object Read & Write on **`hush-blog-media` only** |
+| `CMS_BACKUP_S3_ENDPOINT`, `CMS_BACKUP_S3_ACCESS_KEY_ID`, `CMS_BACKUP_S3_SECRET_ACCESS_KEY` | A second token with Object Read & Write on **`hush-cms-backups` only** (a private bucket) |
 
-The token is printed once; only its hash is stored. Agents get tokens without
-`posts:publish` unless they should publish on their own.
+The endpoint is `https://<account-id>.r2.cloudflarestorage.com`. Never use the
+app-update bucket `hush`, which ships the Mac app. Copy each value straight from
+Cloudflare into Coolify; it must not pass through Git, `.env` files or chat.
+
+## After the first deploy
+
+1. Create the owner's token in the `cms` container's terminal:
+   `bun run cms:token --name owner --scopes posts:read,posts:write,posts:publish --days 90`.
+2. Check the `cms-scheduler` logs for "Backed up the CMS database".
+3. Restore drill: create a scratch database in `cms-postgres`
+   (`createdb -U cms cms_restore`), run
+   `bun run cms:restore --target-url postgresql://cms:<password>@cms-postgres:5432/cms_restore`
+   in the `cms` container, compare `select count(*) from posts`, then drop it.
+   Repeat after any change to the backup code and at least every quarter.

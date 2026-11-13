@@ -4,7 +4,7 @@
 // Imports Markdown articles: bun run cms:import <content-dir>
 import { loadConfig } from "../config";
 import { connectDatabase } from "../db/client";
-import { createMediaStore } from "../media/store";
+import { createObjectStore } from "../storage/object-store";
 import { importArticles } from "../posts/import";
 
 const contentDir = process.argv[2];
@@ -15,7 +15,7 @@ if (!contentDir) {
 const config = loadConfig();
 const { db, close } = connectDatabase(config.databaseUrl);
 try {
-  const report = await importArticles({ db, media: createMediaStore(config.media) }, contentDir);
+  const report = await importArticles({ db, media: createObjectStore(config.media) }, contentDir);
   console.info(JSON.stringify(report, null, 2));
   if (report.failed.length) process.exitCode = 1;
 } finally {
