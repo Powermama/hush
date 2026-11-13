@@ -1,9 +1,19 @@
 # Built from the workspace root: docker build --file apps/web/Dockerfile .
+
+# Every workspace manifest and the lockfile, so a frozen install sees the whole
+# workspace; the install layers below change only when a manifest changes.
+FROM oven/bun:1.3.9-alpine AS manifests
+WORKDIR /workspace
+COPY . .
+RUN mkdir /manifests && cp package.json bun.lock /manifests/ \
+ && for manifest in apps/*/package.json packages/*/package.json; do \
+      [ -f "$manifest" ] || continue; mkdir -p "/manifests/$(dirname "$manifest")"; cp "$manifest" "/manifests/$manifest"; \
+    done
+
 FROM oven/bun:1.3.9-alpine AS dependencies
 
 WORKDIR /app
-COPY package.json bun.lock ./
-COPY apps/web/package.json ./apps/web/
+COPY --from=manifests /manifests ./
 RUN bun install --frozen-lockfile --filter @hush/web
 
 FROM dependencies AS build
@@ -27,8 +37,7 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HUSH_DATA_DIR=/app/data
 
-COPY package.json bun.lock ./
-COPY apps/web/package.json ./apps/web/
+COPY --from=manifests /manifests ./
 RUN bun install --frozen-lockfile --production --filter @hush/web
 WORKDIR /app/apps/web
 COPY --from=build /app/apps/web/dist ./dist
