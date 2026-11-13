@@ -1,0 +1,11 @@
+/* Shared companion artwork, also used on the Verified Messages and not-found pages. */
+.hush-mascot { position: relative; display: block; width: 100%; aspect-ratio: 200 / 190; overflow: visible; }
+.mascot-fallback { display: block; width: 100%; height: 100%; }
+.hush-mascot canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+.hush-mascot[data-scene="ready"] canvas { opacity: 1; }
+.hush-mascot[data-scene="ready"] .mascot-fallback { opacity: 0; }
+.mascot-character { transform-box: fill-box; transform-origin: 50% 80%; }
+.hush-mascot-listening .mascot-character { transform: rotate(-7deg); }
+.hush-mascot-thinking .mascot-character { transform: rotate(6deg); }
+.hush-mascot-recording .mascot-character { transform: rotate(-4deg); }
+.hush-mascot-sad .mascot-character { transform: rotate(5deg); }

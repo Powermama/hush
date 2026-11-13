@@ -1,12 +1,14 @@
 import { useEffect, useId, useRef } from "react";
 import { m } from "../paraglide/messages";
+import "./mascot.css";
 
-export type MascotState = "listening" | "thinking" | "recording";
+export type MascotState = "listening" | "thinking" | "recording" | "sad";
 
 const descriptions: Record<MascotState, () => string> = {
   listening: m.mascot_listening,
   thinking: m.mascot_thinking,
   recording: m.mascot_recording,
+  sad: m.mascot_sad,
 };
 
 /** A character in the editorial artwork, never a live microphone or app control. */
@@ -74,6 +76,7 @@ export function HushMascotArtwork({ state, portrait = false, peeking = false, sa
         {state === "listening" && !peeking && <><path d="M54 111Q28 113 31 88" /><path d="M149 109Q175 96 161 71" /><path d="M158 77Q151 72 157 64Q164 61 168 69" stroke={tone("#86b7be")} strokeWidth="8" /></>}
         {state === "thinking" && <><path d="M55 112Q35 122 45 139" /><path d="M149 112Q169 131 137 135" /><path d="M137 135L131 128" stroke={tone("#86b7be")} strokeWidth="8" /></>}
         {state === "recording" && <><path d="M55 111Q32 131 27 108" /><path d="M149 112Q173 126 176 107" /><path d="M174 108L179 104" stroke={tone("#86b7be")} strokeWidth="8" /></>}
+        {state === "sad" && <><path d="M55 112Q42 124 45 143" /><path d="M149 112Q162 124 158 143" /></>}
       </g>
       <g className="mascot-body">
         <rect x="59" y="49" width="99" height="96" rx="28" fill={tone("#bfe7e8")} stroke={tone("#f3fffd")} strokeWidth="2" />
@@ -82,15 +85,23 @@ export function HushMascotArtwork({ state, portrait = false, peeking = false, sa
         <g className="mascot-eyes">
           {[82, 117].map(x => <g key={x}>
             <ellipse cx={x} cy="93" rx="12" ry="17" fill={paint("silver")} />
-            <ellipse cx={x + (state === "thinking" ? 2 : -1)} cy={state === "thinking" ? 89 : 94} rx="7" ry="10" fill={tone("#367d99")} />
-            <ellipse cx={x + (state === "thinking" ? 2 : -1)} cy={state === "thinking" ? 89 : 94} rx="4.5" ry="7" fill={tone("#102330")} />
+            <ellipse cx={x + (state === "thinking" ? 2 : -1)} cy={state === "thinking" ? 89 : state === "sad" ? 99 : 94} rx="7" ry="10" fill={tone("#367d99")} />
+            <ellipse cx={x + (state === "thinking" ? 2 : -1)} cy={state === "thinking" ? 89 : state === "sad" ? 99 : 94} rx="4.5" ry="7" fill={tone("#102330")} />
             <circle cx={x - 2} cy="88" r="3" fill={tone("white")} />
             <circle cx={x + 3} cy="98" r="1.5" fill={tone("white")} />
           </g>)}
         </g>
         <ellipse cx="67" cy="110" rx="6" ry="3" fill={tone("#efa5a2")} /><ellipse cx="133" cy="110" rx="6" ry="3" fill={tone("#efa5a2")} />
-        <path d="M94 114Q100 120 106 114" stroke={tone("#d9efec")} strokeWidth="2" strokeLinecap="round" />
-        <path d="M86 132V136M95 127V141M104 130V139M113 133V136" stroke={paint("silver")} strokeWidth="3" strokeLinecap="round" />
+        {state === "sad" ? <>
+          {/* Worried brows, a frown, a tear and resting dots where the voice bars usually move. */}
+          <path d="M72 70L90 66M110 66L128 70" stroke={tone("#d9efec")} strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M94 119Q100 113 106 119" stroke={tone("#d9efec")} strokeWidth="2" strokeLinecap="round" />
+          <path d="M124 112Q120 119 124 122Q128 119 124 112Z" fill={tone("#bfe7e8")} />
+          <path d="M86 134V134.5M95 134V134.5M104 134V134.5M113 134V134.5" stroke={paint("silver")} strokeWidth="3" strokeLinecap="round" />
+        </> : <>
+          <path d="M94 114Q100 120 106 114" stroke={tone("#d9efec")} strokeWidth="2" strokeLinecap="round" />
+          <path d="M86 132V136M95 127V141M104 130V139M113 133V136" stroke={paint("silver")} strokeWidth="3" strokeLinecap="round" />
+        </>}
       </g>
     </g>
     {state === "listening" && !peeking && <g className="mascot-sound" stroke={tone("#578f9d")} strokeWidth="2.5" strokeLinecap="round">
