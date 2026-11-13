@@ -54,7 +54,9 @@ test("LANG-003 remembers the language chosen in the footer over the device langu
   const switcher = page.locator("footer").getByRole("navigation", { name: "Sprache" });
   await expect(switcher.getByRole("link", { name: "Deutsch" })).toHaveAttribute("aria-current", "true");
   await switcher.getByRole("link", { name: "English" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  // Let the switch finish loading: starting another navigation while it is
+  // still in flight sometimes crashes WebKit ("internal error") in CI.
+  await page.waitForURL(/\/$/, { waitUntil: "load" });
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator("h1")).toHaveText("The voice layer for your Mac.");
