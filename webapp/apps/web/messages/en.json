@@ -59,6 +59,7 @@
   "mascot_listening": "hush listening, a little graphite companion with expressive eyes and headphones.",
   "mascot_thinking": "hush thinking, a little graphite companion considering an idea.",
   "mascot_recording": "hush recording an idea, a little graphite companion holding a microphone.",
+  "mascot_sad": "hush looking a little lost and sad, a small graphite companion with drooping arms and a tear.",
   "faq_title": "A few things\nto know.",
   "faq_mac_q": "Will it work on my Mac?",
   "faq_mac_a": "hush needs an Apple silicon Mac (M1 or newer) running macOS 15 or later. An 8 GB Mac can run transcription. We recommend 16 GB for the optional AI assistant, with room for your other apps.",
@@ -107,5 +108,10 @@
   "handoff_share_title": "hush for Mac",
   "handoff_share_text": "The voice layer for your Mac.",
   "handoff_email_subject": "Try hush on my Mac",
-  "handoff_email_body": "hush is the voice layer for your Mac.\n\nOpen this link on your Mac to download:\n{url}\n\nFor Apple silicon Macs with macOS 15 or later."
+  "handoff_email_body": "hush is the voice layer for your Mac.\n\nOpen this link on your Mac to download:\n{url}\n\nFor Apple silicon Macs with macOS 15 or later.",
+  "not_found_code": "Error 404",
+  "not_found_title": "This page got lost.",
+  "not_found_body": "The link may be outdated or mistyped. Everything else is right where you left it.",
+  "not_found_home": "Back to home",
+  "not_found_blog": "Read the blog"
 }
