@@ -14,7 +14,10 @@ import type { PostFields } from "./fields";
 
 const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 
-export async function checkPost({ db, ...cms }: Cms, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date)
+/** Posts going live in the same step (an import), so links between them resolve. */
+export type CoPublished = ReadonlyArray<{ lang: string; slug: string; author: string }>;
+
+export async function checkPost({ db, ...cms }: Cms, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date, coPublished: CoPublished = [])
   : Promise<{ post?: BlogPost; problems: string[] }> {
   const { markdown, ...metadata } = fields;
   const front = frontMatterSchema.safeParse({
@@ -36,7 +39,7 @@ export async function checkPost({ db, ...cms }: Cms, id: string, fields: PostFie
   if (duplicate) problems.push(`keyword "${fields.keyword}" already targeted by ${duplicate.slug}`);
 
   const knownPaths = new Set<string>([...linkableSitePaths, blogPath(lang), editorialPolicyPath(lang)]);
-  for (const post of [...live, { slug: fields.slug, author: fields.author }]) {
+  for (const post of [...live, ...coPublished.filter((other) => other.lang === lang), { slug: fields.slug, author: fields.author }]) {
     knownPaths.add(blogPath(lang, post.slug));
     knownPaths.add(authorPath(lang, post.author as Parameters<typeof authorPath>[1]));
   }

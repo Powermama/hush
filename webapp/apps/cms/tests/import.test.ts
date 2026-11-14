@@ -67,4 +67,23 @@ describe.skipIf(!serverUrl)("CMS import", () => {
     expect(linked.updatedAt.getTime()).toBe(before.find((post) => post.slug === "linked-guide")!.updatedAt.getTime());
     expect((await listRevisions(cms.db, linked.id)).length).toBe(revisionsBefore);
   });
+
+  test("CMS-IMPORT-003 publishes new articles that link to each other together", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hush-cms-mutual-"));
+    await mkdir(join(dir, "en"), { recursive: true });
+    const linking = (slug: string, keyword: string, other: string) => validPost({
+      slug, keyword, markdown: validPost().markdown.replace("[the home page](/)", `[the other guide](/blog/${other})`),
+    });
+    await writeFile(join(dir, "en", "first-of-pair.md"), article(linking("first-of-pair", "first of pair", "second-of-pair"), { published: "2026-11-10", updated: "2026-11-10", draft: false }));
+    await writeFile(join(dir, "en", "second-of-pair.md"), article(linking("second-of-pair", "second of pair", "first-of-pair"), { published: "2026-11-11", updated: "2026-11-11", draft: false }));
+    // A third links to a page that will not exist: it must stay a draft, and nothing may link to it.
+    await writeFile(join(dir, "en", "dead-link.md"), article(linking("dead-link", "dead link", "never-published"), { published: "2026-11-12", updated: "2026-11-12", draft: false }));
+    const report = await importArticles(cms, dir);
+    expect(report.published.sort()).toEqual(["en/first-of-pair.md", "en/second-of-pair.md"]);
+    expect(report.failed.map((item) => item.file)).toEqual(["en/dead-link.md"]);
+    const posts = Object.fromEntries((await listPosts(cms.db, {})).map((post) => [post.slug, post]));
+    expect(posts["first-of-pair"]!.status).toBe("published");
+    expect(posts["second-of-pair"]!.status).toBe("published");
+    expect(posts["dead-link"]!.status).toBe("draft");
+  });
 });
