@@ -11,6 +11,8 @@ import { join } from "node:path";
 import { createApp } from "../src/app";
 import { createSession, sessionCookie } from "../src/auth/sessions";
 import { loadConfig, type AdminConfig } from "../src/config";
+import { eq } from "drizzle-orm";
+import { hashToken } from "../src/auth/hash";
 import { adminSessions } from "../src/db/schema";
 import { listRevisions } from "../src/posts/service";
 import { LocalObjectStore } from "../src/storage/object-store";
@@ -25,11 +27,13 @@ const admin: AdminConfig = {
 const origin = admin.publicUrl;
 const realFetch = globalThis.fetch;
 
-/** GitHub's token endpoint and /user, answering as the given account. */
-function fakeGitHub(user: { id: number; login: string }) {
+/** GitHub's token endpoint and /user, answering as the given account; the token request must carry the PKCE verifier. */
+function fakeGitHub(user: { id: number; login: string }, verifier?: string) {
   globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input instanceof Request ? input.url : input);
     if (url.startsWith("https://github.com/login/oauth/access_token")) {
+      const body = new URLSearchParams(await (input instanceof Request ? input.text() : String(init?.body ?? "")));
+      if (verifier !== undefined) expect(body.get("code_verifier")).toBe(verifier);
       return Response.json({ access_token: "gho_test", token_type: "bearer", scope: "" });
     }
     if (url === "https://api.github.com/user") {
@@ -76,6 +80,11 @@ describe.skipIf(!serverUrl)("CMS admin", () => {
     expect(location.origin + location.pathname).toBe("https://github.com/login/oauth/authorize");
     expect(location.searchParams.get("redirect_uri")).toBe("https://cms.behu.sh/auth/github/callback");
     expect(location.searchParams.get("scope")).toBeNull();
+    // PKCE (RFC 7636, S256), as RFC 9700 recommends for confidential clients.
+    expect(location.searchParams.get("code_challenge_method")).toBe("S256");
+    const verifier = cookieOf(start, "__Host-cms_oauth_verifier")!.split(";")[0]!.split("=")[1]!;
+    const challenge = new Bun.CryptoHasher("sha256").update(verifier).digest("base64url");
+    expect(location.searchParams.get("code_challenge")).toBe(challenge);
     const state = location.searchParams.get("state")!;
     const stateCookie = cookieOf(start, "__Host-cms_oauth_state")!;
     expect(stateCookie).toContain(`=${state}`);
@@ -83,12 +92,15 @@ describe.skipIf(!serverUrl)("CMS admin", () => {
     expect(stateCookie).toContain("Secure");
     expect(stateCookie).toContain("SameSite=Lax");
 
-    fakeGitHub({ id: 4242, login: "owner" });
-    const forged = await app.request(`/auth/github/callback?code=c&state=other`, { headers: { cookie: `__Host-cms_oauth_state=${state}` } });
+    fakeGitHub({ id: 4242, login: "owner" }, verifier);
+    const flow = `__Host-cms_oauth_state=${state}; __Host-cms_oauth_verifier=${verifier}`;
+    const forged = await app.request(`/auth/github/callback?code=c&state=other`, { headers: { cookie: flow } });
     expect(forged.status).toBe(400);
     expect(cookieOf(forged, sessionCookie)).toBeUndefined();
 
-    const callback = await app.request(`/auth/github/callback?code=c&state=${state}`, { headers: { cookie: `__Host-cms_oauth_state=${state}` } });
+    const noVerifier = await app.request(`/auth/github/callback?code=c&state=${state}`, { headers: { cookie: `__Host-cms_oauth_state=${state}` } });
+    expect(noVerifier.status).toBe(400);
+    const callback = await app.request(`/auth/github/callback?code=c&state=${state}`, { headers: { cookie: flow } });
     expect(callback.status).toBe(302);
     expect(callback.headers.get("location")).toBe("/");
     const session = cookieOf(callback, sessionCookie)!;
@@ -102,7 +114,8 @@ describe.skipIf(!serverUrl)("CMS admin", () => {
     const start = await app.request("/auth/github");
     const state = new URL(start.headers.get("location")!).searchParams.get("state")!;
     fakeGitHub({ id: 9999, login: "stranger" });
-    const callback = await app.request(`/auth/github/callback?code=c&state=${state}`, { headers: { cookie: `__Host-cms_oauth_state=${state}` } });
+    const verifier = cookieOf(start, "__Host-cms_oauth_verifier")!.split(";")[0]!.split("=")[1]!;
+    const callback = await app.request(`/auth/github/callback?code=c&state=${state}`, { headers: { cookie: `__Host-cms_oauth_state=${state}; __Host-cms_oauth_verifier=${verifier}` } });
     expect(callback.status).toBe(403);
     expect(cookieOf(callback, sessionCookie)).toBeUndefined();
   });
@@ -114,14 +127,21 @@ describe.skipIf(!serverUrl)("CMS admin", () => {
     expect((await call("POST", `/v1/posts/${post.id}/publish`, cookie)).status).toBe(200);
     expect((await listRevisions(database.db, post.id)).map((revision) => revision.actor)).toEqual(["github:clemens", "github:clemens"]);
 
-    expect((await call("POST", "/auth/sign-out", cookie)).status).toBe(204);
+    const signOut = await call("POST", "/auth/sign-out", cookie);
+    expect(signOut.status).toBe(204);
+    expect(signOut.headers.get("clear-site-data")).toBe('"cache", "cookies", "storage"');
     expect((await call("GET", "/v1/posts", cookie)).status).toBe(401);
     expect((await call("GET", "/auth/session", cookie)).status).toBe(401);
   });
 
-  test("CMS-ADMIN-004 expired sessions and cross-site writes are refused", async () => {
+  test("CMS-ADMIN-004 expired and idle sessions and cross-site writes are refused", async () => {
     const { token } = await createSession(database.db, { githubUserId: 4242, githubLogin: "owner" }, new Date(Date.now() - 8 * 86_400_000));
     expect((await call("GET", "/v1/posts", `${sessionCookie}=${token}`)).status).toBe(401);
+
+    // Idle for longer than 12 hours ends the session, even within its week.
+    const idle = await createSession(database.db, { githubUserId: 4242, githubLogin: "owner" });
+    await database.db.update(adminSessions).set({ lastSeenAt: new Date(Date.now() - 13 * 3_600_000) }).where(eq(adminSessions.tokenHash, hashToken(idle.token)));
+    expect((await call("GET", "/v1/posts", `${sessionCookie}=${idle.token}`)).status).toBe(401);
 
     const cookie = await signedIn();
     const crossSite = await app.request("/auth/sign-out", { method: "POST", headers: { cookie, origin: "https://evil.example", "content-type": "application/x-www-form-urlencoded" } });

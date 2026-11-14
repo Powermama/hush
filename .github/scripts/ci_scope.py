@@ -11,6 +11,8 @@ import subprocess
 
 # Each deployable web app has its own CI job, named after its folder.
 WEB_APPS = ("web", "cms")
+# Apps shipped inside another app's image are checked by that app's job.
+SHIPPED_WITH = {"cms-admin": "cms"}
 REPOSITORY = Path(__file__).resolve().parents[2]
 
 
@@ -42,7 +44,9 @@ def workspace_dependents(root=REPOSITORY):
                 if key not in users and any(names.get(dep) == current for dep in deps):
                     users.add(key)
                     frontier.add(key)
-        dependents[package.split("/", 1)[1]] = {key.split("/", 1)[1] for key in users if key.startswith("apps/")}
+        dependents[package.split("/", 1)[1]] = {
+            SHIPPED_WITH.get(name, name) for name in (key.split("/", 1)[1] for key in users if key.startswith("apps/"))
+        }
     return dependents
 
 
@@ -56,7 +60,7 @@ def classify(paths, dependents=None):
         if path.startswith("macos/"):
             scope["native"] = scope["integration"] = True
         elif match := re.match(r"webapp/apps/([^/]+)/", path):
-            app = match.group(1)
+            app = SHIPPED_WITH.get(match.group(1), match.group(1))
             if app not in WEB_APPS:
                 return full_scope()  # A new app must not silently skip CI.
             scope[app] = True

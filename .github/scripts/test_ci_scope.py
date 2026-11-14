@@ -56,6 +56,14 @@ class ScopeTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertEqual(classify([path]), dict(web=True, cms=True, native=False, integration=True))
 
+    def test_the_cms_admin_is_checked_by_the_cms_job(self):
+        # The admin ships inside the CMS image, so the CMS job checks it.
+        self.assertEqual(classify(["webapp/apps/cms-admin/src/main.tsx"]), dict(web=False, cms=True, native=False, integration=False))
+
+    def test_a_package_used_by_the_admin_runs_the_cms_job(self):
+        self.assertIn("cms", workspace_dependents()["article"])
+        self.assertNotIn("cms-admin", workspace_dependents()["article"])
+
     def test_unknown_apps_and_packages_run_everything(self):
         self.assertEqual(classify(["webapp/apps/new-app/src/index.ts"]), full_scope())
         self.assertEqual(classify(["webapp/packages/new-package/index.ts"], {}), full_scope())
