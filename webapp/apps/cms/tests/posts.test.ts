@@ -161,6 +161,20 @@ describe.skipIf(!serverUrl)("CMS API", () => {
     expect((await read(refused)).error.problems.join("\n")).toContain("front matter title");
   });
 
+  test("CMS-API-009 names drafts created or titled at the same moment apart", async () => {
+    // Before, concurrent writers picked the same free number and gave up after three tries.
+    const created = await Promise.all(Array.from({ length: 12 }, () => call("POST", "/v1/posts", tokens.writer, { lang: "de" })));
+    expect(created.map((response) => response.status)).toEqual(Array(12).fill(201));
+    const drafts = await Promise.all(created.map(read));
+    expect(new Set(drafts.map((post) => post.slug)).size).toBe(12);
+    const titled = await Promise.all(drafts.map((post) => call("PATCH", `/v1/posts/${post.id}?autosave=true`, tokens.writer, { markdown: "# Gleichzeitig benannt" })));
+    expect(titled.map((response) => response.status)).toEqual(Array(12).fill(200));
+    const slugs = (await Promise.all(titled.map(read))).map((post) => post.slug).sort();
+    expect(new Set(slugs).size).toBe(12);
+    expect(slugs).toContain("gleichzeitig-benannt");
+    expect(slugs.every((slug) => /^gleichzeitig-benannt(-\d+)?$/.test(slug))).toBe(true);
+  });
+
   test("CMS-API-010 keeps one revision for a run of autosaves", async () => {
     const post = await draft({ slug: "autosaved", keyword: "autosaved" });
     const revisions = async () => (await read(await call("GET", `/v1/posts/${post.id}/revisions`, tokens.reader))).revisions as Array<Record<string, any>>;
