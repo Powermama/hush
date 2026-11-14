@@ -10,7 +10,7 @@ Verified Messages.
 - Journeys against PostgreSQL: `HUSH_TEST_DATABASE_URL=postgresql://... bun test`
   (each test file creates and drops its own database; CI refuses to skip them)
 - OpenAPI drift check: `bun run api:check`
-- Admin browser journeys (CMS-001 to CMS-006): `bun run test:admin`, which
+- Admin browser journeys (CMS-001 to CMS-008): `bun run test:admin`, which
   builds `apps/cms-admin` and runs `tests/admin` against `admin:server`, a
   local CMS with sample posts and a test-only sign-in route
 

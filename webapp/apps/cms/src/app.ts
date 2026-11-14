@@ -30,7 +30,7 @@ export function createApp(cms: Cms, options: AppOptions = {}) {
   app.use("*", secureHeaders({
     // The admin loads only its own scripts. Styles may be inline (Radix positions
     // popovers with style attributes; the preview frame inlines article.css).
-    // The preview is a sandboxed srcdoc frame, which inherits this policy.
+    // The preview is a srcdoc frame on this origin without scripts, which inherits this policy.
     contentSecurityPolicy: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],

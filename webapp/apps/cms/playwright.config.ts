@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 //
-// Browser journeys of the admin (CMS-001 to CMS-006), against the CMS serving
+// Browser journeys of the admin (CMS-001 to CMS-008), against the CMS serving
 // the built admin. Build it first: bun run --cwd ../cms-admin build.
 import { defineConfig, devices } from "@playwright/test";
 

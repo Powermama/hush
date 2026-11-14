@@ -20,8 +20,15 @@ export default defineConfig({
   build: {
     rolldownOptions: {
       output: {
-        // CodeMirror loads only with the editor and changes rarely: its own chunk caches apart from the app.
-        codeSplitting: { groups: [{ name: "codemirror", test: /node_modules[\\/].*(@codemirror|@lezer|crelt|style-mod|w3c-keyname)/ }] },
+        // The editors load only with the editor and change rarely: their own chunks cache apart from the app.
+        codeSplitting: {
+          groups: [
+            { name: "codemirror", test: /node_modules[\\/].*(@codemirror|@lezer|crelt|style-mod|w3c-keyname)/ },
+            { name: "lexical", test: /node_modules[\\/].*(lexical|@lexical)[\\/]/ },
+            // Parsing and writing Markdown in the browser (@hush/article/blocks).
+            { name: "markdown", test: /node_modules[\\/].*(micromark|mdast|unified|remark|unist|vfile|decode-named-character-reference|character-entities|markdown-table|longest-streak|zwitch|ccount|trough|bail|devlop|is-plain-obj|extend)/ },
+          ],
+        },
       },
     },
   },

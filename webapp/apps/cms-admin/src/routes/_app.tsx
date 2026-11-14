@@ -74,7 +74,7 @@ function PostsNav() {
         <ChevronRight size={16} strokeWidth={1.5} className={cn("transition-transform", open && "rotate-90")} />
       </button>
       <Link
-        to="/posts/new" aria-label="New post" onClick={close}
+        to="/posts/$id" params={{ id: "new" }} aria-label="New post" onClick={close}
         className="absolute top-0 right-0 flex size-8 items-center justify-center rounded-full p-0 text-gray-700 ring-sidebar-ring outline-hidden transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 dark:text-gray-800 dark:hover:text-white"
       >
         <Plus className="mt-px stroke-[1.5px]!" size={20} />

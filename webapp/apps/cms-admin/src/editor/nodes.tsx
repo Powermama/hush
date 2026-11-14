@@ -14,6 +14,8 @@ import {
   $applyNodeReplacement, DecoratorNode, ElementNode, createState, type EditorConfig, type Klass, type LexicalNode, type NodeKey,
   type SerializedElementNode, type SerializedLexicalNode, type Spread,
 } from "lexical";
+import type { ReactNode } from "react";
+import { ImageCard } from "./image-card";
 
 /** A list whose items stand apart as paragraphs (blank lines between them in Markdown). */
 export const looseListState = createState("loose", { parse: (value) => value === true });
@@ -22,11 +24,11 @@ type Align = Array<"left" | "right" | "center" | null>;
 /** A table's column alignments, as its Markdown delimiter row gives them. */
 export const tableAlignState = createState("align", { parse: (value): Align | null => (Array.isArray(value) ? value as Align : null) });
 
-type Image = { src: string; alt: string; caption: string };
+export type Image = { src: string; alt: string; caption: string };
 type SerializedImageNode = Spread<Image, SerializedLexicalNode>;
 
 /** An image on a line of its own, with its alt text and an optional caption. */
-export class ImageNode extends DecoratorNode<null> {
+export class ImageNode extends DecoratorNode<ReactNode> {
   __src: string;
   __alt: string;
   __caption: string;
@@ -56,9 +58,13 @@ export class ImageNode extends DecoratorNode<null> {
   }
   getTextContent() { return this.getLatest().__caption; }
   isInline() { return false; }
-  createDOM(_config: EditorConfig) { return document.createElement("figure"); }
+  createDOM(_config: EditorConfig) {
+    const element = document.createElement("div");
+    element.className = "editor-image";
+    return element;
+  }
   updateDOM() { return false; }
-  decorate() { return null; }
+  decorate() { return <ImageCard nodeKey={this.__key} image={this.getImage()} />; }
 }
 
 export const $createImageNode = (image: Image) => $applyNodeReplacement(new ImageNode(image));
@@ -70,7 +76,13 @@ export class SummaryNode extends ElementNode {
   static clone(node: SummaryNode) { return new SummaryNode(node.__key); }
   static importJSON(json: SerializedElementNode) { return $createSummaryNode().updateFromJSON(json); }
 
-  createDOM(_config: EditorConfig) { return document.createElement("aside"); }
+  createDOM(config: EditorConfig) {
+    const element = document.createElement("div");
+    element.className = "editor-summary";
+    // The box's heading in the article's language ("In short"), as the page shows it.
+    element.dataset.title = String(config.theme.summaryTitle ?? "In short");
+    return element;
+  }
   updateDOM() { return false; }
   // Like a table cell: its blocks are edited inside it, and the selection does not merge it with its neighbours.
   isShadowRoot() { return true; }

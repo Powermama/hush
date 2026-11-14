@@ -22,10 +22,14 @@ function tomorrowLocal() {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:00`;
 }
 
-export function PublishMenu({ status, busy, onPublish, onSchedule, onUnpublish }: {
+export function PublishMenu({ status, busy, onPublish, onSchedule, onUnpublish, open: openProp, onOpenChange }: {
   status: Post["status"]; busy: boolean; onPublish: () => void; onSchedule: (at: Date) => void; onUnpublish: () => void;
+  /** Opened from elsewhere too, such as the preview's Publish. */
+  open?: boolean; onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const open = openProp ?? ownOpen;
+  const setOpen = onOpenChange ?? setOwnOpen;
   const [when, setWhen] = useState(tomorrowLocal);
   const at = new Date(when);
   const valid = !Number.isNaN(at.getTime()) && at.getTime() > Date.now();
@@ -33,7 +37,7 @@ export function PublishMenu({ status, busy, onPublish, onSchedule, onUnpublish }
   if (status !== "draft") {
     return (
       <AlertDialog>
-        <AlertDialogTrigger asChild><Button size="sm" variant="secondary" disabled={busy}>Unpublish</Button></AlertDialogTrigger>
+        <AlertDialogTrigger asChild><Button variant="ghost" className="bg-background/80 backdrop-blur-sm" disabled={busy}>Unpublish</Button></AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{status === "published" ? "Take this post offline?" : "Cancel the schedule?"}</AlertDialogTitle>
@@ -54,7 +58,7 @@ export function PublishMenu({ status, busy, onPublish, onSchedule, onUnpublish }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild><Button size="sm" className="bg-[var(--publish)] text-white hover:bg-[var(--publish)]/90" disabled={busy}>Publish</Button></PopoverTrigger>
+      <PopoverTrigger asChild><Button variant="ghost" className="bg-background/80 font-semibold text-publish-accent backdrop-blur-sm hover:text-publish-accent" disabled={busy}>Publish</Button></PopoverTrigger>
       <PopoverContent align="end" className="w-72">
         <div className="grid gap-4">
           <div>

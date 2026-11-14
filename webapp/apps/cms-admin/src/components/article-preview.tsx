@@ -2,11 +2,16 @@
 // Copyright (c) 2026 Clemens Kressmann
 //
 // The rendered article as behu.sh shows it, from the CMS's preview. It runs in
-// a sandboxed frame without scripts or same-origin access: author content
-// never executes on the admin's origin, which holds the session.
+// a sandboxed frame that may run no scripts, so author content never executes
+// on the admin's origin, which holds the session. Unlike a fully sandboxed
+// frame it keeps that origin, as Ghost's preview is a page of its own site:
+// the article's images then load as the admin's own (img-src 'self',
+// Cross-Origin-Resource-Policy same-origin). Allowing the origin is safe only
+// without allow-scripts; never add both.
 import articleCss from "@hush/article/article.css?raw";
+import { cn } from "@/lib/utils";
 
-const page = (heading: string, html: string) => `<!doctype html><html lang="en"><head><meta charset="utf-8">
+const page = (heading: string, html: string, lang: string) => `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
 <style>
 :root { --color-ink: #1f201e; --color-muted: #686963; --color-soft: #a7a8a1; }
 * { box-sizing: border-box; }
@@ -18,6 +23,6 @@ h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -0.035
 ${articleCss}
 </style></head><body><main><h1>${heading.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</h1><div class="blog-prose">${html}</div></main></body></html>`;
 
-export function ArticlePreview({ heading, html }: { heading: string; html: string }) {
-  return <iframe title="Preview" sandbox="" srcDoc={page(heading, html)} className="h-full min-h-[70vh] w-full rounded-lg border border-border bg-white" />;
+export function ArticlePreview({ heading, html, lang, className }: { heading: string; html: string; lang: "en" | "de"; className?: string }) {
+  return <iframe title="Preview" sandbox="allow-same-origin" srcDoc={page(heading, html, lang)} className={cn("block bg-white", className)} />;
 }
