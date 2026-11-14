@@ -63,12 +63,17 @@ export async function syncSite(db: Database, site: SiteConfig, fetcher: Fetch = 
   return result;
 }
 
-/** Coolify's deploy endpoint, with a token that may only deploy the website. */
+/**
+ * Coolify's deploy endpoint, with a token that may only deploy the website.
+ * `force` makes Coolify build: without it, Coolify reuses the image of the
+ * current commit, which still holds the previous export ("Build step skipped").
+ * Coolify's forced builds run without the Docker cache, so they take minutes.
+ */
 async function requestDeploy(site: SiteConfig, fetcher: Fetch) {
   const response = await fetcher(new URL("/api/v1/deploy", site.coolify.url).toString(), {
     method: "POST",
     headers: { authorization: `Bearer ${site.coolify.token}`, "content-type": "application/json", accept: "application/json" },
-    body: JSON.stringify({ uuid: site.coolify.websiteUuid, force: false }),
+    body: JSON.stringify({ uuid: site.coolify.websiteUuid, force: true }),
     signal: AbortSignal.timeout(requestTimeoutMs),
   });
   if (!response.ok) throw new Error(`Coolify refused the deploy (${response.status})`);
