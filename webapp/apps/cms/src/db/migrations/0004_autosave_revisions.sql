@@ -1,0 +1,1 @@
+ALTER TABLE "post_revisions" ADD COLUMN "autosave" boolean DEFAULT false NOT NULL;
