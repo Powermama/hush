@@ -208,7 +208,11 @@ jobs:
       # The admin (apps/cms-admin) ships inside the CMS image.
       - name: Check the admin and its generated API client
         working-directory: webapp/apps/cms-admin
-        run: bun run lint && bun run api:check
+        run: bun run lint && bun run api:check && bun run test
+      # The article contract and blocks (packages/article) are the CMS's core.
+      - name: Check the article package
+        working-directory: webapp/packages/article
+        run: bun run lint && bun run test
       - name: Install browsers for the admin journeys
         run: bunx playwright install --with-deps chromium webkit
       - name: Admin journeys on desktop, a phone and WebKit
