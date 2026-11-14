@@ -18,7 +18,7 @@ ports 8000, 6001 and 6002 (the dashboard, realtime and terminal run on 443).
 Hetzner Cloud Firewalls filter before Docker, which bypasses UFW for published
 ports. Traffic on the private network `hush-private` (`172.16.0.0/16`) is not
 filtered; the CMS reaches Coolify's API there
-(`webapp/apps/cms/docs/operations/coolify.md`).
+([CMS on Coolify](../../webapp/apps/cms/docs/operations/coolify.md)).
 
 When Cloudflare publishes new ranges, rebuild both rule sets from
 https://www.cloudflare.com/ips-v4/ and https://www.cloudflare.com/ips-v6/.
