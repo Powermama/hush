@@ -11,7 +11,7 @@ import { and, asc, desc, eq, inArray, lte, sql } from "drizzle-orm";
 import type { Database } from "../db/client";
 import { postRenditions, postRevisions, postSecondaryKeywords, posts, siteChanges, siteState } from "../db/schema";
 import { writeRenditions, type Cms } from "../media/service";
-import { checkPost } from "./contract";
+import { checkPost, type CoPublished } from "./contract";
 import { PostError } from "./errors";
 import { postFields, type PostFields, type PostPatch } from "./fields";
 
@@ -108,8 +108,8 @@ async function write(db: Database, actor: string, change: {
 }
 
 /** Validates and renders for going live; throws with the contract's problems. */
-async function render(cms: Cms, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date) {
-  const { post, problems } = await checkPost(cms, id, fields, publishedAt, updatedAt);
+async function render(cms: Cms, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date, coPublished: CoPublished = []) {
+  const { post, problems } = await checkPost(cms, id, fields, publishedAt, updatedAt, coPublished);
   if (!post || problems.length) throw new PostError(422, "contract_failed", "The post does not meet the article contract.", problems);
   await writeRenditions(cms, post.images);
   return { heading: post.heading, html: post.html, toc: post.toc, readingMinutes: post.readingMinutes };
@@ -152,14 +152,15 @@ export async function schedulePost(cms: Cms, id: string, at: Date, actor: string
 /**
  * @param dates an imported article's original publication and update dates;
  * otherwise a post published before keeps its date and a new one goes live now.
+ * @param coPublished posts going live in the same import, which it may link to
  */
-export async function publishPost(cms: Cms, id: string, actor: string, dates?: { publishedAt: Date; updatedAt: Date }) {
+export async function publishPost(cms: Cms, id: string, actor: string, dates?: { publishedAt: Date; updatedAt: Date }, coPublished: CoPublished = []) {
   const post = await load(cms.db, id);
   if (post.status === "published") return post;
   const publishedAt = dates?.publishedAt
     ?? (post.publishedAt && post.publishedAt.getTime() <= Date.now() ? post.publishedAt : new Date());
   const updatedAt = dates?.updatedAt ?? post.updatedAt;
-  const rendition = await render(cms, id, editableFields(post), publishedAt, updatedAt);
+  const rendition = await render(cms, id, editableFields(post), publishedAt, updatedAt, coPublished);
   return write(cms.db, actor, { id, row: { status: "published", publishedAt, updatedAt }, rendition, sitePaths: [pagePath(post)] });
 }
 
