@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/article.ts",
     "./authors": "./src/authors.ts",
-    "./taxonomy": "./src/taxonomy.ts"
+    "./taxonomy": "./src/taxonomy.ts",
+    "./article.css": "./src/article.css"
   },
   "scripts": {
     "lint": "tsc -p ."
