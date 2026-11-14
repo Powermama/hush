@@ -27,7 +27,24 @@ const apiPaths = /^\/(v1|auth|health|openapi\.json|blog\/media|robots\.txt)(\/|$
 
 export function createApp(cms: Cms, options: AppOptions = {}) {
   const app = new OpenAPIHono({ defaultHook: validationHook });
-  app.use("*", secureHeaders());
+  app.use("*", secureHeaders({
+    // The admin loads only its own scripts. Styles may be inline (Radix positions
+    // popovers with style attributes; the preview frame inlines article.css).
+    // The preview is a sandboxed srcdoc frame, which inherits this policy.
+    contentSecurityPolicy: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      frameSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'none'"],
+      formAction: ["'self'", "https://github.com"],
+      frameAncestors: ["'none'"],
+    },
+  }));
   // The admin API is never indexed, wherever it is hosted.
   app.use("*", async (context, next) => { await next(); context.header("x-robots-tag", "noindex, nofollow"); });
   // Cookie sessions: unsafe cross-site requests are refused by their Origin.

@@ -175,7 +175,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.cms == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: webapp/apps/cms
@@ -205,6 +205,14 @@ jobs:
       # Journeys run against PostgreSQL; each test file creates and drops its own database.
       - run: bun test
       - run: bun run api:check
+      # The admin (apps/cms-admin) ships inside the CMS image.
+      - name: Check the admin and its generated API client
+        working-directory: webapp/apps/cms-admin
+        run: bun run lint && bun run api:check
+      - name: Install browsers for the admin journeys
+        run: bunx playwright install --with-deps chromium webkit
+      - name: Admin journeys on desktop, a phone and WebKit
+        run: bun run test:admin
       - name: Build the production image
         run: docker build --tag hush-cms-build-check --file Dockerfile ../..
       # A backup counts only once it has been restored.
