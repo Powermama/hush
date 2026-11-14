@@ -4,8 +4,8 @@
 # Two final targets share every stage but the blog's source:
 #   runtime      (default) the blog from content/blog (CI, local builds)
 #   runtime-cms  production: the blog from the hush CMS, read during the build
-# The build stages run on Debian so Chromium can render blog covers; the
-# runtime image stays Alpine.
+# The build stages run on glibc (Debian, and the Playwright image for the CMS
+# blog so Chromium can render covers); the runtime image stays Alpine.
 FROM oven/bun:1.3.9 AS dependencies
 
 WORKDIR /app
@@ -34,9 +34,15 @@ COPY apps/web/content ./content
 FROM source AS build
 RUN bun run build
 
-FROM source AS build-cms
-# Covers are rendered with Chromium; only missing ones, as in development.
-RUN bunx playwright install --with-deps chromium
+# Covers are rendered with Chromium. The official Playwright image ships it, so
+# no build downloads a browser: Coolify's forced builds (how the CMS gets the
+# site rebuilt on an unchanged commit) run without cache, and downloading
+# Chromium there hung. The tag must match @playwright/test
+# (scripts/blog/playwright-image.test.ts).
+FROM mcr.microsoft.com/playwright:v1.62.1-noble AS build-cms
+COPY --from=source /usr/local/bin/bun /usr/local/bin/bunx /usr/local/bin/
+COPY --from=source /app /app
+WORKDIR /app/apps/web
 # Coolify builds with the host network, so the CMS answers on the server's
 # loopback. ADD re-fetches this URL on every build and keeps the next step's
 # cache only while the site revision is unchanged.
