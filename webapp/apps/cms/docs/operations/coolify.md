@@ -23,8 +23,9 @@ updates.
    resolves to `webapp/`. Name it `hush-cms`.
 3. Server `automation`, destination network `hush`, so the website can reach
    the CMS in M2. No domain until the admin UI ships.
-4. **Watch Paths**: `webapp/apps/cms/**`, `webapp/packages/**`,
-   `webapp/package.json`, `webapp/bun.lock`.
+4. **Watch Paths**: `webapp/apps/cms/**`, `webapp/apps/cms-admin/**` (the
+   image includes the admin), `webapp/packages/**`, `webapp/package.json`,
+   `webapp/bun.lock`.
 
 ## Secrets
 
@@ -80,10 +81,35 @@ Check after changes: from the `cms` container a request to
 token answers "Missing required permissions: read" (the IP is allowed, the
 token is limited), and from the internet every `/api` path answers 403.
 
+## The admin at cms.behu.sh
+
+The CMS serves its admin (`apps/cms-admin`, built into the image) on its own
+origin. Sign-in is a GitHub OAuth App with PKCE; only listed GitHub user ids get
+a session.
+
+1. **GitHub > Settings > Developer settings > OAuth Apps > New**: name
+   `hush CMS`, homepage `https://cms.behu.sh`, callback
+   `https://cms.behu.sh/auth/github/callback`, wildcard matching off, device
+   flow off, expiring user tokens on. Generate a client secret.
+2. **Cloudflare DNS**: `cms.behu.sh`, A, the app server's address, proxied.
+3. **Coolify, hush-cms > General**: domain `https://cms.behu.sh:3100` for the
+   `cms` service (Traefik routes to the container port; nothing is published
+   on the host but the loopback port).
+4. **Environment variables**, runtime only: `CMS_PUBLIC_URL=https://cms.behu.sh`,
+   `CMS_ADMIN_GITHUB_IDS` (numeric ids, `https://api.github.com/users/<login>`
+   shows `id`), `CMS_GITHUB_CLIENT_ID`, and `CMS_GITHUB_CLIENT_SECRET` locked.
+   Copy the secret from GitHub straight into Coolify.
+5. Redeploy, open `https://cms.behu.sh` and sign in. A GitHub account outside
+   the list gets "This GitHub account may not use the hush CMS."
+
+Protect the allowed GitHub accounts with a passkey or two-factor
+authentication: the admin inherits their sign-in.
+
 ## After the first deploy
 
 1. Create the owner's token in the `cms` container's terminal:
-   `bun run cms:token --name owner --scopes posts:read,posts:write,posts:publish --days 90`.
+   `bun run cms:token --name owner --scopes posts:read,posts:write,posts:publish --days 90`
+   (for scripts and agents; the owner otherwise signs in at cms.behu.sh).
 2. Check the `cms-scheduler` logs for "Backed up the CMS database".
 3. Restore drill: create a scratch database in `cms-postgres`
    (`createdb -U cms cms_restore`), run
