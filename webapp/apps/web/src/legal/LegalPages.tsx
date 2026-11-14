@@ -363,3 +363,12 @@ export function PrivacyPolicyPage({
     </LegalShell>
   );
 }
+
+/** The German pages, as their own exports so the router can load them on demand. */
+export function GermanImprintPage() {
+  return <ImprintPage language="de" />;
+}
+
+export function GermanPrivacyPolicyPage() {
+  return <PrivacyPolicyPage language="de" />;
+}

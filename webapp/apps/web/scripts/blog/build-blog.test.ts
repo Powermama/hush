@@ -65,6 +65,8 @@ async function contentWith(files: Record<string, string | Buffer>) {
 
 const screenshot = () => sharp({ create: { width: 900, height: 450, channels: 3, background: "#ffffff" } }).png().toBuffer();
 const withImage = (markdown: string) => validBody.replace("Text.", markdown);
+/** The markdown before the article's first section, where it may be on the first screen. */
+const beforeFirstSection = (markdown: string) => validBody.replace("## What runs locally?", `${markdown}\n\n## What runs locally?`);
 
 async function errorsFor(files: Record<string, string>) {
   return (await buildBlog(await contentWith(files), staticPaths)).errors.join("\n");
@@ -187,6 +189,7 @@ describe("blog content pipeline", () => {
     expect(html).toContain("<figure><img");
     expect(html).toMatch(/srcset="\/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-680\.webp 680w, \/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-900\.webp 900w"/);
     expect(html).toContain('width="680" height="340"');
+    // After the first section: it waits until scrolled near.
     expect(html).toContain('loading="lazy"');
     expect(html).toContain("<figcaption>Our test Mac");
     expect(html).toMatch(/href="\/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-900\.webp"/);
@@ -194,6 +197,27 @@ describe("blog content pipeline", () => {
     expect(html).toContain('target="_blank" rel="noopener"');
     expect(html).toContain("View full-size image</a></figcaption>");
     expect(posts[0]!.images.map((image) => image.width)).toEqual([680, 900]);
+  });
+
+  test("loads an image before the first section at once and every other image lazily", async () => {
+    const { posts, errors } = await buildBlog(await contentWith({
+      "en/dictate-without-cloud.md": article({}, beforeFirstSection([
+        "![Keyboard settings with the Dictation section](media/dictate-without-cloud/settings.png)",
+        "",
+        "Some text between the two screenshots.",
+        "",
+        "![The microphone input level in Sound settings](media/dictate-without-cloud/sound.png)",
+      ].join("\n"))),
+      "en/media/dictate-without-cloud/settings.png": await screenshot(),
+      "en/media/dictate-without-cloud/sound.png": await screenshot(),
+    }), staticPaths);
+    expect(errors).toEqual([]);
+    const images = posts[0]!.html.match(/<img [^>]*>/g)!;
+    expect(images).toHaveLength(2);
+    expect(images[0]).not.toContain("loading=");
+    expect(images[0]).toContain('fetchpriority="high"');
+    expect(images[1]).toContain('loading="lazy"');
+    expect(images[1]).not.toContain("fetchpriority");
   });
 
   test("rejects missing images, missing alt text, wrong folders and inline images", async () => {
