@@ -34,7 +34,7 @@ The TanStack Router and Query devtools appear only in development.
 bun run lint          # route tree, then TypeScript
 bun run api:check     # the generated client matches apps/cms/openapi/hush-cms.json
 bun run build
-cd ../cms && bun run test:admin   # browser journeys CMS-001 to CMS-006 (desktop, phone, WebKit)
+cd ../cms && bun run test:admin   # browser journeys CMS-001 to CMS-007 (desktop, phone, WebKit)
 ```
 
 After an API change in `apps/cms`, run `bun run api:openapi` there and

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 //
-// CMS-001 to CMS-006 (docs/user-journeys/cms.md): the owner's journeys in the
+// CMS-001 to CMS-007 (docs/user-journeys/cms.md): the owner's journeys in the
 // admin, on desktop, a phone and WebKit. Each test writes its own posts, so
 // browsers running in parallel never share one.
 import { expect, test as base, type Page } from "@playwright/test";
@@ -12,6 +12,8 @@ type Post = { id: string; slug: string; status: string };
 const test = base.extend<{ signedIn: Page; draft: (overrides?: Record<string, unknown>) => Promise<Post> }>({
   signedIn: async ({ page }, use) => {
     await page.goto("/__e2e/sign-in");
+    // WebKit can report the sign-in loaded before its redirect to the posts list has; a test's own goto would then be cut off.
+    await expect(page.getByRole("heading", { name: "Posts", exact: true })).toBeVisible();
     await use(page);
   },
   draft: async ({ signedIn }, use, testInfo) => {
@@ -71,45 +73,99 @@ test("CMS-001 the owner signs in with GitHub and sees every post with its status
   await expect(published).toHaveAttribute("aria-current", "page");
 });
 
-test("CMS-002 writing updates the preview from the real renderer and lists what the contract refuses", async ({ signedIn, draft }) => {
+/** The article's editable body, and the way to its end. */
+const article = (page: Page) => page.getByRole("textbox", { name: "Article" });
+async function endOfArticle(page: Page) {
+  await article(page).locator("p").last().click();
+  await page.keyboard.press("End");
+}
+const status = (page: Page) => page.getByRole("banner").locator("[aria-live]");
+/** While the writer types, the editor's header fades out; moving the pointer brings it back, as in Ghost. */
+async function showChrome(page: Page) {
+  await page.mouse.move(10, 300);
+  await page.mouse.move(60, 340);
+}
+
+test("CMS-002 writing in the block editor saves the draft by itself, and the preview lists what the contract refuses", async ({ signedIn, draft }) => {
   const post = await draft();
   await signedIn.goto(`/posts/${post.id}`);
+  await expect(signedIn.getByRole("textbox", { name: "Post title" })).toHaveValue("How to dictate on a Mac without the cloud");
+  await expect(article(signedIn).getByRole("heading", { name: "Frequently asked questions" })).toBeVisible();
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
+
+  await endOfArticle(signedIn);
+  await signedIn.keyboard.press("Enter");
+  await signedIn.keyboard.type("A sentence written in the admin.");
+  await expect(status(signedIn)).toHaveText("Draft");
+  // Saved three seconds after the writer stops, with nothing pressed.
+  await expect(status(signedIn)).toHaveText("Draft - Saved", { timeout: 10_000 });
+  const saved = await (await signedIn.request.get(`/v1/posts/${post.id}`)).json() as { markdown: string };
+  expect(saved.markdown).toBe(`${validPost().markdown}\n\nA sentence written in the admin.\n`);
+
+  await showChrome(signedIn);
+  await signedIn.getByRole("button", { name: "Preview" }).click();
   const preview = signedIn.frameLocator("iframe[title=Preview]");
-  await expect(preview.getByRole("heading", { level: 1 })).toHaveText("How to dictate on a Mac without the cloud");
+  await expect(preview.getByText("A sentence written in the admin.")).toBeVisible();
   await expect(signedIn.locator("iframe[title=Preview]")).toHaveAttribute("sandbox", "");
 
-  const editor = signedIn.getByRole("textbox", { name: "Article in Markdown" });
-  await editor.click();
-  await signedIn.keyboard.press("ControlOrMeta+End");
-  await signedIn.keyboard.type("\n\nA sentence written in the admin.");
-  await expect(preview.getByText("A sentence written in the admin.")).toBeVisible();
-  await expect(signedIn.getByText("Unsaved changes")).toBeVisible();
-
-  await signedIn.keyboard.type("\n\n[a dead link](/blog/does-not-exist)");
+  // A Markdown link typed in the editor becomes a link; one to a missing page is refused.
+  await endOfArticle(signedIn);
+  await signedIn.keyboard.type(" See [a dead link](/blog/does-not-exist) ");
+  await expect(article(signedIn).getByRole("link", { name: "a dead link" })).toBeVisible();
   await expect(signedIn.getByRole("alert")).toContainText("does not resolve");
-
-  await signedIn.keyboard.press("ControlOrMeta+z");
   await signedIn.keyboard.press("ControlOrMeta+s");
-  await expect(signedIn.getByRole("banner").getByText("Saved", { exact: true })).toBeVisible();
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
+});
+
+test("CMS-007 a new post starts with its title, saves itself and gets its address from it", async ({ signedIn }, testInfo) => {
+  const title = `A post written in the browser ${testInfo.project.name} ${Date.now().toString(36)}`;
+  await signedIn.goto("/posts/new");
+  const titleField = signedIn.getByRole("textbox", { name: "Post title" });
+  await expect(titleField).toBeFocused();
+  await signedIn.keyboard.type(title);
+  await signedIn.keyboard.press("Enter");
+  await signedIn.keyboard.type("What this post is about.");
+  await signedIn.keyboard.press("Enter");
+  await signedIn.keyboard.type("## A section");
+  await signedIn.keyboard.press("Enter");
+  await signedIn.keyboard.type("Some **bold** words.");
+  // The address moves to the saved post while the same editor stays open.
+  await expect(signedIn).toHaveURL(/\/posts\/[0-9a-f-]{36}$/, { timeout: 10_000 });
+  await expect(status(signedIn)).toHaveText("Draft - Saved", { timeout: 10_000 });
+  const id = signedIn.url().split("/").at(-1);
+  const saved = await (await signedIn.request.get(`/v1/posts/${id}`)).json() as Record<string, string>;
+  expect(saved.slug).toBe(title.toLowerCase().replaceAll(" ", "-"));
+  expect(saved.description).toBe("What this post is about.");
+  expect(saved.markdown).toBe(`# ${title}\n\n## A section\n\nSome **bold** words.\n`);
+
+  // "/" offers the blocks of an article.
+  await signedIn.keyboard.press("Enter");
+  await signedIn.keyboard.type("/div");
+  await expect(signedIn.getByRole("option", { name: /Divider/ })).toBeVisible();
+  await signedIn.keyboard.press("Enter");
+  await expect(article(signedIn).locator("hr")).toHaveCount(1);
+  await expect(article(signedIn)).not.toContainText("/div");
 });
 
 test("CMS-003 publishing now takes a valid draft live", async ({ signedIn, draft }) => {
   const post = await draft();
   await signedIn.goto(`/posts/${post.id}`);
-  await signedIn.getByRole("button", { name: "Publish" }).click();
+  await signedIn.getByRole("button", { name: "Publish", exact: true }).click();
   await signedIn.getByRole("button", { name: "Publish now" }).click();
-  await expect(signedIn.getByText(/Published\. behu\.sh updates/)).toBeVisible();
+  await expect(signedIn.getByText("Post published")).toBeVisible();
   expect(await statusOf(signedIn, post.id)).toBe("published");
+  await expect(status(signedIn)).toHaveText("Published");
   await expect(signedIn.getByRole("button", { name: "Unpublish" })).toBeVisible();
 });
 
 test("CMS-004 scheduling sets a future time and the post waits for it", async ({ signedIn, draft }) => {
   const post = await draft();
   await signedIn.goto(`/posts/${post.id}`);
-  await signedIn.getByRole("button", { name: "Publish" }).click();
+  await signedIn.getByRole("button", { name: "Publish", exact: true }).click();
   await signedIn.getByLabel("Or schedule it").fill("2031-05-04T09:30");
   await signedIn.getByRole("button", { name: "Schedule", exact: true }).click();
-  await expect(signedIn.getByText("Scheduled for 4 May 2031")).toBeVisible();
+  await expect(signedIn.getByText("Post scheduled")).toBeVisible();
+  await expect(status(signedIn)).toHaveText("Scheduled");
   expect(await statusOf(signedIn, post.id)).toBe("scheduled");
 });
 
@@ -124,7 +180,7 @@ test("CMS-005 unpublishing asks first, then returns the post to drafts", async (
   expect(await statusOf(signedIn, post.id)).toBe("published");
   await signedIn.getByRole("button", { name: "Unpublish" }).click();
   await signedIn.getByRole("alertdialog").getByRole("button", { name: "Unpublish" }).click();
-  await expect(signedIn.getByText(/Unpublished\./)).toBeVisible();
+  await expect(signedIn.getByText("Post reverted to a draft.")).toBeVisible();
   expect(await statusOf(signedIn, post.id)).toBe("draft");
 });
 
@@ -133,12 +189,12 @@ test("CMS-006 an earlier revision can be restored from the post's history", asyn
   const changed = validPost().markdown.replace("The speech model runs on your Mac.", "A later wording of the answer.");
   expect((await signedIn.request.patch(`/v1/posts/${post.id}`, { data: { markdown: changed } })).status()).toBe(200);
   await signedIn.goto(`/posts/${post.id}`);
-  await expect(signedIn.getByRole("textbox", { name: "Article in Markdown" })).toContainText("A later wording of the answer.");
-  await signedIn.getByRole("button", { name: "Post settings" }).click();
+  await expect(article(signedIn)).toContainText("A later wording of the answer.");
+  await signedIn.getByRole("button", { name: "Settings" }).click();
   await signedIn.getByRole("button", { name: "Restore" }).first().click();
   await expect(signedIn.getByText("Revision restored")).toBeVisible();
   await signedIn.keyboard.press("Escape");
-  await expect(signedIn.getByRole("textbox", { name: "Article in Markdown" })).toContainText("The speech model runs on your Mac.");
+  await expect(article(signedIn)).toContainText("The speech model runs on your Mac.");
 });
 
 test("the admin runs under its Content Security Policy without violations", async ({ signedIn, draft }) => {
@@ -147,6 +203,8 @@ test("the admin runs under its Content Security Policy without violations", asyn
   const post = await draft();
   const response = await signedIn.goto(`/posts/${post.id}`);
   expect(response!.headers()["content-security-policy"]).toContain("script-src 'self'");
+  await expect(article(signedIn)).toBeVisible();
+  await signedIn.getByRole("button", { name: "Preview" }).click();
   await expect(signedIn.frameLocator("iframe[title=Preview]").getByRole("heading", { level: 1 })).toBeVisible();
   expect(violations).toEqual([]);
 });

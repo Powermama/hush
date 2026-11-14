@@ -1,11 +1,12 @@
 /* The admin's styles, layered as Ghost Admin layers Shade (apps/shade/styles.css):
    Tailwind's theme, Shade's preflight, utilities, then the Shade tokens from
-   @hush/theme. */
+   @hush/theme, and the editor's Koenig typography. */
 @import "@hush/theme/element-styles.css";
 @import "tailwindcss/theme.css";
 @import "@hush/theme/preflight.css";
 @import "tailwindcss/utilities.css";
 @import "tw-animate-css";
 @import "@hush/theme/theme.css";
+@import "./editor/editor.css";
 
 @source "./";

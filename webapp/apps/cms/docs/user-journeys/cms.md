@@ -20,11 +20,12 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-MEDIA-001 | An article referencing `media/<slug>/<name>` cannot go live until that image is uploaded; once it is, the post renders a figure with responsive WebP sources (680 px and 2x) and the renditions exist in storage. | `tests/media.test.ts` |
 | CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
 | CMS-001 | The owner signs in with GitHub and sees every post with its author, topic, date and status, scheduled posts first, then drafts, then published ones; a menu sorts them, and the sidebar's views (on a phone, the sheet behind the bottom bar) filter Drafts, Scheduled and Published. | `tests/admin/admin.e2e.ts` |
-| CMS-002 | Writing in the editor updates a sandboxed preview from the real renderer and lists what the article contract refuses; Cmd/Ctrl+S saves. | `tests/admin/admin.e2e.ts` |
+| CMS-002 | An article opens in the block editor (title, excerpt, body) and a draft saves itself three seconds after its writer stops, written back as the same Markdown; Markdown shortcuts format as you type; the sandboxed preview from the real renderer lists what the article contract refuses; Cmd/Ctrl+S saves at once. | `tests/admin/admin.e2e.ts` |
 | CMS-003 | Publishing now takes a valid draft live. | `tests/admin/admin.e2e.ts` |
 | CMS-004 | Scheduling sets a future time; the post shows when it goes live. | `tests/admin/admin.e2e.ts` |
 | CMS-005 | Unpublishing asks first, then returns the post to drafts. | `tests/admin/admin.e2e.ts` |
 | CMS-006 | An earlier revision is restored from the post's history into the editor. | `tests/admin/admin.e2e.ts` |
+| CMS-007 | A new post needs no form: its title, excerpt and body are typed straight in, the first save moves the address to the post while the editor stays open, the post is named after its title, and "/" offers the blocks of an article. | `tests/admin/admin.e2e.ts` |
 | CMS-ADMIN-001 | Signing in sends the owner to GitHub with a random state and a PKCE challenge (S256, RFC 9700), both kept in `__Host-` cookies (HttpOnly, Secure, SameSite=Lax), and no OAuth scope; the callback needs the matching state and sends the verifier, then sets a session cookie with the same attributes, stored only as a hash. | `tests/admin.test.ts` |
 | CMS-ADMIN-002 | A GitHub account whose numeric id is not on the allowlist gets no session (403). | `tests/admin.test.ts` |
 | CMS-ADMIN-003 | A session acts as the owner (every scope) and revisions name `github:<login>`. | `tests/admin.test.ts` |
@@ -46,5 +47,5 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 
 The import of the live article renders HTML byte-identical to the website's
 static build. The website builds its blog from the export (M2); the admin
-(`apps/cms-admin`, M3) runs the browser journeys CMS-001 to CMS-006 on desktop,
+(`apps/cms-admin`, M3) runs the browser journeys CMS-001 to CMS-007 on desktop,
 a phone and WebKit.

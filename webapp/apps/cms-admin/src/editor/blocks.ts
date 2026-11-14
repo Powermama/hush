@@ -80,10 +80,15 @@ function $blockNode(block: Block): LexicalNode {
   }
 }
 
+/** Nodes for blocks, to insert where the author pastes or picks them. */
+export const $createBlockNodes = (blocks: Block[]) => blocks.map($blockNode);
+
 /** Replaces the editor's content with the blocks. */
 export function $setBlocks(blocks: Block[]) {
   const root = $getRoot().clear();
-  root.append(...(blocks.length ? blocks.map($blockNode) : [$createParagraphNode()]));
+  root.append(...blocks.map($blockNode));
+  // A line to write on after the last block (empty paragraphs are not part of the article).
+  if (!$isParagraphNode(root.getLastChild())) root.append($createParagraphNode());
 }
 
 function $inline(node: ElementNode, link?: Text["link"]): Inline[] {

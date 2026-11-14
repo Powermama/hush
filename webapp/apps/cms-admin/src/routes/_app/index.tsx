@@ -124,7 +124,7 @@ function Posts() {
           </Select>
           <div className="ms-3 shrink-0">
             <Button asChild className="font-bold [&_svg]:stroke-2!">
-              <Link to="/posts/new" aria-label="New post"><Plus className="size-4" /><span className="hidden sm:inline">New post</span></Link>
+              <Link to="/posts/$id" params={{ id: "new" }} aria-label="New post"><Plus className="size-4" /><span className="hidden sm:inline">New post</span></Link>
             </Button>
           </div>
         </div>
@@ -138,7 +138,7 @@ function Posts() {
           <p className="text-md font-medium">{status ? `No ${titles[status]!.toLowerCase()} posts` : "Start creating content."}</p>
           {status
             ? <Button asChild variant="outline"><Link to="/" search={{}}>Show all posts</Link></Button>
-            : <Button asChild><Link to="/posts/new">Write a new post</Link></Button>}
+            : <Button asChild><Link to="/posts/$id" params={{ id: "new" }}>Write a new post</Link></Button>}
         </div>
       )}
       {rows.length > 0 && <ul className={cn("border-t border-border-default pb-4 lg:pb-8")}>{rows.map((post) => <PostRow key={post.id} post={post} />)}</ul>}

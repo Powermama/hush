@@ -14,7 +14,6 @@ import { Route as EditorRouteImport } from './routes/_editor'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as EditorPostsIdRouteImport } from './routes/_editor/posts/$id'
-import { Route as EditorPostsNewRouteImport } from './routes/_editor/posts/new'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -39,23 +38,16 @@ const EditorPostsIdRoute = EditorPostsIdRouteImport.update({
   path: '/posts/$id',
   getParentRoute: () => EditorRoute,
 } as any)
-const EditorPostsNewRoute = EditorPostsNewRouteImport.update({
-  id: '/posts/new',
-  path: '/posts/new',
-  getParentRoute: () => EditorRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/sign-in': typeof SignInRoute
   '/posts/$id': typeof EditorPostsIdRoute
-  '/posts/new': typeof EditorPostsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/sign-in': typeof SignInRoute
   '/posts/$id': typeof EditorPostsIdRoute
-  '/posts/new': typeof EditorPostsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -64,13 +56,12 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/_app/': typeof AppIndexRoute
   '/_editor/posts/$id': typeof EditorPostsIdRoute
-  '/_editor/posts/new': typeof EditorPostsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/posts/$id' | '/posts/new'
+  fullPaths: '/' | '/sign-in' | '/posts/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-in' | '/posts/$id' | '/posts/new'
+  to: '/' | '/sign-in' | '/posts/$id'
   id:
     | '__root__'
     | '/_app'
@@ -78,7 +69,6 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/_app/'
     | '/_editor/posts/$id'
-    | '/_editor/posts/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -124,13 +114,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditorPostsIdRouteImport
       parentRoute: typeof EditorRoute
     }
-    '/_editor/posts/new': {
-      id: '/_editor/posts/new'
-      path: '/posts/new'
-      fullPath: '/posts/new'
-      preLoaderRoute: typeof EditorPostsNewRouteImport
-      parentRoute: typeof EditorRoute
-    }
   }
 }
 
@@ -146,12 +129,10 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface EditorRouteChildren {
   EditorPostsIdRoute: typeof EditorPostsIdRoute
-  EditorPostsNewRoute: typeof EditorPostsNewRoute
 }
 
 const EditorRouteChildren: EditorRouteChildren = {
   EditorPostsIdRoute: EditorPostsIdRoute,
-  EditorPostsNewRoute: EditorPostsNewRoute,
 }
 
 const EditorRouteWithChildren =

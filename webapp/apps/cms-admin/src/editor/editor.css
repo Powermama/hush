@@ -1,0 +1,321 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Clemens Kressmann
+
+   The editor's styles around Koenig's prose typography (kg-prose.css): the
+   variables and base it expects, as Koenig's own stylesheets set them
+   (koenig-lexical/src/styles: index.css, components/koenig-lexical.css, MIT,
+   Ghost Foundation), then the hush blocks Koenig has no card for. */
+@import "./kg-prose.css";
+
+:root {
+  --editor-placeholder: #aeb7c1;
+}
+
+.dark {
+  --editor-placeholder: #626d79;
+}
+
+@theme inline {
+  --color-editor-placeholder: var(--editor-placeholder);
+}
+
+/* The editor's chrome while the writer types (Ghost Admin's index.css): each
+   piece carries data-writing-focus and fades out, keeping its place. */
+[data-writing-focus] {
+  transition: opacity 150ms var(--ease-standard);
+}
+
+[data-writing-focus="hidden"] {
+  opacity: 0;
+  transition-duration: 200ms;
+}
+
+[data-writing-focus="hidden"],
+[data-writing-focus="hidden"] * {
+  pointer-events: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-writing-focus] {
+    transition: none;
+  }
+}
+
+.editor-optical-sizing {
+  font-optical-sizing: auto;
+  font-variation-settings: normal;
+}
+
+.koenig-lexical {
+  --white: #fff;
+  --grey-50: #fafafb;
+  --grey-100: #f4f5f6;
+  --grey-200: #ebeef0;
+  --grey-300: #dde1e5;
+  --grey-400: #ced4d9;
+  --grey-500: #aeb7c1;
+  --grey-600: #95a1ad;
+  --grey-700: #7c8b9a;
+  --grey-800: #626d79;
+  --grey-900: #394047;
+  --grey-950: #23292f;
+  --black: #15171a;
+  --green: #30cf43;
+  /* Links and the quote's rule, as the site's accent in Ghost: the violet of the hush summary box. */
+  --kg-accent-color: #7667d7;
+  position: relative;
+}
+
+.koenig-lexical > * {
+  font-size: 1.7rem;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+  color: var(--grey-900);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Droid Sans", "Helvetica Neue", sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.koenig-lexical [contenteditable] {
+  outline: none;
+}
+
+.koenig-lexical ::selection {
+  background: var(--grey-300);
+}
+
+.koenig-lexical.dark > * {
+  color: var(--grey-300);
+}
+
+.koenig-lexical.dark ::selection {
+  background: var(--grey-900);
+}
+
+.koenig-lexical.dark {
+  --kg-accent-color: #a99cf0;
+}
+
+/* The "Begin writing your post..." line of an empty editor. */
+.editor-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  cursor: text;
+  font-family: georgia, Times, serif;
+  font-size: 2rem;
+  line-height: 1.6em;
+  color: var(--editor-placeholder);
+  pointer-events: none;
+  user-select: none;
+}
+
+.koenig-lexical .kg-prose {
+  /* Nested lists keep their own markers out of the parent item's. */
+  li.editor-nested-item {
+    list-style-type: none;
+  }
+
+  li.editor-nested-item > ul,
+  li.editor-nested-item > ol {
+    margin-top: 0;
+  }
+
+  /* Task lists: a checkbox in place of the marker, as GitHub draws them. */
+  li.editor-check {
+    position: relative;
+    list-style-type: none;
+    margin-left: 0;
+    padding-left: 3rem;
+  }
+
+  li.editor-check::before {
+    content: "";
+    position: absolute;
+    top: 0.75rem;
+    left: 0.3rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    border: 1.5px solid var(--grey-500);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  li.editor-check[aria-checked="true"]::before {
+    border-color: var(--kg-accent-color);
+    background: var(--kg-accent-color) center / 1.1rem no-repeat
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  }
+
+  /* A code block: Lexical draws it as one <code> element. */
+  code.editor-code {
+    display: block;
+    position: relative;
+    margin: 3.2rem 0 0;
+    padding: 1.6rem 2rem;
+    overflow-x: auto;
+    border-radius: 4px;
+    font-size: 1.5rem;
+    line-height: 1.6em;
+    white-space: pre;
+    tab-size: 2;
+    vertical-align: baseline;
+  }
+
+  :is(h2, h3, h4, h5, h6) + code.editor-code {
+    margin-top: 1.6rem;
+  }
+
+  code.editor-code[data-language]:not([data-language=""])::after {
+    content: attr(data-language);
+    position: absolute;
+    top: 0.6rem;
+    right: 1rem;
+    font-family: Inter, sans-serif;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: var(--grey-600);
+    pointer-events: none;
+  }
+
+  hr {
+    margin: 3.2rem 0 1.6rem;
+    padding: 0;
+  }
+
+  hr.editor-selected {
+    border-top-color: var(--green);
+    box-shadow: 0 1px 0 var(--green);
+  }
+
+  /* Tables: the look of the published article, at the editor's size. */
+  table.editor-table {
+    width: 100%;
+    margin: 3.2rem 0 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: Inter, sans-serif;
+  }
+
+  table.editor-table :is(th, td) {
+    position: relative;
+    padding: 1rem 1.4rem;
+    border: 1px solid var(--grey-300);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  table.editor-table th {
+    background: var(--grey-50);
+  }
+
+  table.editor-table :is(th, td) p {
+    margin: 0;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 1.5rem;
+    line-height: 1.5em;
+  }
+
+  table.editor-table th p {
+    font-weight: 600;
+    color: var(--black);
+  }
+
+  table.editor-table .editor-cell-selected {
+    background: color-mix(in oklab, var(--kg-accent-color) 12%, transparent);
+  }
+
+  /* The summary box ("> [!TLDR]"), drawn as on behu.sh (@hush/article/article.css). */
+  > div.editor-summary {
+    margin: 3.2rem 0 0;
+    padding: 2rem 2.2rem 1.6rem;
+    border: 1px solid rgb(118 103 215 / 0.18);
+    border-radius: 18px;
+    background: radial-gradient(90% 120% at 100% 0%, rgb(201 184 255 / 0.22), transparent 70%), #fbfaff;
+    line-height: inherit;
+  }
+
+  > div.editor-summary:first-child {
+    margin-top: 0;
+  }
+
+  > div.editor-summary::before {
+    content: attr(data-title);
+    display: block;
+    margin: 0 0 0.6rem;
+    font-family: Inter, sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.6;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7667d7;
+    user-select: none;
+  }
+
+  > div.editor-summary > :first-child {
+    margin-top: 0;
+  }
+
+  > div.editor-summary :is(p, ul, ol) {
+    font-family: Inter, sans-serif;
+    font-size: 1.7rem;
+  }
+
+  /* An image card: Lexical's wrapper is the block, the card inside it draws itself. */
+  > div.editor-image {
+    line-height: inherit;
+  }
+}
+
+/* Koenig's dark rules expect .dark inside .koenig-lexical; here both sit on one element. */
+.koenig-lexical.dark .kg-prose {
+  :where(h1, h2, h3, h4, h5, h6):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    color: var(--white);
+  }
+
+  :where(code):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    background: var(--grey-900);
+    border: 1px solid var(--grey-900);
+    color: var(--grey-300);
+  }
+
+  :where(a):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-weight: 600;
+  }
+
+  > div.editor-summary {
+    border-color: rgb(169 156 240 / 0.25);
+    background: rgb(118 103 215 / 0.12);
+  }
+
+  > div.editor-summary::before {
+    color: #a99cf0;
+  }
+
+  table.editor-table :is(th, td) {
+    border-color: var(--grey-900);
+  }
+
+  table.editor-table th {
+    background: var(--grey-950);
+  }
+
+  table.editor-table th p {
+    color: var(--white);
+  }
+
+  pre,
+  code.editor-code {
+    background: var(--grey-950);
+    border-color: var(--grey-900);
+    color: var(--grey-300);
+  }
+
+  hr {
+    border-top-color: var(--grey-900);
+  }
+}
