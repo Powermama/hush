@@ -17,6 +17,16 @@ export type CmsConfig = {
   backups: ObjectStoreConfig & { keepDays: number };
   /** The website the CMS deploys and reports to search engines; absent, nothing is deployed. */
   site?: SiteConfig;
+  /** Sign-in to the admin with GitHub; absent, only bearer tokens work. */
+  admin?: AdminConfig;
+};
+
+export type AdminConfig = {
+  /** The admin's own origin, such as https://cms.behu.sh: the OAuth callback and the CSRF origin. */
+  publicUrl: string;
+  github: { clientId: string; clientSecret: string };
+  /** Numeric GitHub user ids allowed to sign in (ids, unlike logins, never change). */
+  allowedGithubIds: ReadonlySet<number>;
 };
 
 export type SiteConfig = {
@@ -44,6 +54,26 @@ export function loadConfig(env: Env = process.env): CmsConfig {
       keepDays: Number(env.CMS_BACKUP_KEEP_DAYS ?? 30),
     },
     site: siteConfig(env),
+    admin: adminConfig(env),
+  };
+}
+
+function adminConfig(env: Env): AdminConfig | undefined {
+  const publicUrl = env.CMS_PUBLIC_URL;
+  if (!publicUrl) return undefined;
+  const required = (name: string) => {
+    const value = env[name];
+    if (!value) throw new Error(`${name} is required when CMS_PUBLIC_URL is set`);
+    return value;
+  };
+  const ids = required("CMS_ADMIN_GITHUB_IDS").split(",").map((id) => id.trim()).filter(Boolean);
+  if (!ids.length || ids.some((id) => !/^[1-9][0-9]*$/.test(id))) throw new Error("CMS_ADMIN_GITHUB_IDS must list numeric GitHub user ids, separated by commas");
+  const url = new URL(publicUrl);
+  if (url.protocol !== "https:" && url.hostname !== "localhost" && url.hostname !== "127.0.0.1") throw new Error("CMS_PUBLIC_URL must use HTTPS");
+  return {
+    publicUrl: url.origin,
+    github: { clientId: required("CMS_GITHUB_CLIENT_ID"), clientSecret: required("CMS_GITHUB_CLIENT_SECRET") },
+    allowedGithubIds: new Set(ids.map(Number)),
   };
 }
 

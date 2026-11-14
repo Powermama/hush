@@ -3,16 +3,18 @@
 //
 // Bearer tokens for agents and scripts: 256 random bits, shown once, stored as
 // a SHA-256 hash, limited by scopes and an optional expiry.
-import { createHash, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { and, eq, gt, isNull, or } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import type { Database } from "../db/client";
+import { hashToken } from "./hash";
+import { sessionUser } from "./sessions";
 import { apiTokenScopes, apiTokens } from "../db/schema";
 
 export const tokenScopes = ["posts:read", "posts:write", "posts:publish"] as const;
 export type TokenScope = (typeof tokenScopes)[number];
 
-export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
+export { hashToken };
 
 export async function createToken(db: Database, input: { name: string; scopes: TokenScope[]; expiresAt?: Date }) {
   const token = `hcms_${randomBytes(32).toString("base64url")}`;
@@ -25,12 +27,20 @@ export async function createToken(db: Database, input: { name: string; scopes: T
 
 export type AuthVariables = { actor: string };
 
-/** Accepts a valid, unexpired, unrevoked token that carries `scope`. */
+/**
+ * Accepts a valid, unexpired, unrevoked bearer token that carries `scope`, or
+ * the signed-in admin, who holds every scope.
+ */
 export function requireScope(db: Database, scope: TokenScope) {
   return createMiddleware<{ Variables: AuthVariables }>(async (context, next) => {
     const header = context.req.header("authorization") ?? "";
     const token = /^Bearer (\S+)$/.exec(header)?.[1];
-    if (!token) return context.json({ error: { code: "unauthorized", message: "A bearer token is required." } }, 401);
+    if (!token) {
+      const admin = await sessionUser(db, context);
+      if (!admin) return context.json({ error: { code: "unauthorized", message: "Sign in or send a bearer token." } }, 401);
+      context.set("actor", `github:${admin.githubLogin}`);
+      return next();
+    }
     const [row] = await db.select().from(apiTokens).where(and(
       eq(apiTokens.tokenHash, hashToken(token)),
       isNull(apiTokens.revokedAt),
