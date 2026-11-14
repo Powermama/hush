@@ -2,8 +2,9 @@
 
 The blog publishes English and German articles as two independent programs:
 each article targets its own market's keywords, and no article is a
-translation of another. Articles are Markdown files in `content/blog/<lang>/`,
-written with the hush-seo skill and reviewed by the author before publishing.
+translation of another. Articles live in the hush CMS (`apps/cms`), written as
+hush-seo Markdown and reviewed by the author before publishing; the website
+builds them in at deploy time.
 
 ## Journeys
 
@@ -26,15 +27,17 @@ written with the hush-seo skill and reviewed by the author before publishing.
 | BLOG-015 | The blog index shows a tinted header with topic filters and articles as cards with artwork, topic, summary, author and reading time. | BLOG-015 |
 
 The browser tests run in CI against fixture articles in
-`scripts/blog/fixtures/content`, generated only inside the CI job. With the
-committed content they skip, so they never depend on real articles.
+`scripts/blog/fixtures/content`, built only inside the CI job. Without
+articles they skip, so they never depend on real articles.
 
 ## Guarantees
 
 - `/blog` and `/de/blog` exist only when that language has a published article,
   so an empty blog is never served or indexed. The footer links to the English
   blog once it exists.
-- `bun run blog:check` fails when the committed generated files are stale.
+- Nothing generated from articles is committed: the blog output, `sitemap.xml`
+  and `llms.txt` are built by `bun run build` (and before `dev`, `lint` and
+  `test`) from `HUSH_BLOG_CONTENT_DIR`, by default `content/blog`.
 - Production builds the blog from the hush CMS (Dockerfile target
   `runtime-cms`): `scripts/blog/pull-cms.ts` writes the published posts and
   their hash-verified images in the same layout as `content/blog`, and the

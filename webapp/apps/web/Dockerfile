@@ -2,7 +2,7 @@
 # Built from the workspace root: docker build --file apps/web/Dockerfile .
 #
 # Two final targets share every stage but the blog's source:
-#   runtime      (default) the blog from content/blog in the repository
+#   runtime      (default) the blog from content/blog (CI, local builds)
 #   runtime-cms  production: the blog from the hush CMS, read during the build
 # The build stages run on Debian so Chromium can render blog covers; the
 # runtime image stays Alpine.
@@ -29,6 +29,7 @@ COPY apps/web/src ./src
 COPY apps/web/scripts/generate-site-files.ts apps/web/scripts/prerender.ts ./scripts/
 COPY apps/web/scripts/prerender ./scripts/prerender
 COPY apps/web/scripts/blog ./scripts/blog
+COPY apps/web/content ./content
 
 FROM source AS build
 RUN bun run build
@@ -44,8 +45,7 @@ ADD ${HUSH_CMS_URL}/v1/site/revision /tmp/cms-revision
 # The read-only token arrives as a build secret and never enters a layer.
 RUN --mount=type=secret,id=HUSH_CMS_TOKEN,env=HUSH_CMS_TOKEN,required=true \
     HUSH_CMS_URL="$HUSH_CMS_URL" bun scripts/blog/pull-cms.ts /tmp/cms-content \
-    && HUSH_BLOG_CONTENT_DIR=/tmp/cms-content bun run blog:generate \
-    && bun run build
+    && HUSH_BLOG_CONTENT_DIR=/tmp/cms-content bun run build
 
 FROM oven/bun:1.3.9-alpine AS runtime-base
 
@@ -78,4 +78,5 @@ USER bun
 FROM runtime-base AS runtime
 COPY --from=build /app/apps/web/dist ./dist
 COPY --from=build /app/apps/web/dist-pages ./dist-pages
+COPY --from=build /app/apps/web/shared/blog-posts.generated.ts ./shared/blog-posts.generated.ts
 USER bun
