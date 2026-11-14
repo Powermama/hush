@@ -282,7 +282,10 @@ export async function renderArticle({ front, body }: ParsedArticle, context: Art
     }
     return true;
   });
+  let figures = 0;
+  let sections = 0;
   walk(hast, (node) => {
+    if (node.type === "element" && node.tagName === "h2") sections++;
     if (node.type === "element" && node.tagName === "h2" && node.properties?.id) {
       toc.push({ id: String(node.properties.id), text: text(node) });
       if ([faqHeadings[lang], sourcesHeadings[lang]].includes(text(node).trim())) node.properties.className = ["blog-appendix"];
@@ -301,6 +304,7 @@ export async function renderArticle({ front, body }: ParsedArticle, context: Art
     if (node.type === "element" && node.tagName === "p" && only?.tagName === "img") {
       const image = images.get(String(only.properties?.src));
       if (!image) return;
+      const leadImage = figures++ === 0 && sections === 0;
       const first = image.renditions[0]!;
       const img: HastNode = {
         type: "element", tagName: "img", children: [], properties: {
@@ -310,7 +314,10 @@ export async function renderArticle({ front, body }: ParsedArticle, context: Art
           width: first.width,
           height: Math.round(image.height * first.width / image.width),
           alt: image.alt,
-          loading: "lazy",
+          // An image before the first section is likely on the first screen, where it can be
+          // the page's largest paint: it loads at once and first, and it is the only one
+          // (web.dev: never lazy-load the LCP image). Every other image waits until scrolled near.
+          ...(leadImage ? { fetchPriority: "high" } : { loading: "lazy" }),
           decoding: "async",
         },
       };

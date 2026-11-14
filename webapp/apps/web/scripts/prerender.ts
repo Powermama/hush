@@ -38,6 +38,49 @@ const scenePreloads = [
   // Matches the scene's same-origin fetch(), so the browser reuses this download.
   ...[...sceneAssets].map((file) => `<link rel="preload" href="/${file}" as="fetch" crossorigin="anonymous">`),
 ].join("");
+// Every page loads its own code on demand (src/app/router.tsx). Its chunks are
+// announced in the head, so the browser fetches them with the application
+// instead of after it, and hydration waits for no second round trip.
+const pageModules: Record<string, string> = {
+  "/": "src/app/App.tsx",
+  "/de": "src/landing/GermanLanding.tsx",
+  "/verified-messages": "src/verified/VerifiedMessagesPage.tsx",
+  "/releases": "src/releases/ReleaseNotesPage.tsx",
+  "/releases/latest": "src/releases/ReleaseNotesPage.tsx",
+  "/impressum": "src/legal/LegalPages.tsx",
+  "/datenschutz": "src/legal/LegalPages.tsx",
+  "/de/impressum": "src/legal/LegalPages.tsx",
+  "/de/datenschutz": "src/legal/LegalPages.tsx",
+};
+function pageModule(path: string) {
+  if (pageModules[path]) return pageModules[path];
+  if (path.startsWith("/releases/")) return "src/releases/ReleaseRoute.tsx";
+  // Articles; the blog index, author and policy pages are part of the application itself.
+  const article = /^(?:\/(de))?\/blog\/([a-z0-9-]+)$/.exec(path);
+  const key = article && `src/blog/generated/${article[1] ?? "en"}/${article[2]}.tsx`;
+  return key && manifest[key] ? key : undefined;
+}
+function pagePreloads(path: string) {
+  const key = pageModule(path);
+  if (!key) return "";
+  if (!manifest[key]) throw new Error(`Missing ${key}, the code of ${path}, in the build manifest`);
+  const files = new Set<string>();
+  (function collect(chunkKey: string) {
+    const chunk = manifest[chunkKey]!;
+    // The application entry is already loaded by the page itself.
+    if (chunk.isEntry || files.has(chunk.file)) return;
+    files.add(chunk.file);
+    for (const imported of chunk.imports ?? []) collect(imported);
+  })(key);
+  return [...files].map((file) => `<link rel="modulepreload" crossorigin href="/${file}">`).join("");
+}
+/** The resource hints a head does not announce yet, each once. */
+function withoutRepeats(documentHead: string, hints: string) {
+  const seen = new Set([...documentHead.matchAll(/href="([^"]+)"/g)].map((match) => match[1]));
+  return [...hints.matchAll(/<link [^>]*href="([^"]+)"[^>]*>/g)]
+    .filter((match) => !seen.has(match[1]) && Boolean(seen.add(match[1])))
+    .map((match) => match[0]).join("");
+}
 const pages: Record<string, string> = {};
 for (const [path, metadata] of Object.entries(sitePages)) {
   const response = await render(`${siteOrigin}${path}`);
@@ -48,7 +91,9 @@ for (const [path, metadata] of Object.entries(sitePages)) {
   }
   html = html.replace('<html lang="en">', `<html lang="${metadata.language}">`);
   // Preserve React's resource hints alongside Vite's compiled script and CSS.
-  html = html.replace("<head>", () => `<head>${pageHead(metadata)}${landingPaths.includes(path) ? scenePreloads : ""}`);
+  const documentHead = pageHead(metadata);
+  const hints = withoutRepeats(documentHead, pagePreloads(path) + (landingPaths.includes(path) ? scenePreloads : ""));
+  html = html.replace("<head>", () => `<head>${documentHead}${hints}`);
   const externalized = externalizeScripts(html);
   for (const asset of externalized.assets) await Bun.write(`dist${asset.path}`, asset.code);
   pages[path] = externalized.html;
