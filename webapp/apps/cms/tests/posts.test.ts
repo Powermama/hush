@@ -137,6 +137,70 @@ describe.skipIf(!serverUrl)("CMS API", () => {
     expect(restored.title).toBe("The first title of this article, long enough to pass");
   });
 
+  test("CMS-API-009 starts a draft from anything and names it after its heading", async () => {
+    const empty = await read(await call("POST", "/v1/posts", tokens.writer, {}));
+    expect(empty).toMatchObject({ status: "draft", lang: "en", slug: "untitled", title: "", markdown: "", secondaryKeywords: [] });
+    const second = await read(await call("POST", "/v1/posts", tokens.writer, { lang: "en" }));
+    expect(second.slug).toBe("untitled-2");
+    // The draft takes its slug from the heading it gets, and its images follow.
+    const named = await read(await call("PATCH", `/v1/posts/${empty.id}`, tokens.writer, {
+      markdown: "# Größer denken: Diktieren für Ärzte\n\n![A screenshot of the app](media/untitled/shot.png)",
+    }));
+    expect(named.slug).toBe("groesser-denken-diktieren-fuer-aerzte");
+    expect(named.markdown).toContain("](media/groesser-denken-diktieren-fuer-aerzte/shot.png)");
+    // A later heading no longer moves it: the slug is the post's address.
+    const renamed = await read(await call("PATCH", `/v1/posts/${empty.id}`, tokens.writer, { markdown: "# Another heading" }));
+    expect(renamed.slug).toBe("groesser-denken-diktieren-fuer-aerzte");
+    const twin = await read(await call("POST", "/v1/posts", tokens.writer, { markdown: "# Größer denken: Diktieren für Ärzte" }));
+    expect(twin.slug).toBe("groesser-denken-diktieren-fuer-aerzte-2");
+    const german = await read(await call("POST", "/v1/posts", tokens.writer, { lang: "de", markdown: "# Größer denken: Diktieren für Ärzte" }));
+    expect(german.slug).toBe("groesser-denken-diktieren-fuer-aerzte");
+    // Incomplete is fine for a draft, not for going live.
+    const refused = await call("POST", `/v1/posts/${twin.id}/publish`, tokens.publisher);
+    expect(refused.status).toBe(422);
+    expect((await read(refused)).error.problems.join("\n")).toContain("front matter title");
+  });
+
+  test("CMS-API-010 keeps one revision for a run of autosaves", async () => {
+    const post = await draft({ slug: "autosaved", keyword: "autosaved" });
+    const revisions = async () => (await read(await call("GET", `/v1/posts/${post.id}/revisions`, tokens.reader))).revisions as Array<Record<string, any>>;
+    const autosave = (markdown: string, token = tokens.writer) => call("PATCH", `/v1/posts/${post.id}?autosave=true`, token, { markdown });
+    await autosave("# First words");
+    await autosave("# First words, then more");
+    expect((await revisions()).map((revision) => [revision.autosave, revision.snapshot.markdown]))
+      .toEqual([[true, "# First words, then more"], [false, validPost().markdown]]);
+    // Another author, a deliberate save and a run older than ten minutes each start a new revision.
+    await autosave("# By someone else", tokens.publisher);
+    expect(await revisions()).toHaveLength(3);
+    await call("PATCH", `/v1/posts/${post.id}`, tokens.writer, { markdown: "# Saved on purpose" });
+    await autosave("# Writing again");
+    expect(await revisions()).toHaveLength(5);
+    await db.execute(sql`update post_revisions set created_at = now() - interval '11 minutes' where post_id = ${post.id}`);
+    await autosave("# After a break");
+    expect((await revisions()).filter((revision) => revision.autosave)).toHaveLength(4);
+    // A live post is never autosaved: each change is a revision of its own.
+    const live = await draft({ slug: "autosave-live", keyword: "autosave live" });
+    await call("POST", `/v1/posts/${live.id}/publish`, tokens.publisher);
+    await call("PATCH", `/v1/posts/${live.id}?autosave=true`, tokens.writer, { imageAlt: "A Mac with a dictation waveform, updated." });
+    await call("PATCH", `/v1/posts/${live.id}?autosave=true`, tokens.writer, { imageAlt: "A Mac with a dictation waveform, again." });
+    const { revisions: liveRevisions } = await read(await call("GET", `/v1/posts/${live.id}/revisions`, tokens.reader));
+    expect(liveRevisions.map((revision: { autosave: boolean }) => revision.autosave)).toEqual([false, false, false, false]);
+  });
+
+  test("CMS-API-011 deletes a draft, but not a live post", async () => {
+    const post = await draft({ slug: "thrown-away", keyword: "thrown away" });
+    expect((await call("DELETE", `/v1/posts/${post.id}`, tokens.reader)).status).toBe(403);
+    expect((await call("DELETE", `/v1/posts/${post.id}`, tokens.writer)).status).toBe(204);
+    expect((await call("GET", `/v1/posts/${post.id}`, tokens.reader)).status).toBe(404);
+    expect((await call("DELETE", `/v1/posts/${post.id}`, tokens.writer)).status).toBe(404);
+    const live = await draft({ slug: "stays-up", keyword: "stays up" });
+    await call("POST", `/v1/posts/${live.id}/publish`, tokens.publisher);
+    const refused = await call("DELETE", `/v1/posts/${live.id}`, tokens.writer);
+    expect(refused.status).toBe(409);
+    expect((await read(refused)).error.code).toBe("not_a_draft");
+    expect((await read(await call("GET", `/v1/posts/${live.id}`, tokens.reader))).status).toBe("published");
+  });
+
   test("rejects requests that do not match the API", async () => {
     const response = await call("POST", "/v1/posts", tokens.writer, { slug: "Not A Slug" });
     expect(response.status).toBe(400);

@@ -7,7 +7,7 @@ import { bodyLimit } from "hono/body-limit";
 import { listMedia, maxImageBytes, uploadMedia, type Cms } from "../media/service";
 import { postFields, postPatch } from "../posts/fields";
 import {
-  createDraft, getPost, listPosts, listRevisions, previewPost, publishPost, restoreRevision, schedulePost, unpublishPost, updatePost,
+  createDraft, deletePost, getPost, listPosts, listRevisions, previewPost, publishPost, restoreRevision, schedulePost, unpublishPost, updatePost,
   type Post,
 } from "../posts/service";
 
@@ -29,7 +29,8 @@ const postSchema = postFields.extend({
 }).openapi("Post");
 
 const revisionSchema = z.object({
-  id: z.uuid(), postId: z.uuid(), status: statusSchema, snapshot: postFields, actor: z.string(), createdAt: z.iso.datetime(),
+  id: z.uuid(), postId: z.uuid(), status: statusSchema, snapshot: postFields, actor: z.string(),
+  autosave: z.boolean().describe("Written by the editor's autosave; holds the last state of that run."), createdAt: z.iso.datetime(),
 }).openapi("Revision");
 
 const serialize = (post: Post) => postSchema.parse({
@@ -73,7 +74,8 @@ export function postRoutes(cms: Cms) {
 
   app.openapi(createRoute({
     method: "post", path: "/v1/posts", operationId: "createDraft", tags: ["Posts"], security,
-    request: { body: { required: true, content: { "application/json": { schema: postFields } } } },
+    description: "Starts a draft from any of the fields; it may be incomplete. Without a slug it takes one from its H1 (\"untitled\" until it has one). The article contract applies when the post is scheduled or published.",
+    request: { body: { required: true, content: { "application/json": { schema: postPatch } } } },
     responses: { 201: json(postSchema, "The new draft"), 401: errors[401], 403: errors[403], 409: errors[409] },
   }), async (context) => context.json(serialize(await createDraft(db, context.req.valid("json"), context.var.actor)), 201));
 
@@ -85,10 +87,22 @@ export function postRoutes(cms: Cms) {
 
   app.openapi(createRoute({
     method: "patch", path: "/v1/posts/{id}", operationId: "updatePost", tags: ["Posts"], security,
-    description: "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused.",
-    request: { params: idParam, body: { required: true, content: { "application/json": { schema: postPatch } } } },
+    description: "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.",
+    request: { params: idParam, query: z.object({ autosave: z.enum(["true", "false"]).optional() }), body: { required: true, content: { "application/json": { schema: postPatch } } } },
     responses: { 200: json(postSchema, "The updated post"), ...errors },
-  }), async (context) => context.json(serialize(await updatePost(cms, context.req.valid("param").id, context.req.valid("json"), context.var.actor)), 200));
+  }), async (context) => context.json(serialize(await updatePost(
+    cms, context.req.valid("param").id, context.req.valid("json"), context.var.actor, { autosave: context.req.valid("query").autosave === "true" },
+  )), 200));
+
+  app.openapi(createRoute({
+    method: "delete", path: "/v1/posts/{id}", operationId: "deletePost", tags: ["Posts"], security,
+    description: "Deletes a draft with its history and images. A scheduled or published post is unpublished first.",
+    request: { params: idParam },
+    responses: { 204: { description: "The draft is gone" }, 401: errors[401], 403: errors[403], 404: errors[404], 409: errors[409] },
+  }), async (context) => {
+    await deletePost(db, context.req.valid("param").id);
+    return context.body(null, 204);
+  });
 
   app.openapi(createRoute({
     method: "post", path: "/v1/posts/{id}/schedule", operationId: "schedulePost", tags: ["Lifecycle"], security,

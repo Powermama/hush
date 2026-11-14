@@ -29,6 +29,13 @@
       "when": 1794679907148,
       "tag": "0003_admin_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794688505727,
+      "tag": "0004_autosave_revisions",
+      "breakpoints": true
     }
   ]
 }

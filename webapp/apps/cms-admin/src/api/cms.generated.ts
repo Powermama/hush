@@ -91,35 +91,21 @@ export type PostRendition = {
 } | null;
 
 export interface Post {
-  /**
-     * @minLength 50
-     * @maxLength 60
-     */
-  title: string;
-  /**
-     * @minLength 140
-     * @maxLength 160
-     */
-  description: string;
+  lang: PostLang;
   /** @pattern ^[a-z0-9]+(-[a-z0-9]+)*$ */
   slug: string;
-  lang: PostLang;
-  /** @minLength 2 */
-  keyword: string;
-  /**
-     * @maxItems 8
-     * @items.minLength 2
-     */
-  secondaryKeywords: string[];
   type: PostType;
   cluster: PostCluster;
   author: PostAuthor;
+  title: string;
+  description: string;
+  keyword: string;
   /**
-     * @minLength 10
-     * @maxLength 160
+     * @maxItems 8
+     * @items.minLength 1
      */
+  secondaryKeywords: string[];
   imageAlt: string;
-  /** @minLength 1 */
   markdown: string;
   id: string;
   status: PostStatus;
@@ -215,35 +201,21 @@ export const RevisionSnapshotAuthor = {
 } as const;
 
 export type RevisionSnapshot = {
-  /**
-     * @minLength 50
-     * @maxLength 60
-     */
-  title: string;
-  /**
-     * @minLength 140
-     * @maxLength 160
-     */
-  description: string;
+  lang: RevisionSnapshotLang;
   /** @pattern ^[a-z0-9]+(-[a-z0-9]+)*$ */
   slug: string;
-  lang: RevisionSnapshotLang;
-  /** @minLength 2 */
-  keyword: string;
-  /**
-     * @maxItems 8
-     * @items.minLength 2
-     */
-  secondaryKeywords: string[];
   type: RevisionSnapshotType;
   cluster: RevisionSnapshotCluster;
   author: RevisionSnapshotAuthor;
+  title: string;
+  description: string;
+  keyword: string;
   /**
-     * @minLength 10
-     * @maxLength 160
+     * @maxItems 8
+     * @items.minLength 1
      */
+  secondaryKeywords: string[];
   imageAlt: string;
-  /** @minLength 1 */
   markdown: string;
 };
 
@@ -253,6 +225,8 @@ export interface Revision {
   status: RevisionStatus;
   snapshot: RevisionSnapshot;
   actor: string;
+  /** Written by the editor's autosave; holds the last state of that run. */
+  autosave: boolean;
   createdAt: string;
 }
 
@@ -355,37 +329,35 @@ export const CreateDraftBodyAuthor = {
 } as const;
 
 export type CreateDraftBody = {
-  /**
-     * @minLength 50
-     * @maxLength 60
-     */
-  title: string;
-  /**
-     * @minLength 140
-     * @maxLength 160
-     */
-  description: string;
+  lang?: CreateDraftBodyLang;
   /** @pattern ^[a-z0-9]+(-[a-z0-9]+)*$ */
-  slug: string;
-  lang: CreateDraftBodyLang;
-  /** @minLength 2 */
-  keyword: string;
+  slug?: string;
+  type?: CreateDraftBodyType;
+  cluster?: CreateDraftBodyCluster;
+  author?: CreateDraftBodyAuthor;
+  title?: string;
+  description?: string;
+  keyword?: string;
   /**
      * @maxItems 8
-     * @items.minLength 2
+     * @items.minLength 1
      */
-  secondaryKeywords: string[];
-  type: CreateDraftBodyType;
-  cluster: CreateDraftBodyCluster;
-  author: CreateDraftBodyAuthor;
-  /**
-     * @minLength 10
-     * @maxLength 160
-     */
-  imageAlt: string;
-  /** @minLength 1 */
-  markdown: string;
+  secondaryKeywords?: string[];
+  imageAlt?: string;
+  markdown?: string;
 };
+
+export type UpdatePostParams = {
+  autosave?: UpdatePostAutosave;
+};
+
+export type UpdatePostAutosave = typeof UpdatePostAutosave[keyof typeof UpdatePostAutosave];
+
+
+export const UpdatePostAutosave = {
+  true: 'true',
+  false: 'false',
+} as const;
 
 export type UpdatePostBodyLang = typeof UpdatePostBodyLang[keyof typeof UpdatePostBodyLang];
 
@@ -428,35 +400,21 @@ export const UpdatePostBodyAuthor = {
 } as const;
 
 export type UpdatePostBody = {
-  /**
-     * @minLength 50
-     * @maxLength 60
-     */
-  title?: string;
-  /**
-     * @minLength 140
-     * @maxLength 160
-     */
-  description?: string;
+  lang?: UpdatePostBodyLang;
   /** @pattern ^[a-z0-9]+(-[a-z0-9]+)*$ */
   slug?: string;
-  lang?: UpdatePostBodyLang;
-  /** @minLength 2 */
-  keyword?: string;
-  /**
-     * @maxItems 8
-     * @items.minLength 2
-     */
-  secondaryKeywords?: string[];
   type?: UpdatePostBodyType;
   cluster?: UpdatePostBodyCluster;
   author?: UpdatePostBodyAuthor;
+  title?: string;
+  description?: string;
+  keyword?: string;
   /**
-     * @minLength 10
-     * @maxLength 160
+     * @maxItems 8
+     * @items.minLength 1
      */
+  secondaryKeywords?: string[];
   imageAlt?: string;
-  /** @minLength 1 */
   markdown?: string;
 };
 
@@ -505,35 +463,21 @@ export const PreviewPostBodyAuthor = {
 } as const;
 
 export type PreviewPostBody = {
-  /**
-     * @minLength 50
-     * @maxLength 60
-     */
-  title?: string;
-  /**
-     * @minLength 140
-     * @maxLength 160
-     */
-  description?: string;
+  lang?: PreviewPostBodyLang;
   /** @pattern ^[a-z0-9]+(-[a-z0-9]+)*$ */
   slug?: string;
-  lang?: PreviewPostBodyLang;
-  /** @minLength 2 */
-  keyword?: string;
-  /**
-     * @maxItems 8
-     * @items.minLength 2
-     */
-  secondaryKeywords?: string[];
   type?: PreviewPostBodyType;
   cluster?: PreviewPostBodyCluster;
   author?: PreviewPostBodyAuthor;
+  title?: string;
+  description?: string;
+  keyword?: string;
   /**
-     * @minLength 10
-     * @maxLength 160
+     * @maxItems 8
+     * @items.minLength 1
      */
+  secondaryKeywords?: string[];
   imageAlt?: string;
-  /** @minLength 1 */
   markdown?: string;
 };
 
@@ -746,6 +690,9 @@ export const getCreateDraftUrl = () => {
   return `/v1/posts`
 }
 
+/**
+ * Starts a draft from any of the fields; it may be incomplete. Without a slug it takes one from its H1 ("untitled" until it has one). The article contract applies when the post is scheduled or published.
+ */
 export const createDraft = async (createDraftBody: CreateDraftBody, options?: Parameters<typeof cmsFetch>[1]): Promise<createDraftResponse> => {
 
   return cmsFetch<createDraftResponse>(getCreateDraftUrl(),
@@ -795,7 +742,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type CreateDraftMutationError = Error
     export type CreateDraftMutationVariables = {data: CreateDraftBody}
 
-    export const useCreateDraft = <TError = Error,
+    /** Starts a draft from any of the fields; it may be incomplete. Without a slug it takes one from its H1 ("untitled" until it has one). The article contract applies when the post is scheduled or published. */
+export const useCreateDraft = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDraft>>, TError,CreateDraftMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createDraft>>,
@@ -968,21 +916,30 @@ export type updatePostResponseError = (updatePostResponse401 | updatePostRespons
 
 export type updatePostResponse = (updatePostResponseSuccess | updatePostResponseError)
 
-export const getUpdatePostUrl = (id: string,) => {
+export const getUpdatePostUrl = (id: string,
+    params?: UpdatePostParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/v1/posts/${id}`
+  return stringifiedParams.length > 0 ? `/v1/posts/${id}?${stringifiedParams}` : `/v1/posts/${id}`
 }
 
 /**
- * Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused.
+ * Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.
  */
 export const updatePost = async (id: string,
-    updatePostBody: UpdatePostBody, options?: Parameters<typeof cmsFetch>[1]): Promise<updatePostResponse> => {
+    updatePostBody: UpdatePostBody,
+    params?: UpdatePostParams, options?: Parameters<typeof cmsFetch>[1]): Promise<updatePostResponse> => {
 
-  return cmsFetch<updatePostResponse>(getUpdatePostUrl(id),
+  return cmsFetch<updatePostResponse>(getUpdatePostUrl(id,params),
   {
     ...options,
     method: 'PATCH',
@@ -1012,9 +969,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePost>>, UpdatePostMutationVariables> = (props) => {
-          const {id,data} = props ?? {};
+          const {id,data,params} = props ?? {};
 
-          return  updatePost(id,data,requestOptions)
+          return  updatePost(id,data,params,requestOptions)
         }
 
 
@@ -1027,9 +984,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdatePostMutationResult = NonNullable<Awaited<ReturnType<typeof updatePost>>>
     export type UpdatePostMutationBody = UpdatePostBody
     export type UpdatePostMutationError = Error
-    export type UpdatePostMutationVariables = {id: string;data: UpdatePostBody}
+    export type UpdatePostMutationVariables = {id: string;data: UpdatePostBody;params?: UpdatePostParams}
 
-    /** Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. */
+    /** Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. */
 export const useUpdatePost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,UpdatePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
@@ -1039,6 +996,112 @@ export const useUpdatePost = <TError = Error,
         TContext
       > => {
       return useMutation(getUpdatePostMutationOptions(options), queryClient);
+    }
+
+export type deletePostResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deletePostResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type deletePostResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type deletePostResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type deletePostResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type deletePostResponseSuccess = (deletePostResponse204) & {
+  headers: Headers;
+};
+export type deletePostResponseError = (deletePostResponse401 | deletePostResponse403 | deletePostResponse404 | deletePostResponse409) & {
+  headers: Headers;
+};
+
+export type deletePostResponse = (deletePostResponseSuccess | deletePostResponseError)
+
+export const getDeletePostUrl = (id: string,) => {
+
+
+
+
+  return `/v1/posts/${id}`
+}
+
+/**
+ * Deletes a draft with its history and images. A scheduled or published post is unpublished first.
+ */
+export const deletePost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<deletePostResponse> => {
+
+  return cmsFetch<deletePostResponse>(getDeletePostUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeletePostMutationKey = () => ['deletePost'] as const;
+
+export const getDeletePostMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext> => {
+
+const mutationKey = getDeletePostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePost>>, DeletePostMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deletePost(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePostMutationResult = NonNullable<Awaited<ReturnType<typeof deletePost>>>
+
+    export type DeletePostMutationError = Error
+    export type DeletePostMutationVariables = {id: string}
+
+    /** Deletes a draft with its history and images. A scheduled or published post is unpublished first. */
+export const useDeletePost = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deletePost>>,
+        TError,
+        DeletePostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeletePostMutationOptions(options), queryClient);
     }
 
 export type schedulePostResponse200 = {

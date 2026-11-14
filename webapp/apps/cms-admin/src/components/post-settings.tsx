@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-export type PostDraft = CreateDraftBody;
+/** Every field of a post; the API also takes a draft with fields left out. */
+export type PostDraft = Required<CreateDraftBody>;
 
 function Field({ id, label, hint, children }: { id: string; label: string; hint?: ReactNode; children: ReactNode }) {
   return (

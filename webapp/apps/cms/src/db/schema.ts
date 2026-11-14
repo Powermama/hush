@@ -10,7 +10,7 @@
 // Authors and clusters are ids validated against @hush/article.
 import type { TocEntry } from "@hush/article";
 import { relations, sql } from "drizzle-orm";
-import { bigint, check, index, integer, jsonb, pgEnum, pgTable, primaryKey, smallint, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, index, integer, jsonb, pgEnum, pgTable, primaryKey, smallint, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 export const postStatus = pgEnum("post_status", ["draft", "scheduled", "published"]);
 export const tokenScope = pgEnum("token_scope", ["posts:read", "posts:write", "posts:publish"]);
@@ -69,13 +69,15 @@ export const postRenditions = pgTable("post_renditions", {
   renderedAt: timestamp("rendered_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** Every save and status change, so any earlier version can be restored. */
+/** Every save and status change, so any earlier version can be restored; a run of autosaves counts as one save. */
 export const postRevisions = pgTable("post_revisions", {
   id: uuid("id").primaryKey().defaultRandom(),
   postId: uuid("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
   status: postStatus("status").notNull(),
   snapshot: jsonb("snapshot").notNull(),
   actor: text("actor").notNull(),
+  /** Written by the editor's autosave: later autosaves of the same run replace it (posts/service.ts). */
+  autosave: boolean("autosave").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [index("post_revisions_post_created").on(table.postId, table.createdAt)]);
 

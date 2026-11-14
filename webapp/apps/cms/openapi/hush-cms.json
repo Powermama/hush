@@ -15,20 +15,6 @@
       "Post": {
         "type": "object",
         "properties": {
-          "title": {
-            "type": "string",
-            "minLength": 50,
-            "maxLength": 60
-          },
-          "description": {
-            "type": "string",
-            "minLength": 140,
-            "maxLength": 160
-          },
-          "slug": {
-            "type": "string",
-            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-          },
           "lang": {
             "type": "string",
             "enum": [
@@ -36,17 +22,9 @@
               "de"
             ]
           },
-          "keyword": {
+          "slug": {
             "type": "string",
-            "minLength": 2
-          },
-          "secondaryKeywords": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 2
-            },
-            "maxItems": 8
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
           },
           "type": {
             "type": "string",
@@ -77,14 +55,28 @@
               "clemens-kressmann"
             ]
           },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "secondaryKeywords": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "maxItems": 8
+          },
           "imageAlt": {
-            "type": "string",
-            "minLength": 10,
-            "maxLength": 160
+            "type": "string"
           },
           "markdown": {
-            "type": "string",
-            "minLength": 1
+            "type": "string"
           },
           "id": {
             "type": "string",
@@ -162,15 +154,15 @@
           }
         },
         "required": [
-          "title",
-          "description",
-          "slug",
           "lang",
-          "keyword",
-          "secondaryKeywords",
+          "slug",
           "type",
           "cluster",
           "author",
+          "title",
+          "description",
+          "keyword",
+          "secondaryKeywords",
           "imageAlt",
           "markdown",
           "id",
@@ -289,20 +281,6 @@
           "snapshot": {
             "type": "object",
             "properties": {
-              "title": {
-                "type": "string",
-                "minLength": 50,
-                "maxLength": 60
-              },
-              "description": {
-                "type": "string",
-                "minLength": 140,
-                "maxLength": 160
-              },
-              "slug": {
-                "type": "string",
-                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-              },
               "lang": {
                 "type": "string",
                 "enum": [
@@ -310,17 +288,9 @@
                   "de"
                 ]
               },
-              "keyword": {
+              "slug": {
                 "type": "string",
-                "minLength": 2
-              },
-              "secondaryKeywords": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "minLength": 2
-                },
-                "maxItems": 8
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
               },
               "type": {
                 "type": "string",
@@ -351,26 +321,40 @@
                   "clemens-kressmann"
                 ]
               },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "keyword": {
+                "type": "string"
+              },
+              "secondaryKeywords": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "maxItems": 8
+              },
               "imageAlt": {
-                "type": "string",
-                "minLength": 10,
-                "maxLength": 160
+                "type": "string"
               },
               "markdown": {
-                "type": "string",
-                "minLength": 1
+                "type": "string"
               }
             },
             "required": [
-              "title",
-              "description",
-              "slug",
               "lang",
-              "keyword",
-              "secondaryKeywords",
+              "slug",
               "type",
               "cluster",
               "author",
+              "title",
+              "description",
+              "keyword",
+              "secondaryKeywords",
               "imageAlt",
               "markdown"
             ],
@@ -378,6 +362,10 @@
           },
           "actor": {
             "type": "string"
+          },
+          "autosave": {
+            "type": "boolean",
+            "description": "Written by the editor's autosave; holds the last state of that run."
           },
           "createdAt": {
             "type": "string",
@@ -390,6 +378,7 @@
           "status",
           "snapshot",
           "actor",
+          "autosave",
           "createdAt"
         ]
       },
@@ -587,6 +576,7 @@
             "bearer": []
           }
         ],
+        "description": "Starts a draft from any of the fields; it may be incomplete. Without a slug it takes one from its H1 (\"untitled\" until it has one). The article contract applies when the post is scheduled or published.",
         "requestBody": {
           "required": true,
           "content": {
@@ -594,20 +584,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string",
-                    "minLength": 50,
-                    "maxLength": 60
-                  },
-                  "description": {
-                    "type": "string",
-                    "minLength": 140,
-                    "maxLength": 160
-                  },
-                  "slug": {
-                    "type": "string",
-                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                  },
                   "lang": {
                     "type": "string",
                     "enum": [
@@ -615,17 +591,9 @@
                       "de"
                     ]
                   },
-                  "keyword": {
+                  "slug": {
                     "type": "string",
-                    "minLength": 2
-                  },
-                  "secondaryKeywords": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "minLength": 2
-                    },
-                    "maxItems": 8
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
                   },
                   "type": {
                     "type": "string",
@@ -656,29 +624,30 @@
                       "clemens-kressmann"
                     ]
                   },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "keyword": {
+                    "type": "string"
+                  },
+                  "secondaryKeywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "maxItems": 8
+                  },
                   "imageAlt": {
-                    "type": "string",
-                    "minLength": 10,
-                    "maxLength": 160
+                    "type": "string"
                   },
                   "markdown": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                   }
                 },
-                "required": [
-                  "title",
-                  "description",
-                  "slug",
-                  "lang",
-                  "keyword",
-                  "secondaryKeywords",
-                  "type",
-                  "cluster",
-                  "author",
-                  "imageAlt",
-                  "markdown"
-                ],
                 "additionalProperties": false
               }
             }
@@ -803,7 +772,7 @@
             "bearer": []
           }
         ],
-        "description": "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused.",
+        "description": "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.",
         "parameters": [
           {
             "schema": {
@@ -813,6 +782,18 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "required": false,
+            "name": "autosave",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -822,20 +803,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string",
-                    "minLength": 50,
-                    "maxLength": 60
-                  },
-                  "description": {
-                    "type": "string",
-                    "minLength": 140,
-                    "maxLength": 160
-                  },
-                  "slug": {
-                    "type": "string",
-                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                  },
                   "lang": {
                     "type": "string",
                     "enum": [
@@ -843,17 +810,9 @@
                       "de"
                     ]
                   },
-                  "keyword": {
+                  "slug": {
                     "type": "string",
-                    "minLength": 2
-                  },
-                  "secondaryKeywords": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "minLength": 2
-                    },
-                    "maxItems": 8
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
                   },
                   "type": {
                     "type": "string",
@@ -884,14 +843,28 @@
                       "clemens-kressmann"
                     ]
                   },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "keyword": {
+                    "type": "string"
+                  },
+                  "secondaryKeywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "maxItems": 8
+                  },
                   "imageAlt": {
-                    "type": "string",
-                    "minLength": 10,
-                    "maxLength": 160
+                    "type": "string"
                   },
                   "markdown": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                   }
                 },
                 "additionalProperties": false
@@ -952,6 +925,74 @@
           },
           "422": {
             "description": "The post does not meet the article contract",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePost",
+        "tags": [
+          "Posts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "Deletes a draft with its history and images. A scheduled or published post is unpublished first.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The draft is gone"
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicts with the post's state or another post",
             "content": {
               "application/json": {
                 "schema": {
@@ -1250,20 +1291,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string",
-                    "minLength": 50,
-                    "maxLength": 60
-                  },
-                  "description": {
-                    "type": "string",
-                    "minLength": 140,
-                    "maxLength": 160
-                  },
-                  "slug": {
-                    "type": "string",
-                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
-                  },
                   "lang": {
                     "type": "string",
                     "enum": [
@@ -1271,17 +1298,9 @@
                       "de"
                     ]
                   },
-                  "keyword": {
+                  "slug": {
                     "type": "string",
-                    "minLength": 2
-                  },
-                  "secondaryKeywords": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "minLength": 2
-                    },
-                    "maxItems": 8
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
                   },
                   "type": {
                     "type": "string",
@@ -1312,14 +1331,28 @@
                       "clemens-kressmann"
                     ]
                   },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "keyword": {
+                    "type": "string"
+                  },
+                  "secondaryKeywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "maxItems": 8
+                  },
                   "imageAlt": {
-                    "type": "string",
-                    "minLength": 10,
-                    "maxLength": 160
+                    "type": "string"
                   },
                   "markdown": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                   }
                 },
                 "additionalProperties": false

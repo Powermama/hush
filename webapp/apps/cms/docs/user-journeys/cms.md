@@ -14,6 +14,9 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-API-006 | Unpublishing returns a post to draft and removes its rendition; publishing it again keeps its original date. | `tests/posts.test.ts` |
 | CMS-API-007 | Editing a live post re-validates it: an invalid edit is refused, a valid one is re-rendered. | `tests/posts.test.ts` |
 | CMS-API-008 | Any earlier revision can be restored. | `tests/posts.test.ts` |
+| CMS-API-009 | A draft can start from any of the fields, also none: its texts may be empty or of any length, and the article contract applies only when it goes live. Without a slug it is named after its H1 ("untitled" until it has one), numbered when the language already has that slug; its image references follow a changed slug. | `tests/posts.test.ts` |
+| CMS-API-010 | Saves sent with `autosave=true` by one author within ten minutes share a single revision holding their last state; a deliberate save, another author or a live post always gets a revision of its own. | `tests/posts.test.ts` |
+| CMS-API-011 | A draft can be deleted with its history and images; a scheduled or published post is refused with 409 until it is unpublished. | `tests/posts.test.ts` |
 | CMS-MEDIA-001 | An article referencing `media/<slug>/<name>` cannot go live until that image is uploaded; once it is, the post renders a figure with responsive WebP sources (680 px and 2x) and the renditions exist in storage. | `tests/media.test.ts` |
 | CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
 | CMS-001 | The owner signs in with GitHub and sees every post with its language, address, status and date; tabs filter Drafts, Scheduled and Published. | `tests/admin/admin.e2e.ts` |
