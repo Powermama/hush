@@ -67,16 +67,30 @@ the Compose file. Follow Coolify's
    access after a migration.
 2. In **Advanced > Deployment > Auto deploy**, select **Deploy on push
    (webhooks)**. Pull-request previews are separate from production.
-3. In **General > Build > Watch Paths**, save `webapp/**`. This pattern is relative
-   to the repository root, even though the build base directory is `/webapp`.
-   Website changes, including deployment documentation, trigger a deployment;
-   native-app and root README changes do not.
+3. In **General > Build > Watch Paths**, save one pattern per line, only what the
+   website is built from:
+
+   ```text
+   webapp/apps/web/**
+   webapp/packages/article/**
+   webapp/package.json
+   webapp/bun.lock
+   ```
+
+   The patterns are relative to the repository root, even though the build base
+   directory is `/webapp`. A change to the CMS (`webapp/apps/cms`, `cms-admin`)
+   or to a package the website does not use deploys only the CMS, not the
+   website; native-app and root README changes deploy neither. `bun.lock` is
+   shared by every app, so a dependency change anywhere still rebuilds the
+   website. When the website starts using another `webapp/packages/` package,
+   add it here. Published articles reach the site through the CMS's forced
+   builds, not through Git (`webapp/apps/cms/docs/operations/coolify.md`).
 4. Merge a website change and confirm **Webhook** and the merged commit in
    **Deployment Logs**. A branch push before merge must not deploy production.
 5. Confirm `/health/ready` and the changed public page before calling the update
-   live. Also check that a root documentation-only merge does not deploy.
+   live. Also check that a root documentation-only merge and a CMS-only merge do
+   not deploy the website.
 
-Use one pattern per line if the website later depends on more shared paths.
 Manual redeployments bypass the watch-path filter. This setup uses the existing
 GitHub App webhook and Coolify server; it needs no additional deployment runner,
 personal access token, or scheduled job.
