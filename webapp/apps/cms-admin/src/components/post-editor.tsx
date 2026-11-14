@@ -295,7 +295,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
     enableBeforeUnload: false,
   });
 
-  const host = useRef<EditorHost>(null!);
+  const host = useRef<Omit<EditorHost, "mediaLoaded">>(null!);
   const media = useListMedia(post?.id ?? "", { query: { enabled: Boolean(post) } });
   const stored: Media[] = media.data?.data && "media" in media.data.data ? media.data.data.media : [];
   host.current = {
@@ -318,7 +318,14 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
     },
   };
   // One object for the editor's life; it always asks the latest state.
-  const stableHost = useMemo<EditorHost>(() => ({ upload: (file) => host.current.upload(file), imageUrl: (src) => host.current.imageUrl(src) }), []);
+  // A new value whenever the stored images change, so the image cards draw again once the list arrives.
+  const mediaLoaded = !post || media.isSuccess;
+  const hostValue = useMemo<EditorHost>(
+    () => ({ upload: (file) => host.current.upload(file), imageUrl: (src) => host.current.imageUrl(src), mediaLoaded }),
+    // media.data is the stored list as the query last read it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [media.data, mediaLoaded],
+  );
 
   const run = async (action: "publish" | "unpublish" | { scheduleAt: Date }) => {
     setBusy(true);
@@ -391,7 +398,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
   })();
 
   return (
-    <EditorHostContext.Provider value={stableHost}>
+    <EditorHostContext.Provider value={hostValue}>
       <div
         className="relative flex h-dvh min-h-0 flex-col bg-background [--editor-overlap:65px] max-[500px]:[--editor-overlap:56px]"
         // Hidden controls stay focusable; focusing one brings the chrome back.
@@ -403,7 +410,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
             <Link to="/" search={{}} aria-label="Posts"><ArrowLeft className="stroke-2!" /></Link>
           </Button>
           <div className="min-w-0" data-writing-focus={writingFocus}>
-            {status && <span aria-live="polite" className={cn(pill, "pointer-events-auto block max-w-full truncate leading-(--control-height)")}>{status}</span>}
+            {status && <span aria-live="polite" className={cn(pill, "pointer-events-auto inline-block max-w-full truncate align-top leading-(--control-height)")}>{status}</span>}
           </div>
           <div className="col-start-3 ml-auto flex items-center gap-3 max-[500px]:gap-1" data-writing-focus={writingFocus}>
             {/* As in Ghost, a draft is previewed; a live post is on behu.sh. */}

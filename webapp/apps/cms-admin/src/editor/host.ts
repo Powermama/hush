@@ -9,6 +9,8 @@ export type EditorHost = {
   upload(file: File): Promise<string | undefined>;
   /** Where the browser loads an article image ("media/<slug>/<name>") from, once it is stored. */
   imageUrl(src: string): string | undefined;
+  /** Whether the post's stored images are known yet; until then a missing one may still be on its way. */
+  mediaLoaded: boolean;
 };
 
 export const EditorHostContext = createContext<EditorHost | null>(null);

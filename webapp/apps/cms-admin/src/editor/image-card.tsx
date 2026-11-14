@@ -81,6 +81,10 @@ export function ImageCard({ nodeKey, image }: { nodeKey: NodeKey; image: Image }
     >
       {url ? (
         <img src={url} alt={image.alt} draggable={false} className="mx-auto block h-auto max-w-full" />
+      ) : image.src && !host.mediaLoaded ? (
+        <div role="status" aria-label="Loading image" className="flex h-[22vh] min-h-[160px] w-full items-center justify-center bg-(--grey-50) in-[.dark]:bg-(--grey-950)">
+          <LoadingIndicator size="md" />
+        </div>
       ) : (
         <button
           type="button"
