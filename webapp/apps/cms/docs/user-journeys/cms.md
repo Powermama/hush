@@ -19,7 +19,7 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-API-011 | A draft can be deleted with its history and images; a scheduled or published post is refused with 409 until it is unpublished. | `tests/posts.test.ts` |
 | CMS-MEDIA-001 | An article referencing `media/<slug>/<name>` cannot go live until that image is uploaded; once it is, the post renders a figure with responsive WebP sources (680 px and 2x) and the renditions exist in storage. | `tests/media.test.ts` |
 | CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
-| CMS-001 | The owner signs in with GitHub and sees every post with its language, address, status and date; tabs filter Drafts, Scheduled and Published. | `tests/admin/admin.e2e.ts` |
+| CMS-001 | The owner signs in with GitHub and sees every post with its author, topic, date and status, scheduled posts first, then drafts, then published ones; a menu sorts them, and the sidebar's views (on a phone, the sheet behind the bottom bar) filter Drafts, Scheduled and Published. | `tests/admin/admin.e2e.ts` |
 | CMS-002 | Writing in the editor updates a sandboxed preview from the real renderer and lists what the article contract refuses; Cmd/Ctrl+S saves. | `tests/admin/admin.e2e.ts` |
 | CMS-003 | Publishing now takes a valid draft live. | `tests/admin/admin.e2e.ts` |
 | CMS-004 | Scheduling sets a future time; the post shows when it goes live. | `tests/admin/admin.e2e.ts` |

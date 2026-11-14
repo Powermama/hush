@@ -1,107 +1,119 @@
-"use client"
+// From Shade, Ghost Admin's design system (TryGhost/Ghost apps/shade/src, c2617d08),
+// MIT License, Copyright (c) 2013-2026 Ghost Foundation (see packages/theme/LICENSE.ghost).
+import * as React from 'react';
 
-import * as React from "react"
-import { cn } from "cn"
+import { cn } from '@/lib/utils';
+import { Button } from './button';
+import { cva, VariantProps } from 'class-variance-authority';
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
-  return (
-    <div
-      data-slot="table-container"
-      className="relative w-full overflow-x-auto"
-    >
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
+const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
+  ({ className, ...props }, ref) => (
+    <div className="relative w-full">
+      <table ref={ref} className={cn('w-full caption-bottom text-base', className)} {...props} />
     </div>
-  )
-}
+  ),
+);
+Table.displayName = 'Table';
 
-function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return (
-    <thead
-      data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
-      {...props}
-    />
-  )
-}
+const TableHeader = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <thead ref={ref} className={cn('[&_tr:hover:before]:bg-transparent', className)} {...props} />
+));
+TableHeader.displayName = 'TableHeader';
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
-  return (
-    <tbody
-      data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
-      {...props}
-    />
-  )
-}
+const TableBody = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => <tbody ref={ref} className={cn('', className)} {...props} />);
+TableBody.displayName = 'TableBody';
 
-function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
-  return (
-    <tfoot
-      data-slot="table-footer"
-      className={cn(
-        "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+const TableFooter = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tfoot
+    ref={ref}
+    className={cn('border-b bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
+    {...props}
+  />
+));
+TableFooter.displayName = 'TableFooter';
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
-  return (
+const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
+  ({ className, ...props }, ref) => (
     <tr
-      data-slot="table-row"
-      className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
-        className
-      )}
+      ref={ref}
+      className={cn('group relative border-b data-[state=selected]:bg-muted', className)}
       {...props}
     />
-  )
+  ),
+);
+TableRow.displayName = 'TableRow';
+
+const headVariants = cva('relative align-middle', {
+  variants: {
+    variant: {
+      default:
+        'column-label h-(--control-height) px-2 text-left text-sm font-medium tracking-wide text-text-secondary [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
+      cardhead: 'text-base font-normal [&>div]:px-0',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
+
+export interface TableHeadProps
+  extends React.ThHTMLAttributes<HTMLTableCellElement>, VariantProps<typeof headVariants> {
+  asChild?: boolean;
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
-  return (
-    <th
-      data-slot="table-head"
-      className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
+  ({ className, variant, ...props }, ref) => (
+    <th ref={ref} className={cn(headVariants({ variant, className }))} {...props} />
+  ),
+);
+TableHead.displayName = 'TableHead';
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
-  return (
-    <td
-      data-slot="table-cell"
-      className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+type TableHeadButtonProps = React.ComponentProps<typeof Button>;
 
-function TableCaption({
-  className,
-  ...props
-}: React.ComponentProps<"caption">) {
+const TableHeadButton: React.FC<TableHeadButtonProps> = ({ className, children, ...props }) => {
+  const buttonClassName = cn(
+    'column-label gap-1 px-0 text-right text-sm leading-4 tracking-wide text-text-secondary uppercase hover:bg-transparent [&_svg]:size-4',
+    className,
+  );
   return (
-    <caption
-      data-slot="table-caption"
-      className={cn("mt-4 text-sm text-muted-foreground", className)}
-      {...props}
-    />
-  )
-}
+    <Button className={buttonClassName} size="sm" variant="ghost" {...props}>
+      {children}
+    </Button>
+  );
+};
+TableHeadButton.displayName = 'TableHeadButton';
+
+const TableCell = React.forwardRef<
+  HTMLTableCellElement,
+  React.TdHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <td
+    ref={ref}
+    className={cn(
+      'relative p-2.5 align-middle group-hover:bg-table-row-hover [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
+      className,
+    )}
+    {...props}
+  />
+));
+TableCell.displayName = 'TableCell';
+
+const TableCaption = React.forwardRef<
+  HTMLTableCaptionElement,
+  React.HTMLAttributes<HTMLTableCaptionElement>
+>(({ className, ...props }, ref) => (
+  <caption ref={ref} className={cn('mt-4 text-base text-muted-foreground', className)} {...props} />
+));
+TableCaption.displayName = 'TableCaption';
 
 export {
   Table,
@@ -109,7 +121,8 @@ export {
   TableBody,
   TableFooter,
   TableHead,
+  TableHeadButton,
   TableRow,
   TableCell,
   TableCaption,
-}
+};

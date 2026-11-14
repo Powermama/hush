@@ -1,168 +1,169 @@
-"use client"
+// From Shade, Ghost Admin's design system (TryGhost/Ghost apps/shade/src, c2617d08),
+// MIT License, Copyright (c) 2013-2026 Ghost Foundation (see packages/theme/LICENSE.ghost).
+import * as React from 'react';
+import { Dialog as DialogPrimitive } from 'radix-ui';
 
-import * as React from "react"
-import { cn } from "cn"
-import { Dialog as DialogPrimitive } from "radix-ui"
+import { cn } from '@/lib/utils';
+import { ShadeScope } from '@/shade-scope';
 
-import { Button } from "@/components/ui/button"
-import { XIcon } from "lucide-react"
+// Radix keeps whether a dialog is modal to itself, and the overlay scroll layout needs to know.
+const DialogModalContext = React.createContext(true);
 
-function Dialog({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+const Dialog = ({ modal = true, ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) => (
+  <DialogModalContext.Provider value={modal}>
+    <DialogPrimitive.Root modal={modal} {...props} />
+  </DialogModalContext.Provider>
+);
+
+const DialogTrigger = DialogPrimitive.Trigger;
+
+const DialogPortal = DialogPrimitive.Portal;
+
+const DialogClose = DialogPrimitive.Close;
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      'fixed inset-0 z-50 transform-gpu bg-black/30 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 dark:bg-black/60',
+      className,
+    )}
+    data-slot="dialog-overlay"
+    {...props}
+  />
+));
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+
+// The panel itself, shared by both ways a dialog can sit on the page.
+const dialogPanelClassName =
+  'z-50 grid w-full max-w-lg transform-gpu gap-6 bg-surface-elevated-2 p-6 shadow-lg outline-hidden duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95';
+
+export interface DialogContentProps extends React.ComponentPropsWithoutRef<
+  typeof DialogPrimitive.Content
+> {
+  /**
+   * How a dialog taller than the window scrolls. `fixed` (the default) pins the dialog near
+   * the top of the window, so it needs its own height limit and inner scroll. `overlay` makes
+   * the backdrop the scroll container instead: the whole dialog scrolls as one piece, the way
+   * a page does.
+   */
+  scroll?: 'fixed' | 'overlay';
 }
 
-function DialogTrigger({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
-}
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  DialogContentProps
+>(({ className, children, scroll = 'fixed', ...props }, ref) => {
+  const modal = React.useContext(DialogModalContext);
 
-function DialogPortal({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
-}
-
-function DialogClose({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Close>) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
-}
-
-function DialogOverlay({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
-  return (
-    <DialogPrimitive.Overlay
-      data-slot="dialog-overlay"
+  const panel = (
+    <DialogPrimitive.Content
+      ref={ref}
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-function DialogContent({
-  className,
-  children,
-  showCloseButton = true,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content> & {
-  showCloseButton?: boolean
-}) {
-  return (
-    <DialogPortal>
-      <DialogOverlay />
-      <DialogPrimitive.Content
-        data-slot="dialog-content"
-        className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          className
-        )}
-        {...props}
-      >
-        {children}
-        {showCloseButton && (
-          <DialogPrimitive.Close data-slot="dialog-close" asChild>
-            <Button
-              variant="ghost"
-              className="absolute top-2 right-2"
-              size="icon-sm"
-            >
-              <XIcon
-              />
-              <span className="sr-only">Close</span>
-            </Button>
-          </DialogPrimitive.Close>
-        )}
-      </DialogPrimitive.Content>
-    </DialogPortal>
-  )
-}
-
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-header"
-      className={cn("flex flex-col gap-2", className)}
-      {...props}
-    />
-  )
-}
-
-function DialogFooter({
-  className,
-  showCloseButton = false,
-  children,
-  ...props
-}: React.ComponentProps<"div"> & {
-  showCloseButton?: boolean
-}) {
-  return (
-    <div
-      data-slot="dialog-footer"
-      className={cn(
-        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 sm:flex-row sm:justify-end",
-        className
+        scroll === 'overlay'
+          ? 'pointer-events-auto relative rounded-lg'
+          : 'fixed top-[8vmin] left-[50%] translate-x-[-50%] sm:rounded-lg',
+        dialogPanelClassName,
+        className,
       )}
       {...props}
     >
       {children}
-      {showCloseButton && (
-        <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
-        </DialogPrimitive.Close>
-      )}
-    </div>
-  )
-}
+    </DialogPrimitive.Content>
+  );
 
-function DialogTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return (
-    <DialogPrimitive.Title
-      data-slot="dialog-title"
-      className={cn(
-        "font-heading text-base leading-none font-medium",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+  // The space around the dialog is padding on this wrapper, not on the scroll container:
+  // browsers leave a scroll container's own bottom padding out of what it scrolls, which
+  // would leave the dialog flush with the bottom of the window.
+  const scrollingPanel = (
+    <div className="flex min-h-full items-start justify-center px-4 py-[8vmin]">{panel}</div>
+  );
 
-function DialogDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
-    <DialogPrimitive.Description
-      data-slot="dialog-description"
-      className={cn(
-        "text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+    <DialogPortal>
+      <ShadeScope>
+        {scroll === 'overlay' ? (
+          modal ? (
+            // The dialog sits inside the backdrop here, so the backdrop animates as long as the
+            // dialog does; otherwise closing unmounts the dialog part-way through its animation.
+            <DialogOverlay className="overflow-y-auto duration-200">{scrollingPanel}</DialogOverlay>
+          ) : (
+            // Radix renders no backdrop for a non-modal dialog, and the page behind stays
+            // usable, so this scroll container lets presses beside the dialog through.
+            <div
+              className="pointer-events-none fixed inset-0 z-50 overflow-y-auto"
+              data-slot="dialog-scroller"
+            >
+              {scrollingPanel}
+            </div>
+          )
+        ) : (
+          <>
+            <DialogOverlay />
+            {panel}
+          </>
+        )}
+      </ShadeScope>
+    </DialogPortal>
+  );
+});
+DialogContent.displayName = DialogPrimitive.Content.displayName;
+
+const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('flex flex-col gap-y-1.5 text-center sm:text-left', className)} {...props} />
+);
+DialogHeader.displayName = 'DialogHeader';
+
+const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      'flex flex-col-reverse sm:flex-row sm:items-end sm:justify-end sm:gap-2',
+      className,
+    )}
+    {...props}
+  />
+);
+DialogFooter.displayName = 'DialogFooter';
+
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      'text-xl leading-none font-semibold tracking-tight in-data-[admin7-design=true]:font-title',
+      className,
+    )}
+    {...props}
+  />
+));
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
+
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn('text-muted-foreground', className)}
+    {...props}
+  />
+));
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 export {
   Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
   DialogClose,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
-  DialogOverlay,
-  DialogPortal,
+  DialogFooter,
   DialogTitle,
-  DialogTrigger,
-}
+  DialogDescription,
+};
