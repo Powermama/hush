@@ -21,5 +21,8 @@
     "src",
     "tests",
     "drizzle.config.ts"
+  ],
+  "exclude": [
+    "tests/admin/*.e2e.ts"
   ]
 }
