@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 //
-// CMS-001 to CMS-007 (docs/user-journeys/cms.md): the owner's journeys in the
+// CMS-001 to CMS-008 (docs/user-journeys/cms.md): the owner's journeys in the
 // admin, on desktop, a phone and WebKit. Each test writes its own posts, so
 // browsers running in parallel never share one.
 import { expect, test as base, type Page } from "@playwright/test";
+import sharp from "sharp";
 import { validPost } from "../fixtures";
 
 type Post = { id: string; slug: string; status: string };
@@ -106,7 +107,7 @@ test("CMS-002 writing in the block editor saves the draft by itself, and the pre
   await signedIn.getByRole("button", { name: "Preview" }).click();
   const preview = signedIn.frameLocator("iframe[title=Preview]");
   await expect(preview.getByText("A sentence written in the admin.")).toBeVisible();
-  await expect(signedIn.locator("iframe[title=Preview]")).toHaveAttribute("sandbox", "");
+  await expect(signedIn.locator("iframe[title=Preview]")).toHaveAttribute("sandbox", "allow-same-origin");
 
   // A Markdown link typed in the editor becomes a link; one to a missing page is refused.
   await endOfArticle(signedIn);
@@ -115,6 +116,20 @@ test("CMS-002 writing in the block editor saves the draft by itself, and the pre
   await expect(signedIn.getByRole("alert")).toContainText("does not resolve");
   await signedIn.keyboard.press("ControlOrMeta+s");
   await expect(status(signedIn)).toHaveText("Draft - Saved");
+});
+
+test("CMS-002 the preview shows the article's images, as the site will", async ({ signedIn }, testInfo) => {
+  const slug = `previewed-picture-${testInfo.project.name}-${Date.now().toString(36)}`;
+  const base = validPost({ slug, keyword: slug.replaceAll("-", " ") });
+  const markdown = base.markdown.replace("## How does it work?", `![The dictation settings on a Mac](media/${slug}/settings.png "Where it lives")\n\n## How does it work?`);
+  const post = await (await signedIn.request.post("/v1/posts", { data: { ...base, markdown } })).json() as Post;
+  const png = await sharp({ create: { width: 800, height: 500, channels: 3, background: "#7667d7" } }).png().toBuffer();
+  expect((await signedIn.request.put(`/v1/posts/${post.id}/media/settings.png`, { data: png, headers: { "content-type": "image/png" } })).status()).toBe(200);
+  await signedIn.goto(`/posts/${post.id}`);
+  await signedIn.getByRole("button", { name: "Preview" }).click();
+  const image = signedIn.frameLocator("iframe[title=Preview]").getByRole("img", { name: "The dictation settings on a Mac" });
+  await expect(image).toBeVisible();
+  await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth)).toBeGreaterThan(0);
 });
 
 test("CMS-007 a new post starts with its title, saves itself and gets its address from it", async ({ signedIn }, testInfo) => {
@@ -145,6 +160,37 @@ test("CMS-007 a new post starts with its title, saves itself and gets its addres
   await signedIn.keyboard.press("Enter");
   await expect(article(signedIn).locator("hr")).toHaveCount(1);
   await expect(article(signedIn)).not.toContainText("/div");
+});
+
+test("CMS-008 an image goes into a new post through its card and follows the post's address", async ({ signedIn }, testInfo) => {
+  const png = await sharp({ create: { width: 800, height: 500, channels: 3, background: "#7667d7" } }).png().toBuffer();
+  await signedIn.goto("/posts/new");
+  await article(signedIn).click();
+  await signedIn.keyboard.type("/image");
+  await signedIn.keyboard.press("Enter");
+  const card = article(signedIn).locator("figure");
+  await expect(card).toContainText("Click to select an image");
+  // Choosing the picture saves the new post first: its images live under its address.
+  await card.locator("input[type=file]").setInputFiles({ name: "Dictation Settings.png", mimeType: "image/png", buffer: png });
+  await expect(card.locator("img")).toBeVisible({ timeout: 10_000 });
+  await expect(signedIn).toHaveURL(/\/posts\/[0-9a-f-]{36}$/);
+  await card.getByLabel("Caption").fill("Where the setting lives");
+  await card.getByRole("button", { name: "Alt" }).click();
+  await card.getByLabel("Alt text").fill("The dictation settings on a Mac");
+
+  // The post is named after the title it gets; the picture moves with it.
+  const title = `A post with a picture ${testInfo.project.name} ${Date.now().toString(36)}`;
+  const slug = title.toLowerCase().replaceAll(" ", "-");
+  await signedIn.getByRole("textbox", { name: "Post title" }).fill(title);
+  const id = signedIn.url().split("/").at(-1);
+  await expect.poll(async () => (await (await signedIn.request.get(`/v1/posts/${id}`)).json() as { markdown: string }).markdown, { timeout: 15_000 })
+    .toBe(`# ${title}\n\n![The dictation settings on a Mac](media/${slug}/dictation-settings.png "Where the setting lives")\n`);
+  await expect(card.locator("img")).toBeVisible();
+
+  // With its metadata complete, the article contract finds the image where the post says it is.
+  const { markdown: _markdown, slug: _slug, ...metadata } = validPost({ keyword: slug.replaceAll("-", " ") });
+  const preview = await (await signedIn.request.post(`/v1/posts/${id}/preview`, { data: metadata })).json() as { problems: string[] };
+  expect(preview.problems).toEqual(['missing the "## Frequently asked questions" section']);
 });
 
 test("CMS-003 publishing now takes a valid draft live", async ({ signedIn, draft }) => {

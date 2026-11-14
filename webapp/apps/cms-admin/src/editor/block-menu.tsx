@@ -13,11 +13,11 @@ import { $setBlocksType } from "@lexical/selection";
 import { $createTableNodeWithDimensions } from "@lexical/table";
 import { mergeRegister } from "@lexical/utils";
 import {
-  $createParagraphNode, $getSelection, $isParagraphNode, $isRangeSelection, $isRootNode, $isTextNode, COMMAND_PRIORITY_LOW, KEY_ESCAPE_COMMAND,
+  $createParagraphNode, $getSelection, $isParagraphNode, $isRangeSelection, $isRootNode, $isTextNode, COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW, KEY_ENTER_COMMAND, KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND, type ElementNode, type LexicalEditor, type LexicalNode,
 } from "lexical";
 import { Code, Heading2, Heading3, ImageIcon, List, ListOrdered, Minus, Plus, Quote, Sparkles, Table, type LucideIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { ShadeScope } from "@/shade-scope";
@@ -121,8 +121,29 @@ export function SlashMenu() {
   const [editor] = useLexicalComposerContext();
   const [query, setQuery] = useState("");
   const options = useMemo(() => matching(query).map((item) => new BlockOption(item)), [query]);
+  // The block highlighted in the menu, as last drawn.
+  const highlighted = useRef<string | null>(null);
+
+  // Enter on a line that is just "/name" decides from the text itself: the menu's own options can lag behind fast
+  // typing, or not be open yet. The highlighted block wins while it still matches, else the first match.
+  useEffect(() => editor.registerCommand(KEY_ENTER_COMMAND, (event) => {
+    const selection = $getSelection();
+    const block = $isRangeSelection(selection) && selection.isCollapsed() ? selection.anchor.getNode().getTopLevelElement() : null;
+    const typed = $isParagraphNode(block) ? /^\/(\w*)$/.exec(block.getTextContent()) : null;
+    if (!typed) return false;
+    const found = matching(typed[1]!);
+    const item = found.find((candidate) => candidate.key === highlighted.current) ?? found[0];
+    if (!item) return false;
+    event?.preventDefault();
+    block!.clear();
+    block!.select();
+    item.run(editor);
+    return true;
+  }, COMMAND_PRIORITY_HIGH), [editor]);
+
   return (
     <LexicalTypeaheadMenuPlugin<BlockOption>
+      onClose={() => { highlighted.current = null; }}
       options={options}
       onQueryChange={(text) => setQuery(text ?? "")}
       triggerFn={(text) => {
@@ -159,7 +180,9 @@ export function SlashMenu() {
         option.item.run(editor);
         close();
       }}
-      menuRenderFn={(anchor, { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }) => (anchor.current ? createPortal(
+      menuRenderFn={(anchor, { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }) => {
+        highlighted.current = selectedIndex === null ? null : options[selectedIndex]?.item.key ?? null;
+        return anchor.current ? createPortal(
         <ShadeScope className="mt-8">
           <MenuList
             shown={options.map((option) => option.item)} selected={selectedIndex ?? undefined} onHover={setHighlightedIndex}
@@ -167,7 +190,8 @@ export function SlashMenu() {
           />
         </ShadeScope>,
         anchor.current,
-      ) : null)}
+      ) : null;
+      }}
     />
   );
 }
