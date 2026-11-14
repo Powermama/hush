@@ -7,7 +7,7 @@ import { bodyLimit } from "hono/body-limit";
 import { listMedia, maxImageBytes, uploadMedia, type Cms } from "../media/service";
 import { postFields, postPatch } from "../posts/fields";
 import {
-  createDraft, getPost, listPosts, listRevisions, publishPost, restoreRevision, schedulePost, unpublishPost, updatePost,
+  createDraft, getPost, listPosts, listRevisions, previewPost, publishPost, restoreRevision, schedulePost, unpublishPost, updatePost,
   type Post,
 } from "../posts/service";
 
@@ -60,6 +60,7 @@ export function postRoutes(cms: Cms) {
   app.use("/v1/posts/:id/revisions", requireScope(db, "posts:read"));
   app.use("/v1/posts/:id/revisions/:revisionId/restore", requireScope(db, "posts:write"));
   for (const action of ["schedule", "publish", "unpublish"]) app.use(`/v1/posts/:id/${action}`, requireScope(db, "posts:publish"));
+  app.use("/v1/posts/:id/preview", requireScope(db, "posts:write"));
 
   app.openapi(createRoute({
     method: "get", path: "/v1/posts", operationId: "listPosts", tags: ["Posts"], security,
@@ -108,6 +109,19 @@ export function postRoutes(cms: Cms) {
     request: { params: idParam },
     responses: { 200: json(postSchema, "The post, back to draft"), 401: errors[401], 403: errors[403], 404: errors[404] },
   }), async (context) => context.json(serialize(await unpublishPost(db, context.req.valid("param").id, context.var.actor)), 200));
+
+  const renditionSchema = z.object({
+    heading: z.string(), html: z.string(), toc: z.array(z.object({ id: z.string(), text: z.string() })), readingMinutes: z.number().int(),
+  });
+  app.openapi(createRoute({
+    method: "post", path: "/v1/posts/{id}/preview", operationId: "previewPost", tags: ["Posts"], security,
+    description: "Renders the post with the given unsaved changes as it would go live, and lists what the article contract refuses. Saves nothing.",
+    request: { params: idParam, body: { required: true, content: { "application/json": { schema: postPatch } } } },
+    responses: {
+      200: json(z.object({ problems: z.array(z.string()), rendition: renditionSchema.nullable() }).openapi("Preview"), "The rendering and the contract's problems"),
+      401: errors[401], 403: errors[403], 404: errors[404],
+    },
+  }), async (context) => context.json(await previewPost(cms, context.req.valid("param").id, context.req.valid("json")), 200));
 
   app.openapi(createRoute({
     method: "get", path: "/v1/posts/{id}/revisions", operationId: "listRevisions", tags: ["Revisions"], security,

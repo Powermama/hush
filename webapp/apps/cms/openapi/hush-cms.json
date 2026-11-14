@@ -211,6 +211,62 @@
           "error"
         ]
       },
+      "Preview": {
+        "type": "object",
+        "properties": {
+          "problems": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rendition": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "heading": {
+                "type": "string"
+              },
+              "html": {
+                "type": "string"
+              },
+              "toc": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "text"
+                  ]
+                }
+              },
+              "readingMinutes": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "heading",
+              "html",
+              "toc",
+              "readingMinutes"
+            ]
+          }
+        },
+        "required": [
+          "problems",
+          "rendition"
+        ]
+      },
       "Revision": {
         "type": "object",
         "properties": {
@@ -1127,6 +1183,157 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the required scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/posts/{id}/preview": {
+      "post": {
+        "operationId": "previewPost",
+        "tags": [
+          "Posts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "Renders the post with the given unsaved changes as it would go live, and lists what the article contract refuses. Saves nothing.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 50,
+                    "maxLength": 60
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 140,
+                    "maxLength": 160
+                  },
+                  "slug": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                  },
+                  "lang": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "de"
+                    ]
+                  },
+                  "keyword": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "secondaryKeywords": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 2
+                    },
+                    "maxItems": 8
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "how-to",
+                      "comparison",
+                      "guide",
+                      "listicle",
+                      "essay",
+                      "news"
+                    ]
+                  },
+                  "cluster": {
+                    "type": "string",
+                    "enum": [
+                      "local-dictation",
+                      "dictation-on-mac",
+                      "local-ai",
+                      "speech-models",
+                      "voice-writing",
+                      "typing-less",
+                      "verified-messages"
+                    ]
+                  },
+                  "author": {
+                    "type": "string",
+                    "enum": [
+                      "clemens-kressmann"
+                    ]
+                  },
+                  "imageAlt": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 160
+                  },
+                  "markdown": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The rendering and the contract's problems",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preview"
                 }
               }
             }

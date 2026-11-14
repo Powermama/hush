@@ -115,6 +115,22 @@ async function render(cms: Cms, id: string, fields: PostFields, publishedAt: Dat
   return { heading: post.heading, html: post.html, toc: post.toc, readingMinutes: post.readingMinutes };
 }
 
+/**
+ * Renders a post as it would go live, with unsaved changes, without writing
+ * anything but its image renditions (content-addressed, so harmless).
+ */
+export async function previewPost(cms: Cms, id: string, patch: PostPatch) {
+  const post = await load(cms.db, id);
+  const fields = postFields.parse({ ...editableFields(post), ...patch });
+  const now = new Date();
+  const { post: rendered, problems } = await checkPost(cms, id, fields, post.publishedAt ?? now, now);
+  if (rendered) await writeRenditions(cms, rendered.images);
+  return {
+    problems,
+    rendition: rendered ? { heading: rendered.heading, html: rendered.html, toc: rendered.toc, readingMinutes: rendered.readingMinutes } : null,
+  };
+}
+
 export async function listPosts(db: Executor, filter: { lang?: string; status?: PostStatus }) {
   const rows: Loaded[] = await db.query.posts.findMany({
     where: and(filter.lang ? eq(posts.lang, filter.lang) : undefined, filter.status ? eq(posts.status, filter.status) : undefined),

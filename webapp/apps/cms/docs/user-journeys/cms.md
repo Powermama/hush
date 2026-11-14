@@ -1,6 +1,6 @@
 # CMS journeys
 
-An owner or agent manages posts through the admin API with a bearer token.
+The owner signs in to the admin with GitHub; agents use the admin API with a bearer token.
 Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 `posts:publish` (schedule, publish, unpublish). Responses are never indexed.
 
@@ -16,6 +16,13 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-API-008 | Any earlier revision can be restored. | `tests/posts.test.ts` |
 | CMS-MEDIA-001 | An article referencing `media/<slug>/<name>` cannot go live until that image is uploaded; once it is, the post renders a figure with responsive WebP sources (680 px and 2x) and the renditions exist in storage. | `tests/media.test.ts` |
 | CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
+| CMS-ADMIN-001 | Signing in sends the owner to GitHub with a random state in a `__Host-` cookie (HttpOnly, Secure, SameSite=Lax) and no OAuth scope; the callback accepts only the matching state and then sets a session cookie with the same attributes, stored only as a hash. | `tests/admin.test.ts` |
+| CMS-ADMIN-002 | A GitHub account whose numeric id is not on the allowlist gets no session (403). | `tests/admin.test.ts` |
+| CMS-ADMIN-003 | A session acts as the owner (every scope) and revisions name `github:<login>`; signing out ends it. | `tests/admin.test.ts` |
+| CMS-ADMIN-004 | Sessions expire after seven days; unsafe requests from another origin are refused (403). | `tests/admin.test.ts` |
+| CMS-ADMIN-005 | The preview renders unsaved changes as the post would go live, lists the contract's problems and saves nothing. | `tests/admin.test.ts` |
+| CMS-ADMIN-006 | The built admin is served on the CMS origin with an app fallback for its routes, never shadows `/v1`, `/auth` or `/health`, keeps paths inside its directory, and every response says `noindex` (plus `robots.txt` disallowing all). | `tests/admin.test.ts` |
+| CMS-ADMIN-007 | Sign-in is configured completely (public HTTPS URL, numeric allowlist, OAuth client) or not at all; without it only bearer tokens work. | `tests/admin.test.ts` |
 | CMS-IMPORT-001 | `bun run cms:import <dir>` imports hush-seo Markdown articles with their images, keeps drafts as drafts and publishes the rest with their original dates. | `tests/import.test.ts` |
 | CMS-IMPORT-003 | Articles of one import may link to each other, also in a cycle: they are checked and published together. An article that fails the contract stays a draft, and so does every article linking to it, so no published article links to a missing page. | `tests/import.test.ts` |
 | CMS-IMPORT-002 | Running the import again matches posts by language and slug; an unchanged article keeps its date, revisions and site revision. | `tests/import.test.ts` |

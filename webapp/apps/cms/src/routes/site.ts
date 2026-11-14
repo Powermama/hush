@@ -69,5 +69,13 @@ export function siteRoutes(cms: Cms) {
     return context.body(bytes as Uint8Array<ArrayBuffer>, 200, { "content-type": row.contentType, "cache-control": "private, max-age=31536000, immutable" });
   });
 
+  // Rendered images for the admin's preview, by their content-hashed names
+  // (the published site serves its own copies). Public like the site's.
+  app.get("/blog/media/:file{[a-z0-9-]+\\.webp}", async (context) => {
+    const bytes = await cms.media.get(`blog/media/${context.req.param("file")}`);
+    if (!bytes) return context.json({ error: { code: "not_found", message: "No such image." } }, 404);
+    return context.body(bytes as Uint8Array<ArrayBuffer>, 200, { "content-type": "image/webp", "cache-control": "public, max-age=31536000, immutable" });
+  });
+
   return app;
 }

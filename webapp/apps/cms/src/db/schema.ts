@@ -103,6 +103,21 @@ export const siteChanges = pgTable("site_changes", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [primaryKey({ columns: [table.revision, table.path] })]);
 
+/**
+ * Admin sign-ins through GitHub. The cookie holds a random token; only its
+ * SHA-256 hash is stored, as for API tokens. The GitHub user id is the
+ * identity (logins can be renamed); the login is kept for revisions and the UI.
+ */
+export const adminSessions = pgTable("admin_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tokenHash: text("token_hash").notNull().unique(),
+  githubUserId: bigint("github_user_id", { mode: "number" }).notNull(),
+  githubLogin: text("github_login").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
+}, (table) => [index("admin_sessions_expires").on(table.expiresAt)]);
+
 /** Bearer tokens for agents and scripts. Only a SHA-256 hash is stored. */
 export const apiTokens = pgTable("api_tokens", {
   id: uuid("id").primaryKey().defaultRandom(),

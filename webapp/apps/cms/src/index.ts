@@ -10,7 +10,12 @@ const config = loadConfig();
 await migrateDatabase(config.databaseUrl);
 const { db, close } = connectDatabase(config.databaseUrl);
 let draining = false;
-const app = createApp({ db, media: createObjectStore(config.media) }, { isDraining: () => draining });
+const adminDir = process.env.CMS_ADMIN_DIR ?? "../cms-admin/dist";
+const app = createApp({ db, media: createObjectStore(config.media) }, {
+  isDraining: () => draining,
+  admin: config.admin,
+  adminDir: await Bun.file(`${adminDir}/index.html`).exists() ? adminDir : undefined,
+});
 const server = Bun.serve({ port: config.port, fetch: app.fetch });
 console.info(JSON.stringify({ level: "info", message: "hush CMS listening", port: server.port, environment: config.environment }));
 
