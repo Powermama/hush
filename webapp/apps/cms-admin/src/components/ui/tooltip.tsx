@@ -1,56 +1,162 @@
-"use client"
+// From Shade, Ghost Admin's design system (TryGhost/Ghost apps/shade/src, c2617d08),
+// MIT License, Copyright (c) 2013-2026 Ghost Foundation (see packages/theme/LICENSE.ghost).
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { Tooltip as TooltipPrimitive } from 'radix-ui';
 
-import * as React from "react"
-import { cn } from "cn"
-import { Tooltip as TooltipPrimitive } from "radix-ui"
+import { cn } from '@/lib/utils';
+import { ShadeScope } from '@/shade-scope';
 
+const TooltipInputContext = React.createContext<React.RefObject<{
+  suppressFocus: boolean;
+  windowBlurred: boolean;
+}> | null>(null);
+
+/**
+ * Shared hover timing: `delayDuration` (ms) waits before the first tooltip;
+ * `skipDelayDuration` (ms) lets nearby triggers open immediately after it.
+ * Individual Tooltip roots can override delayDuration. Keyboard focus opens immediately.
+ */
 function TooltipProvider({
-  delayDuration = 0,
+  children,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
+  const inputState = React.useRef({ suppressFocus: false, windowBlurred: false });
+
+  React.useEffect(() => {
+    const suppressFocus = () => {
+      inputState.current.suppressFocus = true;
+    };
+    const onWindowBlur = () => {
+      suppressFocus();
+      inputState.current.windowBlurred = true;
+    };
+    const onKeyDown = () => {
+      inputState.current.suppressFocus = false;
+      inputState.current.windowBlurred = false;
+    };
+    const onPointerMove = () => {
+      inputState.current.windowBlurred = false;
+    };
+    document.addEventListener('pointerdown', suppressFocus, true);
+    document.addEventListener('pointermove', onPointerMove, true);
+    window.addEventListener('blur', onWindowBlur);
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      document.removeEventListener('pointerdown', suppressFocus, true);
+      document.removeEventListener('pointermove', onPointerMove, true);
+      window.removeEventListener('blur', onWindowBlur);
+      document.removeEventListener('keydown', onKeyDown, true);
+    };
+  }, []);
+
   return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
-      {...props}
-    />
-  )
+    <TooltipInputContext.Provider value={inputState}>
+      <TooltipPrimitive.Provider delayDuration={1000} {...props}>
+        {children}
+      </TooltipPrimitive.Provider>
+    </TooltipInputContext.Provider>
+  );
 }
 
 function Tooltip({
+  open: controlledOpen,
+  defaultOpen = false,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+  const inputState = React.useContext(TooltipInputContext);
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const handleOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      // Radix may finish a hover timer after window blur. Wait for fresh input.
+      if (nextOpen && inputState?.current?.windowBlurred) {
+        return;
+      }
+      setUncontrolledOpen(nextOpen);
+      onOpenChange?.(nextOpen);
+    },
+    [inputState, onOpenChange],
+  );
+
+  React.useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const close = () => handleOpenChange(false);
+    window.addEventListener('blur', close);
+    return () => window.removeEventListener('blur', close);
+  }, [open, handleOpenChange]);
+
+  return (
+    <TooltipPrimitive.Root
+      {...props}
+      defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={handleOpenChange}
+    />
+  );
 }
 
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
-}
+const TooltipTrigger = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
+>(({ onFocus, ...props }, ref) => {
+  const inputState = React.useContext(TooltipInputContext);
 
-function TooltipContent({
-  className,
-  sideOffset = 0,
-  children,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+  return (
+    <TooltipPrimitive.Trigger
+      ref={ref}
+      {...props}
+      onFocus={(event) => {
+        onFocus?.(event);
+        // Menus and browser windows restore focus without a new interaction.
+        // Only deliberate keyboard focus or normal hover should show a tooltip.
+        if (inputState?.current?.suppressFocus) {
+          event.preventDefault();
+        }
+      }}
+    />
+  );
+});
+TooltipTrigger.displayName = TooltipPrimitive.Trigger.displayName;
+
+const tooltipContentVariants = cva(
+  'z-50 animate-in overflow-hidden rounded-menu px-3 py-1.5 text-xs fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground dark:bg-popover dark:text-popover-foreground',
+        white: 'bg-surface-elevated-2 text-foreground shadow-md',
+      },
+    },
+    defaultVariants: { variant: 'default' },
+  },
+);
+
+export interface TooltipContentProps
+  extends
+    React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>,
+    VariantProps<typeof tooltipContentVariants> {}
+
+const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  TooltipContentProps
+>(({ className, sideOffset = 4, variant, ...props }, ref) => {
   return (
     <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        data-slot="tooltip-content"
-        sideOffset={sideOffset}
-        className={cn(
-          "z-50 inline-flex w-fit max-w-xs origin-(--radix-tooltip-content-transform-origin) items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs text-background has-data-[slot=kbd]:pr-1.5 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-sm data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          className
-        )}
-        {...props}
-      >
-        {children}
-        <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground" />
-      </TooltipPrimitive.Content>
+      <ShadeScope>
+        <TooltipPrimitive.Content
+          ref={ref}
+          className={cn(tooltipContentVariants({ variant: variant ?? 'white' }), className)}
+          sideOffset={sideOffset}
+          {...props}
+        />
+      </ShadeScope>
     </TooltipPrimitive.Portal>
-  )
-}
+  );
+});
+TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger }
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };

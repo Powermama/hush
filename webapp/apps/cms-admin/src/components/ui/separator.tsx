@@ -1,25 +1,26 @@
-import * as React from "react"
-import { cn } from "cn"
-import { Separator as SeparatorPrimitive } from "radix-ui"
+// From Shade, Ghost Admin's design system (TryGhost/Ghost apps/shade/src, c2617d08),
+// MIT License, Copyright (c) 2013-2026 Ghost Foundation (see packages/theme/LICENSE.ghost).
+import * as React from 'react';
+import { Separator as SeparatorPrimitive } from 'radix-ui';
 
-function Separator({
-  className,
-  orientation = "horizontal",
-  decorative = true,
-  ...props
-}: React.ComponentProps<typeof SeparatorPrimitive.Root>) {
-  return (
-    <SeparatorPrimitive.Root
-      data-slot="separator"
-      decorative={decorative}
-      orientation={orientation}
-      className={cn(
-        "shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+import { cn } from '@/lib/utils';
 
-export { Separator }
+const Separator = React.forwardRef<
+  React.ElementRef<typeof SeparatorPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
+>(({ className, orientation = 'horizontal', decorative = true, ...props }, ref) => (
+  <SeparatorPrimitive.Root
+    ref={ref}
+    className={cn(
+      'shrink-0 bg-border',
+      orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
+      className,
+    )}
+    decorative={decorative}
+    orientation={orientation}
+    {...props}
+  />
+));
+Separator.displayName = SeparatorPrimitive.Root.displayName;
+
+export { Separator };

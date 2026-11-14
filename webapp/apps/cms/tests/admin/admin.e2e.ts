@@ -27,6 +27,7 @@ const test = base.extend<{ signedIn: Page; draft: (overrides?: Record<string, un
   },
 });
 
+const order = ["Scheduled", "Draft", "Published"];
 const statusOf = async (page: Page, id: string) => (await (await page.request.get(`/v1/posts/${id}`)).json() as Post).status;
 
 test("CMS-001 the owner signs in with GitHub and sees every post with its status", async ({ browser, signedIn, draft }, testInfo) => {
@@ -40,14 +41,34 @@ test("CMS-001 the owner signs in with GitHub and sees every post with its status
 
   const post = await draft();
   await signedIn.goto("/");
-  await expect(signedIn.getByRole("heading", { name: "Posts" })).toBeVisible();
-  const row = signedIn.getByRole("link", { name: new RegExp(post.slug) });
-  await expect(row).toContainText("Draft, edited");
-  await expect(signedIn.getByRole("link", { name: /dictate-without-cloud/ })).toContainText("Published");
+  await expect(signedIn.getByRole("heading", { name: "Posts", exact: true })).toBeVisible();
+  const row = signedIn.getByRole("listitem").filter({ has: signedIn.locator(`a[href="/posts/${post.id}"]`) });
+  await expect(row).toContainText("By Clemens Kressmann - in Dictation without the cloud");
+  await expect(row).toContainText("Draft");
+  await expect(signedIn.getByRole("listitem").filter({ hasText: "Published" }).first()).toBeVisible();
 
-  await signedIn.getByRole("tab", { name: "Published" }).click();
+  // Drafts come before published posts, whichever way they are sorted.
+  const statuses = async () => await signedIn.getByRole("main").getByRole("listitem").evaluateAll((rows) => rows.map((item) => /Draft|Scheduled|Published/.exec(item.textContent ?? "")?.[0]));
+  expect(await statuses()).toEqual([...(await statuses())].sort((a, b) => order.indexOf(a!) - order.indexOf(b!)));
+  await signedIn.getByRole("combobox", { name: "Sort: Newest first" }).click();
+  await signedIn.getByRole("option", { name: "Oldest first" }).click();
+  await expect(signedIn.getByRole("combobox", { name: "Sort: Oldest first" })).toBeVisible();
+
+  // The views live in the sidebar, which is a sheet behind the bottom bar on a phone.
+  const published = signedIn.getByRole("link", { name: "Published", exact: true });
+  const sidebar = signedIn.getByRole("button", { name: "Toggle Sidebar" });
+  const sheet = !await published.isVisible();
+  if (sheet) await sidebar.click();
+  await published.click();
   await expect(signedIn).toHaveURL(/status=published/);
-  await expect(signedIn.getByRole("link", { name: new RegExp(post.slug) })).toHaveCount(0);
+  await expect(signedIn.getByRole("heading", { name: "Published", exact: true })).toBeVisible();
+  await expect(signedIn.locator(`a[href="/posts/${post.id}"]`)).toHaveCount(0);
+  // Choosing a view closes the sheet.
+  if (sheet) {
+    await expect(published).toBeHidden();
+    await sidebar.click();
+  }
+  await expect(published).toHaveAttribute("aria-current", "page");
 });
 
 test("CMS-002 writing updates the preview from the real renderer and lists what the contract refuses", async ({ signedIn, draft }) => {

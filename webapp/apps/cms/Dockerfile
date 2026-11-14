@@ -7,6 +7,7 @@ WORKDIR /app
 COPY --parents package.json bun.lock apps/*/package.json packages/*/package.json ./
 RUN bun install --frozen-lockfile --filter @hush/cms-admin
 COPY packages/article ./packages/article
+COPY packages/theme ./packages/theme
 COPY apps/cms/openapi ./apps/cms/openapi
 WORKDIR /app/apps/cms-admin
 COPY apps/cms-admin ./

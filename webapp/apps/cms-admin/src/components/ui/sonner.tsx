@@ -1,44 +1,38 @@
-import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+// From Shade, Ghost Admin's design system (TryGhost/Ghost apps/shade/src, c2617d08),
+// MIT License, Copyright (c) 2013-2026 Ghost Foundation (see packages/theme/LICENSE.ghost).
+import { Toaster as Sonner } from 'sonner';
+import { cn } from '@/lib/utils';
 
-const Toaster = ({ ...props }: ToasterProps) => {
+type ToasterProps = React.ComponentProps<typeof Sonner>;
+
+const Toaster = ({ className, style, theme = 'light', toastOptions, ...props }: ToasterProps) => {
+  const { classNames, ...toastOptionProps } = toastOptions ?? {};
+
   return (
     <Sonner
-      theme="light"
-      className="toaster group"
-      icons={{
-        success: (
-          <CircleCheckIcon className="size-4" />
-        ),
-        info: (
-          <InfoIcon className="size-4" />
-        ),
-        warning: (
-          <TriangleAlertIcon className="size-4" />
-        ),
-        error: (
-          <OctagonXIcon className="size-4" />
-        ),
-        loading: (
-          <Loader2Icon className="size-4 animate-spin" />
-        ),
-      }}
+      className={cn('toaster group', className)}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
+          '--normal-bg': 'var(--background)',
+          '--normal-text': 'var(--foreground)',
+          '--normal-border': 'var(--border)',
+          ...style,
         } as React.CSSProperties
       }
+      theme={theme}
       toastOptions={{
+        ...toastOptionProps,
         classNames: {
-          toast: "cn-toast",
+          ...classNames,
+          closeButton: cn(
+            'border-control-border! bg-background! text-foreground! hover:bg-interactive-hover! focus-visible:ring-2! focus-visible:ring-focus-ring! focus-visible:ring-offset-2! focus-visible:ring-offset-background! data-[disabled=true]:opacity-50!',
+            classNames?.closeButton,
+          ),
         },
       }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

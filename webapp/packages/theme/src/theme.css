@@ -1,0 +1,119 @@
+/* The hush admin's shadcn theme: the design tokens of Shade, Ghost Admin's
+   design system, unchanged (TryGhost/Ghost apps/shade at c2617d08, MIT, see
+   ../LICENSE.ghost). Use it like Ghost Admin does (apps/shade/styles.css):
+
+     @import "@hush/theme/element-styles.css";
+     @import "tailwindcss/theme.css";
+     @import "@hush/theme/preflight.css";
+     @import "tailwindcss/utilities.css";
+     @import "tw-animate-css";
+     @import "@hush/theme/theme.css";
+
+   with data-admin7-design="false" on <html> (Ghost's shipping palette),
+   class="react-admin" on <body> and the app inside an element with class
+   "shade", as Ghost Admin renders it (apps/admin/index.html, ShadeApp). The
+   root below is Ghost Admin's (apps/admin/src/index.css): 1rem is 10px.
+   Ghost Admin's element styles come first so that Shade's preflight (links
+   inherit their color) overrides them inside .shade, as in apps/admin/src/index.css. */
+@import "./tailwind.theme.css";
+@import "./theme-variables.css";
+
+/* Inter v4 under the name Shade's stack asks for, as Ghost Admin registers it
+   (apps/admin/src/assets/fonts/inter-admin/fonts.css). */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../node_modules/@fontsource-variable/inter/files/inter-latin-wght-italic.woff2") format("woff2-variations");
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  font-size: 62.5%;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+}
+
+/* Shade's base layer (apps/shade/styles.css). */
+@layer base {
+  .shade {
+    & {
+      @apply font-sans text-black text-base leading-normal;
+    }
+  }
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Shade's unlayered root rules (apps/shade/styles.css): text rendering, the
+   dark text color, an instant light/dark swap and hidden scrollbars. */
+.shade {
+  line-height: 1.5;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  letter-spacing: unset;
+}
+
+.shade.app-container {
+  height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.dark .shade {
+  color: var(--foreground);
+}
+
+/* Suppress transitions/animations during a light/dark mode swap so the
+   whole UI flips in a single paint instead of crossfading per element. */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
+.shade .no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome */
+}
+
+.shade .no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
