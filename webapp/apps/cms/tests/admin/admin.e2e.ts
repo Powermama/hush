@@ -124,7 +124,7 @@ test("CMS-002 writing in the block editor saves the draft by itself, and the pre
   await expect(status(signedIn)).toHaveText("Draft - Saved");
 });
 
-test("CMS-002 the preview shows the article's images, as the site will", async ({ signedIn }, testInfo) => {
+test("CMS-002 the editor and the preview show the article's images, as the site will", async ({ signedIn }, testInfo) => {
   const slug = `previewed-picture-${testInfo.project.name}-${Date.now().toString(36)}`;
   const base = validPost({ slug, keyword: slug.replaceAll("-", " ") });
   const markdown = base.markdown.replace("## How does it work?", `![The dictation settings on a Mac](media/${slug}/settings.png "Where it lives")\n\n## How does it work?`);
@@ -132,6 +132,10 @@ test("CMS-002 the preview shows the article's images, as the site will", async (
   const png = await sharp({ create: { width: 800, height: 500, channels: 3, background: "#7667d7" } }).png().toBuffer();
   expect((await signedIn.request.put(`/v1/posts/${post.id}/media/settings.png`, { data: png, headers: { "content-type": "image/png" } })).status()).toBe(200);
   await signedIn.goto(`/posts/${post.id}`);
+  // The editor's card shows the stored picture too.
+  const card = article(signedIn).locator("figure");
+  await expect(card.getByRole("img", { name: "The dictation settings on a Mac" })).toBeVisible();
+  await expect(card).not.toContainText("not uploaded yet");
   await signedIn.getByRole("button", { name: "Preview" }).click();
   const image = signedIn.frameLocator("iframe[title=Preview]").getByRole("img", { name: "The dictation settings on a Mac" });
   await expect(image).toBeVisible();
