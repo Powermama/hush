@@ -44,8 +44,9 @@ Cloudflare into Coolify; it must not pass through Git, `.env` files or chat.
 ## Website deploys and IndexNow
 
 The scheduler keeps behu.sh in step with the CMS (`src/site/deploy.ts`): when
-the site serves an older revision than the CMS holds, it asks Coolify to deploy
-`hush-website`, whose build pulls the export; once the new revision is live it
+the site serves an older revision than the CMS holds, it asks Coolify for a
+forced build of `hush-website` (a normal deploy reuses the image of the current
+commit and skips the build), which pulls the export; once the new revision is live it
 submits the changed pages to IndexNow.
 
 The CMS reaches Coolify's API only over a private network, never the internet:

@@ -141,7 +141,7 @@ describe.skipIf(!serverUrl)("CMS site", () => {
     let result = await syncSite(database.db, site, internet.fetcher, start);
     expect(result).toEqual({ live: 0, notified: [], deployRequested: true });
     const deploy = internet.state.calls.find((call) => call.url === "https://coolify.example/api/v1/deploy")!;
-    expect(deploy).toMatchObject({ authorization: "Bearer deploy-only", body: { uuid: "website-uuid", force: false } });
+    expect(deploy).toMatchObject({ authorization: "Bearer deploy-only", body: { uuid: "website-uuid", force: true } });
     result = await syncSite(database.db, site, internet.fetcher, new Date(start.getTime() + 60_000));
     expect(result.deployRequested).toBe(false);
 
