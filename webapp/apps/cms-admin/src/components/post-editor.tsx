@@ -20,11 +20,11 @@ import {
   schedulePost, unpublishPost, updatePost, uploadMedia, useListMedia, type Media, type Post, type Preview,
 } from "@/api/cms.generated";
 import { CmsError } from "@/api/fetcher";
-import { ArticlePreview } from "@/components/article-preview";
 import { MarkdownEditor } from "@/components/markdown-editor";
 import { PostMedia } from "@/components/post-media";
 import { PostRevisions } from "@/components/post-revisions";
 import { PostSettings, type PostDraft } from "@/components/post-settings";
+import { PostPreview } from "@/components/post-preview";
 import { PublishMenu } from "@/components/publish-menu";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -106,6 +106,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
   const [words, setWords] = useState({ all: 0, selected: 0 });
   const [typing, setTyping] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [problems, setProblems] = useState<string[]>([]);
@@ -258,6 +259,11 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
   // Cmd/Ctrl+S saves at once, whatever has the focus.
   useEffect(() => {
     const key = (event: globalThis.KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "p" && current.current.post?.status === "draft") {
+        event.preventDefault();
+        setShowPreview((value) => !value);
+        return;
+      }
       if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "s") {
         event.preventDefault();
         void save("manual").then((id) => { if (id && current.current.post && current.current.post.status !== "draft") setUpdated(true); });
@@ -339,7 +345,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
   // The preview: rendered by the CMS a moment after the last change, with the contract's problems.
   const latest = useRef(0);
   useEffect(() => {
-    if (!post || !showPreview) return;
+    if (!post || !showPreview) { setPreview(null); return; }
     const request = ++latest.current;
     const wait = setTimeout(async () => {
       try {
@@ -412,14 +418,14 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
                 {saveState === "saving" ? "Updating..." : saveState === "error" ? "Retry" : updated ? "Updated" : "Update"}
               </Button>
             )}
-            {post && <PublishMenu status={post.status} busy={busy} onPublish={() => void run("publish")} onSchedule={(at) => void run({ scheduleAt: at })} onUnpublish={() => void run("unpublish")} />}
+            {post && <PublishMenu open={publishOpen} onOpenChange={setPublishOpen} status={post.status} busy={busy} onPublish={() => void run("publish")} onSchedule={(at) => void run({ scheduleAt: at })} onUnpublish={() => void run("unpublish")} />}
           </div>
         </header>
         <div className="absolute top-[21px] right-[25px] z-40 max-[500px]:top-3 max-[500px]:right-3" data-writing-focus={writingFocus}>
           <Button size="icon" variant="ghost" className={headerButton} aria-label="Settings" aria-expanded={settingsOpen} onClick={() => setSettingsOpen(true)}><PanelRight className="stroke-2!" /></Button>
         </div>
 
-        <div className={cn("relative isolate min-h-0 flex-1", showPreview && post && "lg:grid lg:grid-cols-2")}>
+        <div className="relative isolate min-h-0 flex-1">
           <div className="editor-optical-sizing -mt-(--editor-overlap) h-[calc(100%+var(--editor-overlap))] min-h-0 overflow-x-hidden overflow-y-auto scroll-pt-(--editor-overlap)">
             <div
               className="flex min-h-full flex-col px-6 pt-[calc(48px+var(--editor-overlap))] pb-24 max-[500px]:px-8"
@@ -462,19 +468,6 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
               </div>
             </div>
           </div>
-          {showPreview && post && (
-            <aside className="min-h-0 overflow-y-auto border-t border-border bg-muted/40 p-4 pt-[calc(var(--editor-overlap)-49px)] lg:border-t-0 lg:border-l" aria-label="Preview">
-              {shownProblems.length > 0 && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertTitle>Not ready to publish</AlertTitle>
-                  <AlertDescription><ul className="mt-1 list-disc pl-4">{shownProblems.map((problem) => <li key={problem}>{problem}</li>)}</ul></AlertDescription>
-                </Alert>
-              )}
-              {preview?.rendition
-                ? <ArticlePreview heading={preview.rendition.heading} html={preview.rendition.html} />
-                : <p className="p-6 text-sm text-muted-foreground">{preview ? "The preview appears once the article meets the contract." : "Rendering the preview…"}</p>}
-            </aside>
-          )}
         </div>
 
         {opened.article && (
@@ -482,6 +475,11 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
             <span className={pill}>{words.selected ? `${words.selected.toLocaleString("en")} of ` : ""}{words.all.toLocaleString("en")} {words.all === 1 ? "word" : "words"}</span>
           </div>
         )}
+
+        <PostPreview
+          open={showPreview && Boolean(post)} onOpenChange={setShowPreview} preview={preview} problems={shownProblems} lang={fields.lang}
+          publish={post?.status === "draft" && <Button className="w-20 shrink-0" disabled={busy} onClick={() => { setShowPreview(false); setPublishOpen(true); }}>Publish</Button>}
+        />
 
         <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
           <SheetContent className="w-full overflow-y-auto sm:max-w-md">

@@ -109,11 +109,17 @@ test("CMS-002 writing in the block editor saves the draft by itself, and the pre
   await expect(preview.getByText("A sentence written in the admin.")).toBeVisible();
   await expect(signedIn.locator("iframe[title=Preview]")).toHaveAttribute("sandbox", "allow-same-origin");
 
+  // The preview covers the screen, as Ghost's does; Escape returns to writing.
+  await signedIn.keyboard.press("Escape");
+  await expect(signedIn.locator("iframe[title=Preview]")).toHaveCount(0);
+
   // A Markdown link typed in the editor becomes a link; one to a missing page is refused.
   await endOfArticle(signedIn);
   await signedIn.keyboard.type(" See [a dead link](/blog/does-not-exist) ");
   await expect(article(signedIn).getByRole("link", { name: "a dead link" })).toBeVisible();
-  await expect(signedIn.getByRole("alert")).toContainText("does not resolve");
+  await signedIn.keyboard.press("ControlOrMeta+p");
+  await expect(signedIn.getByRole("dialog", { name: "Preview" }).getByRole("alert")).toContainText("does not resolve");
+  await signedIn.getByRole("button", { name: "Close" }).click();
   await signedIn.keyboard.press("ControlOrMeta+s");
   await expect(status(signedIn)).toHaveText("Draft - Saved");
 });

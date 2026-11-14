@@ -22,10 +22,14 @@ function tomorrowLocal() {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:00`;
 }
 
-export function PublishMenu({ status, busy, onPublish, onSchedule, onUnpublish }: {
+export function PublishMenu({ status, busy, onPublish, onSchedule, onUnpublish, open: openProp, onOpenChange }: {
   status: Post["status"]; busy: boolean; onPublish: () => void; onSchedule: (at: Date) => void; onUnpublish: () => void;
+  /** Opened from elsewhere too, such as the preview's Publish. */
+  open?: boolean; onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const open = openProp ?? ownOpen;
+  const setOpen = onOpenChange ?? setOwnOpen;
   const [when, setWhen] = useState(tomorrowLocal);
   const at = new Date(when);
   const valid = !Number.isNaN(at.getTime()) && at.getTime() > Date.now();
