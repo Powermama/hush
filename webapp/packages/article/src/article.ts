@@ -8,13 +8,12 @@ import { createHash } from "node:crypto";
 import sharp from "sharp";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
-import remarkGfm from "remark-gfm";
-import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import { blogAuthorIds, type BlogAuthorId } from "./authors.ts";
+import { faqHeadings, isTldr, parseMarkdown, sourcesHeadings, tldrMarker, tldrTitles, type MdNode } from "./markdown.ts";
 import {
   blogArticleTypes, blogClusterIds, blogLanguages, blogPath, editorialPolicySlugs, type BlogClusterId, type BlogLanguage,
 } from "./taxonomy.ts";
@@ -92,16 +91,6 @@ export type BlogPost = {
   cover: BlogCoverPlan;
 };
 
-// A blockquote starting with [!TLDR] (GitHub alert syntax) becomes the summary box.
-const tldrMarker = "[!TLDR]";
-const tldrTitles: Record<BlogLanguage, string> = { en: "In short", de: "Kurz gesagt" };
-
-function isTldr(node: { children?: Array<{ type: string; tagName?: string; children?: Array<{ type: string; value?: string }> }> }) {
-  const first = node.children?.find((child) => child.type === "paragraph" || child.tagName === "p");
-  const text = first?.children?.[0];
-  return text?.type === "text" && (text.value ?? "").trimStart().startsWith(tldrMarker);
-}
-
 const copyLabels: Record<BlogLanguage, { label: string; text: string; copied: string }> = {
   en: { label: "Copy code", text: "Copy", copied: "Copied" },
   de: { label: "Code kopieren", text: "Kopieren", copied: "Kopiert" },
@@ -120,16 +109,6 @@ function addCopyButtons(node: HastNode, lang: BlogLanguage) {
   });
 }
 
-const faqHeadings: Record<BlogLanguage, string> = {
-  en: "Frequently asked questions",
-  de: "Häufige Fragen",
-};
-// The FAQ and the sources section close the article; the page sets them apart from the body.
-const sourcesHeadings: Record<BlogLanguage, string> = {
-  en: "Sources and how we tested",
-  de: "Quellen und Testaufbau",
-};
-
 // Mirrors the hush-seo skill profile (section 4). Matched case-insensitively.
 const bannedPhrases: Record<BlogLanguage, string[]> = {
   en: ["revolutionary", "game-changer", "game changer", "100% offline", "completely private",
@@ -139,7 +118,6 @@ const bannedPhrases: Record<BlogLanguage, string[]> = {
     "dsgvo-zertifiziert", "dsgvo zertifiziert"],
 };
 
-type MdNode = { type: string; depth?: number; url?: string; alt?: string; title?: string | null; value?: string; children?: MdNode[] };
 type HastNode = { type: string; tagName?: string; properties?: Record<string, unknown>; value?: string; children?: HastNode[] };
 
 type ArticleImage = { url: string; alt: string; title?: string; width: number; height: number; renditions: BlogImageOutput[] };
@@ -232,7 +210,7 @@ export function formatArticle({ front, body }: ParsedArticle): string {
 export async function renderArticle({ front, body }: ParsedArticle, context: ArticleContext): Promise<{ post?: BlogPost; problems: string[] }> {
   const lang = front.lang;
   const problems: string[] = [];
-  const tree = unified().use(remarkParse).use(remarkGfm).parse(body) as unknown as MdNode;
+  const tree = parseMarkdown(body);
   const knownPaths = context.knownPaths;
 
   if (front.slug === editorialPolicySlugs[lang]) problems.push(`slug "${front.slug}" is reserved for the editorial policy`);
