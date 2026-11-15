@@ -9,15 +9,16 @@ import { formatArticle, readDraftContent, type FrontMatter } from "@hush/article
 import { blogPath, type BlogLanguage } from "@hush/article/taxonomy";
 import { createHash } from "node:crypto";
 import { mkdir, readdir } from "node:fs/promises";
+import { hostname } from "node:os";
 import { basename, dirname, extname, join } from "node:path";
 import { parseArgs } from "node:util";
 import {
-  createDraft, deletePost, getCaller, getMediaOriginal, getPost, listMedia, listPosts, listRevisions, previewPost, publishPost,
-  restoreRevision, schedulePost, unpublishPost, updatePost, uploadMedia,
+  createDraft, deletePost, getCaller, getMediaOriginal, getPost, listMedia, listPosts, listRevisions, pollDeviceSignIn, previewPost, publishPost,
+  restoreRevision, revokeCaller, schedulePost, startDeviceSignIn, unpublishPost, updatePost, uploadMedia,
   type CreateDraftBody, type ListPostsLang, type ListPostsStatus, type Post,
 } from "./api/cms.generated";
 import { connect } from "./api/fetcher";
-import { CredentialError, deleteToken, promptToken, readToken, saveToken } from "./credentials";
+import { CredentialError, deleteToken, promptToken, readToken, saveToken, storedToken } from "./credentials";
 
 export const defaultUrl = "https://cms.behu.sh";
 
@@ -41,10 +42,12 @@ Posts
   posts restore <post> <revision-id>
 
 Access
-  auth login                         Stores a token in the macOS Keychain, read from a hidden
-                                     prompt or from stdin, never from an argument
+  auth login [--no-browser]          Signs in through the browser, as gh auth login: approve the
+                                     code shown here at cms.behu.sh/device; the token goes to the
+                                     macOS Keychain
+  auth login --with-token            Reads a token from stdin instead, for scripts
   auth status                        The token's name, scopes and expiry
-  auth logout
+  auth logout                        Revokes the stored token and removes it from the Keychain
 
 <post> is a post's id or its slug; add --lang when both languages use the slug.
 
@@ -240,13 +243,48 @@ async function postsCommand(action: string | undefined, args: string[], values: 
   }
 }
 
-async function authCommand(action: string | undefined, origin: string): Promise<Output> {
+/**
+ * The OAuth 2.0 Device Authorization Grant (RFC 8628), as `gh auth login`:
+ * show a one-time code, open the page that approves it, poll until the owner
+ * decides. Returns the new token.
+ */
+async function deviceSignIn(origin: string, openBrowser: boolean) {
+  connect(origin);
+  const start = ok(await startDeviceSignIn({ clientName: `hush-cms on ${hostname().replace(/\.local$/, "")}` }));
+  process.stderr.write(`! First copy your one-time code: ${start.userCode}\nOpen ${start.verificationUriComplete} to authorize hush-cms.\n`);
+  if (openBrowser) Bun.spawn(["open", start.verificationUriComplete], { stdout: "ignore", stderr: "ignore" });
+  let interval = start.interval;
+  const deadline = Date.now() + start.expiresIn * 1000;
+  while (Date.now() < deadline) {
+    await Bun.sleep(interval * 1000);
+    const answer = await pollDeviceSignIn({ deviceCode: start.deviceCode });
+    if (answer.status === 200) return answer.data.token;
+    const error = (answer.data as { error?: { code?: string; message?: string } }).error;
+    if (error?.code === "authorization_pending") continue;
+    if (error?.code === "slow_down") { interval += 5; continue; }
+    throw new Failure(error?.message ?? `The CMS answered ${answer.status}.`);
+  }
+  throw new Failure("The sign-in expired. Run hush-cms auth login again.");
+}
+
+/** Revokes a token on the CMS, best effort: an expired or revoked one is already harmless. */
+async function revoke(origin: string, token: string) {
+  connect(origin, token);
+  await revokeCaller().catch(() => undefined);
+}
+
+async function authCommand(action: string | undefined, origin: string, values: Record<string, string | boolean | undefined>): Promise<Output> {
   switch (action) {
     case "login": {
-      const token = await promptToken();
+      // Fail before the browser opens, not after the owner approved.
+      if (process.platform !== "darwin") throw new CredentialError("Only macOS has a Keychain here; set HUSH_CMS_TOKEN instead.");
+      const token = values["with-token"] ? await promptToken() : await deviceSignIn(origin, values["no-browser"] !== true && !process.env.CI);
       connect(origin, token);
       const caller = ok(await getCaller());
+      const previous = storedToken(origin);
       await saveToken(origin, token);
+      // One stored token per CMS: the one it replaces stops working.
+      if (previous && previous !== token) await revoke(origin, previous);
       return { json: caller, text: `Saved ${caller.actor} for ${origin} in the Keychain (${caller.scopes.join(", ")}).` };
     }
     case "status": {
@@ -258,8 +296,10 @@ async function authCommand(action: string | undefined, origin: string): Promise<
       return { json: { ...caller, origin, source: stored.source }, text: `${caller.actor} on ${origin}, from the ${stored.source}: ${caller.scopes.join(", ")}; ${expiry}.` };
     }
     case "logout": {
+      const stored = storedToken(origin);
+      if (stored) await revoke(origin, stored);
       const removed = deleteToken(origin);
-      return { json: { removed }, text: removed ? `Removed the token for ${origin} from the Keychain.` : `No stored token for ${origin}.` };
+      return { json: { removed }, text: removed ? `Revoked the token for ${origin} and removed it from the Keychain.` : `No stored token for ${origin}.` };
     }
     default:
       throw usageError(action ? `Unknown command "auth ${action}".` : "auth needs a command: login, status or logout.");
@@ -277,6 +317,7 @@ export async function run(argv: string[]): Promise<number> {
           options: {
             json: { type: "boolean" }, url: { type: "string" }, help: { type: "boolean", short: "h" },
             lang: { type: "string" }, status: { type: "string" }, at: { type: "string" }, out: { type: "string" },
+            "with-token": { type: "boolean" }, "no-browser": { type: "boolean" },
           },
         });
       } catch (error) {
@@ -292,7 +333,7 @@ export async function run(argv: string[]): Promise<number> {
     const origin = new URL(values.url ?? process.env.HUSH_CMS_URL ?? defaultUrl).origin;
     let output: Output;
     if (group === "auth") {
-      output = await authCommand(action, origin);
+      output = await authCommand(action, origin, values);
     } else if (group === "posts") {
       const stored = await readToken(origin);
       if (!stored) throw new Failure(`No token for ${origin}. Run hush-cms auth login, or set HUSH_CMS_TOKEN.`);

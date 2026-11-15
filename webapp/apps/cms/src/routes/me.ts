@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Clemens Kressmann
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import type { Database } from "../db/client";
-import { requireScope, tokenScopes, type AuthVariables } from "../auth/tokens";
+import { requireScope, revokeToken, tokenScopes, type AuthVariables } from "../auth/tokens";
 import { errorSchema, validationHook } from "./errors";
 
 const callerSchema = z.object({
@@ -24,6 +24,21 @@ export function meRoutes(db: Database) {
   }), (context) => {
     const { actor, scopes, expiresAt } = context.var.caller;
     return context.json({ actor, scopes: [...scopes], expiresAt: expiresAt?.toISOString() ?? null }, 200);
+  });
+
+  app.openapi(createRoute({
+    method: "delete", path: "/v1/me", operationId: "revokeCaller", tags: ["Access"], security: [{ bearer: [] }],
+    description: "Revokes the token sending the request, as a CLI does when it signs out. The owner signs out of the admin instead.",
+    responses: {
+      204: { description: "The token no longer works" },
+      401: { description: "Missing or invalid token", content: { "application/json": { schema: errorSchema } } },
+      409: { description: "Not a token", content: { "application/json": { schema: errorSchema } } },
+    },
+  }), async (context) => {
+    const { tokenId } = context.var.caller;
+    if (!tokenId) return context.json({ error: { code: "not_a_token", message: "Only a token can revoke itself; sign out of the admin instead." } }, 409);
+    await revokeToken(db, tokenId);
+    return context.body(null, 204);
   });
   return app;
 }

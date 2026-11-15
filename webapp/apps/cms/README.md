@@ -23,7 +23,7 @@ The OpenAPI document is served at `/openapi.json` and committed in
 
 | Command | What it does |
 | --- | --- |
-| `bun run cms:token` | Creates a token and prints it once |
+| `bun run cms:token` | Creates a token and prints it once, for services such as the website build; people use `hush-cms auth login` |
 | `bun run cms:import <dir>` | Imports Markdown articles and their images (the hush-seo format); safe to run again |
 | `bun run cms:scheduler` | Long-running: publishes due posts every minute and keeps a daily backup (the `cms-scheduler` service) |
 | `bun run cms:publish-due` | Publishes scheduled posts that are due, once |

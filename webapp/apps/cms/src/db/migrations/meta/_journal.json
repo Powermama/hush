@@ -43,6 +43,13 @@
       "when": 1794781451650,
       "tag": "0005_post_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794785607279,
+      "tag": "0006_device_authorizations",
+      "breakpoints": true
     }
   ]
 }

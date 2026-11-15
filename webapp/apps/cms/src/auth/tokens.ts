@@ -17,17 +17,28 @@ export type TokenScope = (typeof tokenScopes)[number];
 
 export { hashToken };
 
-export async function createToken(db: Database, input: { name: string; scopes: TokenScope[]; expiresAt?: Date }) {
+type TokenInput = { name: string; scopes: readonly TokenScope[]; expiresAt?: Date };
+type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
+
+/** Stores a new token within the caller's transaction; the token itself is returned once and never stored. */
+export async function insertToken(tx: Transaction, input: TokenInput) {
   const token = `hcms_${randomBytes(32).toString("base64url")}`;
-  await db.transaction(async (tx) => {
-    const [row] = await tx.insert(apiTokens).values({ name: input.name, expiresAt: input.expiresAt, tokenHash: hashToken(token) }).returning();
-    await tx.insert(apiTokenScopes).values(input.scopes.map((scope) => ({ tokenId: row!.id, scope })));
-  });
-  return token;
+  const [row] = await tx.insert(apiTokens).values({ name: input.name, expiresAt: input.expiresAt, tokenHash: hashToken(token) }).returning();
+  await tx.insert(apiTokenScopes).values(input.scopes.map((scope) => ({ tokenId: row!.id, scope })));
+  return { token, id: row!.id };
+}
+
+export async function createToken(db: Database, input: TokenInput) {
+  return (await db.transaction((tx) => insertToken(tx, input))).token;
+}
+
+/** Ends a token at once; requests with it get 401 from then on. */
+export async function revokeToken(db: Database, id: string) {
+  await db.update(apiTokens).set({ revokedAt: new Date() }).where(and(eq(apiTokens.id, id), isNull(apiTokens.revokedAt)));
 }
 
 /** Who sent a request: a token with its scopes and expiry, or the signed-in owner, who holds every scope. */
-export type Caller = { actor: string; owner: boolean; scopes: readonly TokenScope[]; expiresAt: Date | null };
+export type Caller = { actor: string; owner: boolean; scopes: readonly TokenScope[]; expiresAt: Date | null; tokenId: string | null };
 
 /**
  * Every token acts for an agent, the owner's own included: what readers see
@@ -46,7 +57,7 @@ async function authenticate(db: Database, context: Context): Promise<Caller | { 
   const token = /^Bearer (\S+)$/.exec(header)?.[1];
   if (!token) {
     const admin = await sessionUser(db, context);
-    return admin ? { actor: `github:${admin.githubLogin}`, owner: true, scopes: tokenScopes, expiresAt: null } : unauthorized;
+    return admin ? { actor: `github:${admin.githubLogin}`, owner: true, scopes: tokenScopes, expiresAt: null, tokenId: null } : unauthorized;
   }
   const [row] = await db.select().from(apiTokens).where(and(
     eq(apiTokens.tokenHash, hashToken(token)),
@@ -61,6 +72,7 @@ async function authenticate(db: Database, context: Context): Promise<Caller | { 
     owner: false,
     scopes: tokenScopes.filter((scope) => granted.some((grant) => grant.scope === scope)),
     expiresAt: row.expiresAt,
+    tokenId: row.id,
   };
 }
 
