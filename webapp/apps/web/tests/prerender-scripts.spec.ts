@@ -39,11 +39,16 @@ test("LANDING-ENTRY-005 preserves interactive scripts under CSP regardless of HT
       await writeFile(join(directory, "dist/.vite/manifest.json"), JSON.stringify({
         "src/landing/HushScene.ts": { file: "assets/HushScene.js", isDynamicEntry: true, assets: ["assets/studio-lighting.ktx2.gz"] },
         ...Object.fromEntries(pageModules.map((key) => [key, { file: `assets/${key.split("/").at(-1)!.replace(/\.tsx$/, "")}.js`, isDynamicEntry: true }])),
+        // The landing's own styles come with a chunk it imports.
+        "src/app/App.tsx": { file: "assets/App.js", isDynamicEntry: true, imports: ["_Landing.js"] },
+        "_Landing.js": { file: "assets/Landing.js", css: ["assets/Landing.css"] },
       }));
       const document = `<html lang="en"><head></head><body><h1>Prerender fixture</h1><button id="action">Open menu</button><${open}>window.$_TSR = {}; document.querySelector('#action').addEventListener('click', event => { event.currentTarget.textContent = 'Menu opened'; });</${close}></body></html>`;
       await writeFile(join(directory, "dist-ssr/document.html"), document);
       await run("bun", ["scripts/prerender.ts"], { cwd: directory });
       const pages = JSON.parse(await readFile(join(directory, "dist-pages/pages.json"), "utf8"));
+      // A page's own styles are linked in its head, so it never paints unstyled.
+      expect(pages["/"].slice(0, pages["/"].indexOf("</head>"))).toContain('<link rel="stylesheet" crossorigin href="/assets/Landing.css">');
       await page.route("**/__prerender-test/", route => route.fulfill({
         contentType: "text/html", body: pages["/"],
         headers: { "Content-Security-Policy": "default-src 'none'; script-src 'self'" },
