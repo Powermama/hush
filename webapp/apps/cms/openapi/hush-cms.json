@@ -1013,7 +1013,7 @@
             "bearer": []
           }
         ],
-        "description": "Deletes a draft with its history and images. A scheduled or published post is unpublished first.",
+        "description": "Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first.",
         "parameters": [
           {
             "schema": {

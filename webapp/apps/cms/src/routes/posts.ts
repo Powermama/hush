@@ -96,7 +96,7 @@ export function postRoutes(cms: Cms) {
 
   app.openapi(createRoute({
     method: "delete", path: "/v1/posts/{id}", operationId: "deletePost", tags: ["Posts"], security,
-    description: "Deletes a draft with its history and images. A scheduled or published post is unpublished first.",
+    description: "Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first.",
     request: { params: idParam },
     responses: { 204: { description: "The draft is gone" }, 401: errors[401], 403: errors[403], 404: errors[404], 409: errors[409] },
   }), async (context) => {

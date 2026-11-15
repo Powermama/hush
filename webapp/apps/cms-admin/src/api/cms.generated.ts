@@ -1174,7 +1174,7 @@ export const getDeletePostUrl = (id: string,) => {
 }
 
 /**
- * Deletes a draft with its history and images. A scheduled or published post is unpublished first.
+ * Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first.
  */
 export const deletePost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<deletePostResponse> => {
 
@@ -1225,7 +1225,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type DeletePostMutationError = Error
     export type DeletePostMutationVariables = {id: string}
 
-    /** Deletes a draft with its history and images. A scheduled or published post is unpublished first. */
+    /** Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first. */
 export const useDeletePost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
