@@ -99,6 +99,8 @@ The final invitation omits the extra slogan. Its headline has relaxed tracking a
 
 LANDING-CACHE-001 / LANDING-CACHE-002: public artwork and app icons use Vite content-hashed URLs with immutable caching. Prerendered and hydrated pages reference the same assets; HTML is revalidated. Responsive WebP candidates, intrinsic dimensions, lazy loading and public attribution remain available. Covered in `tests/public-assets.spec.ts`; see [asset delivery](../operations/asset-delivery.md).
 
+LANDING-CACHE-003: a missing asset answers 404 with `cache-control: no-store`, so neither Cloudflare nor the browser keeps the miss. During a rolling update a page from the new instance can ask the old one for an asset only the new one has; the next request heals instead of leaving the page unstyled for Cloudflare's default browser TTL. Covered in `tests/public-assets.spec.ts`.
+
 LANDING-PAINT-001: the landing and Verified Messages pages apply no CSS or SVG filters at runtime. Editorial colour treatments and the hero icons' soft shadow are baked into WebP files by `scripts/bake-artwork.mjs`, which keeps the untreated sources. Safari renders filters on the CPU in its GPU process; filtered artwork painted near the viewport delayed WebGL frame delivery and froze the hero entrance for about 300 ms. Covered in `tests/public-assets.spec.ts`.
 
 LANDING-LIGHTING-002: the hero and rose both render from the legacy edge-compressed lighting response observed in production WebKit. The normal asset response retains immutable caching with `no-transform`; invalid lighting still falls back without blocking content. Covered in `tests/studio-delivery.spec.ts`.
