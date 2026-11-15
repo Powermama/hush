@@ -16,7 +16,7 @@ test("keeps navigation and static artwork usable when studio lighting fails", as
   expect(errors).toEqual([]);
 });
 
-test("LANDING-ENTRY-001 shows the text at once and coordinates the universe's calendar with the prepared scene", async ({ page }, testInfo) => {
+test("LANDING-ENTRY-001 plays the text entrance from the first paint and coordinates the universe's calendar with the prepared scene", async ({ page }, testInfo) => {
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
   await page.route(/HushScene.*\.js/, async route => { await gate; await route.continue(); });
@@ -30,10 +30,34 @@ test("LANDING-ENTRY-001 shows the text at once and coordinates the universe's ca
   try {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator(".site-header")).toHaveCSS("position", "relative");
-    // The text is in the first paint while the universe still waits for its scene.
+    // The text runs its own entrance from the first paint while the universe still waits.
+    const text = await page.evaluate(() => [".site-header", ".hero-introduction", ".hero-download-area"].map(selector => {
+      const timing = document.querySelector(selector)!.getAnimations()[0]?.effect?.getTiming();
+      return [timing?.delay, Number(timing?.duration)];
+    }));
+    expect(text).toEqual([[120, 1050], [0, 900], [1100, 700]]);
+    const fade = await page.evaluate(() => {
+      const header = document.querySelector<HTMLElement>(".site-header")!;
+      const animation = header.getAnimations().find(item => (item as CSSAnimation).animationName === "header-arrive")!;
+      const timing = animation.effect!.getTiming();
+      const originalTime = animation.currentTime;
+      const height = header.offsetHeight, top = header.offsetTop;
+      animation.pause();
+      animation.currentTime = Number(timing.delay) + Number(timing.duration) * .4;
+      const style = getComputedStyle(header);
+      const result = { opacity: Number(style.opacity), y: new DOMMatrixReadOnly(style.transform).m42, sameLayout: height === header.offsetHeight && top === header.offsetTop, filter: style.filter };
+      animation.currentTime = originalTime;
+      animation.play();
+      return result;
+    });
+    expect(fade.opacity).toBeGreaterThan(0);
+    expect(fade.opacity).toBeLessThan(1);
+    expect(fade.y).toBeGreaterThan(-14);
+    expect(fade.y).toBeLessThan(0);
+    expect(fade.sameLayout).toBe(true);
+    expect(fade.filter).toBe("none");
     for (const selector of [".site-header", ".hero-introduction", ".hero-download-area"]) {
-      await expect(page.locator(selector)).toHaveCSS("opacity", "1");
-      await expect(page.locator(selector)).toHaveCSS("animation-name", "none");
+      await expect(page.locator(selector)).toHaveCSS("opacity", "1", { timeout: 4000 });
     }
     await expect(page.locator(".hero-actions .landing-download")).toBeVisible();
     await expect(page.locator(".landing-loader")).toHaveCount(0);
@@ -51,9 +75,9 @@ test("LANDING-ENTRY-001 shows the text at once and coordinates the universe's ca
       [100, 650], [1000, 1150], [850, 1500], [0, 2400], [300, 1400],
     ]);
     expect(Math.max(...calendar.map(item => item.start)) - Math.min(...calendar.map(item => item.start))).toBeLessThan(1);
-    for (const selector of [".site-header", ".hero-introduction", ".hero-download-area"]) {
-      await expect(page.locator(selector)).toHaveCSS("animation-name", "none");
-    }
+    // The scene starting neither replays nor moves the text.
+    expect(await page.evaluate(() => [".site-header", ".hero-introduction", ".hero-download-area"].map(selector =>
+      document.querySelector(selector)!.getAnimations().every(item => item.playState === "finished")))).toEqual([true, true, true]);
     expect(await page.locator(".hero-introduction").boundingBox()).toEqual(layout);
   } finally { release(); }
   await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "complete");
@@ -90,10 +114,11 @@ test("LANDING-ENTRY-003 reveals the prerendered page while application JavaScrip
     await page.goto("/", { waitUntil: "commit" });
     // The real production CSS must arrive, but neither hydration nor WebGL can run.
     await expect(page.locator(".site-header")).toHaveCSS("position", "relative");
-    // Navigation, headline and download do not wait for JavaScript at all.
-    await expect(page.locator(".hero-introduction")).toHaveCSS("opacity", "1", { timeout: 0 });
-    await expect(page.locator(".site-header")).toHaveCSS("opacity", "1", { timeout: 0 });
-    await expect(page.locator(".hero-download-area")).toHaveCSS("opacity", "1", { timeout: 0 });
+    // Navigation, headline and download arrive without JavaScript, well before the
+    // universe's 3.8-second fallback.
+    await expect(page.locator(".hero-introduction")).toHaveCSS("opacity", "1", { timeout: 2500 });
+    await expect(page.locator(".site-header")).toHaveCSS("opacity", "1", { timeout: 2500 });
+    await expect(page.locator(".hero-download-area")).toHaveCSS("opacity", "1", { timeout: 2500 });
     await expect(page.locator(".hush-core")).toHaveCSS("opacity", "1", { timeout: 4800 });
     await expect(page.locator(".core-fallback")).toHaveCSS("opacity", "1");
     await expect(page.locator(".site-header a[href='/verified-messages']").first()).toHaveAttribute("href", "/verified-messages");
