@@ -26,8 +26,15 @@ export async function createToken(db: Database, input: { name: string; scopes: T
   return token;
 }
 
-/** Who sent a request: a token with its scopes and expiry, or the signed-in admin, who holds every scope. */
-export type Caller = { actor: string; scopes: readonly TokenScope[]; expiresAt: Date | null };
+/** Who sent a request: a token with its scopes and expiry, or the signed-in owner, who holds every scope. */
+export type Caller = { actor: string; owner: boolean; scopes: readonly TokenScope[]; expiresAt: Date | null };
+
+/**
+ * Every token acts for an agent, the owner's own included: what readers see
+ * changes through a token only with the owner's approval (posts/service.ts).
+ * The owner acts through the admin.
+ */
+export const isAgent = (actor: string) => actor.startsWith("token:");
 
 export type AuthVariables = { actor: string; caller: Caller };
 
@@ -39,7 +46,7 @@ async function authenticate(db: Database, context: Context): Promise<Caller | { 
   const token = /^Bearer (\S+)$/.exec(header)?.[1];
   if (!token) {
     const admin = await sessionUser(db, context);
-    return admin ? { actor: `github:${admin.githubLogin}`, scopes: tokenScopes, expiresAt: null } : unauthorized;
+    return admin ? { actor: `github:${admin.githubLogin}`, owner: true, scopes: tokenScopes, expiresAt: null } : unauthorized;
   }
   const [row] = await db.select().from(apiTokens).where(and(
     eq(apiTokens.tokenHash, hashToken(token)),
@@ -51,6 +58,7 @@ async function authenticate(db: Database, context: Context): Promise<Caller | { 
   await db.update(apiTokens).set({ lastUsedAt: new Date() }).where(eq(apiTokens.id, row.id));
   return {
     actor: `token:${row.name}`,
+    owner: false,
     scopes: tokenScopes.filter((scope) => granted.some((grant) => grant.scope === scope)),
     expiresAt: row.expiresAt,
   };
@@ -67,6 +75,18 @@ export function requireScope(db: Database, scope?: TokenScope) {
     if (scope && !caller.scopes.includes(scope)) {
       return context.json({ error: { code: "forbidden", message: `The token lacks the ${scope} scope.` } }, 403);
     }
+    context.set("actor", caller.actor);
+    context.set("caller", caller);
+    await next();
+  });
+}
+
+/** Only the signed-in owner: approvals are never a token's, whatever its scopes. */
+export function requireOwner(db: Database) {
+  return createMiddleware<{ Variables: AuthVariables }>(async (context, next) => {
+    const caller = await authenticate(db, context);
+    if (!("actor" in caller)) return context.json({ error: caller }, 401);
+    if (!caller.owner) return context.json({ error: { code: "owner_only", message: "Only the owner does this, signed in to the admin." } }, 403);
     context.set("actor", caller.actor);
     context.set("caller", caller);
     await next();

@@ -8,10 +8,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { createApp } from "../src/app";
-import { createToken } from "../src/auth/tokens";
 import { LocalObjectStore } from "../src/storage/object-store";
 import { createTestDatabase, serverUrl } from "./database";
-import { validPost } from "./fixtures";
+import { credentials, ownerSession, validPost } from "./fixtures";
 
 export const png = (width: number, height = 400) =>
   sharp({ create: { width, height, channels: 3, background: "#4a6fa5" } }).png().toBuffer();
@@ -26,12 +25,12 @@ describe.skipIf(!serverUrl)("CMS media", () => {
     database = await createTestDatabase();
     store = new LocalObjectStore(await mkdtemp(join(tmpdir(), "hush-cms-media-")));
     app = createApp({ db: database.db, media: store });
-    token = await createToken(database.db, { name: "owner", scopes: ["posts:read", "posts:write", "posts:publish"] });
+    token = await ownerSession(database.db);
   });
   afterAll(async () => { await database?.drop(); });
 
   const call = (method: string, path: string, body?: RequestInit["body"], type = "application/json") => app.request(path, {
-    method, body, headers: { authorization: `Bearer ${token}`, ...(body ? { "content-type": type } : {}) },
+    method, body, headers: { ...credentials(token), ...(body ? { "content-type": type } : {}) },
   });
   const read = (response: Response) => response.json() as Promise<Record<string, any>>;
 

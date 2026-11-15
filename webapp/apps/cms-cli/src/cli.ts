@@ -3,8 +3,8 @@
 //
 // hush-cms: the blog CMS for agents and scripts. Every command is one or a few
 // calls of the generated client; the CMS decides what is allowed (token scopes,
-// the article contract), the CLI only reports it. Exit codes: 0 done, 1 refused
-// or failed, 2 wrong usage.
+// the owner's approval, the article contract), the CLI only reports it. Exit
+// codes: 0 done, 1 refused or failed, 2 wrong usage.
 import { formatArticle, readDraftContent, type FrontMatter } from "@hush/article/file";
 import { blogPath, type BlogLanguage } from "@hush/article/taxonomy";
 import { createHash } from "node:crypto";
@@ -27,15 +27,15 @@ Usage: hush-cms <command> [options]
 
 Posts
   posts list [--lang en|de] [--status draft|scheduled|published]
-  posts get <post>                   Fields, status and dates
-  posts push <file.md> [--live]      Saves an article file as a draft, or updates the post with
+  posts get <post>                   Fields, status, dates and the owner's approval
+  posts push <file.md>               Saves an article file as a draft, or updates the draft with
                                      its language and slug; uploads the images in media/<slug>/
-                                     beside it. A scheduled or published post changes only with --live
+                                     beside it
   posts pull <post> [--out <dir>]    Writes <dir>/<lang>/<slug>.md and its images (default dir: .)
   posts check <post>                 What the article contract refuses; exit 1 if anything
   posts schedule <post> --at <time>  Goes live at an ISO 8601 time, such as 2026-12-01T08:00Z
   posts publish <post>
-  posts unpublish <post>             Back to draft
+  posts unpublish <post>             Back to draft (the owner only)
   posts delete <post>                Drafts only
   posts revisions <post>
   posts restore <post> <revision-id>
@@ -47,6 +47,9 @@ Access
   auth logout
 
 <post> is a post's id or its slug; add --lang when both languages use the slug.
+
+A token is an agent's: it schedules or publishes a post only once the owner has
+approved it as it is now, in the admin, and it changes drafts only.
 
 Options
   --json                             Prints the CMS's JSON answer, errors included
@@ -116,7 +119,7 @@ async function pushMedia(post: Post, file: string) {
   return { uploaded, unchanged };
 }
 
-async function push(file: string | undefined, options: { live?: boolean }) {
+async function push(file: string | undefined) {
   if (!file) throw usageError("Name the article file to push.");
   const source = Bun.file(file);
   if (!await source.exists()) throw new Failure(`${file} does not exist.`);
@@ -127,11 +130,8 @@ async function push(file: string | undefined, options: { live?: boolean }) {
   const existing = typeof fields.slug === "string"
     ? ok(await listPosts({ lang: lang as ListPostsLang })).posts.find((post) => post.slug === fields.slug)
     : undefined;
-  if (existing && existing.status !== "draft" && !options.live) {
-    throw new Failure(`${lang}/${existing.slug} is ${existing.status}; push --live to change the live post.`);
-  }
   let post = existing ?? ok(await createDraft(fields));
-  // Images first: a live post is checked against the contract on update, and its new images must exist by then.
+  // Images first: the CMS checks the post with its images, and a live one refuses an agent's change before anything is written.
   const media = await pushMedia(post, file);
   const changed = existing && (Object.keys(fields) as Array<keyof CreateDraftBody>)
     .some((key) => JSON.stringify(fields[key]) !== JSON.stringify(existing[key]));
@@ -178,11 +178,13 @@ async function postsCommand(action: string | undefined, args: string[], values: 
         ["title", post.title], ["description", post.description], ["keyword", post.keyword],
         ["secondary keywords", post.secondaryKeywords.join(", ") || "-"], ["type", post.type], ["cluster", post.cluster],
         ["author", post.author], ["image alt", post.imageAlt], ["updated", when(post.updatedAt)],
+        ["approval", !post.approval ? "not approved by the owner"
+          : `${post.approval.current ? "approved" : "lapsed: changed since it was approved"} by ${post.approval.approvedBy}, ${when(post.approval.approvedAt)}`],
       ];
       return { json: post, text: table(lines) };
     }
     case "push": {
-      const result = await push(args[0], { live: values.live === true });
+      const result = await push(args[0]);
       const { post, media, problems } = result;
       const lines = [`${result.action === "created" ? "Created" : result.action === "updated" ? "Updated" : "No change to"} ${post.status} ${post.lang}/${post.slug} (${post.id}).`];
       if (media.uploaded.length) lines.push(`Uploaded ${media.uploaded.join(", ")}.`);
@@ -274,7 +276,7 @@ export async function run(argv: string[]): Promise<number> {
           args: argv, allowPositionals: true, strict: true,
           options: {
             json: { type: "boolean" }, url: { type: "string" }, help: { type: "boolean", short: "h" },
-            lang: { type: "string" }, status: { type: "string" }, at: { type: "string" }, out: { type: "string" }, live: { type: "boolean" },
+            lang: { type: "string" }, status: { type: "string" }, at: { type: "string" }, out: { type: "string" },
           },
         });
       } catch (error) {

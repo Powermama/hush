@@ -24,8 +24,11 @@ describe.skipIf(!serverUrl)("hush-cms CLI", () => {
   let cms: ReturnType<typeof Bun.spawn> | undefined;
   let url = "";
   let work = "";
-  const tokens = { agent: "", owner: "" };
+  const tokens = { agent: "", publisher: "" };
   const databaseUrl = () => Object.assign(new URL(serverUrl!), { pathname: `/${databaseName}` }).toString();
+  let connection: ReturnType<typeof postgres> | undefined;
+  /** The test's database, for what only the owner does in the admin. */
+  const database = () => (connection ??= postgres(databaseUrl(), { max: 1, onnotice: () => {} }));
 
   beforeAll(async () => {
     await admin!.unsafe(`create database ${databaseName}`);
@@ -53,12 +56,13 @@ describe.skipIf(!serverUrl)("hush-cms CLI", () => {
       return created.stdout.toString().trim();
     };
     tokens.agent = token("hush-seo", "posts:read,posts:write");
-    tokens.owner = token("owner", "posts:read,posts:write,posts:publish");
+    tokens.publisher = token("hush-seo-publisher", "posts:read,posts:write,posts:publish");
   }, 60_000);
 
   afterAll(async () => {
     cms?.kill();
     await cms?.exited;
+    await connection?.end({ timeout: 5 });
     await admin?.unsafe(`drop database if exists ${databaseName} with (force)`);
     await admin?.end({ timeout: 5 });
     if (work) await rm(work, { recursive: true, force: true });
@@ -133,29 +137,31 @@ describe.skipIf(!serverUrl)("hush-cms CLI", () => {
     expect((await cli(["posts", "delete", "work-in-progress", "--lang", "de"])).stdout).toContain("Deleted de/work-in-progress.");
   });
 
-  test("CMS-CLI-004 schedules and publishes only with posts:publish, and changes a live post only with --live", async () => {
-    const refused = await cli(["posts", "schedule", "dictate-from-the-terminal", "--at", "2099-12-01T08:00Z"]);
-    expect(refused.exitCode).toBe(1);
-    expect(refused.stderr).toContain("The token lacks the posts:publish scope.");
+  test("CMS-CLI-004 an agent schedules or publishes only what the owner approved, and never changes a live post", async () => {
+    const unscoped = await cli(["posts", "schedule", "dictate-from-the-terminal", "--at", "2099-12-01T08:00Z"]);
+    expect([unscoped.exitCode, unscoped.stderr]).toEqual([1, "hush-cms: The token lacks the posts:publish scope.\n"]);
 
-    const owner = { token: tokens.owner };
-    const scheduled = await cli(["posts", "schedule", "dictate-from-the-terminal", "--at", "2099-12-01T08:00Z"], owner);
+    const publisher = { token: tokens.publisher };
+    const unapproved = await cli(["posts", "schedule", "dictate-from-the-terminal", "--at", "2099-12-01T08:00Z"], publisher);
+    expect(unapproved.exitCode).toBe(1);
+    expect(unapproved.stderr).toContain("The owner has not approved this post.");
+    expect((await cli(["posts", "get", "dictate-from-the-terminal"])).stdout).toMatch(/^approval\s+not approved by the owner$/m);
+
+    // The owner approves the post as it is, as the admin does after their review.
+    const { id, contentHash } = (await cli(["posts", "get", "dictate-from-the-terminal", "--json"])).json();
+    await database()`insert into post_approvals (post_id, content_hash, approved_by) values (${id}, ${contentHash}, 'github:owner')`;
+    expect((await cli(["posts", "get", "dictate-from-the-terminal"])).stdout).toMatch(/^approval\s+approved by github:owner, /m);
+
+    const scheduled = await cli(["posts", "schedule", "dictate-from-the-terminal", "--at", "2099-12-01T08:00Z"], publisher);
     expect(scheduled.stdout).toBe("Scheduled /blog/dictate-from-the-terminal for 2099-12-01 08:00 UTC.\n");
-    expect((await cli(["posts", "publish", "dictate-from-the-terminal"], owner)).stdout).toBe("Published /blog/dictate-from-the-terminal.\n");
+    expect((await cli(["posts", "publish", "dictate-from-the-terminal"], publisher)).stdout).toBe("Published /blog/dictate-from-the-terminal.\n");
 
     const source = await readFile(file(article), "utf8");
     await writeFile(file(article), source.replace("Only once, to download the model.", "Once, to download the model."));
-    const guarded = await cli(["posts", "push", file(article)]);
-    expect(guarded.exitCode).toBe(1);
-    expect(guarded.stderr).toContain("is published; push --live to change the live post.");
-    expect((await cli(["posts", "push", file(article), "--live"])).stdout).toContain("Updated published en/dictate-from-the-terminal");
-
-    // A live post stays valid: an edit that breaks the contract is refused with its problems.
-    await writeFile(file(article), source.replace("## Frequently asked questions", "## Questions"));
-    const invalid = await cli(["posts", "push", file(article), "--live"]);
-    expect(invalid.exitCode).toBe(1);
-    expect(invalid.stderr).toContain("  - ");
-    expect((await cli(["posts", "get", "dictate-from-the-terminal", "--json"])).json().markdown).toContain("Once, to download the model.");
+    const live = await cli(["posts", "push", file(article)]);
+    expect([live.exitCode, live.stderr]).toEqual([1, "hush-cms: Only the owner changes a scheduled or published post, in the admin.\n"]);
+    expect((await cli(["posts", "unpublish", "dictate-from-the-terminal"], publisher)).stderr).toContain("Only the owner unpublishes a post");
+    await writeFile(file(article), source);
   });
 
   test("CMS-CLI-005 pulls a post as an article file with its images that pushes back unchanged", async () => {
@@ -166,7 +172,7 @@ describe.skipIf(!serverUrl)("hush-cms CLI", () => {
     expect(source).toContain('keyword: "dictate in the terminal"');
     expect(await Bun.file(join(work, "pulled/en/media/dictate-from-the-terminal/terminal.png")).bytes())
       .toEqual(await Bun.file(file("en/media/dictate-from-the-terminal/terminal.png")).bytes());
-    expect((await cli(["posts", "push", "pulled/en/dictate-from-the-terminal.md", "--live", "--json"])).json())
+    expect((await cli(["posts", "push", "pulled/en/dictate-from-the-terminal.md", "--json"])).json())
       .toMatchObject({ action: "unchanged", media: { uploaded: [] } });
   });
 

@@ -16,7 +16,7 @@ import { publishDuePosts } from "../src/posts/service";
 import { deployWindowMs, syncSite } from "../src/site/deploy";
 import { LocalObjectStore } from "../src/storage/object-store";
 import { createTestDatabase, serverUrl } from "./database";
-import { validPost } from "./fixtures";
+import { credentials, ownerSession, validPost } from "./fixtures";
 import { png } from "./media.test";
 
 const site: SiteConfig = {
@@ -52,13 +52,13 @@ describe.skipIf(!serverUrl)("CMS site", () => {
     database = await createTestDatabase();
     store = new LocalObjectStore(await mkdtemp(join(tmpdir(), "hush-cms-media-")));
     app = createApp({ db: database.db, media: store });
-    owner = await createToken(database.db, { name: "owner", scopes: ["posts:read", "posts:write", "posts:publish"] });
+    owner = await ownerSession(database.db);
     reader = await createToken(database.db, { name: "website-build", scopes: ["posts:read"] });
   });
   afterAll(async () => { await database?.drop(); });
 
   const call = (method: string, path: string, body?: RequestInit["body"], type = "application/json", token = owner) => app.request(path, {
-    method, body, headers: { authorization: `Bearer ${token}`, ...(body ? { "content-type": type } : {}) },
+    method, body, headers: { ...credentials(token), ...(body ? { "content-type": type } : {}) },
   });
   const read = (response: Response) => response.json() as Promise<Record<string, any>>;
   const revision = async () => (await database.db.select().from(siteState))[0]!.revision;
