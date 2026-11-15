@@ -82,10 +82,24 @@ async function write(db: Database, actor: string, change: {
   sitePaths?: string[];
   /** The editor saving while its author writes: one revision per run, not one per save. */
   autosave?: boolean;
+  /** Names the post after this slug, numbered when its language already has it (posts/slug.ts). */
+  slugFrom?: string;
+  /** Adjusts the fields to the slug they got. */
+  named?: (fields: PostFields) => PostFields;
 }) {
   try {
     return await db.transaction(async (tx) => {
-      const { secondaryKeywords, ...columns } = change.fields ?? { secondaryKeywords: undefined };
+      let fields = change.fields;
+      if (fields && change.slugFrom) {
+        // One writer at a time picks from the slugs of a language and base, so two posts
+        // created or named at once never pick the same number. Held until this transaction ends.
+        await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`post-slug\n${fields.lang}\n${change.slugFrom}`}))`);
+        const taken = await tx.select({ slug: posts.slug }).from(posts)
+          .where(and(eq(posts.lang, fields.lang), or(eq(posts.slug, change.slugFrom), like(posts.slug, `${change.slugFrom}-%`))));
+        fields = { ...fields, slug: freeSlug(change.slugFrom, new Set(taken.map((row) => row.slug))) };
+      }
+      if (fields && change.named) fields = change.named(fields);
+      const { secondaryKeywords, ...columns } = fields ?? { secondaryKeywords: undefined };
       const values = { ...columns, ...change.row };
       const [row] = change.id
         ? await tx.update(posts).set(values).where(eq(posts.id, change.id)).returning({ id: posts.id })
@@ -158,23 +172,6 @@ export async function listPosts(db: Executor, filter: { lang?: string; status?: 
 
 export const getPost = load;
 
-/**
- * Writes a post under the slug its content suggests, numbered when another
- * post of the language has it; tries again if one takes it in the meantime.
- */
-async function writeWithFreeSlug(db: Database, fields: PostFields, save: (fields: PostFields) => Promise<Post>) {
-  const base = suggestedSlug(fields);
-  for (let attempt = 0; ; attempt++) {
-    const taken = await db.select({ slug: posts.slug }).from(posts)
-      .where(and(eq(posts.lang, fields.lang), or(eq(posts.slug, base), like(posts.slug, `${base}-%`))));
-    try {
-      return await save({ ...fields, slug: freeSlug(base, new Set(taken.map((row) => row.slug))) });
-    } catch (error) {
-      if (!(error instanceof PostError && error.code === "slug_taken") || attempt === 2) throw error;
-    }
-  }
-}
-
 /** A post's images are referenced as media/<slug>/<name>, so they follow a changed slug. */
 const moveImages = (fields: PostFields, from: string): PostFields => (fields.slug === from ? fields
   : { ...fields, markdown: fields.markdown.replaceAll(`](media/${from}/`, `](media/${fields.slug}/`) });
@@ -182,25 +179,26 @@ const moveImages = (fields: PostFields, from: string): PostFields => (fields.slu
 /** Starts a draft from whatever is given; without a slug it takes one from its heading. */
 export function createDraft(db: Database, input: PostPatch, actor: string) {
   const fields = postFields.parse({ ...draftDefaults, ...input, slug: input.slug ?? untitledSlug });
-  return input.slug ? write(db, actor, { fields }) : writeWithFreeSlug(db, fields, (named) => write(db, actor, { fields: named }));
+  return write(db, actor, { fields, slugFrom: input.slug ? undefined : suggestedSlug(fields) });
 }
 
 export async function updatePost(cms: Cms, id: string, patch: PostPatch, actor: string, options: { autosave?: boolean } = {}) {
   const post = await load(cms.db, id);
   const merged = postFields.parse({ ...editableFields(post), ...patch });
-  const save = async (named: PostFields) => {
-    const fields = moveImages(named, post.slug);
-    const updatedAt = new Date();
-    // A live post changes only to another valid version.
-    const rendition = post.status === "draft" ? undefined : await render(cms, id, fields, post.publishedAt!, updatedAt);
-    // A live post's page changes, at its old and its new address.
-    const sitePaths = post.status === "published" ? [pagePath(post), blogPath(fields.lang, fields.slug)] : undefined;
-    // Only a draft is autosaved; every change to a live post is a revision of its own.
-    return write(cms.db, actor, { id, fields, row: { updatedAt }, rendition, sitePaths, autosave: options.autosave && post.status === "draft" });
-  };
   // A draft that started without a heading takes its slug from the one it gets.
   const unnamed = post.status === "draft" && patch.slug === undefined && isUntitled(post.slug) && suggestedSlug(merged) !== untitledSlug;
-  return unnamed ? writeWithFreeSlug(cms.db, merged, save) : save(merged);
+  const fields = moveImages(merged, post.slug);
+  const updatedAt = new Date();
+  // A live post changes only to another valid version.
+  const rendition = post.status === "draft" ? undefined : await render(cms, id, fields, post.publishedAt!, updatedAt);
+  // A live post's page changes, at its old and its new address.
+  const sitePaths = post.status === "published" ? [pagePath(post), blogPath(fields.lang, fields.slug)] : undefined;
+  return write(cms.db, actor, {
+    id, fields, row: { updatedAt }, rendition, sitePaths,
+    // Only a draft is autosaved; every change to a live post is a revision of its own.
+    autosave: options.autosave && post.status === "draft",
+    ...(unnamed ? { slugFrom: suggestedSlug(merged), named: (named: PostFields) => moveImages(named, post.slug) } : {}),
+  });
 }
 
 /** Removes a draft with its history and images. A live post is unpublished first, so nothing public disappears unannounced. */
