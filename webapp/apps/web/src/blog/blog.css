@@ -25,16 +25,14 @@
   font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -0.035em;
   font-weight: 600; margin: 0; color: var(--color-ink); text-wrap: balance;
 }
-/* Articles (.blog-post): the CMS editor's column and title, as Ghost's editor
-   draws them: 740px, the title bold at 48px, 36px and 28px on smaller screens. */
+/* Articles (.blog-post): the CMS editor's 740px column; the title and lead are
+   @hush/article's .article-title and .article-lead. */
 .blog-post, .blog-post .blog-article-header, .blog-post .blog-share-end, .blog-post .blog-author-card { max-width: 740px; }
 @media (min-width: 1200px) {
   .blog-post { max-width: 1280px; grid-template-columns: minmax(180px, 1fr) minmax(0, 740px) minmax(180px, 1fr); }
 }
 .blog-post .blog-article-header { margin-bottom: 48px; }
-.blog-post .blog-article-header h1 { font-size: 48px; line-height: 1.18; letter-spacing: -0.017em; font-weight: 700; color: #15171a; }
-@media (max-width: 768px) { .blog-post .blog-article-header h1 { font-size: 36px; } }
-@media (max-width: 500px) { .blog-post .blog-article-header h1 { font-size: 28px; } }
+.blog-post .blog-byline { margin-top: 20px; }
 .blog-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 600; color: var(--color-muted); }
 .blog-back:hover, .blog-back:focus-visible { color: var(--color-ink); }
 /* Chevron that grows into a long arrow on hover. */

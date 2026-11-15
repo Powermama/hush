@@ -172,17 +172,29 @@ test("BLOG-009 serves the article artwork as the social preview and on cards, ne
   await expect(page.locator('.blog-card img[src*="/blog/covers/"][src$="-card.webp"]')).toHaveCount(2);
 });
 
-test("BLOG-010 opens a full-size article image in a new tab", async ({ page }) => {
+test("BLOG-010 opens an article image at full size over the article, and closes it again", async ({ page }) => {
   await page.goto(article);
   const figure = page.locator(".article-prose figure");
   await figure.scrollIntoViewIfNeeded();
   await expect.poll(() => figure.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
-  const link = figure.getByRole("link", { name: /Open full-size image \(new tab\)/ });
+  // The picture itself is the link; no extra line of text under it.
+  const link = figure.getByRole("link", { name: /Open full-size image/ });
   await expect(link).toHaveAttribute("href", /-900\.webp$/);
-  const [popup] = await Promise.all([page.waitForEvent("popup"), link.click()]);
-  await expect(popup).toHaveURL(/\/blog\/media\/.+-900\.webp$/);
-  await expect.poll(() => popup.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(900);
-  await popup.close();
+  await expect(link).not.toHaveAttribute("target", /.+/);
+  await expect(figure).not.toContainText("View full-size image");
+  const scroll = await page.evaluate(() => window.scrollY);
+  await link.click();
+  // The reader stays on the article: the full size opens over it.
+  const viewer = page.getByRole("dialog");
+  await expect(viewer).toBeVisible();
+  await expect.poll(() => viewer.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(900);
+  await expect(page).toHaveURL(new RegExp(`${article}$`));
+  await page.keyboard.press("Escape");
+  await expect(viewer).toBeHidden();
+  await link.click();
+  await viewer.click();
+  await expect(viewer).toBeHidden();
+  expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
 });
 
 test("BLOG-011 opens the author profile from the padded edge of the author card", async ({ page }) => {

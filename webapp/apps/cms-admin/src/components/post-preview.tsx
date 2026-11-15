@@ -21,19 +21,21 @@ import { cn } from "@/lib/utils";
 // Ghost's full-viewport frame over Shade's centred dialog.
 const frame = "top-0 left-0 h-dvh w-full max-w-none translate-0 gap-0 rounded-none border-0 p-0 shadow-none sm:rounded-none grid-rows-[auto_1fr]";
 
-export function PostPreview({ open, onOpenChange, preview, problems, lang, publish }: {
+export function PostPreview({ open, onOpenChange, preview, problems, lang, lead, publish }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** The CMS's rendering, or null while it is on its way. */
   preview: Preview | null;
   problems: string[];
   lang: "en" | "de";
+  /** The excerpt, shown as the article's lead as on behu.sh. */
+  lead: string;
   /** The Publish button, for a draft. */
   publish?: ReactNode;
 }) {
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const rendition = preview?.rendition;
-  const article = rendition && <ArticlePreview heading={rendition.heading} html={rendition.html} lang={lang} className="size-full border-0" />;
+  const article = rendition && <ArticlePreview heading={rendition.heading} lead={lead} html={rendition.html} lang={lang} className="size-full border-0" />;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -63,9 +63,10 @@ export type BlogCoverPlan = {
 /** One responsive rendition the generator writes to public/. */
 export type BlogImageOutput = { source: string; path: string; width: number };
 
-// Article images render at most 680 CSS px wide; the second size serves 2x screens.
+// Article images render at most 740 CSS px wide (the article column); 680 px covers
+// most screens at 1x, the second size serves 2x screens.
 const imageWidths = [680, 1360];
-const imageSizes = "(min-width: 768px) 680px, calc(100vw - 40px)";
+const imageSizes = "(min-width: 788px) 740px, calc(100vw - 40px)";
 const imagePath = /^media\/([a-z0-9-]+)\/([a-z0-9-]+)\.(png|jpe?g|webp)$/;
 
 export type BlogPost = {
@@ -323,18 +324,17 @@ export async function renderArticle({ front, body }: ParsedArticle, context: Art
       };
       node.tagName = "figure";
       node.properties = {};
-      node.children = [img, {
-        type: "element", tagName: "figcaption", properties: {}, children: [
-          ...(image.title ? [{ type: "text", value: image.title } as HastNode] : []),
-          {
-            type: "element", tagName: "a", properties: {
-              className: ["blog-image-full"], href: image.renditions.at(-1)!.path,
-              target: "_blank", rel: ["noopener"],
-              ariaLabel: lang === "de" ? `Bild in voller Größe öffnen (neuer Tab): ${image.alt}` : `Open full-size image (new tab): ${image.alt}`,
-            }, children: [{ type: "text", value: lang === "de" ? "Bild in voller Größe ansehen" : "View full-size image" }],
-          },
-        ],
-      }];
+      // The picture itself opens the full size: the article page shows it over the article
+      // (the reader stays on the page); without JavaScript the link opens the file.
+      const full: HastNode = {
+        type: "element", tagName: "a", properties: {
+          className: ["blog-image-full"], href: image.renditions.at(-1)!.path,
+          ariaLabel: lang === "de" ? `Bild in voller Größe öffnen: ${image.alt}` : `Open full-size image: ${image.alt}`,
+        }, children: [img],
+      };
+      node.children = [full, ...(image.title ? [{
+        type: "element", tagName: "figcaption", properties: {}, children: [{ type: "text", value: image.title } as HastNode],
+      } as HastNode] : [])];
     }
   });
   const html = unified().use(rehypeStringify).stringify(hast as never);
