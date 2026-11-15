@@ -213,6 +213,35 @@
               "renderedAt"
             ],
             "description": "What the post renders to; present while it is scheduled or published."
+          },
+          "contentHash": {
+            "type": "string",
+            "description": "Names the post's fields and images as they are now; the owner approves a post by it."
+          },
+          "approval": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "approvedBy": {
+                "type": "string"
+              },
+              "approvedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "current": {
+                "type": "boolean",
+                "description": "Whether it covers the post as it is now; any change to the text or an image leaves it lapsed."
+              }
+            },
+            "required": [
+              "approvedBy",
+              "approvedAt",
+              "current"
+            ],
+            "description": "The owner's approval, which agents need to schedule or publish the post."
           }
         },
         "required": [
@@ -232,7 +261,9 @@
           "publishedAt",
           "createdAt",
           "updatedAt",
-          "rendition"
+          "rendition",
+          "contentHash",
+          "approval"
         ],
         "additionalProperties": false
       },
@@ -623,7 +654,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -743,7 +774,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -809,7 +840,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -840,7 +871,7 @@
             "bearer": []
           }
         ],
-        "description": "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.",
+        "description": "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. Tokens change drafts only (403 live_post).",
         "parameters": [
           {
             "schema": {
@@ -962,7 +993,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1040,7 +1071,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1083,6 +1114,7 @@
             "bearer": []
           }
         ],
+        "description": "Validates and renders the post now and publishes it at publishedAt. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).",
         "parameters": [
           {
             "schema": {
@@ -1135,7 +1167,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1177,6 +1209,102 @@
         }
       }
     },
+    "/v1/posts/{id}/approve": {
+      "post": {
+        "operationId": "approvePost",
+        "tags": [
+          "Lifecycle"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "The owner, signed in to the admin, approves the post as reviewed, so an agent may schedule or publish it. Tokens are refused, also with posts:publish.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contentHash": {
+                    "type": "string",
+                    "description": "The post's contentHash as the owner reviewed it"
+                  }
+                },
+                "required": [
+                  "contentHash"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The approved post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The post changed after the review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/posts/{id}/publish": {
       "post": {
         "operationId": "publishPost",
@@ -1188,6 +1316,7 @@
             "bearer": []
           }
         ],
+        "description": "Publishes the post now. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).",
         "parameters": [
           {
             "schema": {
@@ -1221,7 +1350,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1274,6 +1403,7 @@
             "bearer": []
           }
         ],
+        "description": "Returns the post to draft. Only the owner; tokens get 403 owner_only.",
         "parameters": [
           {
             "schema": {
@@ -1307,7 +1437,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1450,7 +1580,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1527,7 +1657,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1602,7 +1732,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1699,7 +1829,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1732,7 +1862,7 @@
             "bearer": []
           }
         ],
-        "description": "Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it.",
+        "description": "Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. Tokens add images to drafts only (403 live_post).",
         "parameters": [
           {
             "schema": {
@@ -1797,7 +1927,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {

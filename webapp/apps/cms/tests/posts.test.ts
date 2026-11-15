@@ -14,13 +14,13 @@ import type { Database } from "../src/db/client";
 import { LocalObjectStore } from "../src/storage/object-store";
 import { publishDuePosts } from "../src/posts/service";
 import { createTestDatabase, serverUrl } from "./database";
-import { validPost } from "./fixtures";
+import { credentials, ownerSession, validPost } from "./fixtures";
 
 describe.skipIf(!serverUrl)("CMS API", () => {
   let database: Awaited<ReturnType<typeof createTestDatabase>>;
   let db: Database;
   let app: ReturnType<typeof createApp>;
-  const tokens = { reader: "", writer: "", publisher: "" };
+  const tokens = { reader: "", writer: "", publisher: "", owner: "" };
 
   beforeAll(async () => {
     database = await createTestDatabase();
@@ -28,13 +28,14 @@ describe.skipIf(!serverUrl)("CMS API", () => {
     app = createApp({ db, media: new LocalObjectStore(await mkdtemp(join(tmpdir(), "hush-cms-media-"))) });
     tokens.reader = await createToken(db, { name: "reader", scopes: ["posts:read"] });
     tokens.writer = await createToken(db, { name: "agent", scopes: ["posts:read", "posts:write"] });
-    tokens.publisher = await createToken(db, { name: "owner", scopes: ["posts:read", "posts:write", "posts:publish"] });
+    tokens.publisher = await createToken(db, { name: "agent-publisher", scopes: ["posts:read", "posts:write", "posts:publish"] });
+    tokens.owner = await ownerSession(db);
   });
   afterAll(async () => { await database?.drop(); });
 
   const call = (method: string, path: string, token: string, body?: unknown) => app.request(path, {
     method,
-    headers: { authorization: `Bearer ${token}`, ...(body ? { "content-type": "application/json" } : {}) },
+    headers: { ...credentials(token), ...(body ? { "content-type": "application/json" } : {}) },
     body: body ? JSON.stringify(body) : undefined,
   });
   const read = (response: Response) => response.json() as Promise<Record<string, any>>;
@@ -76,7 +77,7 @@ describe.skipIf(!serverUrl)("CMS API", () => {
 
   test("CMS-API-003 refuses to publish a post that breaks the article contract", async () => {
     const post = await draft({ slug: "no-faq", keyword: "no faq", markdown: "# A heading\n\nText without the questions section." });
-    const response = await call("POST", `/v1/posts/${post.id}/publish`, tokens.publisher);
+    const response = await call("POST", `/v1/posts/${post.id}/publish`, tokens.owner);
     expect(response.status).toBe(422);
     const { error } = await read(response);
     expect(error.code).toBe("contract_failed");
@@ -86,24 +87,24 @@ describe.skipIf(!serverUrl)("CMS API", () => {
 
   test("CMS-API-004 publishes a valid post with its rendered HTML and a revision", async () => {
     const post = await draft({ slug: "goes-live", keyword: "goes live" });
-    const published = await read(await call("POST", `/v1/posts/${post.id}/publish`, tokens.publisher));
+    const published = await read(await call("POST", `/v1/posts/${post.id}/publish`, tokens.owner));
     expect(published.status).toBe("published");
     expect(Date.parse(published.publishedAt)).toBeLessThanOrEqual(Date.now());
     expect(published.rendition.html).toContain('<h2 id="how-does-it-work">');
     expect(published.rendition.html).not.toContain("<h1");
     const { revisions } = await read(await call("GET", `/v1/posts/${post.id}/revisions`, tokens.reader));
     expect(revisions.map((revision: { status: string }) => revision.status)).toEqual(["published", "draft"]);
-    expect(revisions[0].actor).toBe("token:owner");
+    expect(revisions[0].actor).toBe("github:owner");
     const twin = await draft({ slug: "same-keyword", keyword: "Goes Live " });
-    const clash = await read(await call("POST", `/v1/posts/${twin.id}/publish`, tokens.publisher));
+    const clash = await read(await call("POST", `/v1/posts/${twin.id}/publish`, tokens.owner));
     expect(clash.error.problems).toContain('keyword "Goes Live " already targeted by goes-live');
   });
 
   test("CMS-API-005 publishes a scheduled post once it is due, exactly once", async () => {
     const post = await draft({ slug: "scheduled", keyword: "scheduled post" });
-    expect((await call("POST", `/v1/posts/${post.id}/schedule`, tokens.publisher, { publishedAt: new Date(Date.now() - 1000).toISOString() })).status).toBe(422);
+    expect((await call("POST", `/v1/posts/${post.id}/schedule`, tokens.owner, { publishedAt: new Date(Date.now() - 1000).toISOString() })).status).toBe(422);
     const at = new Date(Date.now() + 3_600_000).toISOString();
-    const scheduled = await read(await call("POST", `/v1/posts/${post.id}/schedule`, tokens.publisher, { publishedAt: at }));
+    const scheduled = await read(await call("POST", `/v1/posts/${post.id}/schedule`, tokens.owner, { publishedAt: at }));
     expect(scheduled.status).toBe("scheduled");
     expect(scheduled.rendition.html).toContain("<h2");
     expect((await publishDuePosts(db)).map((due) => due.id)).not.toContain(post.id);
@@ -118,19 +119,19 @@ describe.skipIf(!serverUrl)("CMS API", () => {
 
   test("CMS-API-006 unpublishes back to a draft and keeps the original date", async () => {
     const post = await draft({ slug: "comes-down", keyword: "comes down" });
-    const published = await read(await call("POST", `/v1/posts/${post.id}/publish`, tokens.publisher));
-    const draftAgain = await read(await call("POST", `/v1/posts/${post.id}/unpublish`, tokens.publisher));
+    const published = await read(await call("POST", `/v1/posts/${post.id}/publish`, tokens.owner));
+    const draftAgain = await read(await call("POST", `/v1/posts/${post.id}/unpublish`, tokens.owner));
     expect(draftAgain).toMatchObject({ status: "draft", rendition: null, publishedAt: published.publishedAt });
-    const republished = await read(await call("POST", `/v1/posts/${post.id}/publish`, tokens.publisher));
+    const republished = await read(await call("POST", `/v1/posts/${post.id}/publish`, tokens.owner));
     expect(republished.publishedAt).toBe(published.publishedAt);
   });
 
   test("CMS-API-007 keeps a live post valid when it is edited", async () => {
     const post = await draft({ slug: "live-edit", keyword: "live edit" });
-    await call("POST", `/v1/posts/${post.id}/publish`, tokens.publisher);
-    const broken = await call("PATCH", `/v1/posts/${post.id}`, tokens.writer, { markdown: "# Only a heading" });
+    await call("POST", `/v1/posts/${post.id}/publish`, tokens.owner);
+    const broken = await call("PATCH", `/v1/posts/${post.id}`, tokens.owner, { markdown: "# Only a heading" });
     expect(broken.status).toBe(422);
-    const edited = await read(await call("PATCH", `/v1/posts/${post.id}`, tokens.writer, {
+    const edited = await read(await call("PATCH", `/v1/posts/${post.id}`, tokens.owner, {
       markdown: `${validPost().markdown}\n\n### Is it free?\n\nYes.`,
     }));
     expect(edited.rendition.html).toContain("Is it free?");
@@ -164,7 +165,7 @@ describe.skipIf(!serverUrl)("CMS API", () => {
     const german = await read(await call("POST", "/v1/posts", tokens.writer, { lang: "de", markdown: "# Größer denken: Diktieren für Ärzte" }));
     expect(german.slug).toBe("groesser-denken-diktieren-fuer-aerzte");
     // Incomplete is fine for a draft, not for going live.
-    const refused = await call("POST", `/v1/posts/${twin.id}/publish`, tokens.publisher);
+    const refused = await call("POST", `/v1/posts/${twin.id}/publish`, tokens.owner);
     expect(refused.status).toBe(422);
     expect((await read(refused)).error.problems.join("\n")).toContain("front matter title");
   });
@@ -192,7 +193,7 @@ describe.skipIf(!serverUrl)("CMS API", () => {
     expect((await revisions()).map((revision) => [revision.autosave, revision.snapshot.markdown]))
       .toEqual([[true, "# First words, then more"], [false, validPost().markdown]]);
     // Another author, a deliberate save and a run older than ten minutes each start a new revision.
-    await autosave("# By someone else", tokens.publisher);
+    await autosave("# By someone else", tokens.owner);
     expect(await revisions()).toHaveLength(3);
     await call("PATCH", `/v1/posts/${post.id}`, tokens.writer, { markdown: "# Saved on purpose" });
     await autosave("# Writing again");
@@ -202,9 +203,9 @@ describe.skipIf(!serverUrl)("CMS API", () => {
     expect((await revisions()).filter((revision) => revision.autosave)).toHaveLength(4);
     // A live post is never autosaved: each change is a revision of its own.
     const live = await draft({ slug: "autosave-live", keyword: "autosave live" });
-    await call("POST", `/v1/posts/${live.id}/publish`, tokens.publisher);
-    await call("PATCH", `/v1/posts/${live.id}?autosave=true`, tokens.writer, { imageAlt: "A Mac with a dictation waveform, updated." });
-    await call("PATCH", `/v1/posts/${live.id}?autosave=true`, tokens.writer, { imageAlt: "A Mac with a dictation waveform, again." });
+    await call("POST", `/v1/posts/${live.id}/publish`, tokens.owner);
+    await call("PATCH", `/v1/posts/${live.id}?autosave=true`, tokens.owner, { imageAlt: "A Mac with a dictation waveform, updated." });
+    await call("PATCH", `/v1/posts/${live.id}?autosave=true`, tokens.owner, { imageAlt: "A Mac with a dictation waveform, again." });
     const { revisions: liveRevisions } = await read(await call("GET", `/v1/posts/${live.id}/revisions`, tokens.reader));
     expect(liveRevisions.map((revision: { autosave: boolean }) => revision.autosave)).toEqual([false, false, false, false]);
   });
@@ -216,7 +217,7 @@ describe.skipIf(!serverUrl)("CMS API", () => {
     expect((await call("GET", `/v1/posts/${post.id}`, tokens.reader)).status).toBe(404);
     expect((await call("DELETE", `/v1/posts/${post.id}`, tokens.writer)).status).toBe(404);
     const live = await draft({ slug: "stays-up", keyword: "stays up" });
-    await call("POST", `/v1/posts/${live.id}/publish`, tokens.publisher);
+    await call("POST", `/v1/posts/${live.id}/publish`, tokens.owner);
     const refused = await call("DELETE", `/v1/posts/${live.id}`, tokens.writer);
     expect(refused.status).toBe(409);
     expect((await read(refused)).error.code).toBe("not_a_draft");

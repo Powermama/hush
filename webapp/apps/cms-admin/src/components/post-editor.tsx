@@ -19,7 +19,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import {
-  createDraft, getGetPostQueryKey, getListMediaQueryKey, getListPostsQueryKey, getListRevisionsQueryKey, previewPost, publishPost,
+  approvePost, createDraft, getGetPostQueryKey, getListMediaQueryKey, getListPostsQueryKey, getListRevisionsQueryKey, previewPost, publishPost,
   schedulePost, unpublishPost, updatePost, uploadMedia, useListMedia, type Media, type Post, type Preview,
 } from "@/api/cms.generated";
 import { CmsError } from "@/api/fetcher";
@@ -412,6 +412,29 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
     [media.data, mediaLoaded],
   );
 
+  /**
+   * Approves the draft as previewed, after saving it, so an agent may schedule
+   * or publish it as it is. The CMS refuses if it changed since this editor
+   * last read it, so nothing is approved unseen.
+   */
+  const approve = async () => {
+    setBusy(true);
+    try {
+      const id = await save("manual");
+      if (!id) return void toast.error(lastRefusal.current?.message ?? "The post could not be saved.");
+      const reviewed = (queryClient.getQueryData(getGetPostQueryKey(id)) as { data: Post } | undefined)?.data;
+      if (!reviewed) return;
+      const stored = (await approvePost(id, { contentHash: reviewed.contentHash })).data as Post;
+      queryClient.setQueryData(getGetPostQueryKey(id), { data: stored, status: 200, headers: new Headers() });
+      await refresh(id);
+      toast.success("Approved. An agent may now schedule or publish it as it is.");
+    } catch (error) {
+      toast.error(describe(error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   /** Publishes, schedules or reverts to a draft after saving; answers with what was refused, for the flow to show. */
   const act = async (action: "publish" | "unpublish" | { scheduleAt: Date }): Promise<Refusal | undefined> => {
     setBusy(true);
@@ -639,6 +662,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
 
         <PostPreview
           open={showPreview && Boolean(post)} onOpenChange={setShowPreview} preview={preview} problems={shownProblems} lang={fields.lang} lead={fields.description}
+          approval={post?.status === "draft" ? { current: Boolean(post.approval?.current), lapsed: post.approval?.current === false, busy, onApprove: () => void approve() } : undefined}
           publish={post?.status === "draft" && <Button className="w-20 shrink-0" disabled={busy} onClick={() => { setShowPreview(false); setPublishOpen(true); }}>Publish</Button>}
         />
 

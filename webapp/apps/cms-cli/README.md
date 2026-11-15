@@ -14,11 +14,11 @@ hush-cms auth login          # paste a token; it goes to the macOS Keychain
 hush-cms auth status
 ```
 
-The owner creates tokens inside the CMS container with `bun run cms:token`.
-`posts:publish` allows scheduling and publishing. `posts:write` allows drafts,
-and today also edits to scheduled and published posts: the CMS does not yet
-require the owner's approval for an agent's changes, so give agents no token
-until it does (`--live` is only the CLI's own safeguard).
+The owner creates tokens inside the CMS container with `bun run cms:token`. A
+token is always an agent's: `posts:write` lets it work on drafts, and
+`posts:publish` lets it schedule or publish a post once the owner has approved
+it as it is now, in the admin. Any later change to the text or an image needs
+a new approval. Only the owner changes or unpublishes a live post.
 
 ## Use
 

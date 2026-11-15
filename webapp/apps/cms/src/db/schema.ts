@@ -136,9 +136,27 @@ export const apiTokenScopes = pgTable("api_token_scopes", {
   scope: tokenScope("scope").notNull(),
 }, (table) => [primaryKey({ columns: [table.tokenId, table.scope] })]);
 
+/**
+ * The owner's approval of a post for an agent to schedule or publish it. It
+ * names the content it covers by hash (posts/approval.ts), so any later change
+ * to the text or an image leaves it lapsed; one row per post, replaced on
+ * every approval.
+ */
+export const postApprovals = pgTable("post_approvals", {
+  postId: uuid("post_id").primaryKey().references(() => posts.id, { onDelete: "cascade" }),
+  contentHash: text("content_hash").notNull(),
+  approvedBy: text("approved_by").notNull(),
+  approvedAt: timestamp("approved_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const postRelations = relations(posts, ({ many, one }) => ({
   secondaryKeywords: many(postSecondaryKeywords),
+  media: many(media),
   rendition: one(postRenditions, { fields: [posts.id], references: [postRenditions.postId] }),
+  approval: one(postApprovals, { fields: [posts.id], references: [postApprovals.postId] }),
+}));
+export const mediaRelations = relations(media, ({ one }) => ({
+  post: one(posts, { fields: [media.postId], references: [posts.id] }),
 }));
 export const postSecondaryKeywordRelations = relations(postSecondaryKeywords, ({ one }) => ({
   post: one(posts, { fields: [postSecondaryKeywords.postId], references: [posts.id] }),

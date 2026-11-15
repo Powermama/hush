@@ -2,8 +2,11 @@
 
 The owner signs in to the admin with GitHub; agents use the admin API with a bearer token,
 usually through the `hush-cms` CLI (`apps/cms-cli`).
-Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
-`posts:publish` (schedule, publish, unpublish). Responses are never indexed.
+Tokens carry scopes: `posts:read`, `posts:write` (drafts) and `posts:publish`
+(schedule and publish). Every token is an agent's: it goes live only with what
+the owner approved, as it is now, and only the owner changes, restores,
+unpublishes or replaces images of a scheduled or published post. Responses are
+never indexed.
 
 | ID | Journey | Test |
 | --- | --- | --- |
@@ -22,10 +25,12 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-CLI-001 | `hush-cms posts push <file>` saves a hush-seo article file as a draft with the images in `media/<slug>/` beside it, never making it live whatever its `draft` field says; pushing again changes nothing until the file or an image changes, and then updates the same post. | `../cms-cli/tests/cli.test.ts` |
 | CMS-CLI-002 | An incomplete article file is saved as a draft and the CLI lists what the contract still refuses (`posts check` exits 1); a file with an unknown front matter field is refused before anything is sent. | `../cms-cli/tests/cli.test.ts` |
 | CMS-CLI-003 | Posts are named by id or slug; a slug both languages use needs `--lang`; `posts list` filters by language and status. | `../cms-cli/tests/cli.test.ts` |
-| CMS-CLI-004 | `posts schedule` and `posts publish` need a token with `posts:publish`; a push never changes a scheduled or published post without `--live`, and an invalid live edit is refused with the contract's problems. | `../cms-cli/tests/cli.test.ts` |
+| CMS-CLI-004 | `posts schedule` and `posts publish` need a token with `posts:publish` and the owner's approval of the post as it is, which `posts get` shows; a push to a scheduled or published post and `posts unpublish` are refused with the CMS's reason. | `../cms-cli/tests/cli.test.ts` |
 | CMS-CLI-005 | `posts pull` writes a post as `<lang>/<slug>.md` with its images, in the format `posts push` reads back unchanged. | `../cms-cli/tests/cli.test.ts` |
 | CMS-CLI-006 | Refusals go to stderr with exit 1, or with `--json` as the CMS's JSON error; wrong usage exits 2. | `../cms-cli/tests/cli.test.ts` |
 | CMS-CLI-007 | `auth login` reads a token from a hidden prompt or stdin, checks it with the CMS and stores it in the macOS Keychain without echoing it; `auth status` names the token, its scopes, expiry and source; `HUSH_CMS_TOKEN` overrides the Keychain. | `../cms-cli/tests/cli.test.ts` |
+| CMS-API-013 | A token schedules or publishes a post only while the owner's approval covers it as it is (403 `approval_required`, `approval_lapsed`); the owner approves the content hash they reviewed, so a change made meanwhile is refused with 409, and any later change to the text or an image leaves the approval lapsed. | `tests/approval.test.ts` |
+| CMS-API-014 | Only the signed-in owner approves (a token with every scope gets 403); tokens cannot change, restore, replace images of or unpublish a scheduled or published post (403), while the owner can, and a post back in draft is the agent's to work on again. | `tests/approval.test.ts` |
 | CMS-MEDIA-001 | An article referencing `media/<slug>/<name>` cannot go live until that image is uploaded; once it is, the post renders a figure with responsive WebP sources (680 px and 2x) and the renditions exist in storage. | `tests/media.test.ts` |
 | CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
 | CMS-001 | The owner signs in with GitHub and sees every post with its author, topic, date and status, scheduled posts first, then drafts, then published ones; a menu sorts them, and the sidebar's views (on a phone, the sheet behind the bottom bar) filter Drafts, Scheduled and Published. | `tests/admin/admin.e2e.ts` |
@@ -38,6 +43,7 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-008 | An image is added through its card (picked or dropped): a new post is saved first, the picture shows in the card with a caption and alt text, and its reference moves with the post's address when the title arrives, so the contract finds it. | `tests/admin/admin.e2e.ts` |
 | CMS-009 | The post settings dock beside the editor as Ghost's do, never as a modal: the header's Settings button or Cmd/Ctrl+. opens and closes them (not while the preview or publish flow is open; closing from inside moves the focus to the button), the panel narrows the writing area from 1024px, overlays it below and takes the whole width on a phone; Post history, Meta data and Keyboard shortcuts open as panes that Escape closes; from 1024px the editor reopens with the panel as it was left. | `tests/admin/admin.e2e.ts` |
 | CMS-010 | Once a post is published, the posts list celebrates it once ("Boom! It's out there." with the number of published posts; "All set!" for a schedule): the post as a card linking to https://behu.sh/blog/<slug> (/de/blog/ in German), share links and Copy link. | `tests/admin/admin.e2e.ts`, `apps/cms-admin/src/components/settings-and-celebration.test.ts` |
+| CMS-011 | The owner approves a draft from its preview ("Approve", then "Approved"), after its changes are saved, so an agent may schedule or publish it as it is; a later change leaves the approval lapsed and the preview offers "Approve again". | `tests/admin/admin.e2e.ts` |
 | CMS-ADMIN-001 | Signing in sends the owner to GitHub with a random state and a PKCE challenge (S256, RFC 9700), both kept in `__Host-` cookies (HttpOnly, Secure, SameSite=Lax), and no OAuth scope; the callback needs the matching state and sends the verifier, then sets a session cookie with the same attributes, stored only as a hash. | `tests/admin.test.ts` |
 | CMS-ADMIN-002 | A GitHub account whose numeric id is not on the allowlist gets no session (403). | `tests/admin.test.ts` |
 | CMS-ADMIN-003 | A session acts as the owner (every scope) and revisions name `github:<login>`. | `tests/admin.test.ts` |

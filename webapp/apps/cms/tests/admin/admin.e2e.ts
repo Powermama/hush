@@ -392,6 +392,32 @@ test("CMS-010 publishing celebrates the post on the posts list, with its link to
   await expect(signedIn.getByRole("dialog")).toHaveCount(0);
 });
 
+test("CMS-011 the owner approves a draft in its preview, for an agent to schedule or publish it as it is", async ({ signedIn, draft }) => {
+  const post = await draft();
+  const approval = async () => (await (await signedIn.request.get(`/v1/posts/${post.id}`)).json() as { approval: { current: boolean; approvedBy: string } | null }).approval;
+  await signedIn.goto(`/posts/${post.id}`);
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
+  await signedIn.keyboard.press("ControlOrMeta+p");
+  const preview = signedIn.getByRole("dialog", { name: "Preview" });
+  await expect(signedIn.frameLocator("iframe[title=Preview]").getByRole("heading", { name: "How does it work?" })).toBeVisible();
+  await preview.getByRole("button", { name: "Approve", exact: true }).click();
+  await expect(preview.getByText("Approved", { exact: true })).toBeVisible();
+  await expect(signedIn.getByText("Approved. An agent may now schedule or publish it as it is.")).toBeVisible();
+  expect(await approval()).toMatchObject({ current: true, approvedBy: "github:owner" });
+
+  // A change after the approval leaves it lapsed until the owner approves again.
+  await preview.getByRole("button", { name: "Close" }).click();
+  await endOfArticle(signedIn);
+  await signedIn.keyboard.type(" One more sentence.");
+  await signedIn.keyboard.press("ControlOrMeta+s");
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
+  expect((await approval())?.current).toBe(false);
+  await signedIn.keyboard.press("ControlOrMeta+p");
+  await preview.getByRole("button", { name: "Approve again" }).click();
+  await expect(preview.getByText("Approved", { exact: true })).toBeVisible();
+  expect((await approval())?.current).toBe(true);
+});
+
 test("the admin runs under its Content Security Policy without violations", async ({ signedIn, draft }) => {
   const violations: string[] = [];
   signedIn.on("console", (message) => { if (/Content.Security.Policy|Refused to/i.test(message.text())) violations.push(message.text()); });

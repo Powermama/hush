@@ -44,7 +44,7 @@ export async function importArticles(cms: Cms, contentDir: string, actor = "impo
         const mediaDir = join(contentDir, lang, "media", fields.slug);
         for (const name of (await readdir(mediaDir).catch(() => [] as string[])).sort()) {
           const type = contentTypes[extname(name)];
-          if (type) await uploadMedia(cms, id, name, new Uint8Array(await Bun.file(join(mediaDir, name)).arrayBuffer()), type);
+          if (type) await uploadMedia(cms, id, name, new Uint8Array(await Bun.file(join(mediaDir, name)).arrayBuffer()), type, actor);
         }
         // Only a real difference is an edit: an unchanged article keeps its
         // date, revision history and site revision.

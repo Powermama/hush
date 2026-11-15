@@ -101,6 +101,17 @@ export type PostRendition = {
   renderedAt: string;
 } | null;
 
+/**
+ * The owner's approval, which agents need to schedule or publish the post.
+ * @nullable
+ */
+export type PostApproval = {
+  approvedBy: string;
+  approvedAt: string;
+  /** Whether it covers the post as it is now; any change to the text or an image leaves it lapsed. */
+  current: boolean;
+} | null;
+
 export interface Post {
   lang: PostLang;
   /** @pattern ^[a-z0-9]+(-[a-z0-9]+)*$ */
@@ -129,6 +140,13 @@ export interface Post {
      * @nullable
      */
   rendition: PostRendition;
+  /** Names the post's fields and images as they are now; the owner approves a post by it. */
+  contentHash: string;
+  /**
+     * The owner's approval, which agents need to schedule or publish the post.
+     * @nullable
+     */
+  approval: PostApproval;
 }
 
 export type PreviewRenditionTocItem = {
@@ -421,6 +439,11 @@ export type UpdatePostBody = {
 
 export type SchedulePostBody = {
   publishedAt: string;
+};
+
+export type ApprovePostBody = {
+  /** The post's contentHash as the owner reviewed it */
+  contentHash: string;
 };
 
 export type PreviewPostBodyLang = typeof PreviewPostBodyLang[keyof typeof PreviewPostBodyLang];
@@ -761,7 +784,7 @@ export const getUpdatePostUrl = (id: string,
 }
 
 /**
- * Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.
+ * Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. Tokens change drafts only (403 live_post).
  */
 export const updatePost = async (id: string,
     updatePostBody: UpdatePostBody,
@@ -883,6 +906,9 @@ export const getSchedulePostUrl = (id: string,) => {
   return `/v1/posts/${id}/schedule`
 }
 
+/**
+ * Validates and renders the post now and publishes it at publishedAt. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).
+ */
 export const schedulePost = async (id: string,
     schedulePostBody: SchedulePostBody, options?: Parameters<typeof cmsFetch>[1]): Promise<schedulePostResponse> => {
 
@@ -892,6 +918,65 @@ export const schedulePost = async (id: string,
     method: 'POST',
     headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
     body: JSON.stringify(schedulePostBody)
+  }
+);}
+
+
+
+export type approvePostResponse200 = {
+  data: Post
+  status: 200
+}
+
+export type approvePostResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type approvePostResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type approvePostResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type approvePostResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type approvePostResponseSuccess = (approvePostResponse200) & {
+  headers: Headers;
+};
+export type approvePostResponseError = (approvePostResponse401 | approvePostResponse403 | approvePostResponse404 | approvePostResponse409) & {
+  headers: Headers;
+};
+
+export type approvePostResponse = (approvePostResponseSuccess | approvePostResponseError)
+
+export const getApprovePostUrl = (id: string,) => {
+
+
+
+
+  return `/v1/posts/${id}/approve`
+}
+
+/**
+ * The owner, signed in to the admin, approves the post as reviewed, so an agent may schedule or publish it. Tokens are refused, also with posts:publish.
+ */
+export const approvePost = async (id: string,
+    approvePostBody: ApprovePostBody, options?: Parameters<typeof cmsFetch>[1]): Promise<approvePostResponse> => {
+
+  return cmsFetch<approvePostResponse>(getApprovePostUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(approvePostBody)
   }
 );}
 
@@ -944,6 +1029,9 @@ export const getPublishPostUrl = (id: string,) => {
   return `/v1/posts/${id}/publish`
 }
 
+/**
+ * Publishes the post now. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).
+ */
 export const publishPost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<publishPostResponse> => {
 
   return cmsFetch<publishPostResponse>(getPublishPostUrl(id),
@@ -994,6 +1082,9 @@ export const getUnpublishPostUrl = (id: string,) => {
   return `/v1/posts/${id}/unpublish`
 }
 
+/**
+ * Returns the post to draft. Only the owner; tokens get 403 owner_only.
+ */
 export const unpublishPost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<unpublishPostResponse> => {
 
   return cmsFetch<unpublishPostResponse>(getUnpublishPostUrl(id),
@@ -1272,7 +1363,7 @@ export const getUploadMediaUrl = (id: string,
 }
 
 /**
- * Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it.
+ * Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. Tokens add images to drafts only (403 live_post).
  */
 export const uploadMedia = async (id: string,
     name: string,

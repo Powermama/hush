@@ -120,6 +120,17 @@ export type PostRendition = {
   renderedAt: string;
 } | null;
 
+/**
+ * The owner's approval, which agents need to schedule or publish the post.
+ * @nullable
+ */
+export type PostApproval = {
+  approvedBy: string;
+  approvedAt: string;
+  /** Whether it covers the post as it is now; any change to the text or an image leaves it lapsed. */
+  current: boolean;
+} | null;
+
 export interface Post {
   lang: PostLang;
   /** @pattern ^[a-z0-9]+(-[a-z0-9]+)*$ */
@@ -148,6 +159,13 @@ export interface Post {
      * @nullable
      */
   rendition: PostRendition;
+  /** Names the post's fields and images as they are now; the owner approves a post by it. */
+  contentHash: string;
+  /**
+     * The owner's approval, which agents need to schedule or publish the post.
+     * @nullable
+     */
+  approval: PostApproval;
 }
 
 export type PreviewRenditionTocItem = {
@@ -440,6 +458,11 @@ export type UpdatePostBody = {
 
 export type SchedulePostBody = {
   publishedAt: string;
+};
+
+export type ApprovePostBody = {
+  /** The post's contentHash as the owner reviewed it */
+  contentHash: string;
 };
 
 export type PreviewPostBodyLang = typeof PreviewPostBodyLang[keyof typeof PreviewPostBodyLang];
@@ -1066,7 +1089,7 @@ export const getUpdatePostUrl = (id: string,
 }
 
 /**
- * Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.
+ * Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. Tokens change drafts only (403 live_post).
  */
 export const updatePost = async (id: string,
     updatePostBody: UpdatePostBody,
@@ -1119,7 +1142,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdatePostMutationError = Error
     export type UpdatePostMutationVariables = {id: string;data: UpdatePostBody;params?: UpdatePostParams}
 
-    /** Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. */
+    /** Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. Tokens change drafts only (403 live_post). */
 export const useUpdatePost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,UpdatePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
@@ -1284,6 +1307,9 @@ export const getSchedulePostUrl = (id: string,) => {
   return `/v1/posts/${id}/schedule`
 }
 
+/**
+ * Validates and renders the post now and publishes it at publishedAt. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).
+ */
 export const schedulePost = async (id: string,
     schedulePostBody: SchedulePostBody, options?: Parameters<typeof cmsFetch>[1]): Promise<schedulePostResponse> => {
 
@@ -1334,7 +1360,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type SchedulePostMutationError = Error
     export type SchedulePostMutationVariables = {id: string;data: SchedulePostBody}
 
-    export const useSchedulePost = <TError = Error,
+    /** Validates and renders the post now and publishes it at publishedAt. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed). */
+export const useSchedulePost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof schedulePost>>, TError,SchedulePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof schedulePost>>,
@@ -1343,6 +1370,113 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getSchedulePostMutationOptions(options), queryClient);
+    }
+
+export type approvePostResponse200 = {
+  data: Post
+  status: 200
+}
+
+export type approvePostResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type approvePostResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type approvePostResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type approvePostResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type approvePostResponseSuccess = (approvePostResponse200) & {
+  headers: Headers;
+};
+export type approvePostResponseError = (approvePostResponse401 | approvePostResponse403 | approvePostResponse404 | approvePostResponse409) & {
+  headers: Headers;
+};
+
+export type approvePostResponse = (approvePostResponseSuccess | approvePostResponseError)
+
+export const getApprovePostUrl = (id: string,) => {
+
+
+
+
+  return `/v1/posts/${id}/approve`
+}
+
+/**
+ * The owner, signed in to the admin, approves the post as reviewed, so an agent may schedule or publish it. Tokens are refused, also with posts:publish.
+ */
+export const approvePost = async (id: string,
+    approvePostBody: ApprovePostBody, options?: Parameters<typeof cmsFetch>[1]): Promise<approvePostResponse> => {
+
+  return cmsFetch<approvePostResponse>(getApprovePostUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(approvePostBody)
+  }
+);}
+
+
+
+
+
+export const getApprovePostMutationKey = () => ['approvePost'] as const;
+
+export const getApprovePostMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approvePost>>, TError,ApprovePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approvePost>>, TError,ApprovePostMutationVariables, TContext> => {
+
+const mutationKey = getApprovePostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approvePost>>, ApprovePostMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  approvePost(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApprovePostMutationResult = NonNullable<Awaited<ReturnType<typeof approvePost>>>
+    export type ApprovePostMutationBody = ApprovePostBody
+    export type ApprovePostMutationError = Error
+    export type ApprovePostMutationVariables = {id: string;data: ApprovePostBody}
+
+    /** The owner, signed in to the admin, approves the post as reviewed, so an agent may schedule or publish it. Tokens are refused, also with posts:publish. */
+export const useApprovePost = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approvePost>>, TError,ApprovePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof approvePost>>,
+        TError,
+        ApprovePostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getApprovePostMutationOptions(options), queryClient);
     }
 
 export type publishPostResponse200 = {
@@ -1392,6 +1526,9 @@ export const getPublishPostUrl = (id: string,) => {
   return `/v1/posts/${id}/publish`
 }
 
+/**
+ * Publishes the post now. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).
+ */
 export const publishPost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<publishPostResponse> => {
 
   return cmsFetch<publishPostResponse>(getPublishPostUrl(id),
@@ -1441,7 +1578,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PublishPostMutationError = Error
     export type PublishPostMutationVariables = {id: string}
 
-    export const usePublishPost = <TError = Error,
+    /** Publishes the post now. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed). */
+export const usePublishPost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishPost>>, TError,PublishPostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof publishPost>>,
@@ -1489,6 +1627,9 @@ export const getUnpublishPostUrl = (id: string,) => {
   return `/v1/posts/${id}/unpublish`
 }
 
+/**
+ * Returns the post to draft. Only the owner; tokens get 403 owner_only.
+ */
 export const unpublishPost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<unpublishPostResponse> => {
 
   return cmsFetch<unpublishPostResponse>(getUnpublishPostUrl(id),
@@ -1538,7 +1679,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UnpublishPostMutationError = Error
     export type UnpublishPostMutationVariables = {id: string}
 
-    export const useUnpublishPost = <TError = Error,
+    /** Returns the post to draft. Only the owner; tokens get 403 owner_only. */
+export const useUnpublishPost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unpublishPost>>, TError,UnpublishPostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unpublishPost>>,
@@ -2055,7 +2197,7 @@ export const getUploadMediaUrl = (id: string,
 }
 
 /**
- * Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it.
+ * Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. Tokens add images to drafts only (403 live_post).
  */
 export const uploadMedia = async (id: string,
     name: string,
@@ -2108,7 +2250,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UploadMediaMutationError = Error
     export type UploadMediaMutationVariables = {id: string;name: string;data: Blob}
 
-    /** Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. */
+    /** Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. Tokens add images to drafts only (403 live_post). */
 export const useUploadMedia = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadMedia>>, TError,UploadMediaMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
