@@ -12,14 +12,12 @@ import type { Preview } from "@/api/cms.generated";
 import { ArticlePreview } from "@/components/article-preview";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FullscreenDialog } from "@/components/fullscreen-dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { PreviewChrome } from "@/components/ui/preview-chrome";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
-
-// Ghost's full-viewport frame over Shade's centred dialog.
-const frame = "top-0 left-0 h-dvh w-full max-w-none translate-0 gap-0 rounded-none border-0 p-0 shadow-none sm:rounded-none grid-rows-[auto_1fr]";
 
 export function PostPreview({ open, onOpenChange, preview, problems, lang, publish }: {
   open: boolean;
@@ -36,8 +34,7 @@ export function PostPreview({ open, onOpenChange, preview, problems, lang, publi
   const article = rendition && <ArticlePreview heading={rendition.heading} html={rendition.html} lang={lang} className="size-full border-0" />;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={frame} onInteractOutside={(event) => event.preventDefault()} aria-describedby={undefined}>
+    <FullscreenDialog open={open} onOpenChange={onOpenChange} title="Preview" header={
         <DialogHeader className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border-default p-4 md:grid-cols-[minmax(max-content,1fr)_minmax(0,max-content)_minmax(max-content,1fr)]">
           <DialogTitle className="text-lg">Preview</DialogTitle>
           <ToggleGroup
@@ -52,6 +49,7 @@ export function PostPreview({ open, onOpenChange, preview, problems, lang, publi
             {publish}
           </div>
         </DialogHeader>
+      }>
         <div className={cn("flex min-h-0 flex-col overflow-auto", device === "mobile" ? "items-center bg-muted p-6" : "bg-surface-panel")}>
           {problems.length > 0 && (
             <div className={cn("w-full", device === "desktop" && "px-4 pt-4")}>
@@ -71,7 +69,6 @@ export function PostPreview({ open, onOpenChange, preview, problems, lang, publi
             <div className="min-h-0 grow">{article}</div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+    </FullscreenDialog>
   );
 }
