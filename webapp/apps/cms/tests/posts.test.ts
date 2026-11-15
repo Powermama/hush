@@ -55,6 +55,14 @@ describe.skipIf(!serverUrl)("CMS API", () => {
     expect((await app.request("/v1/posts")).headers.get("x-robots-tag")).toBe("noindex, nofollow");
   });
 
+  test("CMS-API-012 tells a token its name, scopes and expiry", async () => {
+    expect((await app.request("/v1/me")).status).toBe(401);
+    expect(await read(await call("GET", "/v1/me", tokens.writer))).toEqual({ actor: "token:agent", scopes: ["posts:read", "posts:write"], expiresAt: null });
+    const expiresAt = new Date("2030-01-01T00:00:00.000Z");
+    const expiring = await createToken(db, { name: "expiring", scopes: ["posts:read"], expiresAt });
+    expect((await read(await call("GET", "/v1/me", expiring))).expiresAt).toBe(expiresAt.toISOString());
+  });
+
   test("CMS-API-002 keeps a draft with its fields and keyword order", async () => {
     const post = await draft({ slug: "draft-only", keyword: "draft only", secondaryKeywords: ["b phrase", "a phrase"] });
     expect(post.status).toBe("draft");

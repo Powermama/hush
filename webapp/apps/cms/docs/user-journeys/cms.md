@@ -1,6 +1,7 @@
 # CMS journeys
 
-The owner signs in to the admin with GitHub; agents use the admin API with a bearer token.
+The owner signs in to the admin with GitHub; agents use the admin API with a bearer token,
+usually through the `hush-cms` CLI (`apps/cms-cli`).
 Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 `posts:publish` (schedule, publish, unpublish). Responses are never indexed.
 
@@ -17,6 +18,14 @@ Tokens carry scopes: `posts:read`, `posts:write` (drafts and edits) and
 | CMS-API-009 | A draft can start from any of the fields, also none: its texts may be empty or of any length, and the article contract applies only when it goes live. Without a slug it is named after its H1 ("untitled" until it has one), numbered when the language already has that slug; its image references follow a changed slug. | `tests/posts.test.ts` |
 | CMS-API-010 | Saves sent with `autosave=true` by one author within ten minutes share a single revision holding their last state; a deliberate save, another author or a live post always gets a revision of its own. | `tests/posts.test.ts` |
 | CMS-API-011 | A draft can be deleted with its history and images; a scheduled or published post is refused with 409 until it is unpublished. | `tests/posts.test.ts` |
+| CMS-API-012 | `GET /v1/me` tells a token its name, scopes and expiry (the owner: every scope); without one it gets 401. | `tests/posts.test.ts` |
+| CMS-CLI-001 | `hush-cms posts push <file>` saves a hush-seo article file as a draft with the images in `media/<slug>/` beside it, never making it live whatever its `draft` field says; pushing again changes nothing until the file or an image changes, and then updates the same post. | `../cms-cli/tests/cli.test.ts` |
+| CMS-CLI-002 | An incomplete article file is saved as a draft and the CLI lists what the contract still refuses (`posts check` exits 1); a file with an unknown front matter field is refused before anything is sent. | `../cms-cli/tests/cli.test.ts` |
+| CMS-CLI-003 | Posts are named by id or slug; a slug both languages use needs `--lang`; `posts list` filters by language and status. | `../cms-cli/tests/cli.test.ts` |
+| CMS-CLI-004 | `posts schedule` and `posts publish` need a token with `posts:publish`; a push never changes a scheduled or published post without `--live`, and an invalid live edit is refused with the contract's problems. | `../cms-cli/tests/cli.test.ts` |
+| CMS-CLI-005 | `posts pull` writes a post as `<lang>/<slug>.md` with its images, in the format `posts push` reads back unchanged. | `../cms-cli/tests/cli.test.ts` |
+| CMS-CLI-006 | Refusals go to stderr with exit 1, or with `--json` as the CMS's JSON error; wrong usage exits 2. | `../cms-cli/tests/cli.test.ts` |
+| CMS-CLI-007 | `auth login` reads a token from a hidden prompt or stdin, checks it with the CMS and stores it in the macOS Keychain without echoing it; `auth status` names the token, its scopes, expiry and source; `HUSH_CMS_TOKEN` overrides the Keychain. | `../cms-cli/tests/cli.test.ts` |
 | CMS-MEDIA-001 | An article referencing `media/<slug>/<name>` cannot go live until that image is uploaded; once it is, the post renders a figure with responsive WebP sources (680 px and 2x) and the renditions exist in storage. | `tests/media.test.ts` |
 | CMS-MEDIA-002 | Uploads are refused unless the name is lowercase with digits and dashes, the declared type matches the extension and the bytes decode as that image; files over 10 MB get 413. | `tests/media.test.ts` |
 | CMS-001 | The owner signs in with GitHub and sees every post with its author, topic, date and status, scheduled posts first, then drafts, then published ones; a menu sorts them, and the sidebar's views (on a phone, the sheet behind the bottom bar) filter Drafts, Scheduled and Published. | `tests/admin/admin.e2e.ts` |

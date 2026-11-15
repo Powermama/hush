@@ -10,6 +10,7 @@ import type { Cms } from "./media/service";
 import { PostError } from "./posts/service";
 import { authRoutes } from "./routes/auth";
 import { healthRoutes } from "./routes/health";
+import { meRoutes } from "./routes/me";
 import { validationHook } from "./routes/errors";
 import { postRoutes } from "./routes/posts";
 import { siteRoutes } from "./routes/site";
@@ -61,6 +62,7 @@ export function createApp(cms: Cms, options: AppOptions = {}) {
   app.get("/robots.txt", (context) => context.text("User-agent: *\nDisallow: /\n"));
   app.route("/", healthRoutes(cms.db, options.isDraining ?? (() => false)));
   if (options.admin) app.route("/", authRoutes(cms.db, options.admin));
+  app.route("/", meRoutes(cms.db));
   app.route("/", postRoutes(cms));
   app.route("/", siteRoutes(cms));
   app.openAPIRegistry.registerComponent("securitySchemes", "bearer", { type: "http", scheme: "bearer" });
