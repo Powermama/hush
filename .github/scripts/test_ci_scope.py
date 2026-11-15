@@ -60,6 +60,11 @@ class ScopeTests(unittest.TestCase):
         # The admin ships inside the CMS image, so the CMS job checks it.
         self.assertEqual(classify(["webapp/apps/cms-admin/src/main.tsx"]), dict(web=False, cms=True, native=False, integration=False))
 
+    def test_the_cms_cli_is_checked_by_the_cms_job(self):
+        # The CLI calls the CMS API, so the CMS job runs its journeys.
+        self.assertEqual(classify(["webapp/apps/cms-cli/src/cli.ts"]), dict(web=False, cms=True, native=False, integration=False))
+        self.assertIn("cms", workspace_dependents()["article"])
+
     def test_a_package_used_by_the_admin_runs_the_cms_job(self):
         self.assertIn("cms", workspace_dependents()["article"])
         self.assertNotIn("cms-admin", workspace_dependents()["article"])

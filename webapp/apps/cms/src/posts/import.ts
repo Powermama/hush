@@ -5,7 +5,7 @@
 // with images in <lang>/media/<slug>/). Safe to run again: posts are matched by
 // language and slug and updated only where they differ, and published articles
 // keep their original dates.
-import { parseArticle } from "@hush/article";
+import { articleContent, parseArticle } from "@hush/article/file";
 import { blogLanguages } from "@hush/article/taxonomy";
 import { and, eq } from "drizzle-orm";
 import { readdir } from "node:fs/promises";
@@ -36,8 +36,8 @@ export async function importArticles(cms: Cms, contentDir: string, actor = "impo
       const where = `${lang}/${file}`;
       const { article, problems } = parseArticle(await Bun.file(join(contentDir, lang, file)).text());
       if (!article) { report.failed.push({ file: where, problems }); continue; }
-      const { published, updated, draft, schema: _schema, ...metadata } = article.front;
-      const fields = { ...metadata, markdown: article.body };
+      const { published, updated, draft } = article.front;
+      const fields = articleContent(article);
       try {
         const [existing] = await cms.db.select({ id: posts.id }).from(posts).where(and(eq(posts.lang, fields.lang), eq(posts.slug, fields.slug)));
         const id = existing?.id ?? (await createDraft(cms.db, fields, actor)).id;

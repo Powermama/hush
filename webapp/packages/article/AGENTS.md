@@ -7,6 +7,7 @@ the blog vocabulary (languages, clusters, article types, URL scheme).
 - Keep `src/article.ts` free of file system and network access; callers pass
   images and the surrounding site through `ArticleContext`.
 - `./authors`, `./taxonomy`, `./markdown` and `./blocks` are imported by browser
-  code and must stay free of Node-only dependencies such as `sharp`.
+  code, and `./file` (the article file format) is compiled into the `hush-cms`
+  CLI; all of them must stay free of Node-only dependencies such as `sharp`.
 - The rules mirror the hush-seo skill profile; change both together.
 - Check with `bun run lint` and `bun test` here and the blog tests in `apps/web`.

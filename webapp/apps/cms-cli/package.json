@@ -1,0 +1,27 @@
+{
+  "name": "@hush/cms-cli",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "hush-cms": "src/main.ts"
+  },
+  "scripts": {
+    "lint": "tsc -p .",
+    "test": "bun test",
+    "api:client": "orval",
+    "api:check": "bun run api:client && git diff --exit-code -- src/api/cms.generated.ts",
+    "build": "bun build src/main.ts --compile --minify --outfile dist/hush-cms",
+    "install:cli": "bun run build && mkdir -p \"$HOME/.local/bin\" && cp dist/hush-cms \"$HOME/.local/bin/hush-cms\""
+  },
+  "dependencies": {
+    "@hush/article": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.9",
+    "orval": "8.48.0",
+    "postgres": "3.4.7",
+    "typescript": "7.0.2"
+  }
+}

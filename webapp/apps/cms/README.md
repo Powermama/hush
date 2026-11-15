@@ -18,7 +18,8 @@ bun run cms:token --name me --scopes posts:read,posts:write,posts:publish
 ```
 
 The OpenAPI document is served at `/openapi.json` and committed in
-`openapi/hush-cms.json`.
+`openapi/hush-cms.json`. Agents and scripts use it through
+[`hush-cms`](../cms-cli/README.md), the CLI generated from it.
 
 | Command | What it does |
 | --- | --- |

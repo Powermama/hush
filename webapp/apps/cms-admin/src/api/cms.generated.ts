@@ -24,6 +24,36 @@ import type {
 } from '@tanstack/react-query';
 
 import { cmsFetch } from './fetcher';
+export type CallerScopesItem = typeof CallerScopesItem[keyof typeof CallerScopesItem];
+
+
+export const CallerScopesItem = {
+  'posts:read': 'posts:read',
+  'posts:write': 'posts:write',
+  'posts:publish': 'posts:publish',
+} as const;
+
+export interface Caller {
+  /** token:<name> for a token, github:<login> for the signed-in owner */
+  actor: string;
+  scopes: CallerScopesItem[];
+  /**
+     * When the token stops working; null for the owner and for tokens without an expiry.
+     * @nullable
+     */
+  expiresAt: string | null;
+}
+
+export type ErrorError = {
+  code: string;
+  message: string;
+  problems?: string[];
+};
+
+export interface Error {
+  error: ErrorError;
+}
+
 export type PostLang = typeof PostLang[keyof typeof PostLang];
 
 
@@ -118,16 +148,6 @@ export interface Post {
      * @nullable
      */
   rendition: PostRendition;
-}
-
-export type ErrorError = {
-  code: string;
-  message: string;
-  problems?: string[];
-};
-
-export interface Error {
-  error: ErrorError;
 }
 
 export type PreviewRenditionTocItem = {
@@ -527,6 +547,119 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export type getCallerResponse200 = {
+  data: Caller
+  status: 200
+}
+
+export type getCallerResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type getCallerResponseSuccess = (getCallerResponse200) & {
+  headers: Headers;
+};
+export type getCallerResponseError = (getCallerResponse401) & {
+  headers: Headers;
+};
+
+export type getCallerResponse = (getCallerResponseSuccess | getCallerResponseError)
+
+export const getGetCallerUrl = () => {
+
+
+
+
+  return `/v1/me`
+}
+
+export const getCaller = async ( options?: Parameters<typeof cmsFetch>[1]): Promise<getCallerResponse> => {
+
+  return cmsFetch<getCallerResponse>(getGetCallerUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCallerQueryKey = () => {
+    return [
+    `/v1/me`
+    ] as const;
+    }
+
+
+export const getGetCallerQueryOptions = <TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCallerQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCaller>>> = ({ signal }) => getCaller({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCallerQueryResult = NonNullable<Awaited<ReturnType<typeof getCaller>>>
+export type GetCallerQueryError = Error
+
+
+export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCaller>>,
+          TError,
+          Awaited<ReturnType<typeof getCaller>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCaller>>,
+          TError,
+          Awaited<ReturnType<typeof getCaller>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCallerQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export type listPostsResponse200 = {
   data: ListPosts200
@@ -1041,7 +1174,7 @@ export const getDeletePostUrl = (id: string,) => {
 }
 
 /**
- * Deletes a draft with its history and images. A scheduled or published post is unpublished first.
+ * Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first.
  */
 export const deletePost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<deletePostResponse> => {
 
@@ -1092,7 +1225,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type DeletePostMutationError = Error
     export type DeletePostMutationVariables = {id: string}
 
-    /** Deletes a draft with its history and images. A scheduled or published post is unpublished first. */
+    /** Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first. */
 export const useDeletePost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<

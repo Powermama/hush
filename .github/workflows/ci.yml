@@ -209,6 +209,11 @@ jobs:
       - name: Check the admin and its generated API client
         working-directory: webapp/apps/cms-admin
         run: bun run lint && bun run api:check && bun run test
+      # The hush-cms CLI calls the API: its generated client, its journeys against
+      # a real CMS process, and its standalone binary.
+      - name: Check the CLI, its generated API client and its binary
+        working-directory: webapp/apps/cms-cli
+        run: bun run lint && bun run api:check && bun run test && bun run build && dist/hush-cms --help
       # The article contract and blocks (packages/article) are the CMS's core.
       - name: Check the article package
         working-directory: webapp/packages/article

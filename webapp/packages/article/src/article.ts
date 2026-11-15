@@ -10,39 +10,12 @@ import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
-import { parse as parseYaml } from "yaml";
-import { z } from "zod";
-import { blogAuthorIds, type BlogAuthorId } from "./authors.ts";
+import type { BlogAuthorId } from "./authors.ts";
 import { faqHeadings, isTldr, parseMarkdown, sourcesHeadings, tldrMarker, tldrTitles, type MdNode } from "./markdown.ts";
-import {
-  blogArticleTypes, blogClusterIds, blogLanguages, blogPath, editorialPolicySlugs, type BlogClusterId, type BlogLanguage,
-} from "./taxonomy.ts";
+import { blogPath, editorialPolicySlugs, type BlogClusterId, type BlogLanguage } from "./taxonomy.ts";
+import type { FrontMatter, ParsedArticle } from "./file.ts";
 
-/** The front matter fields written by the hush-seo skill. Unknown fields fail loudly. */
-export const frontMatterFields = z.object({
-  title: z.string().min(50).max(60),
-  description: z.string().min(140).max(160),
-  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
-  lang: z.enum(blogLanguages),
-  keyword: z.string().min(2),
-  secondaryKeywords: z.array(z.string().min(2)).max(8),
-  type: z.enum(blogArticleTypes),
-  cluster: z.enum(blogClusterIds),
-  author: z.enum(blogAuthorIds),
-  published: z.iso.date(),
-  updated: z.iso.date(),
-  imageAlt: z.string().min(10).max(160),
-  schema: z.tuple([z.literal("BlogPosting")]),
-  draft: z.boolean(),
-}).strict();
-
-/** Front matter as a whole: its fields plus the rules that relate them. */
-export const frontMatterSchema = frontMatterFields.refine((data) => data.updated >= data.published, {
-  message: "updated must not be earlier than published",
-  path: ["updated"],
-});
-
-export type FrontMatter = z.infer<typeof frontMatterSchema>;
+export * from "./file.ts";
 
 export type TocEntry = { id: string; text: string };
 
@@ -154,12 +127,6 @@ function text(node: MdNode | HastNode): string {
   return (node.children ?? []).map((child) => text(child as MdNode)).join("");
 }
 
-export function splitFrontMatter(source: string) {
-  const match = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(source.replace(/\r\n/g, "\n"));
-  if (!match) throw new Error("missing front matter block delimited by ---");
-  return { data: parseYaml(match[1]!) as unknown, body: match[2]! };
-}
-
 function isAllowedUrl(url: string) {
   if (url.startsWith("#")) return true;
   if (url.startsWith("/") && !url.startsWith("//")) return true;
@@ -175,34 +142,6 @@ export type ArticleContext = {
   /** The cover template and renderer sources: changing either renames every cover. */
   coverSeed: readonly string[];
 };
-
-export type ParsedArticle = { front: FrontMatter; body: string };
-
-/** Splits and validates the front matter. Problems carry no file prefix. */
-export function parseArticle(source: string): { article?: ParsedArticle; problems: string[] } {
-  let split;
-  try {
-    split = splitFrontMatter(source);
-  } catch (error) {
-    return { problems: [(error as Error).message] };
-  }
-  const result = frontMatterSchema.safeParse(split.data);
-  if (!result.success) {
-    return { problems: result.error.issues.map((issue) => `front matter ${issue.path.join(".") || "(root)"}: ${issue.message}`) };
-  }
-  return { article: { front: result.data, body: split.body }, problems: [] };
-}
-
-/**
- * Writes an article in the hush-seo file format: front matter in the schema's
- * field order, one JSON value per line (valid YAML), then the body.
- * parseArticle(formatArticle(article)) returns the same article.
- */
-export function formatArticle({ front, body }: ParsedArticle): string {
-  const fields = Object.keys(frontMatterFields.shape) as Array<keyof FrontMatter>;
-  const lines = fields.map((field) => `${field}: ${JSON.stringify(front[field])}`);
-  return `---\n${lines.join("\n")}\n---\n${body}`;
-}
 
 /**
  * Checks one article against the contract and renders it. Rules that need the
