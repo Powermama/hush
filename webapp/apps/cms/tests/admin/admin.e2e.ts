@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 //
-// CMS-001 to CMS-008 (docs/user-journeys/cms.md): the owner's journeys in the
+// CMS-001 to CMS-010 (docs/user-journeys/cms.md): the owner's journeys in the
 // admin, on desktop, a phone and WebKit. Each test writes its own posts, so
 // browsers running in parallel never share one.
 import { expect, test as base, type Page } from "@playwright/test";
@@ -33,9 +33,9 @@ const test = base.extend<{ signedIn: Page; draft: (overrides?: Record<string, un
 const order = ["Scheduled", "Draft", "Published"];
 const statusOf = async (page: Page, id: string) => (await (await page.request.get(`/v1/posts/${id}`)).json() as Post).status;
 
-test("CMS-001 the owner signs in with GitHub and sees every post with its status", async ({ browser, signedIn, draft }, testInfo) => {
+test("CMS-001 the owner signs in with GitHub and sees every post with its status", async ({ browser, signedIn, draft, baseURL }, testInfo) => {
   // A visitor without a session, in a browser of their own.
-  const visitor = await browser.newContext({ ...testInfo.project.use, baseURL: "https://localhost:4310", ignoreHTTPSErrors: true });
+  const visitor = await browser.newContext({ ...testInfo.project.use, baseURL, ignoreHTTPSErrors: true });
   const anonymous = await visitor.newPage();
   await anonymous.goto("/");
   await expect(anonymous).toHaveURL(/\/sign-in$/);
@@ -213,9 +213,12 @@ test("CMS-003 publishing now takes a valid draft live", async ({ signedIn, draft
   await flow.getByRole("button", { name: /Continue, final review/ }).click();
   await expect(flow).toContainText("Your post will be published on your site.");
   await flow.getByRole("button", { name: "Publish post, right now" }).click();
-  await expect(signedIn.getByText("Post published")).toBeVisible();
-  await expect(flow).toBeHidden();
+  // As in Ghost, the editor goes to the posts list, which celebrates the post (CMS-010).
+  await expect(signedIn).toHaveURL(/\/$/);
+  await expect(signedIn.getByRole("dialog")).toContainText("Boom! It’s out there.");
   expect(await statusOf(signedIn, post.id)).toBe("published");
+  await signedIn.getByRole("button", { name: "Close" }).click();
+  await signedIn.locator(`a[href="/posts/${post.id}"]`).first().click();
   await expect(status(signedIn)).toHaveText("Published");
   await expect(signedIn.getByRole("button", { name: "Unpublish" })).toBeVisible();
 });
@@ -244,15 +247,23 @@ test("CMS-004 scheduling sets a future time and the post waits for it", async ({
   await flow.getByRole("button", { name: /Continue, final review/ }).click();
   await expect(flow).toContainText("On 4 May 2031 at 09:30 your post will be published on your site.");
   await flow.getByRole("button", { name: "Publish post, on May 4th" }).click();
-  await expect(signedIn.getByText("Post scheduled")).toBeVisible();
-  await expect(status(signedIn)).toHaveText("Scheduled");
+  // The list says "All set!" for a schedule rather than celebrating a publish.
+  await expect(signedIn).toHaveURL(/\/$/);
+  const celebration = signedIn.getByRole("dialog");
+  await expect(celebration).toContainText("All set!");
+  await expect(celebration).not.toContainText("out there");
   expect(await statusOf(signedIn, post.id)).toBe("scheduled");
+  await signedIn.keyboard.press("Escape");
+  await expect(celebration).toBeHidden();
+  await expect(signedIn.getByRole("listitem").filter({ has: signedIn.locator(`a[href="/posts/${post.id}"]`) })).toContainText("Scheduled");
+  await signedIn.goto(`/posts/${post.id}`);
+  await expect(status(signedIn)).toHaveText("Scheduled");
 });
 
-test("CMS-005 unpublishing asks first, then returns the post to drafts", async ({ signedIn, draft }) => {
+test("CMS-005 unpublishing asks first, then returns the post to drafts", async ({ signedIn, draft, baseURL }) => {
   const post = await draft();
   // A bodyless POST counts as a form for the CSRF check: it must name its origin, as browsers do.
-  expect((await signedIn.request.post(`/v1/posts/${post.id}/publish`, { headers: { origin: "https://localhost:4310" } })).status()).toBe(200);
+  expect((await signedIn.request.post(`/v1/posts/${post.id}/publish`, { headers: { origin: baseURL! } })).status()).toBe(200);
   await signedIn.goto(`/posts/${post.id}`);
   await signedIn.getByRole("button", { name: "Unpublish" }).click();
   const flow = signedIn.getByRole("dialog", { name: "Unpublish" });
@@ -273,10 +284,112 @@ test("CMS-006 an earlier revision can be restored from the post's history", asyn
   await signedIn.goto(`/posts/${post.id}`);
   await expect(article(signedIn)).toContainText("A later wording of the answer.");
   await signedIn.getByRole("button", { name: "Settings" }).click();
-  await signedIn.getByRole("button", { name: "Restore" }).first().click();
+  await signedIn.getByRole("button", { name: "Post history" }).click();
+  const history = signedIn.getByRole("complementary", { name: "Post history" });
+  await expect(history.getByText("Latest")).toBeVisible();
+  await history.getByRole("button", { name: "Restore" }).first().click();
   await expect(signedIn.getByText("Revision restored")).toBeVisible();
-  await signedIn.keyboard.press("Escape");
   await expect(article(signedIn)).toContainText("The speech model runs on your Mac.");
+});
+
+/** The settings panel beside the editor, and the toggle in its header. */
+const settings = (page: Page) => page.getByRole("complementary", { name: "Post settings" });
+const settingsToggle = (page: Page) => page.getByRole("button", { name: "Settings" });
+
+test("CMS-009 the post settings dock beside the editor, and Cmd/Ctrl+. toggles them", async ({ signedIn, draft }, testInfo) => {
+  const post = await draft();
+  await signedIn.goto(`/posts/${post.id}`);
+  await expect(article(signedIn)).toBeVisible();
+  await expect(settings(signedIn)).toHaveCount(0);
+  await expect(settingsToggle(signedIn)).toHaveAttribute("aria-expanded", "false");
+
+  await settingsToggle(signedIn).click();
+  await expect(settings(signedIn)).toBeVisible();
+  await expect(settingsToggle(signedIn)).toHaveAttribute("aria-expanded", "true");
+  await expect(settings(signedIn).getByRole("heading", { name: "Post settings" })).toBeVisible();
+  // A panel beside the editor, never a modal over it.
+  await expect(signedIn.getByRole("dialog")).toHaveCount(0);
+  // Wait for its 450ms slide to end before measuring it.
+  const viewport = signedIn.viewportSize()!;
+  await expect.poll(async () => Math.round((await settings(signedIn).boundingBox())!.width)).toBe(viewport.width < 500 ? viewport.width : 350 - 2 * 4);
+  if (viewport.width >= 1024) {
+    // The writing area narrows: the article ends before the panel starts.
+    const [text, panel] = [(await article(signedIn).boundingBox())!, (await settings(signedIn).boundingBox())!];
+    expect(text.x + text.width).toBeLessThanOrEqual(panel.x);
+  }
+  await expect(settings(signedIn).getByText(`behu.sh/blog/${post.slug}`)).toBeVisible();
+
+  // Meta data opens as a pane over the list; Escape returns to the list.
+  await settings(signedIn).getByRole("button", { name: "Meta data" }).click();
+  const meta = signedIn.getByRole("complementary", { name: "Meta data" });
+  await expect(meta.getByRole("heading", { name: "Meta data" })).toBeVisible();
+  await expect(meta.getByText("Search Engine Result Preview")).toBeVisible();
+  const seoTitle = "How to dictate on a Mac without the cloud, a calm guide";
+  await meta.getByLabel("Meta title").fill(seoTitle);
+  await expect(meta.getByText(`You've used ${seoTitle.length}`)).toBeVisible();
+  await signedIn.keyboard.press("Escape");
+  await expect(settings(signedIn).getByRole("button", { name: "Meta data" })).toBeFocused();
+  // The edit saves itself as every draft change does.
+  await expect.poll(async () => (await (await signedIn.request.get(`/v1/posts/${post.id}`)).json() as { title: string }).title, { timeout: 10_000 }).toBe(seoTitle);
+
+  // The shortcut closes the panel from inside it, leaving the focus on the toggle.
+  await signedIn.keyboard.press("ControlOrMeta+.");
+  await expect(settings(signedIn)).toHaveCount(0);
+  await expect(settingsToggle(signedIn)).toBeFocused();
+  await expect(settingsToggle(signedIn)).toHaveAttribute("aria-expanded", "false");
+  // From the article it opens the panel and leaves the writer where they type.
+  await endOfArticle(signedIn);
+  await signedIn.keyboard.press("ControlOrMeta+.");
+  await expect(settings(signedIn)).toBeVisible();
+  await expect(article(signedIn)).toBeFocused();
+  // Cmd/Ctrl+S still saves, and the preview's own shortcut still opens it; there the settings shortcut does nothing.
+  await signedIn.keyboard.press("ControlOrMeta+p");
+  await expect(signedIn.getByRole("dialog", { name: "Preview" })).toBeVisible();
+  await signedIn.keyboard.press("ControlOrMeta+.");
+  await signedIn.keyboard.press("Escape");
+  await expect(signedIn.getByRole("dialog", { name: "Preview" })).toHaveCount(0);
+  await expect(settings(signedIn)).toBeVisible();
+
+  // Above 1024px the editor opens with the panel as the writer left it; below, always closed.
+  await signedIn.reload();
+  await expect(article(signedIn)).toBeVisible();
+  if (testInfo.project.name === "mobile") await expect(settings(signedIn)).toHaveCount(0);
+  else await expect(settings(signedIn)).toBeVisible();
+});
+
+test("CMS-010 publishing celebrates the post on the posts list, with its link to share", async ({ signedIn, draft }) => {
+  const post = await draft();
+  await signedIn.goto(`/posts/${post.id}`);
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
+  await signedIn.keyboard.press("ControlOrMeta+Shift+p");
+  const flow = signedIn.getByRole("dialog", { name: "Publish" });
+  await flow.getByRole("button", { name: /Continue, final review/ }).click();
+  await flow.getByRole("button", { name: "Publish post, right now" }).click();
+
+  await expect(signedIn).toHaveURL(/\/$/);
+  const celebration = signedIn.getByRole("dialog");
+  await expect(celebration.getByRole("heading", { level: 2 })).toContainText("Boom! It’s out there.");
+  await expect(celebration.getByRole("heading", { level: 2 })).toContainText(/That’s \d+ posts? published\./);
+  // The post as a card, linking to it on behu.sh.
+  const url = `https://behu.sh/blog/${post.slug}`;
+  const card = celebration.getByRole("link", { name: /How to dictate on a Mac without the cloud/ });
+  await expect(card).toHaveAttribute("href", url);
+  await expect(card).toHaveAttribute("target", "_blank");
+  await expect(card).toContainText("A practical guide to dictating on a Mac");
+  await expect(card).toContainText("hush");
+  await expect(card).toContainText("Clemens Kressmann");
+  // Sharing names the post's address.
+  await expect(celebration.getByRole("link", { name: "Share on X" })).toHaveAttribute("href", `https://twitter.com/intent/tweet?text=${encodeURIComponent("How to dictate on a Mac without the cloud")}%0A${encodeURIComponent(url)}`);
+  await expect(celebration.getByRole("link", { name: "Share on LinkedIn" })).toHaveAttribute("href", new RegExp(encodeURIComponent(url).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  await celebration.getByRole("button", { name: "Copy link" }).click();
+  await expect(celebration.getByRole("button", { name: "Copied!" })).toBeVisible();
+
+  // Closed, it stays closed: the celebration is read once.
+  await celebration.getByRole("button", { name: "Close" }).click();
+  await expect(celebration).toBeHidden();
+  await signedIn.reload();
+  await expect(signedIn.getByRole("heading", { name: "Posts", exact: true })).toBeVisible();
+  await expect(signedIn.getByRole("dialog")).toHaveCount(0);
 });
 
 test("the admin runs under its Content Security Policy without violations", async ({ signedIn, draft }) => {

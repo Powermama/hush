@@ -10,3 +10,18 @@
 @import "./editor/editor.css";
 
 @source "./";
+
+/* The post settings panel's motion, as in Ghost Admin (apps/admin/src/index.css).
+   `--editor-settings-progress` on the editor shell is only ever 0 or 1; each
+   element that moves with the panel transitions its own property, named in
+   brackets (`editor-settings-motion-[width]`), on this one timing. Animating the
+   inherited progress itself would restyle the whole document every frame. */
+@utility editor-settings-motion-* {
+  transition-property: --value([*]);
+  transition-duration: 450ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition-property: none;
+  }
+}
