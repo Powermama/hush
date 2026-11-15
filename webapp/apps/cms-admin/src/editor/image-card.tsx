@@ -12,7 +12,7 @@ import {
   KEY_DELETE_COMMAND, KEY_ENTER_COMMAND, type NodeKey,
 } from "lexical";
 import { ImageIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ export function ImageCard({ nodeKey, image }: { nodeKey: NodeKey; image: Image }
   const [over, setOver] = useState(false);
   const card = useRef<HTMLElement>(null);
   const picker = useRef<HTMLInputElement>(null);
+  const caption = useRef<HTMLTextAreaElement>(null);
   const url = image.src ? host.imageUrl(image.src) : undefined;
 
   const change = (patch: Partial<Image>) => editor.update(() => { ($getNodeByKey(nodeKey) as ImageNode | null)?.setImage(patch); });
@@ -73,6 +74,14 @@ export function ImageCard({ nodeKey, image }: { nodeKey: NodeKey; image: Image }
     ? { value: image.alt, placeholder: "Type alt text for image (optional)", label: "Alt text", set: (alt: string) => change({ alt }) }
     : { value: image.caption, placeholder: "Type caption for image (optional)", label: "Caption", set: (caption: string) => change({ caption }) };
 
+  // The caption wraps as on the site: as tall as its text.
+  useLayoutEffect(() => {
+    const element = caption.current;
+    if (!element) return;
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  }, [field.value, editingAlt]);
+
   return (
     <figure
       ref={card}
@@ -80,7 +89,7 @@ export function ImageCard({ nodeKey, image }: { nodeKey: NodeKey; image: Image }
       className={cn("not-kg-prose relative m-0 rounded-[3px] font-sans leading-normal transition-shadow", selected ? "shadow-[0_0_0_2px_var(--green)]" : "hover:shadow-[0_0_0_1px_var(--green)]")}
     >
       {url ? (
-        <img src={url} alt={image.alt} draggable={false} className="mx-auto block h-auto max-w-full" />
+        <img src={url} alt={image.alt} draggable={false} className="mx-auto block h-auto max-w-full rounded-[10px] outline outline-1 -outline-offset-1 outline-black/[0.07]" />
       ) : image.src && !host.mediaLoaded ? (
         <div role="status" aria-label="Loading image" className="flex h-[22vh] min-h-[160px] w-full items-center justify-center bg-(--grey-50) in-[.dark]:bg-(--grey-950)">
           <LoadingIndicator size="md" />
@@ -107,16 +116,17 @@ export function ImageCard({ nodeKey, image }: { nodeKey: NodeKey; image: Image }
       )}
       <input ref={picker} type="file" accept={imageTypes.join(",")} hidden onChange={(event) => { void choose(event.target.files?.[0]); event.target.value = ""; }} />
       {(url || image.src) && (
-        <figcaption className="relative flex min-h-[3.6rem] items-center px-14 py-2">
-          <input
+        <figcaption className="relative flex min-h-[3.6rem] items-start px-14 py-2">
+          <textarea
+            ref={caption} rows={1}
             aria-label={field.label}
             value={field.value}
             placeholder={field.placeholder}
-            onChange={(event) => field.set(event.target.value)}
-            // Typing here is the field's own business, not the editor's.
-            onKeyDown={(event) => event.stopPropagation()}
+            onChange={(event) => field.set(event.target.value.replace(/\s*\n\s*/g, " "))}
+            // Typing here is the field's own business, not the editor's; Enter ends the caption.
+            onKeyDown={(event) => { event.stopPropagation(); if (event.key === "Enter") event.preventDefault(); }}
             onFocus={() => clearSelection()}
-            className="w-full border-0 bg-transparent p-0 text-center text-[1.4rem] tracking-[0.04rem] text-(--grey-900) outline-none placeholder:text-(--grey-500) in-[.dark]:text-(--grey-300)"
+            className="block w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-center text-[1.4rem] leading-[1.5] tracking-[0.04rem] text-(--grey-900) outline-none placeholder:text-(--grey-500) in-[.dark]:text-(--grey-300)"
           />
           <button
             type="button"

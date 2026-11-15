@@ -19,7 +19,7 @@ const pageHead = (metadata: typeof privatePageMetadata) => head.replace(
 // waterfall missed the entrance's fallback deadline, so landing pages announce
 // the scene's chunks and texture in the head and the browser fetches them with
 // the application.
-type ManifestChunk = { file: string; isEntry?: boolean; imports?: string[]; assets?: string[] };
+type ManifestChunk = { file: string; isEntry?: boolean; imports?: string[]; assets?: string[]; css?: string[] };
 const manifest: Record<string, ManifestChunk> = await Bun.file("dist/.vite/manifest.json").json();
 const sceneKey = Object.keys(manifest).find((key) => key.endsWith("src/landing/HushScene.ts"));
 if (!sceneKey) throw new Error("Missing the landing scene in the build manifest");
@@ -64,15 +64,22 @@ function pagePreloads(path: string) {
   const key = pageModule(path);
   if (!key) return "";
   if (!manifest[key]) throw new Error(`Missing ${key}, the code of ${path}, in the build manifest`);
-  const files = new Set<string>();
+  const files = new Set<string>(), styles = new Set<string>();
   (function collect(chunkKey: string) {
     const chunk = manifest[chunkKey]!;
     // The application entry is already loaded by the page itself.
     if (chunk.isEntry || files.has(chunk.file)) return;
     files.add(chunk.file);
+    for (const style of chunk.css ?? []) styles.add(style);
     for (const imported of chunk.imports ?? []) collect(imported);
   })(key);
-  return [...files].map((file) => `<link rel="modulepreload" crossorigin href="/${file}">`).join("");
+  // A page's own styles block rendering like the application's: linked by its
+  // JavaScript instead, the prerendered page would first paint unstyled (a
+  // full-screen logo on the landing). Vite's loader finds them already linked.
+  return [
+    ...[...styles].map((file) => `<link rel="stylesheet" crossorigin href="/${file}">`),
+    ...[...files].map((file) => `<link rel="modulepreload" crossorigin href="/${file}">`),
+  ].join("");
 }
 /** The resource hints a head does not announce yet, each once. */
 function withoutRepeats(documentHead: string, hints: string) {

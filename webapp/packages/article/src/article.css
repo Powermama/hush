@@ -1,9 +1,10 @@
 /* SPDX-License-Identifier: AGPL-3.0-only
    Copyright (c) 2026 Clemens Kressmann
 
-   How rendered article HTML looks, wherever it is shown: the website's article
-   pages and the CMS preview. It reads --color-ink, --color-muted and
-   --color-soft from the page around it. */
+   How rendered article HTML looks, wherever it is shown. It reads
+   --color-ink, --color-muted and --color-soft from the page around it.
+   .blog-prose is the text of the blog's other pages (the editorial policy);
+   .article-prose, below, is the articles' own. */
 .blog-prose { font-size: 17px; line-height: 1.75; color: #2b2c29; min-width: 0; }
 @media (min-width: 768px) { .blog-prose { font-size: 18px; } }
 .blog-prose > :first-child { margin-top: 0; }
@@ -71,3 +72,148 @@
   content: ""; position: absolute; left: 7px; top: 17px; width: 6px; height: 4px; border: solid #fff; border-width: 0 0 1.6px 1.6px; transform: rotate(-45deg);
 }
 .blog-prose .blog-tldr p:not(.blog-tldr-title) { margin: 0 0 14px; }
+
+/* An article's title and lead (its excerpt), as the CMS editor shows them (Ghost's
+   post title and excerpt): wherever an article is shown, the website's article page
+   and the CMS preview. */
+.article-title { margin: 0; font-size: 48px; line-height: 1.18; letter-spacing: -0.017em; font-weight: 700; color: #15171a; text-wrap: balance; }
+.article-lead { margin: 16px 0 0; font-size: 20px; line-height: 1.5; font-weight: 440; letter-spacing: -0.018em; color: rgb(21 23 26 / 0.9); text-wrap: pretty; }
+@media (max-width: 768px) { .article-title { font-size: 36px; } }
+@media (max-width: 500px) { .article-title { font-size: 28px; } .article-lead { font-size: 18px; } }
+
+/* Articles: the CMS editor's typography, so an article reads on behu.sh as it
+   was written. Koenig's prose styles (TryGhost/Koenig, kg-prose.css, MIT,
+   Ghost Foundation), in px for a 16px root: Georgia for the text, the page's
+   own sans for headings, and vertical rhythm by margin-top only, depending on
+   the pair of blocks. Only articles use it (the website's article page and the
+   CMS preview); other pages keep .blog-prose above. Change it together with
+   apps/cms-admin/src/editor. The copy button is styled above. */
+.article-prose {
+  --prose-text: #394047;
+  --prose-heading: #15171a;
+  --prose-accent: #7667d7;
+  --prose-rule: #dde1e5;
+  --prose-code-bg: #f4f5f6;
+  --prose-code-border: #ebeef0;
+  min-width: 0; color: var(--prose-text);
+  font-family: Georgia, Times, serif; font-size: 20px; line-height: 1.6;
+  text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
+}
+.article-prose > * { margin: 16px 0 0; }
+.article-prose > :first-child { margin-top: 0; }
+
+/* Headings: the page's sans, bold, tighter as they grow. */
+.article-prose :is(h2, h3, h4, h5, h6) {
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  font-weight: 700; color: var(--prose-heading); scroll-margin-top: 96px;
+}
+.article-prose :is(h2, h3, h4, h5, h6) strong { font-weight: 800; }
+.article-prose h2 { font-size: 32px; line-height: 1.2; letter-spacing: -0.014em; }
+.article-prose h3 { font-size: 25px; line-height: 1.3; letter-spacing: -0.013em; }
+.article-prose h4 { font-size: 22px; line-height: 1.35; letter-spacing: -0.011em; }
+.article-prose :is(h5, h6) { font-size: 20px; line-height: 1.35; letter-spacing: -0.011em; }
+.article-prose > :is(p, ul, ol, blockquote, aside, figure, table, .blog-code) + :is(h2, h3, h4, h5, h6) { margin-top: 48px; }
+.article-prose h2 + :is(h3, h4) { margin-top: 12px; }
+.article-prose :is(h3, h4) + :is(h3, h4) { margin-top: 8px; }
+
+/* Text after a heading sits close to it; text after text breathes. */
+.article-prose :is(h2, h3, h4, h5, h6) + :is(p, blockquote) { margin-top: 8px; }
+.article-prose > :is(p, blockquote, aside, ul, ol) + p { margin-top: 32px; }
+.article-prose > :is(figure, table, .blog-code, hr) + :is(p, ul, ol, blockquote) { margin-top: 28px; }
+.article-prose strong { font-weight: 700; }
+.article-prose a { color: var(--prose-accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.article-prose a:hover { color: var(--prose-heading); }
+
+/* Lists: roomy items, markers outside the text. */
+.article-prose :is(ul, ol) { padding: 0; }
+.article-prose > :is(p, ul, ol, blockquote, aside) + :is(ul, ol) { margin-top: 30px; }
+.article-prose h2 + :is(ul, ol) { margin-top: 8px; }
+.article-prose :is(h3, h4, h5, h6) + :is(ul, ol) { margin-top: 12px; }
+.article-prose li { display: list-item; margin: 10px 0 0; line-height: 32px; }
+.article-prose li:first-child { margin-top: 0; }
+.article-prose ul > li { list-style-type: disc; margin-left: 24px; padding-left: 6px; }
+.article-prose ol > li { list-style-type: decimal; margin-left: 22px; padding-left: 8px; }
+.article-prose ul ul > li { list-style-type: circle; }
+.article-prose ol ol > li { list-style-type: lower-alpha; }
+.article-prose li :is(ul, ol) { margin: 10px 0 20px; }
+.article-prose li > p { margin: 0; }
+
+.article-prose blockquote { padding-left: 20px; border-left: 2.5px solid var(--prose-accent); font-style: italic; }
+.article-prose blockquote p { margin: 0; }
+.article-prose > :is(p, blockquote) + blockquote { margin-top: 32px; }
+.article-prose hr { margin: 32px 0 16px; border: 0; border-top: 1px solid var(--prose-rule); }
+
+/* Code: inline and in blocks, on Koenig's quiet grey. */
+.article-prose code {
+  padding: 4px 4px 2px; border: 1px solid var(--prose-code-border); border-radius: 2px; background: var(--prose-code-bg);
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; font-size: 0.8em; line-height: 1em; color: var(--prose-text);
+  vertical-align: middle; white-space: pre-wrap;
+}
+.article-prose > :is(p, ul, ol, blockquote, h2, h3, h4) + .blog-code { margin-top: 32px; }
+.article-prose :is(h2, h3, h4) + .blog-code { margin-top: 16px; }
+.article-prose .blog-code { position: relative; }
+.article-prose pre {
+  margin: 0; padding: 16px 92px 16px 20px; overflow-x: auto; border: 1px solid var(--prose-code-border); border-radius: 4px;
+  background: var(--prose-code-bg); font-size: 15px; line-height: 1.6;
+}
+.article-prose pre code { padding: 0; border: 0; border-radius: 0; background: none; font-size: inherit; line-height: inherit; white-space: pre; vertical-align: baseline; }
+/* Screenshots: as the editor shows them, with only a hairline and rounded corners
+   (they bring their own window frame, so no card or shadow around them),
+   full column width; the caption centred below in a small, quiet sans. The picture
+   itself opens the full size (a zoom cursor says so), over the article on the page. */
+.article-prose > :is(p, ul, ol, blockquote) + figure { margin-top: 32px; }
+.article-prose :is(h2, h3, h4) + figure { margin-top: 16px; }
+.article-prose figure img { display: block; width: 100%; height: auto; border-radius: 10px; outline: 1px solid rgb(0 0 0 / 0.07); outline-offset: -1px; }
+.article-prose figcaption { margin: 12px auto 0; max-width: 600px; font-family: var(--font-sans, sans-serif); font-size: 14px; line-height: 1.5; color: var(--color-muted); text-align: center; text-wrap: balance; }
+.article-prose .blog-image-full { display: block; cursor: zoom-in; }
+.article-prose .blog-image-full:focus-visible { outline: 2px solid var(--prose-accent); outline-offset: 4px; }
+
+/* Tables scroll inside their own box; the page never scrolls sideways. */
+.article-prose > :is(p, ul, ol, blockquote) + table { margin-top: 32px; }
+.article-prose :is(h2, h3, h4) + table { margin-top: 16px; }
+.article-prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-family: var(--font-sans, sans-serif); font-size: 15px; line-height: 1.5; }
+.article-prose th, .article-prose td { padding: 10px 14px; border: 1px solid var(--prose-rule); text-align: left; vertical-align: top; min-width: 120px; }
+.article-prose th { font-weight: 600; color: var(--prose-heading); background: #fafafb; }
+
+/* Cards next to cards keep Koenig's card spacing. */
+.article-prose > :is(figure, table, .blog-code, .blog-tldr) + :is(figure, table, .blog-code) { margin-top: 32px; }
+
+/* FAQ and sources close the article: a rule sets them apart from the body. */
+.article-prose h2.blog-appendix { margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--prose-rule); }
+
+/* TL;DR summary box at the start of an article ("> [!TLDR]" in Markdown), as the editor draws it. */
+.article-prose .blog-tldr {
+  margin-top: 32px; padding: 20px 22px 16px; border-radius: 18px; border: 1px solid rgb(118 103 215 / 0.18);
+  background: radial-gradient(90% 120% at 100% 0%, rgb(201 184 255 / 0.22), transparent 70%), #fbfaff;
+  font-family: var(--font-sans, sans-serif); font-size: 17px; font-style: normal;
+}
+.article-prose > .blog-tldr:first-child { margin-top: 0; }
+.article-prose .blog-tldr-title { margin: 0 0 6px; font-size: 12px; font-weight: 600; line-height: 1.6; letter-spacing: 0.12em; text-transform: uppercase; color: #7667d7; }
+.article-prose .blog-tldr ul { list-style: none; margin: 0; padding: 0; }
+.article-prose .blog-tldr li { position: relative; list-style: none; margin: 0; padding: 9px 0 9px 30px; border-top: 1px solid rgb(118 103 215 / 0.12); line-height: 1.55; }
+.article-prose .blog-tldr li:first-child { border-top: 0; }
+.article-prose .blog-tldr li::before {
+  content: ""; position: absolute; left: 2px; top: 13px; width: 16px; height: 16px; border-radius: 50%; background: #7667d7; }
+.article-prose .blog-tldr li::after {
+  content: ""; position: absolute; left: 7px; top: 17px; width: 6px; height: 4px; border: solid #fff; border-width: 0 0 1.6px 1.6px; transform: rotate(-45deg);
+}
+.article-prose .blog-tldr p:not(.blog-tldr-title) { margin: 0 0 8px; }
+
+/* Phones: Koenig's smaller steps. */
+@media (max-width: 500px) {
+  .article-prose { font-size: 18px; }
+  .article-prose h2 { font-size: 28px; }
+  .article-prose h3 { font-size: 24px; }
+  .article-prose h4 { font-size: 23px; }
+}
+
+/* The full-size image over the article (a <dialog> the article page opens): the
+   reader stays where they were; a click or Escape closes it. */
+.article-image-viewer { max-width: none; max-height: none; width: 100vw; height: 100dvh; margin: 0; padding: 0; border: 0; background: transparent; cursor: zoom-out; }
+.article-image-viewer::backdrop { background: rgb(21 23 26 / 0.86); }
+.article-image-viewer[open] { display: grid; place-items: center; }
+.article-image-viewer img { max-width: min(96vw, 1400px); max-height: 92dvh; width: auto; height: auto; border-radius: 6px; box-shadow: 0 20px 60px rgb(0 0 0 / 0.35); }
+@media (prefers-reduced-motion: no-preference) {
+  .article-image-viewer[open], .article-image-viewer[open]::backdrop { animation: article-image-viewer-in 160ms ease-out; }
+}
+@keyframes article-image-viewer-in { from { opacity: 0; } }

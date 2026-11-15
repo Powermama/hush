@@ -521,7 +521,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
         )}
 
         <PostPreview
-          open={showPreview && Boolean(post)} onOpenChange={setShowPreview} preview={preview} problems={shownProblems} lang={fields.lang}
+          open={showPreview && Boolean(post)} onOpenChange={setShowPreview} preview={preview} problems={shownProblems} lang={fields.lang} lead={fields.description}
           publish={post?.status === "draft" && <Button className="w-20 shrink-0" disabled={busy} onClick={() => { setShowPreview(false); setPublishOpen(true); }}>Publish</Button>}
         />
 

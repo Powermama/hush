@@ -128,7 +128,7 @@ test("BLOG-008 keeps the way back and sharing in a quiet margin, with no content
     // The chevron is an inline 16px icon, never a full-size SVG.
     expect((await page.locator(".blog-article > .blog-back .blog-arrow").boundingBox())!.width).toBeLessThanOrEqual(16);
     expect(back!.height).toBeLessThan(30);
-    const prose = await page.locator(".blog-prose").boundingBox();
+    const prose = await page.locator(".article-prose").boundingBox();
     if (isMobile) {
       await expect(page.locator(".blog-share-margin")).toBeHidden();
       await expect(page.locator(".blog-share-end").getByRole("button").first()).toBeVisible();
@@ -172,17 +172,29 @@ test("BLOG-009 serves the article artwork as the social preview and on cards, ne
   await expect(page.locator('.blog-card img[src*="/blog/covers/"][src$="-card.webp"]')).toHaveCount(2);
 });
 
-test("BLOG-010 opens a full-size article image in a new tab", async ({ page }) => {
+test("BLOG-010 opens an article image at full size over the article, and closes it again", async ({ page }) => {
   await page.goto(article);
-  const figure = page.locator(".blog-prose figure");
+  const figure = page.locator(".article-prose figure");
   await figure.scrollIntoViewIfNeeded();
   await expect.poll(() => figure.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
-  const link = figure.getByRole("link", { name: /Open full-size image \(new tab\)/ });
+  // The picture itself is the link; no extra line of text under it.
+  const link = figure.getByRole("link", { name: /Open full-size image/ });
   await expect(link).toHaveAttribute("href", /-900\.webp$/);
-  const [popup] = await Promise.all([page.waitForEvent("popup"), link.click()]);
-  await expect(popup).toHaveURL(/\/blog\/media\/.+-900\.webp$/);
-  await expect.poll(() => popup.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(900);
-  await popup.close();
+  await expect(link).not.toHaveAttribute("target", /.+/);
+  await expect(figure).not.toContainText("View full-size image");
+  const scroll = await page.evaluate(() => window.scrollY);
+  await link.click();
+  // The reader stays on the article: the full size opens over it.
+  const viewer = page.getByRole("dialog");
+  await expect(viewer).toBeVisible();
+  await expect.poll(() => viewer.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(900);
+  await expect(page).toHaveURL(new RegExp(`${article}$`));
+  await page.keyboard.press("Escape");
+  await expect(viewer).toBeHidden();
+  await link.click();
+  await viewer.click();
+  await expect(viewer).toBeHidden();
+  expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
 });
 
 test("BLOG-011 opens the author profile from the padded edge of the author card", async ({ page }) => {
@@ -195,7 +207,7 @@ test("BLOG-011 opens the author profile from the padded edge of the author card"
 test("BLOG-012 preserves selected article text while scrolling", async ({ page }) => {
   await page.goto(article);
   await page.waitForLoadState("networkidle");
-  const selected = await page.locator(".blog-prose > p").first().evaluate((paragraph) => {
+  const selected = await page.locator(".article-prose > p").first().evaluate((paragraph) => {
     const range = document.createRange();
     range.selectNodeContents(paragraph);
     const selection = window.getSelection()!;

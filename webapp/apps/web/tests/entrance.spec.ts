@@ -133,3 +133,17 @@ test("LANDING-ENTRY-004 keeps the public page readable when application JavaScri
   await expect(page).toHaveURL(/\/verified-messages$/);
   await expect(page.locator("h1")).toBeVisible();
 });
+
+test("LANDING-ENTRY-006 links every page's own styles in its prerendered head", async ({ page, request }) => {
+  for (const path of ["/", "/de", "/verified-messages", "/impressum", "/datenschutz"]) {
+    const html = await (await request.get(path)).text();
+    const head = html.slice(0, html.indexOf("</head>"));
+    const linked = [...head.matchAll(/<link rel="stylesheet"[^>]*href="([^"]+)"/g)].map((match) => match[1]);
+    await page.goto(path);
+    await page.waitForLoadState("networkidle");
+    // A stylesheet the page needs but links only from JavaScript paints the page unstyled first.
+    const used = await page.evaluate(() => [...document.styleSheets].flatMap((sheet) => (sheet.href ? [new URL(sheet.href).pathname] : [])));
+    expect(used.length, path).toBeGreaterThan(0);
+    expect(used.filter((href) => !linked.includes(href)), path).toEqual([]);
+  }
+});

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { authorPath, blogAuthors, type BlogAuthor, type BlogAuthorId } from "@hush/article/authors";
 import { type BlogLanguage } from "@hush/article/taxonomy";
 import { blogCopy, type BlogPostMetadata } from "../../shared/blog";
@@ -87,8 +87,24 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
   const copy = blogCopy[lang];
   const related = relatedPosts(post);
   const articleHTML = useMemo(() => ({ __html: html }), [html]);
+  // Images open at full size over the article, so the reader stays where they were.
+  const viewer = useRef<HTMLDialogElement>(null);
+  const viewerImage = useRef<HTMLImageElement>(null);
+  const openImage = (event: React.MouseEvent<HTMLDivElement>) => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>("a.blog-image-full");
+    // A modified click keeps its usual meaning (a new tab or window).
+    if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return false;
+    const picture = link.querySelector("img");
+    if (!viewer.current || !viewerImage.current || !picture) return false;
+    event.preventDefault();
+    viewerImage.current.src = link.href;
+    viewerImage.current.alt = picture.alt;
+    viewer.current.showModal();
+    return true;
+  };
   // Code blocks carry a copy button from the build; one delegated handler serves them all.
   const copyCode = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (openImage(event)) return;
     const button = (event.target as Element).closest<HTMLButtonElement>(".blog-code-copy");
     const code = button?.parentElement?.querySelector("pre")?.innerText;
     if (!button || code === undefined) return;
@@ -106,10 +122,12 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
       <BlogHeader lang={lang} />
       <main className="blog-article-main">
         {/* As on Notion: a quiet left margin with the way back and sharing, no contents sidebar. */}
-        <article className="blog-article" aria-labelledby="article-title">
+        <article className="blog-article blog-post" aria-labelledby="article-title">
           <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
           <header className="blog-article-header">
-            <h1 id="article-title">{post.heading}</h1>
+            <h1 id="article-title" className="article-title">{post.heading}</h1>
+            {/* The excerpt as the article's lead, as in the editor (Ghost's custom excerpt): what the reader will get. */}
+            <p className="article-lead">{post.description}</p>
             <p className="blog-byline">
               <span>{copy.by} <a href={authorPath(lang, post.author)} rel="author">{blogAuthors[post.author].name}</a></span>
               <span>{copy.published} <BlogDate lang={lang} value={post.published} /></span>
@@ -119,7 +137,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
           </header>
           <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-margin" />
           <div className="blog-body">
-            <div className="blog-prose" data-blog-body="" onClick={copyCode} dangerouslySetInnerHTML={articleHTML} />
+            <div className="article-prose" data-blog-body="" onClick={copyCode} dangerouslySetInnerHTML={articleHTML} />
             <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-end" />
             <BlogAuthorCard lang={lang} author={post.author} />
           </div>
@@ -131,6 +149,9 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
           </section>
         )}
       </main>
+      <dialog ref={viewer} className="article-image-viewer" aria-label={copy.imageViewer} onClick={() => viewer.current?.close()}>
+        <img ref={viewerImage} alt="" />
+      </dialog>
       <BlogDownloadBand lang={lang} />
       <Footer />
     </div>

@@ -265,6 +265,32 @@
     font-size: 1.7rem;
   }
 
+  /* Its list as behu.sh draws it: a check in a violet circle, a line between items. */
+  > div.editor-summary li {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0.9rem 0 0.9rem 3rem;
+    border-top: 1px solid rgb(118 103 215 / 0.12);
+    line-height: 1.55;
+  }
+
+  > div.editor-summary li:first-child {
+    border-top: 0;
+  }
+
+  > div.editor-summary li::before {
+    content: "";
+    position: absolute;
+    top: 1.3rem;
+    left: 0.2rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: #7667d7 center / 1rem no-repeat
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  }
+
   /* An image card: Lexical's wrapper is the block, the card inside it draws itself. */
   > div.editor-image {
     line-height: inherit;

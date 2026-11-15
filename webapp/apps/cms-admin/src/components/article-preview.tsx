@@ -11,18 +11,19 @@
 import articleCss from "@hush/article/article.css?raw";
 import { cn } from "@/lib/utils";
 
-const page = (heading: string, html: string, lang: string) => `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
+const page = (heading: string, lead: string, html: string, lang: string) => `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
 <style>
-:root { --color-ink: #1f201e; --color-muted: #686963; --color-soft: #a7a8a1; }
+:root { --color-ink: #1f201e; --color-muted: #686963; --color-soft: #a7a8a1; --font-sans: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; padding: 40px 24px 80px; background: #fff; color: var(--color-ink);
   font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
-main { max-width: 680px; margin: 0 auto; }
-/* As .blog-article-header h1 on behu.sh. */
-h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; margin: 0 0 40px; color: var(--color-ink); text-wrap: balance; }
+main { max-width: 740px; margin: 0 auto; }
+main > .article-prose { margin-top: 48px; }
 ${articleCss}
-</style></head><body><main><h1>${heading.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</h1><div class="blog-prose">${html}</div></main></body></html>`;
+/* The preview is not the page: a picture does not navigate the frame. */
+.blog-image-full { pointer-events: none; }
+</style></head><body><main><h1 class="article-title">${heading.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</h1>${lead ? `<p class="article-lead">${lead.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</p>` : ""}<div class="article-prose">${html}</div></main></body></html>`;
 
-export function ArticlePreview({ heading, html, lang, className }: { heading: string; html: string; lang: "en" | "de"; className?: string }) {
-  return <iframe title="Preview" sandbox="allow-same-origin" srcDoc={page(heading, html, lang)} className={cn("block bg-white", className)} />;
+export function ArticlePreview({ heading, lead, html, lang, className }: { heading: string; lead: string; html: string; lang: "en" | "de"; className?: string }) {
+  return <iframe title="Preview" sandbox="allow-same-origin" srcDoc={page(heading, lead, html, lang)} className={cn("block bg-white", className)} />;
 }
