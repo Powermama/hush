@@ -6,17 +6,20 @@ import { externalizeScripts } from "./externalize-scripts";
 test("preserves inert markup, attributed scripts, order and exact hydration data", () => {
   const inert = '<!--<script>comment()</script>--><template><script>template()</script></template>' +
     '<noscript><script>noscript()</script></noscript>' +
-    '<script type="application/ld+json">{"name":"hush"}</script>' +
-    '<script type="module" src="/entry.js"></script>';
+    '<script type="application/ld+json">{"name":"hush"}</script>';
+  const module = '<script type="module" src="/entry.js"></script>';
   const first = 'window.$_TSR = "\u0000/&<";';
   const second = "window.order = 2;";
-  const result = externalizeScripts('<!doctype html><html><body>' + inert +
+  const result = externalizeScripts('<!doctype html><html><head>' + module + '</head><body>' + inert +
     `<ScRiPt >${first}</sCrIpT data-ignored="yes"><script\n>${second}</script\t>` +
     '</body></html>');
   expect(result.html).toContain(inert);
   expect(result.assets.map(asset => asset.code)).toEqual([first.replaceAll("\u0000", "\\u0000"), second]);
-  expect(result.html.indexOf(result.assets[0]!.path)).toBeLessThan(result.html.indexOf(result.assets[1]!.path));
   expect(result.html).not.toContain("data-ignored");
+  // The hydration data runs before the app module that reads it, in its own order.
+  const deferred = result.assets.map(asset => `<script defer src="${asset.path}"></script>`).join("");
+  expect(result.html).toContain(`<head>${deferred}${module}</head>`);
+  expect(result.html.split("/assets/route-")).toHaveLength(3);
 });
 
 test("deduplicates asset bytes without losing repeated script execution or changing comments", () => {

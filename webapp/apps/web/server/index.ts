@@ -88,12 +88,15 @@ app.use("*", serveStatic({
 }));
 registerRootProofAlias(app, proofService);
 // Browsers asking for an unknown page get the not-found page with status 404;
-// API clients and other requests keep the JSON error from createApp.
+// API clients and other requests keep the JSON error from createApp. No cache
+// may keep a 404: during a rolling update a new page can ask the old instance
+// for an asset only the new one has, and that miss must heal on the next request
+// (otherwise Cloudflare's default browser TTL keeps the page unstyled for hours).
 app.notFound((context) => {
+  context.header("cache-control", "no-store");
   const html = renderedPages[notFoundDocumentKey(/^\/de(\/|$)/.test(context.req.path) ? "de" : "en")];
   const wantsPage = ["GET", "HEAD"].includes(context.req.method) && (context.req.header("accept") ?? "").includes("text/html");
   if (html && wantsPage && !/^\/(v1|health|openapi\.json)(\/|$)/.test(context.req.path)) {
-    context.header("cache-control", "no-store");
     context.header("x-robots-tag", "noindex, nofollow");
     return context.html(html, 404);
   }

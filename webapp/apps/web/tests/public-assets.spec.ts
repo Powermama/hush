@@ -20,6 +20,16 @@ test("LANDING-CACHE-001 uses versioned artwork while keeping public HTML fresh",
   }
 });
 
+test("LANDING-CACHE-003 never lets a cache keep a missing asset", async ({ request }) => {
+  // During a rolling update a new page can ask the old instance for an asset only
+  // the new one has; the miss must heal on the next request, not stay cached.
+  for (const path of ["/assets/Landing-0000000.css", "/assets/index-0000000.js", "/assets/missing.webp"]) {
+    const response = await request.get(path);
+    expect(response.status(), path).toBe(404);
+    expect(response.headers()["cache-control"], path).toBe("no-store");
+  }
+});
+
 test("LANDING-CACHE-002 retains responsive artwork and its public attribution", async ({ page, request }) => {
   await page.goto("/");
   const image = page.locator(".portrait-base img");
