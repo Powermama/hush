@@ -13,15 +13,17 @@ import { cn } from "@/lib/utils";
 
 const page = (heading: string, html: string, lang: string) => `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
 <style>
-:root { --color-ink: #1f201e; --color-muted: #686963; --color-soft: #a7a8a1; }
+:root { --color-ink: #1f201e; --color-muted: #686963; --color-soft: #a7a8a1; --font-sans: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; padding: 40px 24px 80px; background: #fff; color: var(--color-ink);
   font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
-main { max-width: 680px; margin: 0 auto; }
-/* As .blog-article-header h1 on behu.sh. */
-h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; margin: 0 0 40px; color: var(--color-ink); text-wrap: balance; }
+main { max-width: 740px; margin: 0 auto; }
+/* As .blog-article-header h1 on behu.sh, the editor's title. */
+h1 { font-size: 48px; line-height: 1.18; letter-spacing: -0.017em; font-weight: 700; margin: 0 0 48px; color: #15171a; text-wrap: balance; }
+@media (max-width: 768px) { h1 { font-size: 36px; } }
+@media (max-width: 500px) { h1 { font-size: 28px; } }
 ${articleCss}
-</style></head><body><main><h1>${heading.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</h1><div class="blog-prose">${html}</div></main></body></html>`;
+</style></head><body><main><h1>${heading.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)}</h1><div class="article-prose">${html}</div></main></body></html>`;
 
 export function ArticlePreview({ heading, html, lang, className }: { heading: string; html: string; lang: "en" | "de"; className?: string }) {
   return <iframe title="Preview" sandbox="allow-same-origin" srcDoc={page(heading, html, lang)} className={cn("block bg-white", className)} />;

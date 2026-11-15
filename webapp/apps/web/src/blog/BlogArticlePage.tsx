@@ -106,7 +106,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
       <BlogHeader lang={lang} />
       <main className="blog-article-main">
         {/* As on Notion: a quiet left margin with the way back and sharing, no contents sidebar. */}
-        <article className="blog-article" aria-labelledby="article-title">
+        <article className="blog-article blog-post" aria-labelledby="article-title">
           <a className="blog-back" href={copy.indexPath}><BlogArrow direction="back" />{copy.allArticles}</a>
           <header className="blog-article-header">
             <h1 id="article-title">{post.heading}</h1>
@@ -119,7 +119,7 @@ export function BlogArticlePage({ lang, slug, html }: { lang: BlogLanguage; slug
           </header>
           <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-margin" />
           <div className="blog-body">
-            <div className="blog-prose" data-blog-body="" onClick={copyCode} dangerouslySetInnerHTML={articleHTML} />
+            <div className="article-prose" data-blog-body="" onClick={copyCode} dangerouslySetInnerHTML={articleHTML} />
             <BlogShare lang={lang} path={post.path} title={post.title} className="blog-share-end" />
             <BlogAuthorCard lang={lang} author={post.author} />
           </div>
