@@ -19,6 +19,11 @@ Manual workflow runs always check both components.
 | Documentation, licenses or issue forms only | No | No | No | No |
 | CI configuration, an unknown app, package or root component, or an unavailable comparison | Yes | Yes | Yes | Yes |
 
+CodeQL uses the same selection for its Swift analysis, which builds the Xcode
+project on a Mac: it runs on pull requests that change native code or the CodeQL
+workflow itself. Other GitHub configuration, such as CI jobs or this selection,
+cannot change what the code analysis finds, so it does not start it.
+
 Which apps a shared package affects is read from the workspace manifests
 (`workspace:*` dependencies, including packages that depend on packages), so a
 new package or app needs no CI change to be scoped correctly. A merge-queue run
