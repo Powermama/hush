@@ -114,9 +114,13 @@ export function PublishFlow({ open, onClose, mode, publishedAt, onPreview, onPub
     setRunning(true);
     setRefusal(undefined);
     const refused = mode === "publish" ? await onPublish(scheduled ? at : undefined) : await onUnpublish();
+    if (refused) { setRunning(false); setRefusal(refused); return; }
+    // A publish or schedule that lands goes to the posts list, as Ghost's editor does
+    // (showCompletion={false}): the button keeps running until the editor unmounts.
+    if (mode === "publish") return;
     setRunning(false);
-    if (refused) setRefusal(refused);
-    else { setStep("options"); onClose(); }
+    setStep("options");
+    onClose();
   };
 
   const setDay = (value: string) => {

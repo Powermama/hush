@@ -7,13 +7,16 @@
 // draft saves itself while its author writes; a live post changes only with
 // "Update". The article stays Markdown: blocks are read from it and written
 // back (@hush/article/blocks), and Markdown that blocks cannot hold exactly is
-// edited as Markdown.
+// edited as Markdown. The post's settings dock beside it (Cmd/Ctrl+.), and
+// publishing ends on the posts list, which celebrates the post, as in Ghost.
 import { readArticle, writeArticle } from "@hush/article/blocks";
 import { tldrTitles } from "@hush/article/markdown";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useBlocker } from "@tanstack/react-router";
+import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, PanelRight } from "lucide-react";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type RefObject } from "react";
+import {
+  useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type RefObject,
+} from "react";
 import { toast } from "sonner";
 import {
   createDraft, getGetPostQueryKey, getListMediaQueryKey, getListPostsQueryKey, getListRevisionsQueryKey, previewPost, publishPost,
@@ -21,22 +24,21 @@ import {
 } from "@/api/cms.generated";
 import { CmsError } from "@/api/fetcher";
 import { MarkdownEditor } from "@/components/markdown-editor";
-import { PostMedia } from "@/components/post-media";
-import { PostRevisions } from "@/components/post-revisions";
-import { PostSettings, type PostDraft } from "@/components/post-settings";
+import { writePublishCelebration } from "@/components/publish-celebration";
+import { PostSettingsSidebar, type PostDraft } from "@/components/post-settings";
 import { PostPreview } from "@/components/post-preview";
-import { PublishFlow, atTime, type Refusal } from "@/components/publish-flow";
+import { PublishFlow, type Refusal } from "@/components/publish-flow";
+import { useSettingsOpen } from "@/components/settings-open";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ArticleEditor } from "@/editor/article-editor";
 import { EditorHostContext, type EditorHost } from "@/editor/host";
 import type { ArticleEditorHandle } from "@/editor/plugins";
+import { articleUrl } from "@/lib/article-url";
 import { cn } from "@/lib/utils";
 import { useShade } from "@/providers/shade-context";
 
@@ -69,16 +71,29 @@ const pill = "inline-flex h-(--control-height) items-center rounded-full bg-back
 const headerButton = "bg-background/80 backdrop-blur-sm";
 const emphasis = "font-semibold text-publish-accent hover:text-publish-accent disabled:text-text-secondary/60";
 
-/** A textarea as tall as its text. */
+/** A textarea as tall as its text, also when its column narrows beside the settings panel. */
 function useAutosize(ref: RefObject<HTMLTextAreaElement | null>, value: string) {
   useLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
     const fit = () => { element.style.height = "auto"; element.style.height = `${element.scrollHeight}px`; };
     fit();
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
+    // Only a new width rewraps the text; the height this sets must not start another fit.
+    let width = element.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (element.clientWidth === width) return;
+      width = element.clientWidth;
+      fit();
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
   }, [ref, value]);
+}
+
+/** CSS transitions running on an element (or inside it); WebKit before 17 knows no CSSTransition. */
+function transitionsOf(element: Element | null, subtree = false) {
+  if (!element || typeof CSSTransition === "undefined") return [];
+  return element.getAnimations({ subtree }).filter((animation) => animation instanceof CSSTransition);
 }
 
 type SaveState = "idle" | "saving" | "error";
@@ -107,8 +122,19 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
   const [typing, setTyping] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [preview, setPreview] = useState<Preview | null>(null);
+  const navigate = useNavigate();
+
+  // The settings panel opens as the writer last left it; restored open, it is in place from the first paint.
+  const settingsMemory = useSettingsOpen();
+  const [settingsOpen, setSettingsOpen] = useState(settingsMemory.openAtStart);
+  // Mounted from the toggle until its closing transition has ended.
+  const [settingsPresent, setSettingsPresent] = useState(settingsMemory.openAtStart);
+  // From a toggle until everything moving with the panel has arrived; the chrome stays meanwhile.
+  const [settingsMoving, setSettingsMoving] = useState(false);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const settingsFrameRef = useRef<HTMLDivElement>(null);
+  const settingsToggleRef = useRef<HTMLButtonElement>(null);
   const [problems, setProblems] = useState<string[]>([]);
 
   const editor = useRef<ArticleEditorHandle>(null);
@@ -257,7 +283,56 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
     window.addEventListener("mousemove", move);
     return () => window.removeEventListener("mousemove", move);
   }, [typing]);
-  const writingFocus = typing ? "hidden" : "visible";
+  // The chrome stays while the settings panel is out or moving.
+  const writingFocus = typing && !settingsOpen && !settingsMoving ? "hidden" : "visible";
+
+  // Keep the panel mounted until its closing transition ends; a reopen cancels the wait.
+  useLayoutEffect(() => {
+    if (settingsOpen || !settingsPresent) return;
+    const transitions = transitionsOf(settingsFrameRef.current);
+    if (!transitions.length) { setSettingsPresent(false); return; }
+    let cancelled = false;
+    void Promise.allSettled(transitions.map((transition) => transition.finished)).then(() => { if (!cancelled) setSettingsPresent(false); });
+    return () => { cancelled = true; };
+  }, [settingsOpen, settingsPresent]);
+  // Reading the shell's transitions also flushes the style that starts them.
+  useLayoutEffect(() => {
+    if (!settingsMoving) return;
+    const transitions = transitionsOf(shellRef.current, true);
+    let cancelled = false;
+    void Promise.allSettled(transitions.map((transition) => transition.finished)).then(() => { if (!cancelled) setSettingsMoving(false); });
+    return () => { cancelled = true; };
+  }, [settingsOpen, settingsMoving]);
+
+  const { toggled: settingsToggled } = settingsMemory;
+  const flipSettings = useCallback(() => {
+    setSettingsMoving(true);
+    setSettingsPresent(true);
+    // Only the writer's own toggle is remembered.
+    settingsToggled(!settingsOpen);
+    setSettingsOpen((open) => !open);
+  }, [settingsOpen, settingsToggled]);
+
+  // Cmd/Ctrl+. opens and closes the settings, as in Ghost (use-editor-shortcuts.ts). It leaves focus
+  // where the writer is typing, unless closing the panel takes it away: then it lands on the toggle.
+  // Nothing happens while the publish flow, the preview or another modal is open.
+  const blockerRef = useRef(false);
+  const settingsShortcut = useRef(() => {});
+  settingsShortcut.current = () => {
+    if (publishOpen || showPreview || blockerRef.current || shellRef.current?.closest("[aria-hidden=true]")) return;
+    if (settingsOpen && settingsFrameRef.current?.contains(document.activeElement)) settingsToggleRef.current?.focus();
+    flipSettings();
+  };
+  useEffect(() => {
+    const key = (event: globalThis.KeyboardEvent) => {
+      // Autofill sends keydown events without a key.
+      if (typeof event.key !== "string" || event.key !== "." || !(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) return;
+      event.preventDefault();
+      if (!event.repeat) settingsShortcut.current();
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, []);
 
   // Cmd/Ctrl+S saves at once, whatever has the focus.
   useEffect(() => {
@@ -303,6 +378,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
     withResolver: true,
     enableBeforeUnload: false,
   });
+  blockerRef.current = blocker.status === "blocked";
 
   const host = useRef<Omit<EditorHost, "mediaLoaded">>(null!);
   const media = useListMedia(post?.id ?? "", { query: { enabled: Boolean(post) } });
@@ -347,17 +423,16 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
           : await schedulePost(id, { publishedAt: action.scheduleAt.toISOString() });
       const stored = result.data as Post;
       queryClient.setQueryData(getGetPostQueryKey(id), { data: stored, status: 200, headers: new Headers() });
-      // Ghost's toasts.
-      if (action === "publish") {
-        const url = `https://behu.sh${stored.lang === "de" ? "/de" : ""}/blog/${stored.slug}`;
-        toast.success("Post published", { action: { label: "View on site", onClick: () => window.open(url, "_blank", "noopener") } });
-      } else if (action === "unpublish") {
-        toast.success("Post reverted to a draft.");
-      } else {
-        toast.success("Post scheduled", { description: `Will be published on ${atTime(action.scheduleAt)}.` });
-      }
       setProblems([]);
       await refresh(id);
+      if (action === "unpublish") {
+        toast.success("Post reverted to a draft.");
+      } else {
+        // As in Ghost, a publish or schedule hands the celebration to the posts list and goes there;
+        // the flow stays on its running button until the editor unmounts.
+        writePublishCelebration({ id, scheduled: action !== "publish" });
+        void navigate({ to: "/", search: {} });
+      }
       return undefined;
     } catch (error) {
       const refusal = describe(error);
@@ -411,7 +486,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
     }
     if (saveState === "saving" && !live) return "Saving…";
     if (!post) return dirty ? "New" : "";
-    if (post.status === "published") return <a href={`https://behu.sh${post.lang === "de" ? "/de" : ""}/blog/${post.slug}`} target="_blank" rel="noreferrer" className="hover:text-foreground">Published</a>;
+    if (post.status === "published") return <a href={articleUrl(post.lang, post.slug)} target="_blank" rel="noreferrer" className="hover:text-foreground">Published</a>;
     if (post.status === "scheduled") return <span className="text-state-success">Scheduled</span>;
     return dirty ? "Draft" : "Draft - Saved";
   })();
@@ -419,95 +494,137 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
   return (
     <EditorHostContext.Provider value={hostValue}>
       <div
-        className="relative flex h-dvh min-h-0 flex-col bg-background [--editor-overlap:65px] max-[500px]:[--editor-overlap:56px]"
+        className="relative flex h-dvh min-h-0 flex-col bg-background"
         // Hidden controls stay focusable; focusing one brings the chrome back.
         onFocus={(event) => { if ((event.target as HTMLElement).closest("[data-writing-focus]")) setTyping(false); }}
       >
-        <header className="pointer-events-none relative z-20 grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-2 pt-[21px] pr-[61px] pb-3 pl-4 max-[500px]:pt-3 max-[500px]:pr-[52px] max-[500px]:pl-3 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
-          {/* The way out stays while the writer types. */}
-          <Button asChild size="icon" variant="ghost" className={headerButton}>
-            <Link to="/" search={{}} aria-label="Posts"><ArrowLeft className="stroke-2!" /></Link>
-          </Button>
-          <div className="min-w-0" data-writing-focus={writingFocus}>
-            {status && <span aria-live="polite" className={cn(pill, "pointer-events-auto inline-block max-w-full truncate align-top leading-(--control-height)")}>{status}</span>}
-          </div>
-          <div className="col-start-3 ml-auto flex items-center gap-3 max-[500px]:gap-1" data-writing-focus={writingFocus}>
-            {/* As in Ghost, a draft is previewed; a live post is on behu.sh. */}
-            {post?.status === "draft" && (
-              <Button variant="ghost" className={headerButton} aria-pressed={showPreview} onClick={() => setShowPreview((value) => !value)}>Preview</Button>
-            )}
-            {live && (
-              <Button variant="ghost" className={headerButton} disabled={busy} onClick={() => setPublishOpen(true)}>
-                {post?.status === "scheduled" ? "Unschedule" : "Unpublish"}
+        {/* The editor and its settings panel side by side, as Ghost's editor screen lays them out. */}
+        <div
+          ref={shellRef}
+          className="relative flex min-h-0 flex-1 items-stretch [--editor-overlap:65px] [--editor-settings-width:350px] max-[500px]:[--editor-overlap:56px] max-[500px]:[--editor-settings-width:100vw]"
+          style={{
+            // Never animated: what moves with the panel transitions its own property.
+            "--editor-settings-progress": settingsOpen ? 1 : 0,
+            "--editor-settings-toggle-width": "var(--control-height)",
+          } as CSSProperties}
+        >
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+            <header className="pointer-events-none relative z-20 grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-2 pt-[calc(var(--spacing)*5+1px)] pr-[calc(var(--spacing)*(4+2*var(--editor-settings-progress,0)))] pb-3 pl-4 editor-settings-motion-[padding-right] max-[500px]:pt-3 max-[500px]:pr-[calc(var(--spacing)*(1+2*var(--editor-settings-progress,0))-1px)] max-[500px]:pl-3 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+              {/* The way out stays while the writer types. */}
+              <Button asChild size="icon" variant="ghost" className={headerButton}>
+                <Link to="/" search={{}} aria-label="Posts"><ArrowLeft className="stroke-2!" /></Link>
               </Button>
-            )}
-            {live && (
-              <Button
-                variant="ghost" className={cn(headerButton, emphasis)} disabled={busy || saveState === "saving" || (!dirty && !updated)}
-                onClick={() => void save("manual").then((id) => { if (id) { setUpdated(true); setTimeout(() => setUpdated(false), 2500); } })}
-              >
-                {saveState === "saving" ? "Updating..." : saveState === "error" ? "Retry" : updated ? "Updated" : "Update"}
-              </Button>
-            )}
-            {post?.status === "draft" && (
-              <Button variant="ghost" className={cn(headerButton, emphasis)} disabled={busy} onClick={() => setPublishOpen(true)}>Publish</Button>
-            )}
-          </div>
-        </header>
-        <div className="absolute top-[21px] right-[25px] z-40 max-[500px]:top-3 max-[500px]:right-3" data-writing-focus={writingFocus}>
-          <Button size="icon" variant="ghost" className={headerButton} aria-label="Settings" aria-expanded={settingsOpen} onClick={() => setSettingsOpen(true)}><PanelRight className="stroke-2!" /></Button>
-        </div>
+              <div className="min-w-0" data-writing-focus={writingFocus}>
+                {status && <span aria-live="polite" className={cn(pill, "pointer-events-auto inline-block max-w-full truncate align-top leading-(--control-height)")}>{status}</span>}
+              </div>
+              <div className="col-start-3 ml-auto" data-writing-focus={writingFocus}>
+                <div className="flex items-center gap-x-[calc(var(--spacing)*3*(1-var(--editor-settings-progress)))] editor-settings-motion-[column-gap] max-[500px]:gap-x-[calc(var(--spacing)*(1-var(--editor-settings-progress)))]">
+                  {/* As in Ghost, a draft is previewed; a live post is on behu.sh. */}
+                  {post?.status === "draft" && (
+                    <Button variant="ghost" className={headerButton} aria-pressed={showPreview} onClick={() => setShowPreview((value) => !value)}>Preview</Button>
+                  )}
+                  {live && (
+                    <Button variant="ghost" className={headerButton} disabled={busy} onClick={() => setPublishOpen(true)}>
+                      {post?.status === "scheduled" ? "Unschedule" : "Unpublish"}
+                    </Button>
+                  )}
+                  {live && (
+                    <Button
+                      variant="ghost" className={cn(headerButton, emphasis)} disabled={busy || saveState === "saving" || (!dirty && !updated)}
+                      onClick={() => void save("manual").then((id) => { if (id) { setUpdated(true); setTimeout(() => setUpdated(false), 2500); } })}
+                    >
+                      {saveState === "saving" ? "Updating..." : saveState === "error" ? "Retry" : updated ? "Updated" : "Update"}
+                    </Button>
+                  )}
+                  {post?.status === "draft" && (
+                    <Button variant="ghost" className={cn(headerButton, emphasis)} disabled={busy} onClick={() => setPublishOpen(true)}>Publish</Button>
+                  )}
+                  {/* The settings toggle floats over this place; it moves into the panel's header when the panel opens. */}
+                  <div aria-hidden className="w-[calc((var(--editor-settings-toggle-width)+var(--spacing)*2+1px)*(1-var(--editor-settings-progress)))] shrink-0 editor-settings-motion-[width]" />
+                </div>
+              </div>
+            </header>
 
-        <div className="relative isolate min-h-0 flex-1">
-          <div className="editor-optical-sizing -mt-(--editor-overlap) h-[calc(100%+var(--editor-overlap))] min-h-0 overflow-x-hidden overflow-y-auto scroll-pt-(--editor-overlap)">
-            <div
-              className="flex min-h-full flex-col px-6 pt-[calc(48px+var(--editor-overlap))] pb-24 max-[500px]:px-8"
-              // A click below the article continues it.
-              onMouseUp={(event) => { if (event.target === event.currentTarget) editor.current?.focus(); }}
-            >
-              <div className="relative mx-auto w-full max-w-[740px]">
-                {opened.article ? (
-                  <>
-                    <textarea
-                      ref={titleRef} aria-label="Post title" placeholder="Post title" rows={1} autoFocus={!post} value={heading}
-                      onChange={(event) => { setHeading(event.target.value.replace(/\s*\n\s*/g, " ")); changedContent(); }}
-                      onBlur={() => { if (!post && heading.trim()) void save("auto"); }}
-                      onKeyDown={titleKey}
-                      className={cn(fieldClass, "heading-font-features mb-4 pb-1 text-[4.8rem] leading-[1.18] font-bold tracking-[-0.017em] text-foreground placeholder:font-bold placeholder:text-editor-placeholder max-[769px]:text-[3.6rem] max-[501px]:text-[2.8rem]")}
-                    />
-                    <div className="relative">
-                      <textarea
-                        ref={excerptRef} aria-label="Excerpt" placeholder="Add an excerpt" rows={1} value={fields.description}
-                        onChange={(event) => changedFields({ description: event.target.value.replace(/\s*\n\s*/g, " ") })}
-                        onKeyDown={excerptKey}
-                        className={cn(fieldClass, "text-[2rem] leading-[1.5] font-[440] tracking-[-0.018em] text-foreground/90 placeholder:font-normal placeholder:text-editor-placeholder")}
-                      />
-                      <hr className="mt-4 mb-12 border-border-default" />
-                    </div>
-                    <ArticleEditor
-                      handle={editor} initialBlocks={opened.article.blocks} summaryTitle={tldrTitles[fields.lang]} dark={darkMode}
-                      onChange={changedContent} onWords={onWords} onTyping={onTyping} onLeaveUp={onLeaveUp}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Alert className="mb-8">
-                      <AlertTitle>Editing as Markdown</AlertTitle>
-                      <AlertDescription>This article contains {opened.reason}, which the block editor cannot hold without changing it.</AlertDescription>
-                    </Alert>
-                    <MarkdownEditor value={markdown} onChange={(text) => { setMarkdown(text); changedContent(); }} onSave={() => void save("manual")} label="Article in Markdown" />
-                  </>
-                )}
+            <div className="relative isolate min-h-0 flex-1">
+              <div className="editor-optical-sizing -mt-(--editor-overlap) h-[calc(100%+var(--editor-overlap))] min-h-0 overflow-x-hidden overflow-y-auto scroll-pt-(--editor-overlap)">
+                <div
+                  className="flex min-h-full flex-col px-6 pt-[calc(48px+var(--editor-overlap))] pb-24 editor-settings-motion-[margin-right] max-[500px]:px-8 lg:mr-[calc(var(--spacing)*3*var(--editor-settings-progress,0))]"
+                  // A click below the article continues it.
+                  onMouseUp={(event) => { if (event.target === event.currentTarget) editor.current?.focus(); }}
+                >
+                  <div className="relative mx-auto w-full max-w-[740px]">
+                    {opened.article ? (
+                      <>
+                        <textarea
+                          ref={titleRef} aria-label="Post title" placeholder="Post title" rows={1} autoFocus={!post} value={heading}
+                          onChange={(event) => { setHeading(event.target.value.replace(/\s*\n\s*/g, " ")); changedContent(); }}
+                          onBlur={() => { if (!post && heading.trim()) void save("auto"); }}
+                          onKeyDown={titleKey}
+                          className={cn(fieldClass, "heading-font-features mb-4 pb-1 text-[4.8rem] leading-[1.18] font-bold tracking-[-0.017em] text-foreground placeholder:font-bold placeholder:text-editor-placeholder max-[769px]:text-[3.6rem] max-[501px]:text-[2.8rem]")}
+                        />
+                        <div className="relative">
+                          <textarea
+                            ref={excerptRef} aria-label="Excerpt" placeholder="Add an excerpt" rows={1} value={fields.description}
+                            onChange={(event) => changedFields({ description: event.target.value.replace(/\s*\n\s*/g, " ") })}
+                            onKeyDown={excerptKey}
+                            className={cn(fieldClass, "text-[2rem] leading-[1.5] font-[440] tracking-[-0.018em] text-foreground/90 placeholder:font-normal placeholder:text-editor-placeholder")}
+                          />
+                          <hr className="mt-4 mb-12 border-border-default" />
+                        </div>
+                        <ArticleEditor
+                          handle={editor} initialBlocks={opened.article.blocks} summaryTitle={tldrTitles[fields.lang]} dark={darkMode}
+                          onChange={changedContent} onWords={onWords} onTyping={onTyping} onLeaveUp={onLeaveUp}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <Alert className="mb-8">
+                          <AlertTitle>Editing as Markdown</AlertTitle>
+                          <AlertDescription>This article contains {opened.reason}, which the block editor cannot hold without changing it.</AlertDescription>
+                        </Alert>
+                        <MarkdownEditor value={markdown} onChange={(text) => { setMarkdown(text); changedContent(); }} onSave={() => void save("manual")} label="Article in Markdown" />
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {opened.article && (
-          <div className="pointer-events-none absolute right-4 bottom-3 z-20 max-[500px]:right-3" data-writing-focus={writingFocus}>
-            <span className={pill}>{words.selected ? `${words.selected.toLocaleString("en")} of ` : ""}{words.all.toLocaleString("en")} {words.all === 1 ? "word" : "words"}</span>
+            {opened.article && (
+              <div className="pointer-events-none absolute right-[calc(var(--spacing)*(4+2*var(--editor-settings-progress,0)))] bottom-3 z-20 editor-settings-motion-[right] max-[500px]:right-3" data-writing-focus={writingFocus}>
+                <span className={pill}>{words.selected ? `${words.selected.toLocaleString("en")} of ` : ""}{words.all.toLocaleString("en")} {words.all === 1 ? "word" : "words"}</span>
+              </div>
+            )}
           </div>
-        )}
+
+          <div className="absolute top-[calc(var(--spacing)*5+1px)] right-[calc(var(--spacing)*6+1px)] z-40 max-[500px]:top-3 max-[500px]:right-3" data-writing-focus={writingFocus}>
+            <Button
+              ref={settingsToggleRef} size="icon" variant="ghost" aria-label="Settings" aria-expanded={settingsOpen}
+              className={settingsOpen
+                ? "bg-transparent enabled:aria-expanded:bg-transparent enabled:aria-expanded:shadow-none enabled:aria-expanded:hover:bg-sidebar-accent"
+                : headerButton}
+              onClick={() => { settingsToggleRef.current?.focus(); flipSettings(); }}
+            >
+              <PanelRight className="stroke-2!" />
+            </Button>
+          </div>
+
+          {settingsPresent && (
+            <PostSettingsSidebar
+              frameRef={settingsFrameRef} opensInPlace={settingsMemory.restored}
+              fields={fields} onChange={changedFields} post={post} heading={heading} markdownMode={!opened.article}
+              onRestored={async (restored) => {
+                queryClient.setQueryData(getGetPostQueryKey(restored.id), { data: restored, status: 200, headers: new Headers() });
+                await refresh(restored.id);
+                // Nothing of the old text is left to save: the restored post is opened afresh, as blocks or as Markdown.
+                clearTimeout(timer.current);
+                changes.current.savedContent = changes.current.content;
+                changes.current.savedFields = changes.current.fields;
+                onReopen?.();
+              }}
+            />
+          )}
+        </div>
 
         {post && (
           <PublishFlow
@@ -524,25 +641,6 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
           open={showPreview && Boolean(post)} onOpenChange={setShowPreview} preview={preview} problems={shownProblems} lang={fields.lang} lead={fields.description}
           publish={post?.status === "draft" && <Button className="w-20 shrink-0" disabled={busy} onClick={() => { setShowPreview(false); setPublishOpen(true); }}>Publish</Button>}
         />
-
-        <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
-          <SheetContent className="w-full overflow-y-auto sm:max-w-md">
-            <SheetHeader className="px-6 pt-6"><SheetTitle>Post settings</SheetTitle><SheetDescription>Search metadata and where the post lives.</SheetDescription></SheetHeader>
-            <div className="grid gap-8 px-6 pb-10">
-              <PostSettings draft={{ ...fields, markdown: "" }} onChange={({ markdown: _markdown, ...patch }) => changedFields(patch)} published={post?.status === "published"} />
-              {post && !opened.article && <><Separator /><PostMedia postId={post.id} slug={fields.slug} /></>}
-              {post && <><Separator /><PostRevisions postId={post.id} onRestored={async (restored) => {
-                queryClient.setQueryData(getGetPostQueryKey(restored.id), { data: restored, status: 200, headers: new Headers() });
-                await refresh(restored.id);
-                // Nothing of the old text is left to save: the restored post is opened afresh, as blocks or as Markdown.
-                clearTimeout(timer.current);
-                changes.current.savedContent = changes.current.content;
-                changes.current.savedFields = changes.current.fields;
-                onReopen?.();
-              }} /></>}
-            </div>
-          </SheetContent>
-        </Sheet>
 
         <AlertDialog open={blocker.status === "blocked"} onOpenChange={(open) => { if (!open) blocker.reset?.(); }}>
           <AlertDialogContent>

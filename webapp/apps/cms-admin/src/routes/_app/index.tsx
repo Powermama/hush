@@ -4,13 +4,16 @@
 // The posts list, as Ghost Admin's (apps/admin/src/posts/list): a sticky header
 // with the title, sort and "New post", then rows with a thumbnail, the title,
 // "By … - in … - date" and the status in Ghost's colors, scheduled first, then
-// drafts, then published. The sidebar's views filter by status.
+// drafts, then published. The sidebar's views filter by status. A post the
+// editor just published or scheduled is celebrated here, as Ghost's list does.
 import { blogAuthors, type BlogAuthorId } from "@hush/article/authors";
 import { blogClusters, type BlogClusterId } from "@hush/article/taxonomy";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowUpDown, ImageIcon, Pen, PenLine, Plus, SearchX } from "lucide-react";
-import { useState } from "react";
-import { useListPosts, type ListPostsStatus, type Post } from "@/api/cms.generated";
+import { useEffect, useRef, useState } from "react";
+import { useGetPost, useListPosts, type ListPostsStatus, type Post } from "@/api/cms.generated";
+import { PostCelebrationModal } from "@/components/post-celebration-modal";
+import { readPublishCelebration, type PublishCelebration } from "@/components/publish-celebration";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -87,7 +90,33 @@ function PostRow({ post }: { post: Post }) {
   );
 }
 
+/**
+ * The celebration the editor handed over: read once, on mount, and cleared as it
+ * is read. StrictMode runs the effect twice; the ref keeps the second run from
+ * reading the cleared key and dropping the celebration.
+ */
+function usePublishCelebration() {
+  const [celebration, setCelebration] = useState<PublishCelebration | null>(null);
+  const read = useRef(false);
+  useEffect(() => {
+    if (read.current) return;
+    read.current = true;
+    setCelebration(readPublishCelebration());
+  }, []);
+  const post = useGetPost(celebration?.id ?? "", { query: { enabled: Boolean(celebration) } });
+  // The count does not hold the celebration back: the copy says "Spread the word!" until it lands.
+  const published = useListPosts({ status: "published" }, { query: { enabled: celebration?.wasPublished === true } });
+  const list = published.data?.data;
+  return {
+    celebration,
+    post: celebration ? post.data?.data as Post | undefined : undefined,
+    postCount: list && "posts" in list ? list.posts.length : undefined,
+    dismiss: () => setCelebration(null),
+  };
+}
+
 function Posts() {
+  const celebration = usePublishCelebration();
   const { status } = Route.useSearch();
   const [sort, setSort] = useState<Sort>("newest");
   const posts = useListPosts(status ? { status } : undefined);
@@ -142,6 +171,11 @@ function Posts() {
         </div>
       )}
       {rows.length > 0 && <ul className={cn("border-t border-border-default pb-4 lg:pb-8")}>{rows.map((post) => <PostRow key={post.id} post={post} />)}</ul>}
+      {celebration.celebration && celebration.post && (
+        <PostCelebrationModal
+          post={celebration.post} wasPublished={celebration.celebration.wasPublished} postCount={celebration.postCount} onClose={celebration.dismiss}
+        />
+      )}
     </div>
   );
 }

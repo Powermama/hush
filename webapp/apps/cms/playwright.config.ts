@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 //
-// Browser journeys of the admin (CMS-001 to CMS-008), against the CMS serving
+// Browser journeys of the admin (CMS-001 to CMS-010), against the CMS serving
 // the built admin. Build it first: bun run --cwd ../cms-admin build.
 import { defineConfig, devices } from "@playwright/test";
 
-const port = 4310;
+// Another port (CMS_ADMIN_E2E_PORT) lets two checkouts run their journeys at once.
+const port = Number(process.env.CMS_ADMIN_E2E_PORT ?? 4310);
 
 export default defineConfig({
   testDir: "./tests/admin",
