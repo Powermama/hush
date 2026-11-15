@@ -154,3 +154,26 @@ test("LANDING-ENTRY-006 links every page's own styles in its prerendered head", 
     expect(used.filter((href) => !linked.includes(href)), path).toEqual([]);
   }
 });
+
+test("LANDING-ENTRY-007 never loses the page over the router's hydration data", async ({ page, request }) => {
+  for (const path of ["/", "/de"]) {
+    // The data runs before the app module that reads it, without blocking the first paint.
+    const html = await (await request.get(path)).text();
+    const head = html.slice(0, html.indexOf("</head>"));
+    const data = [...html.matchAll(/<script([^>]*) src="\/assets\/route-[0-9a-f]+\.js"><\/script>/g)];
+    expect(data.length, path).toBeGreaterThan(0);
+    for (const [tag, attributes] of data) {
+      expect(attributes, path).toBe(" defer");
+      expect(head.indexOf(tag), path).toBeGreaterThan(-1);
+      expect(head.indexOf(tag), path).toBeLessThan(head.indexOf('<script type="module"'));
+    }
+  }
+  // Even if the data never arrives, the app renders instead of removing the page.
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.route(/\/assets\/route-[0-9a-f]+\.js$/, route => route.abort());
+  await page.goto("/de");
+  await expect(page.locator("h1")).toHaveText("Die Sprachebene für deinen Mac.");
+  await expect(page.locator(".hero-actions .landing-download")).toBeVisible();
+  expect(errors).toEqual([]);
+});
