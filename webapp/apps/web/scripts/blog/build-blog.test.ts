@@ -186,16 +186,16 @@ describe("blog content pipeline", () => {
     }), staticPaths);
     expect(errors).toEqual([]);
     const html = posts[0]!.html;
-    expect(html).toContain("<figure><img");
     expect(html).toMatch(/srcset="\/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-680\.webp 680w, \/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-900\.webp 900w"/);
     expect(html).toContain('width="680" height="340"');
     // After the first section: it waits until scrolled near.
     expect(html).toContain('loading="lazy"');
     expect(html).toContain("<figcaption>Our test Mac");
     expect(html).toMatch(/href="\/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-900\.webp"/);
-    expect(html).toContain('aria-label="Open full-size image (new tab): Keyboard settings with the Dictation section"');
-    expect(html).toContain('target="_blank" rel="noopener"');
-    expect(html).toContain("View full-size image</a></figcaption>");
+    // The picture itself is the full-size link, with the caption under it and no extra text.
+    expect(html).toMatch(/<figure><a class="blog-image-full" href="\/blog\/media\/dictate-without-cloud-settings-[0-9a-f]{10}-900\.webp" aria-label="Open full-size image: Keyboard settings with the Dictation section"><img /);
+    expect(html).toContain("</a><figcaption>Our test Mac</figcaption></figure>");
+    expect(html).not.toContain("target=");
     expect(posts[0]!.images.map((image) => image.width)).toEqual([680, 900]);
   });
 

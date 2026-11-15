@@ -73,6 +73,14 @@
 }
 .blog-prose .blog-tldr p:not(.blog-tldr-title) { margin: 0 0 14px; }
 
+/* An article's title and lead (its excerpt), as the CMS editor shows them (Ghost's
+   post title and excerpt): wherever an article is shown, the website's article page
+   and the CMS preview. */
+.article-title { margin: 0; font-size: 48px; line-height: 1.18; letter-spacing: -0.017em; font-weight: 700; color: #15171a; text-wrap: balance; }
+.article-lead { margin: 16px 0 0; font-size: 20px; line-height: 1.5; font-weight: 440; letter-spacing: -0.018em; color: rgb(21 23 26 / 0.9); text-wrap: pretty; }
+@media (max-width: 768px) { .article-title { font-size: 36px; } }
+@media (max-width: 500px) { .article-title { font-size: 28px; } .article-lead { font-size: 18px; } }
+
 /* Articles: the CMS editor's typography, so an article reads on behu.sh as it
    was written. Koenig's prose styles (TryGhost/Koenig, kg-prose.css, MIT,
    Ghost Foundation), in px for a 16px root: Georgia for the text, the page's
@@ -149,12 +157,16 @@
   background: var(--prose-code-bg); font-size: 15px; line-height: 1.6;
 }
 .article-prose pre code { padding: 0; border: 0; border-radius: 0; background: none; font-size: inherit; line-height: inherit; white-space: pre; vertical-align: baseline; }
-/* Screenshots: full column width in a quiet frame, caption below, as cards around text. */
+/* Screenshots: as the editor shows them, with only a hairline and rounded corners
+   (they bring their own window frame, so no card or shadow around them),
+   full column width; the caption centred below in a small, quiet sans. The picture
+   itself opens the full size (a zoom cursor says so), over the article on the page. */
 .article-prose > :is(p, ul, ol, blockquote) + figure { margin-top: 32px; }
 .article-prose :is(h2, h3, h4) + figure { margin-top: 16px; }
-.article-prose figure img { display: block; width: 100%; height: auto; border-radius: 14px; background: #fff; border: 1px solid rgb(0 0 0 / 0.08); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px rgb(31 32 30 / 0.06); }
-.article-prose figcaption { margin-top: 10px; font-family: var(--font-sans, sans-serif); font-size: 14px; line-height: 1.5; color: var(--color-muted); text-align: center; }
-.article-prose .blog-image-full { display: flex; align-items: center; justify-content: center; width: fit-content; min-height: 44px; margin: 0 auto; font-size: 13px; }
+.article-prose figure img { display: block; width: 100%; height: auto; border-radius: 10px; outline: 1px solid rgb(0 0 0 / 0.07); outline-offset: -1px; }
+.article-prose figcaption { margin: 12px auto 0; max-width: 600px; font-family: var(--font-sans, sans-serif); font-size: 14px; line-height: 1.5; color: var(--color-muted); text-align: center; text-wrap: balance; }
+.article-prose .blog-image-full { display: block; cursor: zoom-in; }
+.article-prose .blog-image-full:focus-visible { outline: 2px solid var(--prose-accent); outline-offset: 4px; }
 
 /* Tables scroll inside their own box; the page never scrolls sideways. */
 .article-prose > :is(p, ul, ol, blockquote) + table { margin-top: 32px; }
@@ -194,3 +206,14 @@
   .article-prose h3 { font-size: 24px; }
   .article-prose h4 { font-size: 23px; }
 }
+
+/* The full-size image over the article (a <dialog> the article page opens): the
+   reader stays where they were; a click or Escape closes it. */
+.article-image-viewer { max-width: none; max-height: none; width: 100vw; height: 100dvh; margin: 0; padding: 0; border: 0; background: transparent; cursor: zoom-out; }
+.article-image-viewer::backdrop { background: rgb(21 23 26 / 0.86); }
+.article-image-viewer[open] { display: grid; place-items: center; }
+.article-image-viewer img { max-width: min(96vw, 1400px); max-height: 92dvh; width: auto; height: auto; border-radius: 6px; box-shadow: 0 20px 60px rgb(0 0 0 / 0.35); }
+@media (prefers-reduced-motion: no-preference) {
+  .article-image-viewer[open], .article-image-viewer[open]::backdrop { animation: article-image-viewer-in 160ms ease-out; }
+}
+@keyframes article-image-viewer-in { from { opacity: 0; } }
