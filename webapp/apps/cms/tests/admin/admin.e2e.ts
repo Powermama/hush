@@ -206,20 +206,44 @@ test("CMS-008 an image goes into a new post through its card and follows the pos
 test("CMS-003 publishing now takes a valid draft live", async ({ signedIn, draft }) => {
   const post = await draft();
   await signedIn.goto(`/posts/${post.id}`);
-  await signedIn.getByRole("button", { name: "Publish", exact: true }).click();
-  await signedIn.getByRole("button", { name: "Publish now" }).click();
+  await signedIn.getByRole("banner").getByRole("button", { name: "Publish", exact: true }).click();
+  const flow = signedIn.getByRole("dialog", { name: "Publish" });
+  await expect(flow).toContainText("Ready, set, publish.");
+  await expect(flow.getByRole("button", { name: "Right now" })).toBeVisible();
+  await flow.getByRole("button", { name: /Continue, final review/ }).click();
+  await expect(flow).toContainText("Your post will be published on your site.");
+  await flow.getByRole("button", { name: "Publish post, right now" }).click();
   await expect(signedIn.getByText("Post published")).toBeVisible();
+  await expect(flow).toBeHidden();
   expect(await statusOf(signedIn, post.id)).toBe("published");
   await expect(status(signedIn)).toHaveText("Published");
   await expect(signedIn.getByRole("button", { name: "Unpublish" })).toBeVisible();
 });
 
+test("CMS-003 a draft that breaks the contract is refused in the review, with the reasons", async ({ signedIn, draft }) => {
+  const post = await draft({ markdown: "# A heading\n\nText without the questions section." });
+  await signedIn.goto(`/posts/${post.id}`);
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
+  await signedIn.keyboard.press("ControlOrMeta+Shift+p");
+  const flow = signedIn.getByRole("dialog", { name: "Publish" });
+  await flow.getByRole("button", { name: /Continue, final review/ }).click();
+  await flow.getByRole("button", { name: "Publish post, right now" }).click();
+  await expect(flow.getByRole("alert")).toContainText("Frequently asked questions");
+  expect(await statusOf(signedIn, post.id)).toBe("draft");
+});
+
 test("CMS-004 scheduling sets a future time and the post waits for it", async ({ signedIn, draft }) => {
   const post = await draft();
   await signedIn.goto(`/posts/${post.id}`);
-  await signedIn.getByRole("button", { name: "Publish", exact: true }).click();
-  await signedIn.getByLabel("Or schedule it").fill("2031-05-04T09:30");
-  await signedIn.getByRole("button", { name: "Schedule", exact: true }).click();
+  await signedIn.getByRole("banner").getByRole("button", { name: "Publish", exact: true }).click();
+  const flow = signedIn.getByRole("dialog", { name: "Publish" });
+  await flow.getByRole("button", { name: "Right now" }).click();
+  await flow.getByLabel("Schedule for later").click();
+  await flow.getByLabel("Publish date").fill("2031-05-04");
+  await flow.getByLabel("Publish time").fill("09:30");
+  await flow.getByRole("button", { name: /Continue, final review/ }).click();
+  await expect(flow).toContainText("On 4 May 2031 at 09:30 your post will be published on your site.");
+  await flow.getByRole("button", { name: "Publish post, on May 4th" }).click();
   await expect(signedIn.getByText("Post scheduled")).toBeVisible();
   await expect(status(signedIn)).toHaveText("Scheduled");
   expect(await statusOf(signedIn, post.id)).toBe("scheduled");
@@ -231,13 +255,15 @@ test("CMS-005 unpublishing asks first, then returns the post to drafts", async (
   expect((await signedIn.request.post(`/v1/posts/${post.id}/publish`, { headers: { origin: "https://localhost:4310" } })).status()).toBe(200);
   await signedIn.goto(`/posts/${post.id}`);
   await signedIn.getByRole("button", { name: "Unpublish" }).click();
-  await expect(signedIn.getByRole("alertdialog")).toContainText("Take this post offline?");
-  await signedIn.getByRole("button", { name: "Keep it" }).click();
+  const flow = signedIn.getByRole("dialog", { name: "Unpublish" });
+  await expect(flow).toContainText("This post has been published");
+  await flow.getByRole("button", { name: "Close" }).click();
   expect(await statusOf(signedIn, post.id)).toBe("published");
   await signedIn.getByRole("button", { name: "Unpublish" }).click();
-  await signedIn.getByRole("alertdialog").getByRole("button", { name: "Unpublish" }).click();
+  await flow.getByRole("button", { name: /Unpublish and revert to private draft/ }).click();
   await expect(signedIn.getByText("Post reverted to a draft.")).toBeVisible();
   expect(await statusOf(signedIn, post.id)).toBe("draft");
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
 });
 
 test("CMS-006 an earlier revision can be restored from the post's history", async ({ signedIn, draft }) => {

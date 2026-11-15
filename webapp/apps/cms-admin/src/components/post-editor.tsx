@@ -25,7 +25,7 @@ import { PostMedia } from "@/components/post-media";
 import { PostRevisions } from "@/components/post-revisions";
 import { PostSettings, type PostDraft } from "@/components/post-settings";
 import { PostPreview } from "@/components/post-preview";
-import { PublishMenu } from "@/components/publish-menu";
+import { PublishFlow, atTime, type Refusal } from "@/components/publish-flow";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
@@ -123,6 +123,8 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
   // Each change counts up; a save knows which change it covered.
   const changes = useRef({ content: 0, fields: 0, savedContent: 0, savedFields: 0 });
   const saving = useRef<Promise<string | undefined> | null>(null);
+  // Why the last save was refused, for the publish flow to show.
+  const lastRefusal = useRef<Refusal | undefined>(undefined);
   // The post this editor created, until the route hands it back as `post`.
   const created = useRef<Post | undefined>(undefined);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -203,6 +205,7 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
         return stored.id;
       } catch (error) {
         const { message, problems: refused } = describe(error);
+        lastRefusal.current = { message, problems: refused };
         setProblems(refused);
         setSaveError(message);
         setSaveState("error");
@@ -259,6 +262,12 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
   // Cmd/Ctrl+S saves at once, whatever has the focus.
   useEffect(() => {
     const key = (event: globalThis.KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey && !event.altKey && event.key.toLowerCase() === "p" && current.current.post?.status === "draft") {
+        event.preventDefault();
+        setShowPreview(false);
+        setPublishOpen(true);
+        return;
+      }
       if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "p" && current.current.post?.status === "draft") {
         event.preventDefault();
         setShowPreview((value) => !value);
@@ -327,23 +336,33 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
     [media.data, mediaLoaded],
   );
 
-  const run = async (action: "publish" | "unpublish" | { scheduleAt: Date }) => {
+  /** Publishes, schedules or reverts to a draft after saving; answers with what was refused, for the flow to show. */
+  const act = async (action: "publish" | "unpublish" | { scheduleAt: Date }): Promise<Refusal | undefined> => {
     setBusy(true);
     try {
       const id = await save("manual");
-      if (!id) return;
+      if (!id) return lastRefusal.current ?? { message: "The post could not be saved.", problems: [] };
       const result = action === "publish" ? await publishPost(id)
         : action === "unpublish" ? await unpublishPost(id)
           : await schedulePost(id, { publishedAt: action.scheduleAt.toISOString() });
-      queryClient.setQueryData(getGetPostQueryKey(id), { data: result.data, status: 200, headers: new Headers() });
-      toast.success(action === "publish" ? "Post published" : action === "unpublish" ? "Post reverted to a draft." : "Post scheduled");
+      const stored = result.data as Post;
+      queryClient.setQueryData(getGetPostQueryKey(id), { data: stored, status: 200, headers: new Headers() });
+      // Ghost's toasts.
+      if (action === "publish") {
+        const url = `https://behu.sh${stored.lang === "de" ? "/de" : ""}/blog/${stored.slug}`;
+        toast.success("Post published", { action: { label: "View on site", onClick: () => window.open(url, "_blank", "noopener") } });
+      } else if (action === "unpublish") {
+        toast.success("Post reverted to a draft.");
+      } else {
+        toast.success("Post scheduled", { description: `Will be published on ${atTime(action.scheduleAt)}.` });
+      }
       setProblems([]);
       await refresh(id);
+      return undefined;
     } catch (error) {
-      const { message, problems: refused } = describe(error);
-      setProblems(refused);
-      if (refused.length) setShowPreview(true);
-      toast.error(message);
+      const refusal = describe(error);
+      setProblems(refusal.problems);
+      return refusal;
     } finally {
       setBusy(false);
     }
@@ -418,6 +437,11 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
               <Button variant="ghost" className={headerButton} aria-pressed={showPreview} onClick={() => setShowPreview((value) => !value)}>Preview</Button>
             )}
             {live && (
+              <Button variant="ghost" className={headerButton} disabled={busy} onClick={() => setPublishOpen(true)}>
+                {post?.status === "scheduled" ? "Unschedule" : "Unpublish"}
+              </Button>
+            )}
+            {live && (
               <Button
                 variant="ghost" className={cn(headerButton, emphasis)} disabled={busy || saveState === "saving" || (!dirty && !updated)}
                 onClick={() => void save("manual").then((id) => { if (id) { setUpdated(true); setTimeout(() => setUpdated(false), 2500); } })}
@@ -425,7 +449,9 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
                 {saveState === "saving" ? "Updating..." : saveState === "error" ? "Retry" : updated ? "Updated" : "Update"}
               </Button>
             )}
-            {post && <PublishMenu open={publishOpen} onOpenChange={setPublishOpen} status={post.status} busy={busy} onPublish={() => void run("publish")} onSchedule={(at) => void run({ scheduleAt: at })} onUnpublish={() => void run("unpublish")} />}
+            {post?.status === "draft" && (
+              <Button variant="ghost" className={cn(headerButton, emphasis)} disabled={busy} onClick={() => setPublishOpen(true)}>Publish</Button>
+            )}
           </div>
         </header>
         <div className="absolute top-[21px] right-[25px] z-40 max-[500px]:top-3 max-[500px]:right-3" data-writing-focus={writingFocus}>
@@ -481,6 +507,17 @@ export function PostEditor({ post, onCreated, onReopen }: { post?: Post; onCreat
           <div className="pointer-events-none absolute right-4 bottom-3 z-20 max-[500px]:right-3" data-writing-focus={writingFocus}>
             <span className={pill}>{words.selected ? `${words.selected.toLocaleString("en")} of ` : ""}{words.all.toLocaleString("en")} {words.all === 1 ? "word" : "words"}</span>
           </div>
+        )}
+
+        {post && (
+          <PublishFlow
+            open={publishOpen} onClose={() => setPublishOpen(false)}
+            mode={post.status === "draft" ? "publish" : post.status === "scheduled" ? "unpublish-scheduled" : "unpublish-published"}
+            publishedAt={post.publishedAt ? new Date(post.publishedAt) : undefined}
+            onPreview={() => { setPublishOpen(false); setShowPreview(true); }}
+            onPublish={(at) => act(at ? { scheduleAt: at } : "publish")}
+            onUnpublish={() => act("unpublish")}
+          />
         )}
 
         <PostPreview
