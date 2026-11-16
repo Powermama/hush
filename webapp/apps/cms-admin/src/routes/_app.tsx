@@ -8,7 +8,7 @@
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { AppWindow, Check, ChevronRight, ChevronsUpDown, Ellipsis, ExternalLink, LogOut, Monitor, Moon, Palette, PenLine, Plus, Sun } from "lucide-react";
-import { useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { requireSession } from "@/api/require-session";
 import { sessionQuery, signOut } from "@/api/session";
 import { HushLogo } from "@/components/hush-logo";
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar-context";
 import { cn } from "@/lib/utils";
+import { GlobalSearchProvider, SearchButton } from "@/search/global-search";
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: requireSession,
@@ -102,9 +103,8 @@ const modes: Array<{ mode: ThemeMode; label: string; icon: typeof Sun }> = [
   { mode: "system", label: "System", icon: Monitor },
 ];
 
-function UserMenu() {
+function UserMenu({ mode, setMode }: { mode: ThemeMode; setMode: (mode: ThemeMode) => void }) {
   const { data: session } = useSuspenseQuery(sessionQuery);
-  const [mode, setMode] = useThemeMode();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const initial = session.login.slice(0, 1).toUpperCase();
@@ -175,14 +175,21 @@ function MobileNavBar() {
 }
 
 function AppLayout() {
+  // One appearance for the user menu and the search's switch.
+  const [mode, setMode] = useThemeMode();
+  const appearance = useMemo(() => ({ mode, setMode }), [mode, setMode]);
   return (
+    <GlobalSearchProvider appearance={appearance}>
     <SidebarProvider
       style={{ "--sidebar-width": "316px" } as CSSProperties}
       className="h-dvh [--content-width:1080px] [--page-gutter:20px] sidebar:[--page-gutter:40px] min-[1380px]:[--content-width:1280px] [&_[data-sidebar=sidebar]]:rounded-xl [&_[data-sidebar=sidebar]]:border-border [&_[data-sidebar=sidebar]]:shadow-none"
     >
       <Sidebar variant="floating">
         <SidebarHeader className="px-5 pt-5 pb-0">
-          <SiteIdentity />
+          <div className="flex flex-col items-stretch gap-5">
+            <SiteIdentity />
+            <SearchButton />
+          </div>
         </SidebarHeader>
         <SidebarContent className="justify-between px-3 pt-4 pb-1">
           <div className="flex flex-col gap-2 sidebar:gap-4">
@@ -206,12 +213,13 @@ function AppLayout() {
             </SidebarGroup>
           </div>
         </SidebarContent>
-        <SidebarFooter className="gap-0 p-3"><UserMenu /></SidebarFooter>
+        <SidebarFooter className="gap-0 p-3"><UserMenu mode={mode} setMode={setMode} /></SidebarFooter>
       </Sidebar>
       <SidebarInset className="relative max-h-[calc(100%-var(--mobile-navbar-height))] overflow-y-auto bg-background sidebar:max-h-full">
         <Outlet />
         <MobileNavBar />
       </SidebarInset>
     </SidebarProvider>
+    </GlobalSearchProvider>
   );
 }

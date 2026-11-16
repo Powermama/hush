@@ -189,7 +189,8 @@ test("CMS-008 an image goes into a new post through its card and follows the pos
   await card.getByLabel("Alt text").fill("The dictation settings on a Mac");
 
   // The post is named after the title it gets; the picture moves with it.
-  const title = `A post with a picture ${testInfo.project.name} ${Date.now().toString(36)}`;
+  // Unique per run: two runs in the same millisecond would otherwise share a slug.
+  const title = `A post with a picture ${testInfo.project.name} ${crypto.randomUUID().slice(0, 8)}`;
   const slug = title.toLowerCase().replaceAll(" ", "-");
   await signedIn.getByRole("textbox", { name: "Post title" }).fill(title);
   const id = signedIn.url().split("/").at(-1);
@@ -450,6 +451,36 @@ test("CMS-012 the owner connects the CLI on the device page, like github.com/log
   await guest.goto(`/device?code=${third.userCode}`);
   await expect(guest.getByRole("link", { name: "Sign in with GitHub" })).toHaveAttribute("href", `/auth/github?next=${encodeURIComponent(`/device?code=${third.userCode}`)}`);
   await guest.close();
+});
+
+test("CMS-013 Search site, or Cmd/Ctrl+K, finds posts and opens them, as Ghost's global search", async ({ signedIn, draft }, testInfo) => {
+  // One post per run, so repeated runs never find each other's.
+  const name = `${testInfo.project.name}${crypto.randomUUID().slice(0, 8)}`;
+  const post = await draft({ title: `A searchable post about dictation ${name}`, keyword: `searchable ${name}` });
+  await signedIn.goto("/");
+  // The shortcut listens once the admin has drawn its posts list.
+  await expect(signedIn.getByRole("heading", { name: "Posts", exact: true })).toBeVisible();
+  await signedIn.keyboard.press("ControlOrMeta+k");
+  const search = signedIn.getByRole("dialog", { name: "Search site" });
+  await expect(search.getByPlaceholder("Search site")).toBeFocused();
+  // Every word, in any order; the first result is selected, so Enter opens it.
+  await signedIn.keyboard.type(`${name} searchable`);
+  const result = search.getByRole("option", { name: new RegExp(`A searchable post about dictation ${name}`) });
+  await expect(result).toContainText("Draft");
+  await expect(result).toHaveAttribute("aria-selected", "true");
+  await signedIn.keyboard.press("Enter");
+  await expect(signedIn).toHaveURL(new RegExp(`/posts/${post.id}$`));
+
+  // From the sidebar's button too (on a phone, in the sheet behind the bottom bar), with the appearance switch.
+  await signedIn.goto("/");
+  if (testInfo.project.name === "mobile") await signedIn.getByRole("button", { name: "Toggle Sidebar" }).click();
+  await signedIn.getByRole("button", { name: /Search site/ }).click();
+  await signedIn.keyboard.type("dark mode");
+  await search.getByRole("option", { name: /Switch to (dark|light) mode/ }).click();
+  await expect(search).toHaveCount(0);
+  await signedIn.keyboard.press("ControlOrMeta+k");
+  await signedIn.keyboard.type("nothing matches this at all");
+  await expect(search.getByText("No results found")).toBeVisible();
 });
 
 test("the admin runs under its Content Security Policy without violations", async ({ signedIn, draft }) => {
