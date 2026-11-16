@@ -128,3 +128,12 @@ export function releasePath(release: HushRelease) {
 export function findRelease(slug: string) {
   return releases.find((release) => release.slug === slug);
 }
+
+/**
+ * Where download buttons point: the website counts the download (PRD R10,
+ * "downloads" means a download started) and redirects to the latest release's
+ * exact immutable DMG. `from` is the path of the page the button is on.
+ */
+export function downloadPath(from: string) {
+  return `/download?from=${encodeURIComponent(from)}`;
+}

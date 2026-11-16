@@ -68,7 +68,15 @@ Noindex is an indexing choice, not a substitute for legal obligations.
    removal date, and confirm the Cloudflare processing terms cover R2 storage
    of these backups. Live-object cleanup and authenticated revocation are
    implemented separately; neither establishes GDPR compliance alone.
-6. Confirm the dispute-resolution statement and whether editorial activities
+6. Analytics (PRD R10, November 2026): the code for cookieless Umami page
+   views, download clicks and counted downloads exists but stays off until
+   `HUSH_UMAMI_URL` and `HUSH_UMAMI_WEBSITE_ID` are set. Before setting them,
+   the privacy policy (section 8, which today says the site uses no audience
+   analytics) must describe it and be reviewed: which Umami instance and host
+   processes the data, that the visitor's IP address is not forwarded, Do Not
+   Track and Global Privacy Control are honoured, and the legal basis. Turning
+   it on without that review is not allowed.
+7. Confirm the dispute-resolution statement and whether editorial activities
    or other business circumstances trigger additional disclosure duties.
 
 The factual disclosure improvements are approved for publication by the operator.
