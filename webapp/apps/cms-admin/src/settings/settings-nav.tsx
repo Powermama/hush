@@ -91,7 +91,8 @@ export function SettingsNav() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-testid="settings-nav">
-      <div className="shrink-0 px-5 pt-5 pb-2"><SettingsHeader inputRef={inputRef} /></div>
+      {/* data-nav-row: the rows that swipe in as the sidebar swaps to this navigation. */}
+      <div className="shrink-0 px-5 pt-5 pb-2" data-nav-row><SettingsHeader inputRef={inputRef} /></div>
       <nav aria-label="Settings" className="min-h-0 flex-1 overflow-y-auto px-5 pt-4 pb-5 [&>:last-child]:mb-0">
         {noResult && <NoSearchResult className="ml-2" />}
         {groups.map((group) => {
@@ -99,7 +100,7 @@ export function SettingsNav() {
           if (!sections.length) return null;
           return (
             <div key={group}>
-              <h2 className="section-heading settings-heading mb-4 ml-2 text-md font-semibold tracking-normal">{group}</h2>
+              <h2 className="section-heading settings-heading mb-4 ml-2 text-md font-semibold tracking-normal" data-nav-row>{group}</h2>
               <SidebarMenu className="-mt-1 mb-7 gap-0">
                 {sections.map((section) => (
                   <SidebarMenuItem key={section.id}>

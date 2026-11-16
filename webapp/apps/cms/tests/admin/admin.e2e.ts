@@ -496,8 +496,10 @@ test("CMS-014 Settings, as Ghost's: the sidebar becomes its navigation, and Inte
   await signedIn.getByRole("link", { name: "Settings" }).click();
   await expect(signedIn).toHaveURL(/\/settings$/);
   if (!mobile) {
-    // The sidebar is the settings navigation now, its search focused, as in Ghost.
+    // The sidebar is the settings navigation now, its search focused, as in Ghost;
+    // the main navigation, swiped away, is out of reach until Settings closes.
     const nav = signedIn.getByRole("navigation", { name: "Settings" });
+    await expect(signedIn.getByRole("link", { name: "View site" })).toHaveCount(0);
     await expect(signedIn.getByRole("textbox", { name: "Search settings" })).toBeFocused();
     await nav.getByRole("button", { name: "Integrations" }).click();
     await expect(nav.getByRole("button", { name: "Integrations" })).toHaveAttribute("aria-current", "page");
@@ -531,6 +533,7 @@ test("CMS-014 Settings, as Ghost's: the sidebar becomes its navigation, and Inte
   await signedIn.locator("body").click({ position: { x: 5, y: 5 } });
   await signedIn.keyboard.press("Escape");
   await expect(signedIn).toHaveURL(/\/$/);
+  if (!mobile) await expect(signedIn.getByRole("link", { name: "View site" })).toBeVisible();
 });
 
 test("the admin runs under its Content Security Policy without violations", async ({ signedIn, draft }) => {

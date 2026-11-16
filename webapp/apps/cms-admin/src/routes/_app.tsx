@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { GlobalSearchProvider, SearchButton } from "@/search/global-search";
 import { SettingsProvider } from "@/settings/settings-context";
 import { SettingsNav } from "@/settings/settings-nav";
+import { SidebarBodySwap } from "@/components/sidebar-body-swap";
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: requireSession,
@@ -205,8 +206,8 @@ function AppLayout() {
       className="h-dvh [--content-width:1080px] [--page-gutter:20px] sidebar:[--page-gutter:40px] min-[1380px]:[--content-width:1280px] [&_[data-sidebar=sidebar]]:rounded-xl [&_[data-sidebar=sidebar]]:border-border [&_[data-sidebar=sidebar]]:shadow-none"
     >
       <Sidebar variant="floating">
-        {/* In Settings the sidebar becomes the settings navigation, as in Ghost. */}
-        {inSettings ? <SettingsNav /> : <>
+        {/* In Settings the sidebar becomes the settings navigation, swiping across as in Ghost. */}
+        <SidebarBodySwap settings={inSettings} settingsNavigation={<SettingsNav />}>
         <SidebarHeader className="px-5 pt-5 pb-0">
           <div className="flex flex-col items-stretch gap-5">
             <SiteIdentity />
@@ -237,7 +238,7 @@ function AppLayout() {
           <SettingsNavItem />
         </SidebarContent>
         <SidebarFooter className="gap-0 p-3"><UserMenu mode={mode} setMode={setMode} /></SidebarFooter>
-        </>}
+        </SidebarBodySwap>
       </Sidebar>
       <SidebarInset className="relative max-h-[calc(100%-var(--mobile-navbar-height))] overflow-y-auto bg-background sidebar:max-h-full">
         <Outlet />
