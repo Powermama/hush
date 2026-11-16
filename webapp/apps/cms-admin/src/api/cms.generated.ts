@@ -89,6 +89,39 @@ export interface PendingDeviceSignIn {
   tokenDays: number;
 }
 
+/**
+ * device: a CLI signed in through /device; service: made with cms:token, such as the website build's
+ */
+export type TokenKind = typeof TokenKind[keyof typeof TokenKind];
+
+
+export const TokenKind = {
+  device: 'device',
+  service: 'service',
+} as const;
+
+export type TokenScopesItem = typeof TokenScopesItem[keyof typeof TokenScopesItem];
+
+
+export const TokenScopesItem = {
+  'posts:read': 'posts:read',
+  'posts:write': 'posts:write',
+  'posts:publish': 'posts:publish',
+} as const;
+
+export interface Token {
+  id: string;
+  name: string;
+  /** device: a CLI signed in through /device; service: made with cms:token, such as the website build's */
+  kind: TokenKind;
+  scopes: TokenScopesItem[];
+  createdAt: string;
+  /** @nullable */
+  lastUsedAt: string | null;
+  /** @nullable */
+  expiresAt: string | null;
+}
+
 export type PostLang = typeof PostLang[keyof typeof PostLang];
 
 
@@ -347,6 +380,10 @@ export type StartDeviceSignInBody = {
 export type PollDeviceSignInBody = {
   /** @minLength 1 */
   deviceCode: string;
+};
+
+export type ListTokens200 = {
+  tokens: Token[];
 };
 
 export type ListPostsParams = {
@@ -1235,6 +1272,232 @@ export const useDecideDeviceSignIn = <TError = Error,
         TContext
       > => {
       return useMutation(getDecideDeviceSignInMutationOptions(options), queryClient);
+    }
+
+export type listTokensResponse200 = {
+  data: ListTokens200
+  status: 200
+}
+
+export type listTokensResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type listTokensResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type listTokensResponseSuccess = (listTokensResponse200) & {
+  headers: Headers;
+};
+export type listTokensResponseError = (listTokensResponse401 | listTokensResponse403) & {
+  headers: Headers;
+};
+
+export type listTokensResponse = (listTokensResponseSuccess | listTokensResponseError)
+
+export const getListTokensUrl = () => {
+
+
+
+
+  return `/v1/tokens`
+}
+
+/**
+ * Every token that is not revoked, newest first, without its secret. The owner only.
+ */
+export const listTokens = async ( options?: Parameters<typeof cmsFetch>[1]): Promise<listTokensResponse> => {
+
+  return cmsFetch<listTokensResponse>(getListTokensUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListTokensQueryKey = () => {
+    return [
+    `/v1/tokens`
+    ] as const;
+    }
+
+
+export const getListTokensQueryOptions = <TData = Awaited<ReturnType<typeof listTokens>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTokens>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListTokensQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTokens>>> = ({ signal }) => listTokens({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listTokens>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListTokensQueryResult = NonNullable<Awaited<ReturnType<typeof listTokens>>>
+export type ListTokensQueryError = Error
+
+
+/** Every token that is not revoked, newest first, without its secret. The owner only. */
+export function useListTokens<TData = Awaited<ReturnType<typeof listTokens>>, TError = Error>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTokens>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listTokens>>,
+          TError,
+          Awaited<ReturnType<typeof listTokens>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** Every token that is not revoked, newest first, without its secret. The owner only. */
+export function useListTokens<TData = Awaited<ReturnType<typeof listTokens>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTokens>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listTokens>>,
+          TError,
+          Awaited<ReturnType<typeof listTokens>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** Every token that is not revoked, newest first, without its secret. The owner only. */
+export function useListTokens<TData = Awaited<ReturnType<typeof listTokens>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTokens>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** Every token that is not revoked, newest first, without its secret. The owner only. */
+export function useListTokens<TData = Awaited<ReturnType<typeof listTokens>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTokens>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListTokensQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type revokeTokenResponse204 = {
+  data: void
+  status: 204
+}
+
+export type revokeTokenResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type revokeTokenResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type revokeTokenResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type revokeTokenResponseSuccess = (revokeTokenResponse204) & {
+  headers: Headers;
+};
+export type revokeTokenResponseError = (revokeTokenResponse401 | revokeTokenResponse403 | revokeTokenResponse404) & {
+  headers: Headers;
+};
+
+export type revokeTokenResponse = (revokeTokenResponseSuccess | revokeTokenResponseError)
+
+export const getRevokeTokenUrl = (id: string,) => {
+
+
+
+
+  return `/v1/tokens/${id}`
+}
+
+/**
+ * Revokes a token: requests with it get 401 from then on. The owner only.
+ */
+export const revokeToken = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<revokeTokenResponse> => {
+
+  return cmsFetch<revokeTokenResponse>(getRevokeTokenUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokeTokenMutationKey = () => ['revokeToken'] as const;
+
+export const getRevokeTokenMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeToken>>, TError,RevokeTokenMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeToken>>, TError,RevokeTokenMutationVariables, TContext> => {
+
+const mutationKey = getRevokeTokenMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeToken>>, RevokeTokenMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  revokeToken(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeTokenMutationResult = NonNullable<Awaited<ReturnType<typeof revokeToken>>>
+
+    export type RevokeTokenMutationError = Error
+    export type RevokeTokenMutationVariables = {id: string}
+
+    /** Revokes a token: requests with it get 401 from then on. The owner only. */
+export const useRevokeToken = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeToken>>, TError,RevokeTokenMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof revokeToken>>,
+        TError,
+        RevokeTokenMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevokeTokenMutationOptions(options), queryClient);
     }
 
 export type listPostsResponse200 = {

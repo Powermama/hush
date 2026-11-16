@@ -70,6 +70,39 @@ export interface PendingDeviceSignIn {
   tokenDays: number;
 }
 
+/**
+ * device: a CLI signed in through /device; service: made with cms:token, such as the website build's
+ */
+export type TokenKind = typeof TokenKind[keyof typeof TokenKind];
+
+
+export const TokenKind = {
+  device: 'device',
+  service: 'service',
+} as const;
+
+export type TokenScopesItem = typeof TokenScopesItem[keyof typeof TokenScopesItem];
+
+
+export const TokenScopesItem = {
+  'posts:read': 'posts:read',
+  'posts:write': 'posts:write',
+  'posts:publish': 'posts:publish',
+} as const;
+
+export interface Token {
+  id: string;
+  name: string;
+  /** device: a CLI signed in through /device; service: made with cms:token, such as the website build's */
+  kind: TokenKind;
+  scopes: TokenScopesItem[];
+  createdAt: string;
+  /** @nullable */
+  lastUsedAt: string | null;
+  /** @nullable */
+  expiresAt: string | null;
+}
+
 export type PostLang = typeof PostLang[keyof typeof PostLang];
 
 
@@ -328,6 +361,10 @@ export type StartDeviceSignInBody = {
 export type PollDeviceSignInBody = {
   /** @minLength 1 */
   deviceCode: string;
+};
+
+export type ListTokens200 = {
+  tokens: Token[];
 };
 
 export type ListPostsParams = {
@@ -850,6 +887,107 @@ export const decideDeviceSignIn = async (userCode: string,
   {
     ...options,
     method: 'POST'
+
+
+  }
+);}
+
+
+
+export type listTokensResponse200 = {
+  data: ListTokens200
+  status: 200
+}
+
+export type listTokensResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type listTokensResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type listTokensResponseSuccess = (listTokensResponse200) & {
+  headers: Headers;
+};
+export type listTokensResponseError = (listTokensResponse401 | listTokensResponse403) & {
+  headers: Headers;
+};
+
+export type listTokensResponse = (listTokensResponseSuccess | listTokensResponseError)
+
+export const getListTokensUrl = () => {
+
+
+
+
+  return `/v1/tokens`
+}
+
+/**
+ * Every token that is not revoked, newest first, without its secret. The owner only.
+ */
+export const listTokens = async ( options?: Parameters<typeof cmsFetch>[1]): Promise<listTokensResponse> => {
+
+  return cmsFetch<listTokensResponse>(getListTokensUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type revokeTokenResponse204 = {
+  data: void
+  status: 204
+}
+
+export type revokeTokenResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type revokeTokenResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type revokeTokenResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type revokeTokenResponseSuccess = (revokeTokenResponse204) & {
+  headers: Headers;
+};
+export type revokeTokenResponseError = (revokeTokenResponse401 | revokeTokenResponse403 | revokeTokenResponse404) & {
+  headers: Headers;
+};
+
+export type revokeTokenResponse = (revokeTokenResponseSuccess | revokeTokenResponseError)
+
+export const getRevokeTokenUrl = (id: string,) => {
+
+
+
+
+  return `/v1/tokens/${id}`
+}
+
+/**
+ * Revokes a token: requests with it get 401 from then on. The owner only.
+ */
+export const revokeToken = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<revokeTokenResponse> => {
+
+  return cmsFetch<revokeTokenResponse>(getRevokeTokenUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
 
 
   }
