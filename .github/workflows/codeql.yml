@@ -35,6 +35,8 @@ jobs:
         name: Select checks
         # Pushes, schedules and manual runs always analyse every language.
         run: python3 .github/scripts/ci_scope.py
+        env:
+          CI_SCOPE_WORKFLOW: codeql
 
   analyze:
     name: Analyze (${{ matrix.language }})
