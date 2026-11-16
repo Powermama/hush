@@ -88,6 +88,8 @@ async function showChrome(page: Page) {
 }
 
 test("CMS-002 writing in the block editor saves the draft by itself, and the preview lists what the contract refuses", async ({ signedIn, draft }) => {
+  // Waits out the editor's three-second autosave and two preview renders by design.
+  test.slow();
   const post = await draft();
   await signedIn.goto(`/posts/${post.id}`);
   await expect(signedIn.getByRole("textbox", { name: "Post title" })).toHaveValue("How to dictate on a Mac without the cloud");
@@ -173,6 +175,8 @@ test("CMS-007 a new post starts with its title, saves itself and gets its addres
 });
 
 test("CMS-008 an image goes into a new post through its card and follows the post's address", async ({ signedIn }, testInfo) => {
+  // Saves a new post, uploads its image and moves it to the post's new address by design.
+  test.slow();
   const png = await sharp({ create: { width: 800, height: 500, channels: 3, background: "#7667d7" } }).png().toBuffer();
   await signedIn.goto("/posts/new");
   await article(signedIn).click();

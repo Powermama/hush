@@ -41,9 +41,10 @@ The applications `hush-cms-api` and `hush-cms-scheduler`, each:
 3. **Healthcheck**: enable it, HTTP `GET localhost:3100/health/ready`, expected
    code 200, interval 5 s (scheduler 10 s), timeout 3 s, retries 3, start
    period 10 s (scheduler 15 s).
-4. **Environment variables**: those of [Secrets](#secrets) and the sections
-   below, plus `PORT=3100` and `CMS_DATABASE_URL` (the database's internal URL,
-   `postgresql://cms:...@<database uuid>:5432/cms`), all locked.
+4. **Environment variables**: `NODE_ENV=production`, `PORT=3100`, and for
+   every `CMS_*` variable a reference to the environment's shared variable,
+   such as `CMS_S3_SECRET_ACCESS_KEY={{environment.CMS_S3_SECRET_ACCESS_KEY}}`.
+   No value is stored on the application itself.
 5. **Watch Paths**: `webapp/apps/cms/**`, `webapp/packages/**`,
    `webapp/package.json`, `webapp/bun.lock`, and for the API also
    `webapp/apps/cms-admin/**` (the image includes the admin). Auto deploy on
@@ -70,9 +71,25 @@ Production ran all three services in the Compose resource `hush-cms` until
 
 ## Secrets
 
-Coolify generates `SERVICE_PASSWORD_64_CMSPOSTGRES`. Set the rest under
-**Environment Variables**, each **locked** and **not available at build time**;
-the names are listed in [`apps/cms/.env.production.example`](../../.env.production.example):
+The values come from [`webapp/deploy/production/cms.env`](../../../../deploy/README.md),
+encrypted with SOPS, which is their source of truth. On Coolify they are the
+**shared variables** of the environment `hush / production` (Developer View:
+paste `sops decrypt deploy/production/cms.env | grep ^CMS_`, run in `webapp/`), and both
+applications reference them, so a value lives in one place
+([Coolify: shared variables](https://coolify.io/docs/knowledge-base/environment-variables)).
+Lock the secret ones (the R2 keys, `CMS_GITHUB_CLIENT_SECRET`,
+`CMS_COOLIFY_TOKEN`, `CMS_DATABASE_URL`): Coolify then never shows them again,
+not even in the Developer View, which shows a placeholder instead. Never copy
+values out of Coolify; take them from the SOPS file.
+
+At start the API checks that its media bucket answers and that GitHub accepts
+the OAuth client, and the scheduler checks its backup bucket; until then they
+report not ready, so a deploy with a wrong credential keeps the running version.
+
+### Where each value comes from
+
+The names are listed in [`apps/cms/.env.production.example`](../../.env.production.example).
+`CMS_DATABASE_URL` is the database's internal URL from its page in Coolify.
 
 | Variables | Source |
 | --- | --- |

@@ -19,6 +19,8 @@ import { tokenRoutes } from "./routes/tokens";
 
 export type AppOptions = {
   isDraining?: () => boolean;
+  /** Whether the outside credentials have been checked (config-check.ts); not ready until then. */
+  isConfigured?: () => boolean;
   /** GitHub sign-in for the admin; without it only bearer tokens work. */
   admin?: AdminConfig;
   /** The built admin (apps/cms-admin/dist), served on this origin. */
@@ -69,7 +71,7 @@ export function createApp(cms: Cms, options: AppOptions = {}) {
     return context.json({ error: { code: "internal", message: "Something went wrong." } }, 500);
   });
   app.get("/robots.txt", (context) => context.text("User-agent: *\nDisallow: /\n"));
-  app.route("/", healthRoutes(cms.db, options.isDraining ?? (() => false)));
+  app.route("/", healthRoutes(cms.db, options.isDraining ?? (() => false), options.isConfigured));
   if (options.admin) app.route("/", authRoutes(cms.db, options.admin));
   app.route("/", meRoutes(cms.db));
   app.route("/", deviceRoutes(cms.db, options.admin?.publicUrl));

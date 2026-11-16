@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 import { createApp } from "./app";
+import { githubClientCheck, storeCheck, watchConfiguration } from "./config-check";
 import { connectDatabase } from "./db/client";
 import { migrateDatabase } from "./db/migrate";
 import { loadConfig } from "./config";
@@ -11,8 +12,15 @@ await migrateDatabase(config.databaseUrl);
 const { db, close } = connectDatabase(config.databaseUrl);
 let draining = false;
 const adminDir = process.env.CMS_ADMIN_DIR ?? "../cms-admin/dist";
-const app = createApp({ db, media: createObjectStore(config.media) }, {
+const media = createObjectStore(config.media);
+// Only production signs in with a real GitHub OAuth App; test servers use placeholder clients.
+const configuration = watchConfiguration([
+  storeCheck("media bucket", media),
+  ...(config.admin && config.environment === "production" ? [githubClientCheck(config.admin)] : []),
+]);
+const app = createApp({ db, media }, {
   isDraining: () => draining,
+  isConfigured: configuration.configured,
   admin: config.admin,
   adminDir: await Bun.file(`${adminDir}/index.html`).exists() ? adminDir : undefined,
 });
