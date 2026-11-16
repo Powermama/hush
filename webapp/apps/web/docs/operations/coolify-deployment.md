@@ -271,9 +271,9 @@ running version uses it.
    `runtime-cms` and enable **Use Docker Build Secrets**. Add `HUSH_CMS_TOKEN`
    (a read-only token from `bun run cms:token --name website-build --scopes
    posts:read` in the `cms` container) as a locked variable that is available
-   at build time and not at runtime. The build reads the CMS on the server's
-   loopback (`127.0.0.1:3100`, Coolify builds with the host network), so the
-   CMS must be deployed on the same server. Without these settings the image
+   at build time and not at runtime. The build reads the CMS at its public
+   address (`HUSH_CMS_URL`, default `https://cms.behu.sh`), so it works on any
+   builder; the token is the only credential it needs. Without these settings the image
    builds the default target `runtime`, with the blog from `content/blog`.
 
 ### Verify the contract before every infrastructure change

@@ -6,19 +6,27 @@
 // deploys the website when it is behind the CMS and tells search engines about
 // changed pages (src/site/deploy.ts), and whenever the newest backup is a day
 // old it takes a new one. Both steps are
-// idempotent, so a restart or a second instance does no harm. After a tick
-// without errors it touches a heartbeat file, which the Compose healthcheck
-// requires to be recent.
+// idempotent, so a restart or a second instance (during a rolling update) does
+// no harm. Like the API it answers health checks over HTTP on PORT (3100):
+// /health/live while it runs, /health/ready while its last tick without errors
+// is under five minutes old (or it started less than five minutes ago), so the
+// image's health check and any platform's probe work for it unchanged. It
+// applies pending migrations before its first tick,
+// as the API does at start (under one advisory lock), so neither depends on
+// the other having started.
 import { backupDatabase, backupTime, listBackups } from "../backups/backups";
 import { loadConfig } from "../config";
 import { connectDatabase } from "../db/client";
+import { migrateDatabase } from "../db/migrate";
 import { publishDuePosts } from "../posts/service";
 import { syncSite } from "../site/deploy";
 import { createObjectStore } from "../storage/object-store";
 
-const heartbeatPath = "/tmp/cms-scheduler-heartbeat";
+/** How long the scheduler counts as ready without a tick that succeeded. */
+const readyWindowMs = 5 * 60_000;
 
 const config = loadConfig();
+await migrateDatabase(config.databaseUrl);
 const { db, close } = connectDatabase(config.databaseUrl);
 const backups = createObjectStore(config.backups);
 const log = (level: "info" | "error", message: string, details: Record<string, unknown> = {}) =>
@@ -26,6 +34,21 @@ const log = (level: "info" | "error", message: string, details: Record<string, u
 
 let stopping = false;
 process.on("SIGTERM", () => { stopping = true; });
+
+const startedAt = Date.now();
+let lastHealthyTick: number | undefined;
+const health = Bun.serve({
+  port: Number(process.env.PORT ?? 3100),
+  fetch(request) {
+    const { pathname } = new URL(request.url);
+    if (pathname === "/health/live") return Response.json({ status: "ok" });
+    if (pathname === "/health/ready") {
+      const ready = !stopping && Date.now() - (lastHealthyTick ?? startedAt) < readyWindowMs;
+      return Response.json({ status: ready ? "ready" : "not ready" }, { status: ready ? 200 : 503 });
+    }
+    return new Response("Not found", { status: 404 });
+  },
+});
 
 async function tick() {
   let healthy = true;
@@ -54,7 +77,7 @@ async function tick() {
     healthy = false;
     log("error", "Backing up the CMS database failed", { error: String(error) });
   }
-  if (healthy) await Bun.write(heartbeatPath, new Date().toISOString());
+  if (healthy) lastHealthyTick = Date.now();
 }
 
 log("info", "hush CMS scheduler started");
@@ -62,4 +85,5 @@ while (!stopping) {
   await tick();
   for (let waited = 0; waited < 60_000 && !stopping; waited += 1_000) await Bun.sleep(1_000);
 }
+await health.stop(true);
 await close();
