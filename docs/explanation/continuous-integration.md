@@ -12,7 +12,7 @@ Manual workflow runs always check both components.
 | --- | --- | --- | --- | --- |
 | Website UI, assets, legal contact or browser tests (`webapp/apps/web`) | Yes | No | No | No |
 | Proof service, shared proof contracts or OpenAPI | Yes | No | Yes | No |
-| The CMS (`webapp/apps/cms`) | No | Yes | No | No |
+| The CMS (`webapp/apps/cms`), its admin or the `hush-cms` CLI | No | Yes | No | No |
 | A shared package (`webapp/packages/*`) | Apps that depend on it | Apps that depend on it | No | No |
 | Workspace root: manifest, lockfile, Docker or Compose files | Yes | Yes | Yes | No |
 | Native source, resources, packages or build scripts | No | No | Yes | Yes |

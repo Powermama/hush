@@ -392,6 +392,66 @@ test("CMS-010 publishing celebrates the post on the posts list, with its link to
   await expect(signedIn.getByRole("dialog")).toHaveCount(0);
 });
 
+test("CMS-011 the owner approves a draft in its preview, for an agent to schedule or publish it as it is", async ({ signedIn, draft }) => {
+  const post = await draft();
+  const approval = async () => (await (await signedIn.request.get(`/v1/posts/${post.id}`)).json() as { approval: { current: boolean; approvedBy: string } | null }).approval;
+  await signedIn.goto(`/posts/${post.id}`);
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
+  await signedIn.keyboard.press("ControlOrMeta+p");
+  const preview = signedIn.getByRole("dialog", { name: "Preview" });
+  await expect(signedIn.frameLocator("iframe[title=Preview]").getByRole("heading", { name: "How does it work?" })).toBeVisible();
+  await preview.getByRole("button", { name: "Approve", exact: true }).click();
+  await expect(preview.getByText("Approved", { exact: true })).toBeVisible();
+  await expect(signedIn.getByText("Approved. An agent may now schedule or publish it as it is.")).toBeVisible();
+  expect(await approval()).toMatchObject({ current: true, approvedBy: "github:owner" });
+
+  // A change after the approval leaves it lapsed until the owner approves again.
+  await preview.getByRole("button", { name: "Close" }).click();
+  await endOfArticle(signedIn);
+  await signedIn.keyboard.type(" One more sentence.");
+  await signedIn.keyboard.press("ControlOrMeta+s");
+  await expect(status(signedIn)).toHaveText("Draft - Saved");
+  expect((await approval())?.current).toBe(false);
+  await signedIn.keyboard.press("ControlOrMeta+p");
+  await preview.getByRole("button", { name: "Approve again" }).click();
+  await expect(preview.getByText("Approved", { exact: true })).toBeVisible();
+  expect((await approval())?.current).toBe(true);
+});
+
+test("CMS-012 the owner connects the CLI on the device page, like github.com/login/device", async ({ signedIn, browser, baseURL }) => {
+  const start = async (clientName: string) => (await (await signedIn.request.post("/v1/auth/device", { data: { clientName } })).json()) as { deviceCode: string; userCode: string; verificationUriComplete: string };
+  const poll = async (deviceCode: string) => (await signedIn.request.post("/v1/auth/device/token", { data: { deviceCode } })).json() as Promise<{ token?: string; error?: { code: string } }>;
+
+  const cli = await start("hush-cms on a test Mac");
+  await signedIn.goto(new URL(cli.verificationUriComplete).pathname + new URL(cli.verificationUriComplete).search);
+  await expect(signedIn.getByRole("heading", { name: "Authorize hush-cms" })).toBeVisible();
+  await expect(signedIn.getByText("hush-cms on a test Mac")).toBeVisible();
+  await expect(signedIn.getByLabel("Code")).toHaveText(cli.userCode);
+  await expect(signedIn.getByText("Schedule or publish posts you have approved")).toBeVisible();
+  await signedIn.getByRole("button", { name: "Authorize" }).click();
+  await expect(signedIn.getByRole("heading", { name: "Device connected" })).toBeVisible();
+  expect((await poll(cli.deviceCode)).token).toMatch(/^hcms_/);
+
+  // Denied: the CLI gets no token.
+  const other = await start("hush-cms on another Mac");
+  await signedIn.goto("/device");
+  await signedIn.getByLabel("Code").fill(other.userCode.toLowerCase().replace("-", ""));
+  await signedIn.getByRole("button", { name: "Continue" }).click();
+  await signedIn.getByRole("button", { name: "Deny" }).click();
+  await expect(signedIn.getByRole("heading", { name: "Access denied" })).toBeVisible();
+  expect((await poll(other.deviceCode)).error?.code).toBe("access_denied");
+  // A used code is not waiting any more.
+  await signedIn.goto(`/device?code=${other.userCode}`);
+  await expect(signedIn.getByText("That code is not waiting for approval.")).toBeVisible();
+
+  // Signed out, the page asks to sign in and comes back to the code afterwards.
+  const guest = await browser.newPage({ baseURL, ignoreHTTPSErrors: true });
+  const third = await start("hush-cms signed out");
+  await guest.goto(`/device?code=${third.userCode}`);
+  await expect(guest.getByRole("link", { name: "Sign in with GitHub" })).toHaveAttribute("href", `/auth/github?next=${encodeURIComponent(`/device?code=${third.userCode}`)}`);
+  await guest.close();
+});
+
 test("the admin runs under its Content Security Policy without violations", async ({ signedIn, draft }) => {
   const violations: string[] = [];
   signedIn.on("console", (message) => { if (/Content.Security.Policy|Refused to/i.test(message.text())) violations.push(message.text()); });

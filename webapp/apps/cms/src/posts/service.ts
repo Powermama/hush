@@ -6,11 +6,18 @@
 // may be incomplete; a scheduled or published post always passed the article
 // contract and has a rendition, so anything live is valid. A change to what the website shows also records the
 // changed pages under the next site revision, in the same transaction.
+//
+// Agents (every token) change what readers see only with the owner's approval:
+// they schedule or publish a post only while the owner's approval covers its
+// content, and never change, restore or unpublish a live one. These checks run
+// on the post as it is inside the write's transaction.
 import { blogPath, type BlogLanguage } from "@hush/article/taxonomy";
 import { and, asc, desc, eq, inArray, like, lte, or, sql } from "drizzle-orm";
+import { isAgent } from "../auth/tokens";
 import type { Database } from "../db/client";
-import { postRenditions, postRevisions, postSecondaryKeywords, posts, siteChanges, siteState } from "../db/schema";
+import { postApprovals, postRenditions, postRevisions, postSecondaryKeywords, posts, siteChanges, siteState } from "../db/schema";
 import { writeRenditions, type Cms } from "../media/service";
+import { contentHash, requireApproval, requireDraftFor, type Approval } from "./approval";
 import { checkPost, type CoPublished } from "./contract";
 import { PostError } from "./errors";
 import { draftDefaults, postFields, type PostFields, type PostPatch } from "./fields";
@@ -21,7 +28,13 @@ export type Executor = Database | Transaction;
 
 export type PostStatus = (typeof posts.$inferSelect)["status"];
 export type Rendition = Omit<typeof postRenditions.$inferSelect, "postId">;
-export type Post = typeof posts.$inferSelect & { secondaryKeywords: string[]; rendition: Rendition | null };
+export type Post = typeof posts.$inferSelect & {
+  secondaryKeywords: string[];
+  rendition: Rendition | null;
+  /** Names the post's fields and images as they are now (posts/approval.ts). */
+  contentHash: string;
+  approval: Approval | null;
+};
 
 export { PostError };
 
@@ -31,13 +44,25 @@ const pagePath = (post: Post) => blogPath(post.lang as BlogLanguage, post.slug);
 const withRelations = {
   secondaryKeywords: { columns: { keyword: true as const }, orderBy: [asc(postSecondaryKeywords.position)] },
   rendition: { columns: { heading: true as const, html: true as const, toc: true as const, readingMinutes: true as const, renderedAt: true as const } },
+  media: { columns: { name: true as const, sha256: true as const } },
+  approval: { columns: { contentHash: true as const, approvedBy: true as const, approvedAt: true as const } },
 };
 
-type Loaded = typeof posts.$inferSelect & { secondaryKeywords: Array<{ keyword: string }>; rendition: Rendition | null };
+type Loaded = typeof posts.$inferSelect & {
+  secondaryKeywords: Array<{ keyword: string }>;
+  rendition: Rendition | null;
+  media: Array<{ name: string; sha256: string }>;
+  approval: { contentHash: string; approvedBy: string; approvedAt: Date } | null;
+};
 
-const compose = ({ secondaryKeywords, ...post }: Loaded): Post => ({
-  ...post, secondaryKeywords: secondaryKeywords.map((row) => row.keyword),
-});
+const compose = ({ secondaryKeywords, media, approval, ...row }: Loaded): Post => {
+  const post = { ...row, secondaryKeywords: secondaryKeywords.map((keyword) => keyword.keyword) };
+  const hash = contentHash(editableFields(post), media);
+  return {
+    ...post, contentHash: hash,
+    approval: approval && { approvedBy: approval.approvedBy, approvedAt: approval.approvedAt, current: approval.contentHash === hash },
+  };
+};
 
 async function load(db: Executor, id: string) {
   const post: Loaded | undefined = await db.query.posts.findFirst({ where: eq(posts.id, id), with: withRelations });
@@ -46,7 +71,7 @@ async function load(db: Executor, id: string) {
 }
 
 /** The fields an author or agent writes, as stored in revisions. */
-export function editableFields(post: Post): PostFields {
+export function editableFields(post: typeof posts.$inferSelect & { secondaryKeywords: string[] }): PostFields {
   return postFields.parse({
     lang: post.lang, slug: post.slug, title: post.title, description: post.description,
     keyword: post.keyword, secondaryKeywords: post.secondaryKeywords, type: post.type,
@@ -86,9 +111,15 @@ async function write(db: Database, actor: string, change: {
   slugFrom?: string;
   /** Adjusts the fields to the slug they got. */
   named?: (fields: PostFields) => PostFields;
+  /** Refuses the change by throwing, given the post as it is now, locked until the transaction ends. */
+  check?: (current: Post) => void;
 }) {
   try {
     return await db.transaction(async (tx) => {
+      if (change.id && change.check) {
+        await tx.select({ id: posts.id }).from(posts).where(eq(posts.id, change.id)).for("update");
+        change.check(await load(tx, change.id));
+      }
       let fields = change.fields;
       if (fields && change.slugFrom) {
         // One writer at a time picks from the slugs of a language and base, so two posts
@@ -137,6 +168,17 @@ async function write(db: Database, actor: string, change: {
   }
 }
 
+/** Refuses a change prepared from `seen` (a rendition, a status) when the post's status changed since. */
+const sameStatus = (seen: Post) => (current: Post) => {
+  if (current.status !== seen.status) throw new PostError(409, "changed", "The post changed meanwhile; load it again and retry.");
+};
+
+/** Refuses a change prepared from `seen` when its status or content changed since: its rendition would be stale. */
+const sameContent = (seen: Post) => (current: Post) => {
+  sameStatus(seen)(current);
+  if (current.contentHash !== seen.contentHash) throw new PostError(409, "changed", "The post changed meanwhile; load it again and retry.");
+};
+
 /** Validates and renders for going live; throws with the contract's problems. */
 async function render(cms: Cms, id: string, fields: PostFields, publishedAt: Date, updatedAt: Date, coPublished: CoPublished = []) {
   const { post, problems } = await checkPost(cms, id, fields, publishedAt, updatedAt, coPublished);
@@ -184,6 +226,7 @@ export function createDraft(db: Database, input: PostPatch, actor: string) {
 
 export async function updatePost(cms: Cms, id: string, patch: PostPatch, actor: string, options: { autosave?: boolean } = {}) {
   const post = await load(cms.db, id);
+  requireDraftFor(actor, post);
   const merged = postFields.parse({ ...editableFields(post), ...patch });
   // A draft that started without a heading takes its slug from the one it gets.
   const unnamed = post.status === "draft" && patch.slug === undefined && isUntitled(post.slug) && suggestedSlug(merged) !== untitledSlug;
@@ -195,6 +238,7 @@ export async function updatePost(cms: Cms, id: string, patch: PostPatch, actor: 
   const sitePaths = post.status === "published" ? [pagePath(post), blogPath(fields.lang, fields.slug)] : undefined;
   return write(cms.db, actor, {
     id, fields, row: { updatedAt }, rendition, sitePaths,
+    check: (current) => { sameStatus(post)(current); requireDraftFor(actor, current); },
     // Only a draft is autosaved; every change to a live post is a revision of its own.
     autosave: options.autosave && post.status === "draft",
     ...(unnamed ? { slugFrom: suggestedSlug(merged), named: (named: PostFields) => moveImages(named, post.slug) } : {}),
@@ -213,8 +257,12 @@ export async function schedulePost(cms: Cms, id: string, at: Date, actor: string
   if (at.getTime() <= Date.now()) throw new PostError(422, "not_in_future", "Schedule a time in the future, or publish now.");
   const post = await load(cms.db, id);
   if (post.status === "published") throw new PostError(409, "already_published", "Unpublish the post before scheduling it.");
+  requireApproval(actor, post);
   const rendition = await render(cms, id, editableFields(post), at, at);
-  return write(cms.db, actor, { id, row: { status: "scheduled", publishedAt: at }, rendition });
+  return write(cms.db, actor, {
+    id, row: { status: "scheduled", publishedAt: at }, rendition,
+    check: (current) => { sameContent(post)(current); requireApproval(actor, current); },
+  });
 }
 
 /**
@@ -225,19 +273,41 @@ export async function schedulePost(cms: Cms, id: string, at: Date, actor: string
 export async function publishPost(cms: Cms, id: string, actor: string, dates?: { publishedAt: Date; updatedAt: Date }, coPublished: CoPublished = []) {
   const post = await load(cms.db, id);
   if (post.status === "published") return post;
+  requireApproval(actor, post);
   const publishedAt = dates?.publishedAt
     ?? (post.publishedAt && post.publishedAt.getTime() <= Date.now() ? post.publishedAt : new Date());
   const updatedAt = dates?.updatedAt ?? post.updatedAt;
   const rendition = await render(cms, id, editableFields(post), publishedAt, updatedAt, coPublished);
-  return write(cms.db, actor, { id, row: { status: "published", publishedAt, updatedAt }, rendition, sitePaths: [pagePath(post)] });
+  return write(cms.db, actor, {
+    id, row: { status: "published", publishedAt, updatedAt }, rendition, sitePaths: [pagePath(post)],
+    check: (current) => { sameContent(post)(current); requireApproval(actor, current); },
+  });
 }
 
 export async function unpublishPost(db: Database, id: string, actor: string) {
   const post = await load(db, id);
   if (post.status === "draft") return post;
+  if (isAgent(actor)) throw new PostError(403, "owner_only", "Only the owner unpublishes a post, in the admin.");
   const keepDate = post.publishedAt && post.publishedAt.getTime() <= Date.now();
   const sitePaths = post.status === "published" ? [pagePath(post)] : undefined;
   return write(db, actor, { id, row: { status: "draft", publishedAt: keepDate ? post.publishedAt : null }, rendition: null, sitePaths });
+}
+
+/**
+ * The owner approves a post as they reviewed it: `reviewedHash` is the
+ * contentHash they saw, so a change made meanwhile is never approved unseen.
+ */
+export async function approvePost(db: Database, id: string, reviewedHash: string, actor: string) {
+  return db.transaction(async (tx) => {
+    await tx.select({ id: posts.id }).from(posts).where(eq(posts.id, id)).for("update");
+    const post = await load(tx, id);
+    if (post.contentHash !== reviewedHash) {
+      throw new PostError(409, "changed_since_review", "The post changed after you reviewed it; review it again before approving.");
+    }
+    const approval = { contentHash: post.contentHash, approvedBy: actor, approvedAt: new Date() };
+    await tx.insert(postApprovals).values({ postId: id, ...approval }).onConflictDoUpdate({ target: postApprovals.postId, set: approval });
+    return load(tx, id);
+  });
 }
 
 export async function listRevisions(db: Database, id: string) {

@@ -24,6 +24,71 @@ import type {
 } from '@tanstack/react-query';
 
 import { cmsFetch } from './fetcher';
+export type CallerScopesItem = typeof CallerScopesItem[keyof typeof CallerScopesItem];
+
+
+export const CallerScopesItem = {
+  'posts:read': 'posts:read',
+  'posts:write': 'posts:write',
+  'posts:publish': 'posts:publish',
+} as const;
+
+export interface Caller {
+  /** token:<name> for a token, github:<login> for the signed-in owner */
+  actor: string;
+  scopes: CallerScopesItem[];
+  /**
+     * When the token stops working; null for the owner and for tokens without an expiry.
+     * @nullable
+     */
+  expiresAt: string | null;
+}
+
+export type ErrorError = {
+  code: string;
+  message: string;
+  problems?: string[];
+};
+
+export interface Error {
+  error: ErrorError;
+}
+
+export interface DeviceSignIn {
+  deviceCode: string;
+  userCode: string;
+  verificationUri: string;
+  verificationUriComplete: string;
+  /** Seconds until the codes expire */
+  expiresIn: number;
+  /** Seconds to wait between polls */
+  interval: number;
+}
+
+export interface DeviceToken {
+  token: string;
+  actor: string;
+  expiresAt: string;
+}
+
+export type PendingDeviceSignInScopesItem = typeof PendingDeviceSignInScopesItem[keyof typeof PendingDeviceSignInScopesItem];
+
+
+export const PendingDeviceSignInScopesItem = {
+  'posts:read': 'posts:read',
+  'posts:write': 'posts:write',
+  'posts:publish': 'posts:publish',
+} as const;
+
+export interface PendingDeviceSignIn {
+  userCode: string;
+  clientName: string;
+  expiresAt: string;
+  scopes: PendingDeviceSignInScopesItem[];
+  /** How long the token will work */
+  tokenDays: number;
+}
+
 export type PostLang = typeof PostLang[keyof typeof PostLang];
 
 
@@ -90,6 +155,17 @@ export type PostRendition = {
   renderedAt: string;
 } | null;
 
+/**
+ * The owner's approval, which agents need to schedule or publish the post.
+ * @nullable
+ */
+export type PostApproval = {
+  approvedBy: string;
+  approvedAt: string;
+  /** Whether it covers the post as it is now; any change to the text or an image leaves it lapsed. */
+  current: boolean;
+} | null;
+
 export interface Post {
   lang: PostLang;
   /** @pattern ^[a-z0-9]+(-[a-z0-9]+)*$ */
@@ -118,16 +194,13 @@ export interface Post {
      * @nullable
      */
   rendition: PostRendition;
-}
-
-export type ErrorError = {
-  code: string;
-  message: string;
-  problems?: string[];
-};
-
-export interface Error {
-  error: ErrorError;
+  /** Names the post's fields and images as they are now; the owner approves a post by it. */
+  contentHash: string;
+  /**
+     * The owner's approval, which agents need to schedule or publish the post.
+     * @nullable
+     */
+  approval: PostApproval;
 }
 
 export type PreviewRenditionTocItem = {
@@ -261,6 +334,20 @@ export interface SiteExport {
   revision: number;
   files: SiteExportFilesItem[];
 }
+
+export type StartDeviceSignInBody = {
+  /**
+     * Names the token, such as "hush-cms on Clemens's MacBook"
+     * @minLength 1
+     * @maxLength 80
+     */
+  clientName: string;
+};
+
+export type PollDeviceSignInBody = {
+  /** @minLength 1 */
+  deviceCode: string;
+};
 
 export type ListPostsParams = {
   lang?: ListPostsLang;
@@ -422,6 +509,11 @@ export type SchedulePostBody = {
   publishedAt: string;
 };
 
+export type ApprovePostBody = {
+  /** The post's contentHash as the owner reviewed it */
+  contentHash: string;
+};
+
 export type PreviewPostBodyLang = typeof PreviewPostBodyLang[keyof typeof PreviewPostBodyLang];
 
 
@@ -527,6 +619,623 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export type getCallerResponse200 = {
+  data: Caller
+  status: 200
+}
+
+export type getCallerResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type getCallerResponseSuccess = (getCallerResponse200) & {
+  headers: Headers;
+};
+export type getCallerResponseError = (getCallerResponse401) & {
+  headers: Headers;
+};
+
+export type getCallerResponse = (getCallerResponseSuccess | getCallerResponseError)
+
+export const getGetCallerUrl = () => {
+
+
+
+
+  return `/v1/me`
+}
+
+export const getCaller = async ( options?: Parameters<typeof cmsFetch>[1]): Promise<getCallerResponse> => {
+
+  return cmsFetch<getCallerResponse>(getGetCallerUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCallerQueryKey = () => {
+    return [
+    `/v1/me`
+    ] as const;
+    }
+
+
+export const getGetCallerQueryOptions = <TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCallerQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCaller>>> = ({ signal }) => getCaller({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCallerQueryResult = NonNullable<Awaited<ReturnType<typeof getCaller>>>
+export type GetCallerQueryError = Error
+
+
+export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCaller>>,
+          TError,
+          Awaited<ReturnType<typeof getCaller>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCaller>>,
+          TError,
+          Awaited<ReturnType<typeof getCaller>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCaller>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCallerQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type revokeCallerResponse204 = {
+  data: void
+  status: 204
+}
+
+export type revokeCallerResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type revokeCallerResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type revokeCallerResponseSuccess = (revokeCallerResponse204) & {
+  headers: Headers;
+};
+export type revokeCallerResponseError = (revokeCallerResponse401 | revokeCallerResponse409) & {
+  headers: Headers;
+};
+
+export type revokeCallerResponse = (revokeCallerResponseSuccess | revokeCallerResponseError)
+
+export const getRevokeCallerUrl = () => {
+
+
+
+
+  return `/v1/me`
+}
+
+/**
+ * Revokes the token sending the request, as a CLI does when it signs out. The owner signs out of the admin instead.
+ */
+export const revokeCaller = async ( options?: Parameters<typeof cmsFetch>[1]): Promise<revokeCallerResponse> => {
+
+  return cmsFetch<revokeCallerResponse>(getRevokeCallerUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokeCallerMutationKey = () => ['revokeCaller'] as const;
+
+export const getRevokeCallerMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeCaller>>, TError,void, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeCaller>>, TError,void, TContext> => {
+
+const mutationKey = getRevokeCallerMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeCaller>>, void> = () => {
+
+
+          return  revokeCaller(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeCallerMutationResult = NonNullable<Awaited<ReturnType<typeof revokeCaller>>>
+
+    export type RevokeCallerMutationError = Error
+
+
+    /** Revokes the token sending the request, as a CLI does when it signs out. The owner signs out of the admin instead. */
+export const useRevokeCaller = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeCaller>>, TError,void, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof revokeCaller>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRevokeCallerMutationOptions(options), queryClient);
+    }
+
+export type startDeviceSignInResponse200 = {
+  data: DeviceSignIn
+  status: 200
+}
+
+export type startDeviceSignInResponseSuccess = (startDeviceSignInResponse200) & {
+  headers: Headers;
+};
+;
+
+export type startDeviceSignInResponse = (startDeviceSignInResponseSuccess)
+
+export const getStartDeviceSignInUrl = () => {
+
+
+
+
+  return `/v1/auth/device`
+}
+
+/**
+ * Starts a device sign-in (RFC 8628): show userCode and verificationUriComplete to the person, then poll with deviceCode.
+ */
+export const startDeviceSignIn = async (startDeviceSignInBody: StartDeviceSignInBody, options?: Parameters<typeof cmsFetch>[1]): Promise<startDeviceSignInResponse> => {
+
+  return cmsFetch<startDeviceSignInResponse>(getStartDeviceSignInUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(startDeviceSignInBody)
+  }
+);}
+
+
+
+
+
+export const getStartDeviceSignInMutationKey = () => ['startDeviceSignIn'] as const;
+
+export const getStartDeviceSignInMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startDeviceSignIn>>, TError,StartDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof startDeviceSignIn>>, TError,StartDeviceSignInMutationVariables, TContext> => {
+
+const mutationKey = getStartDeviceSignInMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startDeviceSignIn>>, StartDeviceSignInMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  startDeviceSignIn(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartDeviceSignInMutationResult = NonNullable<Awaited<ReturnType<typeof startDeviceSignIn>>>
+    export type StartDeviceSignInMutationBody = StartDeviceSignInBody
+    export type StartDeviceSignInMutationError = unknown
+    export type StartDeviceSignInMutationVariables = {data: StartDeviceSignInBody}
+
+    /** Starts a device sign-in (RFC 8628): show userCode and verificationUriComplete to the person, then poll with deviceCode. */
+export const useStartDeviceSignIn = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startDeviceSignIn>>, TError,StartDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof startDeviceSignIn>>,
+        TError,
+        StartDeviceSignInMutationVariables,
+        TContext
+      > => {
+      return useMutation(getStartDeviceSignInMutationOptions(options), queryClient);
+    }
+
+export type pollDeviceSignInResponse200 = {
+  data: DeviceToken
+  status: 200
+}
+
+export type pollDeviceSignInResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type pollDeviceSignInResponseSuccess = (pollDeviceSignInResponse200) & {
+  headers: Headers;
+};
+export type pollDeviceSignInResponseError = (pollDeviceSignInResponse400) & {
+  headers: Headers;
+};
+
+export type pollDeviceSignInResponse = (pollDeviceSignInResponseSuccess | pollDeviceSignInResponseError)
+
+export const getPollDeviceSignInUrl = () => {
+
+
+
+
+  return `/v1/auth/device/token`
+}
+
+/**
+ * One poll. Until the owner decides it answers 400 authorization_pending (slow_down when polled too soon); after an approval it answers the token, once.
+ */
+export const pollDeviceSignIn = async (pollDeviceSignInBody: PollDeviceSignInBody, options?: Parameters<typeof cmsFetch>[1]): Promise<pollDeviceSignInResponse> => {
+
+  return cmsFetch<pollDeviceSignInResponse>(getPollDeviceSignInUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(pollDeviceSignInBody)
+  }
+);}
+
+
+
+
+
+export const getPollDeviceSignInMutationKey = () => ['pollDeviceSignIn'] as const;
+
+export const getPollDeviceSignInMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pollDeviceSignIn>>, TError,PollDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof pollDeviceSignIn>>, TError,PollDeviceSignInMutationVariables, TContext> => {
+
+const mutationKey = getPollDeviceSignInMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pollDeviceSignIn>>, PollDeviceSignInMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  pollDeviceSignIn(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PollDeviceSignInMutationResult = NonNullable<Awaited<ReturnType<typeof pollDeviceSignIn>>>
+    export type PollDeviceSignInMutationBody = PollDeviceSignInBody
+    export type PollDeviceSignInMutationError = Error
+    export type PollDeviceSignInMutationVariables = {data: PollDeviceSignInBody}
+
+    /** One poll. Until the owner decides it answers 400 authorization_pending (slow_down when polled too soon); after an approval it answers the token, once. */
+export const usePollDeviceSignIn = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pollDeviceSignIn>>, TError,PollDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof pollDeviceSignIn>>,
+        TError,
+        PollDeviceSignInMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPollDeviceSignInMutationOptions(options), queryClient);
+    }
+
+export type getDeviceSignInResponse200 = {
+  data: PendingDeviceSignIn
+  status: 200
+}
+
+export type getDeviceSignInResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type getDeviceSignInResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type getDeviceSignInResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type getDeviceSignInResponseSuccess = (getDeviceSignInResponse200) & {
+  headers: Headers;
+};
+export type getDeviceSignInResponseError = (getDeviceSignInResponse401 | getDeviceSignInResponse403 | getDeviceSignInResponse404) & {
+  headers: Headers;
+};
+
+export type getDeviceSignInResponse = (getDeviceSignInResponseSuccess | getDeviceSignInResponseError)
+
+export const getGetDeviceSignInUrl = (userCode: string,) => {
+
+
+
+
+  return `/v1/auth/device/${userCode}`
+}
+
+/**
+ * A sign-in waiting for the owner's decision. The owner only.
+ */
+export const getDeviceSignIn = async (userCode: string, options?: Parameters<typeof cmsFetch>[1]): Promise<getDeviceSignInResponse> => {
+
+  return cmsFetch<getDeviceSignInResponse>(getGetDeviceSignInUrl(userCode),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDeviceSignInQueryKey = (userCode: string,) => {
+    return [
+    `/v1/auth/device/${userCode}`
+    ] as const;
+    }
+
+
+export const getGetDeviceSignInQueryOptions = <TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDeviceSignInQueryKey(userCode);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDeviceSignIn>>> = ({ signal }) => getDeviceSignIn(userCode, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: userCode !== null && userCode !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetDeviceSignInQueryResult = NonNullable<Awaited<ReturnType<typeof getDeviceSignIn>>>
+export type GetDeviceSignInQueryError = Error
+
+
+/** A sign-in waiting for the owner's decision. The owner only. */
+export function useGetDeviceSignIn<TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(
+ userCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDeviceSignIn>>,
+          TError,
+          Awaited<ReturnType<typeof getDeviceSignIn>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** A sign-in waiting for the owner's decision. The owner only. */
+export function useGetDeviceSignIn<TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDeviceSignIn>>,
+          TError,
+          Awaited<ReturnType<typeof getDeviceSignIn>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** A sign-in waiting for the owner's decision. The owner only. */
+export function useGetDeviceSignIn<TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** A sign-in waiting for the owner's decision. The owner only. */
+export function useGetDeviceSignIn<TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetDeviceSignInQueryOptions(userCode,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type decideDeviceSignInResponse204 = {
+  data: void
+  status: 204
+}
+
+export type decideDeviceSignInResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type decideDeviceSignInResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type decideDeviceSignInResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type decideDeviceSignInResponseSuccess = (decideDeviceSignInResponse204) & {
+  headers: Headers;
+};
+export type decideDeviceSignInResponseError = (decideDeviceSignInResponse401 | decideDeviceSignInResponse403 | decideDeviceSignInResponse404) & {
+  headers: Headers;
+};
+
+export type decideDeviceSignInResponse = (decideDeviceSignInResponseSuccess | decideDeviceSignInResponseError)
+
+export const getDecideDeviceSignInUrl = (userCode: string,
+    decision: 'approve' | 'deny',) => {
+
+
+
+
+  return `/v1/auth/device/${userCode}/${decision}`
+}
+
+/**
+ * The owner approves or denies a sign-in. The owner only.
+ */
+export const decideDeviceSignIn = async (userCode: string,
+    decision: 'approve' | 'deny', options?: Parameters<typeof cmsFetch>[1]): Promise<decideDeviceSignInResponse> => {
+
+  return cmsFetch<decideDeviceSignInResponse>(getDecideDeviceSignInUrl(userCode,decision),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getDecideDeviceSignInMutationKey = () => ['decideDeviceSignIn'] as const;
+
+export const getDecideDeviceSignInMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideDeviceSignIn>>, TError,DecideDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideDeviceSignIn>>, TError,DecideDeviceSignInMutationVariables, TContext> => {
+
+const mutationKey = getDecideDeviceSignInMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideDeviceSignIn>>, DecideDeviceSignInMutationVariables> = (props) => {
+          const {userCode,decision} = props ?? {};
+
+          return  decideDeviceSignIn(userCode,decision,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideDeviceSignInMutationResult = NonNullable<Awaited<ReturnType<typeof decideDeviceSignIn>>>
+
+    export type DecideDeviceSignInMutationError = Error
+    export type DecideDeviceSignInMutationVariables = {userCode: string;decision: 'approve' | 'deny'}
+
+    /** The owner approves or denies a sign-in. The owner only. */
+export const useDecideDeviceSignIn = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideDeviceSignIn>>, TError,DecideDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof decideDeviceSignIn>>,
+        TError,
+        DecideDeviceSignInMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideDeviceSignInMutationOptions(options), queryClient);
+    }
 
 export type listPostsResponse200 = {
   data: ListPosts200
@@ -933,7 +1642,7 @@ export const getUpdatePostUrl = (id: string,
 }
 
 /**
- * Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.
+ * Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. Tokens change drafts only (403 live_post).
  */
 export const updatePost = async (id: string,
     updatePostBody: UpdatePostBody,
@@ -986,7 +1695,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdatePostMutationError = Error
     export type UpdatePostMutationVariables = {id: string;data: UpdatePostBody;params?: UpdatePostParams}
 
-    /** Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. */
+    /** Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. Tokens change drafts only (403 live_post). */
 export const useUpdatePost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,UpdatePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
@@ -1041,7 +1750,7 @@ export const getDeletePostUrl = (id: string,) => {
 }
 
 /**
- * Deletes a draft with its history and images. A scheduled or published post is unpublished first.
+ * Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first.
  */
 export const deletePost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<deletePostResponse> => {
 
@@ -1092,7 +1801,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type DeletePostMutationError = Error
     export type DeletePostMutationVariables = {id: string}
 
-    /** Deletes a draft with its history and images. A scheduled or published post is unpublished first. */
+    /** Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first. */
 export const useDeletePost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
@@ -1151,6 +1860,9 @@ export const getSchedulePostUrl = (id: string,) => {
   return `/v1/posts/${id}/schedule`
 }
 
+/**
+ * Validates and renders the post now and publishes it at publishedAt. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).
+ */
 export const schedulePost = async (id: string,
     schedulePostBody: SchedulePostBody, options?: Parameters<typeof cmsFetch>[1]): Promise<schedulePostResponse> => {
 
@@ -1201,7 +1913,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type SchedulePostMutationError = Error
     export type SchedulePostMutationVariables = {id: string;data: SchedulePostBody}
 
-    export const useSchedulePost = <TError = Error,
+    /** Validates and renders the post now and publishes it at publishedAt. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed). */
+export const useSchedulePost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof schedulePost>>, TError,SchedulePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof schedulePost>>,
@@ -1210,6 +1923,113 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getSchedulePostMutationOptions(options), queryClient);
+    }
+
+export type approvePostResponse200 = {
+  data: Post
+  status: 200
+}
+
+export type approvePostResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type approvePostResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type approvePostResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type approvePostResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type approvePostResponseSuccess = (approvePostResponse200) & {
+  headers: Headers;
+};
+export type approvePostResponseError = (approvePostResponse401 | approvePostResponse403 | approvePostResponse404 | approvePostResponse409) & {
+  headers: Headers;
+};
+
+export type approvePostResponse = (approvePostResponseSuccess | approvePostResponseError)
+
+export const getApprovePostUrl = (id: string,) => {
+
+
+
+
+  return `/v1/posts/${id}/approve`
+}
+
+/**
+ * The owner, signed in to the admin, approves the post as reviewed, so an agent may schedule or publish it. Tokens are refused, also with posts:publish.
+ */
+export const approvePost = async (id: string,
+    approvePostBody: ApprovePostBody, options?: Parameters<typeof cmsFetch>[1]): Promise<approvePostResponse> => {
+
+  return cmsFetch<approvePostResponse>(getApprovePostUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(approvePostBody)
+  }
+);}
+
+
+
+
+
+export const getApprovePostMutationKey = () => ['approvePost'] as const;
+
+export const getApprovePostMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approvePost>>, TError,ApprovePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approvePost>>, TError,ApprovePostMutationVariables, TContext> => {
+
+const mutationKey = getApprovePostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approvePost>>, ApprovePostMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  approvePost(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApprovePostMutationResult = NonNullable<Awaited<ReturnType<typeof approvePost>>>
+    export type ApprovePostMutationBody = ApprovePostBody
+    export type ApprovePostMutationError = Error
+    export type ApprovePostMutationVariables = {id: string;data: ApprovePostBody}
+
+    /** The owner, signed in to the admin, approves the post as reviewed, so an agent may schedule or publish it. Tokens are refused, also with posts:publish. */
+export const useApprovePost = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approvePost>>, TError,ApprovePostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof approvePost>>,
+        TError,
+        ApprovePostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getApprovePostMutationOptions(options), queryClient);
     }
 
 export type publishPostResponse200 = {
@@ -1259,6 +2079,9 @@ export const getPublishPostUrl = (id: string,) => {
   return `/v1/posts/${id}/publish`
 }
 
+/**
+ * Publishes the post now. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).
+ */
 export const publishPost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<publishPostResponse> => {
 
   return cmsFetch<publishPostResponse>(getPublishPostUrl(id),
@@ -1308,7 +2131,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PublishPostMutationError = Error
     export type PublishPostMutationVariables = {id: string}
 
-    export const usePublishPost = <TError = Error,
+    /** Publishes the post now. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed). */
+export const usePublishPost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishPost>>, TError,PublishPostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof publishPost>>,
@@ -1356,6 +2180,9 @@ export const getUnpublishPostUrl = (id: string,) => {
   return `/v1/posts/${id}/unpublish`
 }
 
+/**
+ * Returns the post to draft. Only the owner; tokens get 403 owner_only.
+ */
 export const unpublishPost = async (id: string, options?: Parameters<typeof cmsFetch>[1]): Promise<unpublishPostResponse> => {
 
   return cmsFetch<unpublishPostResponse>(getUnpublishPostUrl(id),
@@ -1405,7 +2232,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UnpublishPostMutationError = Error
     export type UnpublishPostMutationVariables = {id: string}
 
-    export const useUnpublishPost = <TError = Error,
+    /** Returns the post to draft. Only the owner; tokens get 403 owner_only. */
+export const useUnpublishPost = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unpublishPost>>, TError,UnpublishPostMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unpublishPost>>,
@@ -1922,7 +2750,7 @@ export const getUploadMediaUrl = (id: string,
 }
 
 /**
- * Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it.
+ * Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. Tokens add images to drafts only (403 live_post).
  */
 export const uploadMedia = async (id: string,
     name: string,
@@ -1975,7 +2803,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UploadMediaMutationError = Error
     export type UploadMediaMutationVariables = {id: string;name: string;data: Blob}
 
-    /** Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. */
+    /** Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. Tokens add images to drafts only (403 live_post). */
 export const useUploadMedia = <TError = Error,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadMedia>>, TError,UploadMediaMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
  , queryClient?: QueryClient): UseMutationResult<

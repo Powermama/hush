@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Clemens Kressmann
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { requireScope, type AuthVariables } from "../auth/tokens";
+import { requireOwner, requireScope, type AuthVariables } from "../auth/tokens";
 import { errorSchema, validationHook } from "./errors";
 import { bodyLimit } from "hono/body-limit";
 import { listMedia, maxImageBytes, uploadMedia, type Cms } from "../media/service";
 import { postFields, postPatch } from "../posts/fields";
 import {
-  createDraft, deletePost, getPost, listPosts, listRevisions, previewPost, publishPost, restoreRevision, schedulePost, unpublishPost, updatePost,
+  approvePost, createDraft, deletePost, getPost, listPosts, listRevisions, previewPost, publishPost, restoreRevision, schedulePost, unpublishPost, updatePost,
   type Post,
 } from "../posts/service";
 
@@ -26,6 +26,12 @@ const postSchema = postFields.extend({
     readingMinutes: z.number().int(),
     renderedAt: z.iso.datetime(),
   }).nullable().describe("What the post renders to; present while it is scheduled or published."),
+  contentHash: z.string().describe("Names the post's fields and images as they are now; the owner approves a post by it."),
+  approval: z.object({
+    approvedBy: z.string(),
+    approvedAt: z.iso.datetime(),
+    current: z.boolean().describe("Whether it covers the post as it is now; any change to the text or an image leaves it lapsed."),
+  }).nullable().describe("The owner's approval, which agents need to schedule or publish the post."),
 }).openapi("Post");
 
 const revisionSchema = z.object({
@@ -39,12 +45,13 @@ const serialize = (post: Post) => postSchema.parse({
   createdAt: post.createdAt.toISOString(),
   updatedAt: post.updatedAt.toISOString(),
   rendition: post.rendition && { ...post.rendition, renderedAt: post.rendition.renderedAt.toISOString() },
+  approval: post.approval && { ...post.approval, approvedAt: post.approval.approvedAt.toISOString() },
 });
 
 const json = <T extends z.ZodType>(schema: T, description: string) => ({ description, content: { "application/json": { schema } } });
 const errors = {
   401: json(errorSchema, "Missing or invalid token"),
-  403: json(errorSchema, "The token lacks the required scope"),
+  403: json(errorSchema, "The token lacks the required scope, or the change needs the owner"),
   404: json(errorSchema, "No such post"),
   409: json(errorSchema, "Conflicts with the post's state or another post"),
   422: json(errorSchema, "The post does not meet the article contract"),
@@ -62,6 +69,7 @@ export function postRoutes(cms: Cms) {
   app.use("/v1/posts/:id/revisions/:revisionId/restore", requireScope(db, "posts:write"));
   for (const action of ["schedule", "publish", "unpublish"]) app.use(`/v1/posts/:id/${action}`, requireScope(db, "posts:publish"));
   app.use("/v1/posts/:id/preview", requireScope(db, "posts:write"));
+  app.use("/v1/posts/:id/approve", requireOwner(db));
 
   app.openapi(createRoute({
     method: "get", path: "/v1/posts", operationId: "listPosts", tags: ["Posts"], security,
@@ -87,7 +95,7 @@ export function postRoutes(cms: Cms) {
 
   app.openapi(createRoute({
     method: "patch", path: "/v1/posts/{id}", operationId: "updatePost", tags: ["Posts"], security,
-    description: "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.",
+    description: "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. Tokens change drafts only (403 live_post).",
     request: { params: idParam, query: z.object({ autosave: z.enum(["true", "false"]).optional() }), body: { required: true, content: { "application/json": { schema: postPatch } } } },
     responses: { 200: json(postSchema, "The updated post"), ...errors },
   }), async (context) => context.json(serialize(await updatePost(
@@ -96,7 +104,7 @@ export function postRoutes(cms: Cms) {
 
   app.openapi(createRoute({
     method: "delete", path: "/v1/posts/{id}", operationId: "deletePost", tags: ["Posts"], security,
-    description: "Deletes a draft with its history and images. A scheduled or published post is unpublished first.",
+    description: "Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first.",
     request: { params: idParam },
     responses: { 204: { description: "The draft is gone" }, 401: errors[401], 403: errors[403], 404: errors[404], 409: errors[409] },
   }), async (context) => {
@@ -106,6 +114,7 @@ export function postRoutes(cms: Cms) {
 
   app.openapi(createRoute({
     method: "post", path: "/v1/posts/{id}/schedule", operationId: "schedulePost", tags: ["Lifecycle"], security,
+    description: "Validates and renders the post now and publishes it at publishedAt. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).",
     request: { params: idParam, body: { required: true, content: { "application/json": { schema: z.object({ publishedAt: z.iso.datetime() }) } } } },
     responses: { 200: json(postSchema, "The scheduled post"), ...errors },
   }), async (context) => context.json(serialize(await schedulePost(
@@ -113,13 +122,27 @@ export function postRoutes(cms: Cms) {
   )), 200));
 
   app.openapi(createRoute({
+    method: "post", path: "/v1/posts/{id}/approve", operationId: "approvePost", tags: ["Lifecycle"], security,
+    description: "The owner, signed in to the admin, approves the post as reviewed, so an agent may schedule or publish it. Tokens are refused, also with posts:publish.",
+    request: {
+      params: idParam,
+      body: { required: true, content: { "application/json": { schema: z.object({ contentHash: z.string().describe("The post's contentHash as the owner reviewed it") }) } } },
+    },
+    responses: { 200: json(postSchema, "The approved post"), 401: errors[401], 403: json(errorSchema, "Not the owner"), 404: errors[404], 409: json(errorSchema, "The post changed after the review") },
+  }), async (context) => context.json(serialize(await approvePost(
+    db, context.req.valid("param").id, context.req.valid("json").contentHash, context.var.actor,
+  )), 200));
+
+  app.openapi(createRoute({
     method: "post", path: "/v1/posts/{id}/publish", operationId: "publishPost", tags: ["Lifecycle"], security,
+    description: "Publishes the post now. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).",
     request: { params: idParam },
     responses: { 200: json(postSchema, "The published post"), ...errors },
   }), async (context) => context.json(serialize(await publishPost(cms, context.req.valid("param").id, context.var.actor)), 200));
 
   app.openapi(createRoute({
     method: "post", path: "/v1/posts/{id}/unpublish", operationId: "unpublishPost", tags: ["Lifecycle"], security,
+    description: "Returns the post to draft. Only the owner; tokens get 403 owner_only.",
     request: { params: idParam },
     responses: { 200: json(postSchema, "The post, back to draft"), 401: errors[401], 403: errors[403], 404: errors[404] },
   }), async (context) => context.json(serialize(await unpublishPost(db, context.req.valid("param").id, context.var.actor)), 200));
@@ -181,7 +204,7 @@ export function postRoutes(cms: Cms) {
   const binary = z.string().openapi({ type: "string", format: "binary" });
   app.openapi(createRoute({
     method: "put", path: "/v1/posts/{id}/media/{name}", operationId: "uploadMedia", tags: ["Media"], security,
-    description: "Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it.",
+    description: "Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. Tokens add images to drafts only (403 live_post).",
     request: {
       params: idParam.extend({ name: z.string() }),
       body: { required: true, content: { "image/png": { schema: binary }, "image/jpeg": { schema: binary }, "image/webp": { schema: binary } } },
@@ -191,7 +214,7 @@ export function postRoutes(cms: Cms) {
     const { id, name } = context.req.valid("param");
     await getPost(db, id);
     const bytes = new Uint8Array(await context.req.arrayBuffer());
-    const row = await uploadMedia(cms, id, name, bytes, context.req.header("content-type") ?? "");
+    const row = await uploadMedia(cms, id, name, bytes, context.req.header("content-type") ?? "", context.var.actor);
     return context.json(serializeMedia(row), 200);
   });
 

@@ -107,9 +107,10 @@ authentication: the admin inherits their sign-in.
 
 ## After the first deploy
 
-1. Create the owner's token in the `cms` container's terminal:
-   `bun run cms:token --name owner --scopes posts:read,posts:write,posts:publish --days 90`
-   (for scripts and agents; the owner otherwise signs in at cms.behu.sh).
+1. Connect the CLI on the owner's Mac with `hush-cms auth login` and approve
+   its code at cms.behu.sh/device ([CLI guide](../../../cms-cli/README.md)).
+   `bun run cms:token` in the `cms` container is only for tokens no person
+   signs in for, such as the website build's read token (step 7 above).
 2. Check the `cms-scheduler` logs for "Backed up the CMS database".
 3. Restore drill: create a scratch database in `cms-postgres`
    (`createdb -U cms cms_restore`), run

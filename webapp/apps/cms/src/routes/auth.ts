@@ -15,6 +15,10 @@ import type { Database } from "../db/client";
 
 const stateCookie = "__Host-cms_oauth_state";
 const verifierCookie = "__Host-cms_oauth_verifier";
+const nextCookie = "__Host-cms_oauth_next";
+
+/** Where to go after signing in: a path on this origin only, never another site. */
+const safeNext = (value: string | undefined) => value && /^\/(?![/\\])/.test(value) ? value : undefined;
 const githubAuthorize = "https://github.com/login/oauth/authorize";
 const githubToken = "https://github.com/login/oauth/access_token";
 const githubUserUrl = "https://api.github.com/user";
@@ -35,6 +39,9 @@ export function authRoutes(db: Database, admin: AdminConfig) {
     const verifier = generateCodeVerifier();
     setCookie(context, stateCookie, state, flowCookie);
     setCookie(context, verifierCookie, verifier, flowCookie);
+    const next = safeNext(context.req.query("next"));
+    if (next) setCookie(context, nextCookie, next, flowCookie);
+    else deleteCookie(context, nextCookie, { path: "/", secure: true });
     return context.redirect(github.createAuthorizationURLWithPKCE(githubAuthorize, state, CodeChallengeMethod.S256, verifier, []).toString());
   });
 
@@ -43,8 +50,10 @@ export function authRoutes(db: Database, admin: AdminConfig) {
     const state = context.req.query("state");
     const expected = getCookie(context, stateCookie);
     const verifier = getCookie(context, verifierCookie);
+    const next = safeNext(getCookie(context, nextCookie));
     deleteCookie(context, stateCookie, { path: "/", secure: true });
     deleteCookie(context, verifierCookie, { path: "/", secure: true });
+    deleteCookie(context, nextCookie, { path: "/", secure: true });
     if (!code || !state || !expected || !verifier || state !== expected) return signInFailed(context, "The sign-in expired or did not start here.");
     let user: GitHubUser;
     try {
@@ -65,7 +74,7 @@ export function authRoutes(db: Database, admin: AdminConfig) {
     }
     const session = await createSession(db, { githubUserId: user.id, githubLogin: user.login });
     setSessionCookie(context, session.token, session.expiresAt);
-    return context.redirect("/");
+    return context.redirect(next ?? "/");
   });
 
   app.get("/auth/session", async (context) => {

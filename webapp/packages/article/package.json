@@ -10,7 +10,8 @@
     "./blocks": "./src/blocks.ts",
     "./markdown": "./src/markdown.ts",
     "./taxonomy": "./src/taxonomy.ts",
-    "./article.css": "./src/article.css"
+    "./article.css": "./src/article.css",
+    "./file": "./src/file.ts"
   },
   "scripts": {
     "lint": "tsc -p .",

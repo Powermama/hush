@@ -12,6 +12,160 @@
       }
     },
     "schemas": {
+      "Caller": {
+        "type": "object",
+        "properties": {
+          "actor": {
+            "type": "string",
+            "description": "token:<name> for a token, github:<login> for the signed-in owner"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "posts:read",
+                "posts:write",
+                "posts:publish"
+              ]
+            }
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the token stops working; null for the owner and for tokens without an expiry."
+          }
+        },
+        "required": [
+          "actor",
+          "scopes",
+          "expiresAt"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "problems": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "DeviceSignIn": {
+        "type": "object",
+        "properties": {
+          "deviceCode": {
+            "type": "string"
+          },
+          "userCode": {
+            "type": "string"
+          },
+          "verificationUri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "verificationUriComplete": {
+            "type": "string",
+            "format": "uri"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Seconds until the codes expire"
+          },
+          "interval": {
+            "type": "integer",
+            "description": "Seconds to wait between polls"
+          }
+        },
+        "required": [
+          "deviceCode",
+          "userCode",
+          "verificationUri",
+          "verificationUriComplete",
+          "expiresIn",
+          "interval"
+        ]
+      },
+      "DeviceToken": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "token",
+          "actor",
+          "expiresAt"
+        ]
+      },
+      "PendingDeviceSignIn": {
+        "type": "object",
+        "properties": {
+          "userCode": {
+            "type": "string"
+          },
+          "clientName": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "posts:read",
+                "posts:write",
+                "posts:publish"
+              ]
+            }
+          },
+          "tokenDays": {
+            "type": "integer",
+            "description": "How long the token will work"
+          }
+        },
+        "required": [
+          "userCode",
+          "clientName",
+          "expiresAt",
+          "scopes",
+          "tokenDays"
+        ]
+      },
       "Post": {
         "type": "object",
         "properties": {
@@ -151,6 +305,35 @@
               "renderedAt"
             ],
             "description": "What the post renders to; present while it is scheduled or published."
+          },
+          "contentHash": {
+            "type": "string",
+            "description": "Names the post's fields and images as they are now; the owner approves a post by it."
+          },
+          "approval": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "approvedBy": {
+                "type": "string"
+              },
+              "approvedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "current": {
+                "type": "boolean",
+                "description": "Whether it covers the post as it is now; any change to the text or an image leaves it lapsed."
+              }
+            },
+            "required": [
+              "approvedBy",
+              "approvedAt",
+              "current"
+            ],
+            "description": "The owner's approval, which agents need to schedule or publish the post."
           }
         },
         "required": [
@@ -170,38 +353,11 @@
           "publishedAt",
           "createdAt",
           "updatedAt",
-          "rendition"
+          "rendition",
+          "contentHash",
+          "approval"
         ],
         "additionalProperties": false
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              },
-              "problems": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            },
-            "required": [
-              "code",
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "error"
-        ]
       },
       "Preview": {
         "type": "object",
@@ -484,6 +640,311 @@
     "parameters": {}
   },
   "paths": {
+    "/v1/me": {
+      "get": {
+        "operationId": "getCaller",
+        "tags": [
+          "Access"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The token or owner making the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Caller"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "revokeCaller",
+        "tags": [
+          "Access"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "Revokes the token sending the request, as a CLI does when it signs out. The owner signs out of the admin instead.",
+        "responses": {
+          "204": {
+            "description": "The token no longer works"
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Not a token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/device": {
+      "post": {
+        "operationId": "startDeviceSignIn",
+        "tags": [
+          "Access"
+        ],
+        "description": "Starts a device sign-in (RFC 8628): show userCode and verificationUriComplete to the person, then poll with deviceCode.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80,
+                    "description": "Names the token, such as \"hush-cms on Clemens's MacBook\""
+                  }
+                },
+                "required": [
+                  "clientName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The codes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceSignIn"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/device/token": {
+      "post": {
+        "operationId": "pollDeviceSignIn",
+        "tags": [
+          "Access"
+        ],
+        "description": "One poll. Until the owner decides it answers 400 authorization_pending (slow_down when polled too soon); after an approval it answers the token, once.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deviceCode": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "deviceCode"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The new token, shown once",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceToken"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "authorization_pending, slow_down, access_denied, expired_token or invalid_grant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/device/{userCode}": {
+      "get": {
+        "operationId": "getDeviceSignIn",
+        "tags": [
+          "Access"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "A sign-in waiting for the owner's decision. The owner only.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "The code the CLI shows, such as BCDF-GHJK"
+            },
+            "required": true,
+            "description": "The code the CLI shows, such as BCDF-GHJK",
+            "name": "userCode",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The sign-in to decide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingDeviceSignIn"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such code waiting: mistyped, expired or already decided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/device/{userCode}/{decision}": {
+      "post": {
+        "operationId": "decideDeviceSignIn",
+        "tags": [
+          "Access"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "The owner approves or denies a sign-in. The owner only.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "The code the CLI shows, such as BCDF-GHJK"
+            },
+            "required": true,
+            "description": "The code the CLI shows, such as BCDF-GHJK",
+            "name": "userCode",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "approve",
+                "deny"
+              ]
+            },
+            "required": true,
+            "name": "decision",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Decided"
+          },
+          "401": {
+            "description": "Not signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such code waiting: mistyped, expired or already decided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/posts": {
       "get": {
         "operationId": "listPosts",
@@ -555,7 +1016,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -675,7 +1136,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -741,7 +1202,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -772,7 +1233,7 @@
             "bearer": []
           }
         ],
-        "description": "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision.",
+        "description": "Changes fields. A scheduled or published post is re-validated and re-rendered; an invalid change is refused. With autosave=true, the saves of one writing session (same author, up to ten minutes) share one revision. Tokens change drafts only (403 live_post).",
         "parameters": [
           {
             "schema": {
@@ -894,7 +1355,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -945,7 +1406,7 @@
             "bearer": []
           }
         ],
-        "description": "Deletes a draft with its history and images. A scheduled or published post is unpublished first.",
+        "description": "Deletes a draft with its history and images. A scheduled or published post is refused; unpublish it first.",
         "parameters": [
           {
             "schema": {
@@ -972,7 +1433,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1015,6 +1476,7 @@
             "bearer": []
           }
         ],
+        "description": "Validates and renders the post now and publishes it at publishedAt. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).",
         "parameters": [
           {
             "schema": {
@@ -1067,7 +1529,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1109,6 +1571,102 @@
         }
       }
     },
+    "/v1/posts/{id}/approve": {
+      "post": {
+        "operationId": "approvePost",
+        "tags": [
+          "Lifecycle"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "description": "The owner, signed in to the admin, approves the post as reviewed, so an agent may schedule or publish it. Tokens are refused, also with posts:publish.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contentHash": {
+                    "type": "string",
+                    "description": "The post's contentHash as the owner reviewed it"
+                  }
+                },
+                "required": [
+                  "contentHash"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The approved post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The post changed after the review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/posts/{id}/publish": {
       "post": {
         "operationId": "publishPost",
@@ -1120,6 +1678,7 @@
             "bearer": []
           }
         ],
+        "description": "Publishes the post now. A token needs the owner's approval of the post as it is (403 approval_required or approval_lapsed).",
         "parameters": [
           {
             "schema": {
@@ -1153,7 +1712,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1206,6 +1765,7 @@
             "bearer": []
           }
         ],
+        "description": "Returns the post to draft. Only the owner; tokens get 403 owner_only.",
         "parameters": [
           {
             "schema": {
@@ -1239,7 +1799,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1382,7 +1942,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1459,7 +2019,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1534,7 +2094,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1631,7 +2191,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {
@@ -1664,7 +2224,7 @@
             "bearer": []
           }
         ],
-        "description": "Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it.",
+        "description": "Stores an image the post's Markdown references as media/<slug>/<name>. Sending the same name again replaces it. Tokens add images to drafts only (403 live_post).",
         "parameters": [
           {
             "schema": {
@@ -1729,7 +2289,7 @@
             }
           },
           "403": {
-            "description": "The token lacks the required scope",
+            "description": "The token lacks the required scope, or the change needs the owner",
             "content": {
               "application/json": {
                 "schema": {

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as EditorRouteImport } from './routes/_editor'
+import { Route as DeviceRouteImport } from './routes/device'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as EditorPostsIdRouteImport } from './routes/_editor/posts/$id'
@@ -21,6 +22,11 @@ const AppRoute = AppRouteImport.update({
 } as any)
 const EditorRoute = EditorRouteImport.update({
   id: '/_editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeviceRoute = DeviceRouteImport.update({
+  id: '/device',
+  path: '/device',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
@@ -41,11 +47,13 @@ const EditorPostsIdRoute = EditorPostsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/device': typeof DeviceRoute
   '/sign-in': typeof SignInRoute
   '/posts/$id': typeof EditorPostsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
+  '/device': typeof DeviceRoute
   '/sign-in': typeof SignInRoute
   '/posts/$id': typeof EditorPostsIdRoute
 }
@@ -53,19 +61,21 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_editor': typeof EditorRouteWithChildren
+  '/device': typeof DeviceRoute
   '/sign-in': typeof SignInRoute
   '/_app/': typeof AppIndexRoute
   '/_editor/posts/$id': typeof EditorPostsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/posts/$id'
+  fullPaths: '/' | '/device' | '/sign-in' | '/posts/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-in' | '/posts/$id'
+  to: '/' | '/device' | '/sign-in' | '/posts/$id'
   id:
     | '__root__'
     | '/_app'
     | '/_editor'
+    | '/device'
     | '/sign-in'
     | '/_app/'
     | '/_editor/posts/$id'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   EditorRoute: typeof EditorRouteWithChildren
+  DeviceRoute: typeof DeviceRoute
   SignInRoute: typeof SignInRoute
 }
 
@@ -91,6 +102,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof EditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/device': {
+      id: '/device'
+      path: '/device'
+      fullPath: '/device'
+      preLoaderRoute: typeof DeviceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sign-in': {
@@ -141,6 +159,7 @@ const EditorRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   EditorRoute: EditorRouteWithChildren,
+  DeviceRoute: DeviceRoute,
   SignInRoute: SignInRoute,
 }
 export const routeTree = rootRouteImport

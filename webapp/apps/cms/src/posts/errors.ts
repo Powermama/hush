@@ -3,7 +3,7 @@
 
 /** A request the CMS refuses, with the HTTP status and code the API answers with. */
 export class PostError extends Error {
-  constructor(readonly status: 404 | 409 | 422, readonly code: string, message: string, readonly problems: string[] = []) {
+  constructor(readonly status: 403 | 404 | 409 | 422, readonly code: string, message: string, readonly problems: string[] = []) {
     super(message);
   }
 }

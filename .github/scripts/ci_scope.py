@@ -11,8 +11,9 @@ import subprocess
 
 # Each deployable web app has its own CI job, named after its folder.
 WEB_APPS = ("web", "cms")
-# Apps shipped inside another app's image are checked by that app's job.
-SHIPPED_WITH = {"cms-admin": "cms"}
+# Apps checked by another app's job: the admin ships inside the CMS image, and
+# the CLI is a client of the CMS API, so a change to either side runs both.
+SHIPPED_WITH = {"cms-admin": "cms", "cms-cli": "cms"}
 REPOSITORY = Path(__file__).resolve().parents[2]
 
 
