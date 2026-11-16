@@ -33,7 +33,7 @@ is writing that platform's configuration from it, and copying the data.
 | --- | --- | --- | --- | --- | --- |
 | Website and proof service (`web`) | `apps/web/Dockerfile`, target `runtime-cms` in production | 3000 | `/health/live`, `/health/ready` | Any number of copies once proof objects are in S3; one while they are on disk | PostgreSQL (`DATABASE_URL`); proof objects in S3 or on disk (`HUSH_DATA_DIR`); the proof-signing key in `HUSH_DATA_DIR` (a persistent volume) |
 | CMS API and admin (`cms`) | `apps/cms/Dockerfile` | 3100 | `/health/live`, `/health/ready` | Any number of copies | PostgreSQL (`CMS_DATABASE_URL`); images and backups in S3-compatible buckets |
-| CMS scheduler (`cms-scheduler`) | `apps/cms/Dockerfile`, command `bun run cms:scheduler` | 3100, health only | `/health/live`, `/health/ready` (a tick succeeded in the last five minutes) | **One copy** (two for a moment during a rolling update are safe); on Kubernetes one replica | as the API |
+| CMS scheduler (`cms-scheduler`) | `apps/cms/Dockerfile`, target `scheduler` (or the default image with the command `bun run cms:scheduler`) | 3100, health only | `/health/live`, `/health/ready` (a tick succeeded in the last five minutes) | **One copy** (two for a moment during a rolling update are safe); on Kubernetes one replica | as the API |
 | Databases | `postgres:17-alpine`, or the platform's managed PostgreSQL 17 | 5432 | `pg_isready` | one each for web and CMS | a persistent volume, or managed |
 
 Building the production website reads the CMS: it needs the build argument
@@ -47,7 +47,7 @@ platform this trigger is the one setting to point at its deploy hook.
 | Platform | Images | Databases | Rolling updates |
 | --- | --- | --- | --- |
 | Any Docker host | `docker compose up` per app | in the Compose files | Compose stops, then starts; add a proxy with health checks for zero downtime |
-| Coolify (today) | built from Git per resource | Coolify PostgreSQL (`hush-postgres`) for web, the Compose resource's for the CMS | for applications: [web](../../webapp/apps/web/docs/operations/coolify-deployment.md), [CMS](../../webapp/apps/cms/docs/operations/coolify.md) |
+| Coolify (today) | built from Git per application | Coolify PostgreSQL databases: `hush-postgres` for web, `hush-cms-postgres` for the CMS | for applications: [web](../../webapp/apps/web/docs/operations/coolify-deployment.md), [CMS](../../webapp/apps/cms/docs/operations/coolify.md) |
 | Kubernetes | a Deployment per service (the scheduler as one replica or a CronJob); `kompose convert` turns the Compose files into a starting point | a PostgreSQL operator or a managed database | Deployments roll by default; readiness probe `/health/ready` |
 | Fly.io, Railway, Render | each runs a Dockerfile or a registry image | the platform's managed PostgreSQL | built in, using the health path |
 
