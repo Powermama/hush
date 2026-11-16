@@ -13,7 +13,7 @@ WORKDIR /app/apps/cms-admin
 COPY apps/cms-admin ./
 RUN bun run build
 
-FROM oven/bun:1.3.9-alpine
+FROM oven/bun:1.3.9-alpine AS runtime-base
 
 # pg_dump and pg_restore for backups, matching the PostgreSQL 17 server.
 RUN apk add --no-cache postgresql17-client
@@ -39,5 +39,14 @@ EXPOSE 3100
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
   CMD ["bun", "-e", "fetch('http://127.0.0.1:3100/health/ready').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
 
-# Migrations run at start under an advisory lock.
+# The scheduler: publishes due posts, keeps the website in step, takes the
+# daily backup. The same image as the API; it answers the same health check.
+# Build it with --target scheduler (or run the API image with the command
+# `bun run cms:scheduler`, as compose.yaml does).
+FROM runtime-base AS scheduler
+CMD ["bun", "run", "cms:scheduler"]
+
+# The API and the admin, the default target. Migrations run at start under an
+# advisory lock, in the scheduler too.
+FROM runtime-base AS api
 CMD ["bun", "src/index.ts"]

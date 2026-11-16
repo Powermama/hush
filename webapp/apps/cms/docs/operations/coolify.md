@@ -6,69 +6,67 @@ backup) and its own PostgreSQL. Any Docker Compose host runs that file as it is
 ([deploy anywhere](../../../../../docs/reference/deploy-anywhere.md)); locally, `webapp/compose.yaml` includes
 it with `compose.local.yaml` (local password, volumes instead of R2, a host port).
 
-On Coolify the stack is three resources, because Coolify replaces only
+On Coolify the stack is three resources, in the same shape as the website
+(an application and a Coolify database), because Coolify replaces only
 applications with a rolling update and stops every service of a Docker Compose
 resource on each deploy ([Coolify: rolling updates](https://coolify.io/docs/applications/deployments/rolling-updates)):
 
 | Resource | What | Deploys |
 | --- | --- | --- |
-| `hush-cms-api` | Dockerfile application: the API and the admin at cms.behu.sh | Rolling update on every push: the new container passes `/health/ready`, then the old one drains (10 s) and stops. `scripts/rolling-update-e2e.ts` proves no request is dropped (CI runs it). |
-| `hush-cms-scheduler` | Dockerfile application: the same image, start command `bun run cms:scheduler`, no domain | Rolling update; for a moment two schedulers run, which is safe (every step is idempotent). |
-| `hush-cms` | Docker Compose resource from [`compose.coolify.yaml`](../../compose.coolify.yaml): PostgreSQL alone, with its volume | Only when that file changes, so code deploys never restart the database. |
+| `hush-cms-api` | Dockerfile application, the API and the admin at cms.behu.sh | Rolling update on every push: the new container passes `/health/ready`, then the old one drains (10 s) and stops. `scripts/rolling-update-e2e.ts` proves no request is dropped (CI runs it). |
+| `hush-cms-scheduler` | Dockerfile application, the same image built with target `scheduler`, no domain | Rolling update; for a moment two schedulers run, which is safe (every step is idempotent). |
+| `hush-cms-postgres` | Coolify PostgreSQL 17 database, user and database `cms` | Never on code deploys. Its internal address (the database's uuid) never changes. |
 
-`compose.coolify.yaml` holds exactly the PostgreSQL service of `compose.yaml`
-(`tests/compose.test.ts` keeps them in step). The API and the scheduler apply
-migrations at start under one lock and answer `/health/ready` on port 3100, so
-they start in any order. The website's build reads the CMS at `https://cms.behu.sh`.
+The applications reach the database by its internal URL, which Coolify shows
+on the database's page; both apply migrations at start under one lock and
+answer `/health/ready` on port 3100, so they start in any order. The website's
+build reads the CMS at `https://cms.behu.sh`. Keep the database at PostgreSQL
+17: the image's `pg_dump` is version 17 and refuses a newer server.
 
 ## Create the resources
 
-The Compose resource `hush-cms` (PostgreSQL):
-
-1. Project `hush` → environment `production` → **New Resource** → **Git
-   Repository (with GitHub App)** → `Powermama/hush`, branch `main`.
-2. Build pack **Docker Compose**. Base Directory `/webapp/apps/cms`, Docker
-   Compose Location `/compose.coolify.yaml`. Name it `hush-cms`.
-3. Server `automation`, destination network `hush`, and under **Advanced >
-   Predefined network** connect to the destination network, so the
-   applications reach the database as `cms-postgres-<hush-cms uuid>`. No domain.
-4. **Watch Paths**: `webapp/apps/cms/compose.coolify.yaml`.
+The database `hush-cms-postgres`: project `hush` → environment `production` →
+**New Resource** → **PostgreSQL** → server `automation`, destination `hush` →
+**PostgreSQL 17**. Set user and database `cms`, start it, and copy its
+**Postgres URL (internal)** for the applications. No public port.
 
 The applications `hush-cms-api` and `hush-cms-scheduler`, each:
 
-1. **New Resource** → **Git Repository (with GitHub App)** → `Powermama/hush`,
-   branch `main`, build pack **Dockerfile**, Base Directory `/webapp`,
-   Dockerfile Location `/apps/cms/Dockerfile`, port `3100`, server
-   `automation`, destination network `hush`.
+1. **New Resource** → **Git Repository (with GitHub App)** → server
+   `automation`, destination `hush` → `Powermama/hush`, branch `main`, build
+   pack **Dockerfile**. Then under **General**: Base Directory `/webapp`,
+   Dockerfile Location `/apps/cms/Dockerfile`, port `3100`.
 2. No **Ports Mappings**, no **Custom Container Name** and no custom IP: each
    makes Coolify stop the old container first instead of rolling over.
-3. **Health check**: path `/health/ready`, port `3100`, interval 5 s, retries 3.
-4. **Environment variables**: the variables of [Secrets](#secrets) and the
-   sections below, plus `CMS_DATABASE_URL=postgresql://cms:<hush-cms's SERVICE_PASSWORD_64_CMSPOSTGRES>@cms-postgres-<hush-cms uuid>:5432/cms`,
-   all locked and runtime only.
-5. **Watch Paths**: `webapp/apps/cms/**`, `webapp/apps/cms-admin/**` (the image
-   includes the admin), `webapp/packages/**`, `webapp/package.json`,
-   `webapp/bun.lock`. Auto deploy on push, as the website.
+3. **Healthcheck**: enable it, HTTP `GET localhost:3100/health/ready`, expected
+   code 200, interval 5 s (scheduler 10 s), timeout 3 s, retries 3, start
+   period 10 s (scheduler 15 s).
+4. **Environment variables**: those of [Secrets](#secrets) and the sections
+   below, plus `PORT=3100` and `CMS_DATABASE_URL` (the database's internal URL,
+   `postgresql://cms:...@<database uuid>:5432/cms`), all locked.
+5. **Watch Paths**: `webapp/apps/cms/**`, `webapp/packages/**`,
+   `webapp/package.json`, `webapp/bun.lock`, and for the API also
+   `webapp/apps/cms-admin/**` (the image includes the admin). Auto deploy on
+   push, as the website.
 
 `hush-cms-api` gets the domain `https://cms.behu.sh`. `hush-cms-scheduler`
-gets the start command `bun run cms:scheduler` and no domain.
+gets the **Docker Build Stage Target** `scheduler` and no domain.
 
 ### Move from one Compose resource (once)
 
-Production ran all three services in `hush-cms` from `compose.yaml` until
-2026-11-16. To move without losing data or the domain:
+Production ran all three services in the Compose resource `hush-cms` until
+2026-11-16. The move, without losing data or the domain:
 
-1. In `hush-cms`, connect to the destination network and redeploy (the last
-   restart of the API there).
-2. Create `hush-cms-api` and `hush-cms-scheduler` as above and deploy them.
-   Check that both are healthy.
-3. Remove the domain `cms.behu.sh` from the `cms` service of `hush-cms` and add
-   it to `hush-cms-api`.
-4. Set `hush-cms`'s Docker Compose Location to `/compose.coolify.yaml` and its
-   watch path, and redeploy: its `cms` and `cms-scheduler` containers go away,
-   PostgreSQL keeps its volume.
+1. Create the database and both applications as above. Deploy neither yet.
+2. In `hush-cms`, take a fresh backup and restore it into the new database:
+   `bun run cms:backup && bun run cms:restore --target-url <new database's internal URL>`
+   in its `cms` container (a one-off **Scheduled Task**, deleted afterwards).
+3. Deploy `hush-cms-api` and check it is healthy, then move the domain
+   `cms.behu.sh` from `hush-cms` to it.
+4. Stop `hush-cms`, then deploy `hush-cms-scheduler`.
 5. Sign in at cms.behu.sh, run `hush-cms auth status`, and check the
-   scheduler's logs for its next tick.
+   scheduler's logs for its next tick. Keep the stopped `hush-cms` and its
+   volume for a week as a fallback, then delete it.
 
 ## Secrets
 
