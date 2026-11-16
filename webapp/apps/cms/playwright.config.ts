@@ -14,6 +14,9 @@ export default defineConfig({
   testMatch: "*.e2e.ts",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
+  // One retry in CI, as Playwright's own template; a journey that needs it is
+  // reported as flaky, never as passed, so the report still shows it.
+  retries: process.env.CI ? 1 : 0,
   reporter: "line",
   use: {
     // HTTPS on localhost with the test server's self-signed certificate, as in production.
@@ -24,7 +27,10 @@ export default defineConfig({
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
     { name: "mobile", use: { ...devices["iPhone 13"], browserName: "chromium" } },
-    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+    // WebKit's first page on a fresh machine pays one-time shader and font
+    // caching; tests/admin/warm-up.setup.ts pays it before the journeys.
+    { name: "webkit warm-up", testMatch: "warm-up.setup.ts", use: { ...devices["Desktop Safari"] } },
+    { name: "webkit", use: { ...devices["Desktop Safari"] }, dependencies: ["webkit warm-up"] },
   ],
   webServer: {
     command: `PORT=${port} bun run admin:server`,
