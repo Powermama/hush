@@ -69,6 +69,11 @@ class ScopeTests(unittest.TestCase):
         self.assertIn("cms", workspace_dependents()["article"])
         self.assertNotIn("cms-admin", workspace_dependents()["article"])
 
+    def test_encrypted_deployment_secrets_run_no_product_checks(self):
+        for path in ["webapp/.sops.yaml", "webapp/deploy/production/cms.env", "webapp/deploy/README.md"]:
+            with self.subTest(path=path):
+                self.assertEqual(classify([path]), dict(web=False, cms=False, native=False, integration=False))
+
     def test_unknown_apps_and_packages_run_everything(self):
         self.assertEqual(classify(["webapp/apps/new-app/src/index.ts"]), full_scope())
         self.assertEqual(classify(["webapp/packages/new-package/index.ts"], {}), full_scope())

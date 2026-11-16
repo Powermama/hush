@@ -1,0 +1,9 @@
+# SOPS encrypts deployment secrets in this repository with age
+# (docs/reference/deploy-anywhere.md). Each file under deploy/ holds one
+# service's production environment; keys stay readable, values are encrypted.
+# To add a reader, append their age public key and run `sops updatekeys`.
+creation_rules:
+  - path_regex: ^deploy/.+\.env$
+    # The owner's key; the private half lives in their password manager and in
+    # ~/Library/Application Support/sops/age/keys.txt on their Mac.
+    age: age1wvpy9e07gjmacj2qegz653qhgt677cgamju3u7ce84x6g97n0pyqgvlje3
