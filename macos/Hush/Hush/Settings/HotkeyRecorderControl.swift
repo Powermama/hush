@@ -71,7 +71,7 @@ final class HotkeyRecorderControl: NSView {
         label.wantsLayer = true
         label.layer?.cornerRadius = 6
         label.layer?.borderWidth = 0
-        label.layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.055).cgColor
+        updateLabelBackground()
         label.drawsBackground = false
         label.backgroundColor = .clear
         addSubview(label)
@@ -110,6 +110,18 @@ final class HotkeyRecorderControl: NSView {
     }
 
     required init?(coder: NSCoder) { fatalError() }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateLabelBackground()
+    }
+
+    /// Layer colors are fixed when set, so the field's fill is redrawn for each appearance.
+    private func updateLabelBackground() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            label.layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.055).cgColor
+        }
+    }
 
     deinit {
         if let m = monitor { NSEvent.removeMonitor(m) }

@@ -360,7 +360,7 @@ private final class PersonaLibraryRow: NSView {
 }
 
 @MainActor
-private final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
+final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
     var onSave: ((Profile) -> Void)?
     var onCancel: (() -> Void)?
     var onDuplicate: ((Profile) -> Void)?
@@ -374,7 +374,11 @@ private final class PersonaEditorSheetController: NSViewController, NSTextViewDe
 
     private let iconButton = NSButton()
     private let nameField = NSTextField()
-    private let promptTextView = NSTextView()
+    // AppKit's own scrolling text view: the text view tracks the scroll view's width and
+    // grows with its text. A bare NSTextView() as a document view keeps a zero-width text
+    // container, so its instructions were invisible and could not be clicked into.
+    private let promptScroll = NSTextView.scrollableTextView()
+    private var promptTextView: NSTextView { promptScroll.documentView as! NSTextView }
     private let creativitySlider = NSSlider(value: 0.3, minValue: 0, maxValue: 1, target: nil, action: nil)
     private let creativityValue = NSTextField(labelWithString: "Balanced")
     private let tryInput = NSTextField(string: "so um the meeting is at three i think")
@@ -393,9 +397,7 @@ private final class PersonaEditorSheetController: NSViewController, NSTextViewDe
     required init?(coder: NSCoder) { fatalError() }
 
     override func loadView() {
-        let root = NSView()
-        root.wantsLayer = true
-        root.layer?.backgroundColor = ControlCenterStyle.contentBackground.cgColor
+        let root = ControlCenterBackgroundView()
         root.translatesAutoresizingMaskIntoConstraints = false
         view = root
 
@@ -458,17 +460,22 @@ private final class PersonaEditorSheetController: NSViewController, NSTextViewDe
         promptTextView.textContainerInset = .init(width: 9, height: 9)
         promptTextView.delegate = self
         promptTextView.setAccessibilityIdentifier("hush.personaEditor.instructions")
-        let promptScroll = NSScrollView()
-        promptScroll.documentView = promptTextView
+        promptTextView.drawsBackground = false
         promptScroll.hasVerticalScroller = true
+        promptScroll.autohidesScrollers = true
         promptScroll.drawsBackground = false
         promptScroll.borderType = .noBorder
-        promptScroll.wantsLayer = true
-        promptScroll.layer?.cornerRadius = 10
-        promptScroll.layer?.cornerCurve = .continuous
-        promptScroll.layer?.backgroundColor = ControlCenterStyle.softFill.cgColor
         promptScroll.translatesAutoresizingMaskIntoConstraints = false
-        promptScroll.heightAnchor.constraint(equalToConstant: 112).isActive = true
+        let promptBox = ControlCenterFieldBackgroundView()
+        promptBox.translatesAutoresizingMaskIntoConstraints = false
+        promptBox.addSubview(promptScroll)
+        NSLayoutConstraint.activate([
+            promptScroll.topAnchor.constraint(equalTo: promptBox.topAnchor),
+            promptScroll.bottomAnchor.constraint(equalTo: promptBox.bottomAnchor),
+            promptScroll.leadingAnchor.constraint(equalTo: promptBox.leadingAnchor),
+            promptScroll.trailingAnchor.constraint(equalTo: promptBox.trailingAnchor),
+            promptBox.heightAnchor.constraint(equalToConstant: 112),
+        ])
 
         creativitySlider.doubleValue = original.creativity
         creativitySlider.numberOfTickMarks = 3
@@ -536,13 +543,13 @@ private final class PersonaEditorSheetController: NSViewController, NSTextViewDe
         footer.alignment = .centerY
         footer.spacing = 8
 
-        let stack = NSStackView(views: [headingRow, identity, instructionsHeader, promptScroll, creativity, tryCard, footer])
+        let stack = NSStackView(views: [headingRow, identity, instructionsHeader, promptBox, creativity, tryCard, footer])
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.spacing = 13
         stack.translatesAutoresizingMaskIntoConstraints = false
         root.addSubview(stack)
-        for child in [headingRow, identity, instructionsHeader, promptScroll, creativity, tryCard, footer] {
+        for child in [headingRow, identity, instructionsHeader, promptBox, creativity, tryCard, footer] {
             child.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
         }
         NSLayoutConstraint.activate([
