@@ -54,6 +54,41 @@ export interface Error {
   error: ErrorError;
 }
 
+export interface DeviceSignIn {
+  deviceCode: string;
+  userCode: string;
+  verificationUri: string;
+  verificationUriComplete: string;
+  /** Seconds until the codes expire */
+  expiresIn: number;
+  /** Seconds to wait between polls */
+  interval: number;
+}
+
+export interface DeviceToken {
+  token: string;
+  actor: string;
+  expiresAt: string;
+}
+
+export type PendingDeviceSignInScopesItem = typeof PendingDeviceSignInScopesItem[keyof typeof PendingDeviceSignInScopesItem];
+
+
+export const PendingDeviceSignInScopesItem = {
+  'posts:read': 'posts:read',
+  'posts:write': 'posts:write',
+  'posts:publish': 'posts:publish',
+} as const;
+
+export interface PendingDeviceSignIn {
+  userCode: string;
+  clientName: string;
+  expiresAt: string;
+  scopes: PendingDeviceSignInScopesItem[];
+  /** How long the token will work */
+  tokenDays: number;
+}
+
 export type PostLang = typeof PostLang[keyof typeof PostLang];
 
 
@@ -299,6 +334,20 @@ export interface SiteExport {
   revision: number;
   files: SiteExportFilesItem[];
 }
+
+export type StartDeviceSignInBody = {
+  /**
+     * Names the token, such as "hush-cms on Clemens's MacBook"
+     * @minLength 1
+     * @maxLength 80
+     */
+  clientName: string;
+};
+
+export type PollDeviceSignInBody = {
+  /** @minLength 1 */
+  deviceCode: string;
+};
 
 export type ListPostsParams = {
   lang?: ListPostsLang;
@@ -683,6 +732,510 @@ export function useGetCaller<TData = Awaited<ReturnType<typeof getCaller>>, TErr
 
 
 
+
+export type revokeCallerResponse204 = {
+  data: void
+  status: 204
+}
+
+export type revokeCallerResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type revokeCallerResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type revokeCallerResponseSuccess = (revokeCallerResponse204) & {
+  headers: Headers;
+};
+export type revokeCallerResponseError = (revokeCallerResponse401 | revokeCallerResponse409) & {
+  headers: Headers;
+};
+
+export type revokeCallerResponse = (revokeCallerResponseSuccess | revokeCallerResponseError)
+
+export const getRevokeCallerUrl = () => {
+
+
+
+
+  return `/v1/me`
+}
+
+/**
+ * Revokes the token sending the request, as a CLI does when it signs out. The owner signs out of the admin instead.
+ */
+export const revokeCaller = async ( options?: Parameters<typeof cmsFetch>[1]): Promise<revokeCallerResponse> => {
+
+  return cmsFetch<revokeCallerResponse>(getRevokeCallerUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokeCallerMutationKey = () => ['revokeCaller'] as const;
+
+export const getRevokeCallerMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeCaller>>, TError,void, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeCaller>>, TError,void, TContext> => {
+
+const mutationKey = getRevokeCallerMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeCaller>>, void> = () => {
+
+
+          return  revokeCaller(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeCallerMutationResult = NonNullable<Awaited<ReturnType<typeof revokeCaller>>>
+
+    export type RevokeCallerMutationError = Error
+
+
+    /** Revokes the token sending the request, as a CLI does when it signs out. The owner signs out of the admin instead. */
+export const useRevokeCaller = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeCaller>>, TError,void, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof revokeCaller>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRevokeCallerMutationOptions(options), queryClient);
+    }
+
+export type startDeviceSignInResponse200 = {
+  data: DeviceSignIn
+  status: 200
+}
+
+export type startDeviceSignInResponseSuccess = (startDeviceSignInResponse200) & {
+  headers: Headers;
+};
+;
+
+export type startDeviceSignInResponse = (startDeviceSignInResponseSuccess)
+
+export const getStartDeviceSignInUrl = () => {
+
+
+
+
+  return `/v1/auth/device`
+}
+
+/**
+ * Starts a device sign-in (RFC 8628): show userCode and verificationUriComplete to the person, then poll with deviceCode.
+ */
+export const startDeviceSignIn = async (startDeviceSignInBody: StartDeviceSignInBody, options?: Parameters<typeof cmsFetch>[1]): Promise<startDeviceSignInResponse> => {
+
+  return cmsFetch<startDeviceSignInResponse>(getStartDeviceSignInUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(startDeviceSignInBody)
+  }
+);}
+
+
+
+
+
+export const getStartDeviceSignInMutationKey = () => ['startDeviceSignIn'] as const;
+
+export const getStartDeviceSignInMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startDeviceSignIn>>, TError,StartDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof startDeviceSignIn>>, TError,StartDeviceSignInMutationVariables, TContext> => {
+
+const mutationKey = getStartDeviceSignInMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startDeviceSignIn>>, StartDeviceSignInMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  startDeviceSignIn(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartDeviceSignInMutationResult = NonNullable<Awaited<ReturnType<typeof startDeviceSignIn>>>
+    export type StartDeviceSignInMutationBody = StartDeviceSignInBody
+    export type StartDeviceSignInMutationError = unknown
+    export type StartDeviceSignInMutationVariables = {data: StartDeviceSignInBody}
+
+    /** Starts a device sign-in (RFC 8628): show userCode and verificationUriComplete to the person, then poll with deviceCode. */
+export const useStartDeviceSignIn = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startDeviceSignIn>>, TError,StartDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof startDeviceSignIn>>,
+        TError,
+        StartDeviceSignInMutationVariables,
+        TContext
+      > => {
+      return useMutation(getStartDeviceSignInMutationOptions(options), queryClient);
+    }
+
+export type pollDeviceSignInResponse200 = {
+  data: DeviceToken
+  status: 200
+}
+
+export type pollDeviceSignInResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type pollDeviceSignInResponseSuccess = (pollDeviceSignInResponse200) & {
+  headers: Headers;
+};
+export type pollDeviceSignInResponseError = (pollDeviceSignInResponse400) & {
+  headers: Headers;
+};
+
+export type pollDeviceSignInResponse = (pollDeviceSignInResponseSuccess | pollDeviceSignInResponseError)
+
+export const getPollDeviceSignInUrl = () => {
+
+
+
+
+  return `/v1/auth/device/token`
+}
+
+/**
+ * One poll. Until the owner decides it answers 400 authorization_pending (slow_down when polled too soon); after an approval it answers the token, once.
+ */
+export const pollDeviceSignIn = async (pollDeviceSignInBody: PollDeviceSignInBody, options?: Parameters<typeof cmsFetch>[1]): Promise<pollDeviceSignInResponse> => {
+
+  return cmsFetch<pollDeviceSignInResponse>(getPollDeviceSignInUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(pollDeviceSignInBody)
+  }
+);}
+
+
+
+
+
+export const getPollDeviceSignInMutationKey = () => ['pollDeviceSignIn'] as const;
+
+export const getPollDeviceSignInMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pollDeviceSignIn>>, TError,PollDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof pollDeviceSignIn>>, TError,PollDeviceSignInMutationVariables, TContext> => {
+
+const mutationKey = getPollDeviceSignInMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pollDeviceSignIn>>, PollDeviceSignInMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  pollDeviceSignIn(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PollDeviceSignInMutationResult = NonNullable<Awaited<ReturnType<typeof pollDeviceSignIn>>>
+    export type PollDeviceSignInMutationBody = PollDeviceSignInBody
+    export type PollDeviceSignInMutationError = Error
+    export type PollDeviceSignInMutationVariables = {data: PollDeviceSignInBody}
+
+    /** One poll. Until the owner decides it answers 400 authorization_pending (slow_down when polled too soon); after an approval it answers the token, once. */
+export const usePollDeviceSignIn = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pollDeviceSignIn>>, TError,PollDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof pollDeviceSignIn>>,
+        TError,
+        PollDeviceSignInMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPollDeviceSignInMutationOptions(options), queryClient);
+    }
+
+export type getDeviceSignInResponse200 = {
+  data: PendingDeviceSignIn
+  status: 200
+}
+
+export type getDeviceSignInResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type getDeviceSignInResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type getDeviceSignInResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type getDeviceSignInResponseSuccess = (getDeviceSignInResponse200) & {
+  headers: Headers;
+};
+export type getDeviceSignInResponseError = (getDeviceSignInResponse401 | getDeviceSignInResponse403 | getDeviceSignInResponse404) & {
+  headers: Headers;
+};
+
+export type getDeviceSignInResponse = (getDeviceSignInResponseSuccess | getDeviceSignInResponseError)
+
+export const getGetDeviceSignInUrl = (userCode: string,) => {
+
+
+
+
+  return `/v1/auth/device/${userCode}`
+}
+
+/**
+ * A sign-in waiting for the owner's decision. The owner only.
+ */
+export const getDeviceSignIn = async (userCode: string, options?: Parameters<typeof cmsFetch>[1]): Promise<getDeviceSignInResponse> => {
+
+  return cmsFetch<getDeviceSignInResponse>(getGetDeviceSignInUrl(userCode),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDeviceSignInQueryKey = (userCode: string,) => {
+    return [
+    `/v1/auth/device/${userCode}`
+    ] as const;
+    }
+
+
+export const getGetDeviceSignInQueryOptions = <TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDeviceSignInQueryKey(userCode);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDeviceSignIn>>> = ({ signal }) => getDeviceSignIn(userCode, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: userCode !== null && userCode !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetDeviceSignInQueryResult = NonNullable<Awaited<ReturnType<typeof getDeviceSignIn>>>
+export type GetDeviceSignInQueryError = Error
+
+
+/** A sign-in waiting for the owner's decision. The owner only. */
+export function useGetDeviceSignIn<TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(
+ userCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDeviceSignIn>>,
+          TError,
+          Awaited<ReturnType<typeof getDeviceSignIn>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** A sign-in waiting for the owner's decision. The owner only. */
+export function useGetDeviceSignIn<TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDeviceSignIn>>,
+          TError,
+          Awaited<ReturnType<typeof getDeviceSignIn>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** A sign-in waiting for the owner's decision. The owner only. */
+export function useGetDeviceSignIn<TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** A sign-in waiting for the owner's decision. The owner only. */
+export function useGetDeviceSignIn<TData = Awaited<ReturnType<typeof getDeviceSignIn>>, TError = Error>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeviceSignIn>>, TError, TData>>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetDeviceSignInQueryOptions(userCode,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type decideDeviceSignInResponse204 = {
+  data: void
+  status: 204
+}
+
+export type decideDeviceSignInResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type decideDeviceSignInResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type decideDeviceSignInResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type decideDeviceSignInResponseSuccess = (decideDeviceSignInResponse204) & {
+  headers: Headers;
+};
+export type decideDeviceSignInResponseError = (decideDeviceSignInResponse401 | decideDeviceSignInResponse403 | decideDeviceSignInResponse404) & {
+  headers: Headers;
+};
+
+export type decideDeviceSignInResponse = (decideDeviceSignInResponseSuccess | decideDeviceSignInResponseError)
+
+export const getDecideDeviceSignInUrl = (userCode: string,
+    decision: 'approve' | 'deny',) => {
+
+
+
+
+  return `/v1/auth/device/${userCode}/${decision}`
+}
+
+/**
+ * The owner approves or denies a sign-in. The owner only.
+ */
+export const decideDeviceSignIn = async (userCode: string,
+    decision: 'approve' | 'deny', options?: Parameters<typeof cmsFetch>[1]): Promise<decideDeviceSignInResponse> => {
+
+  return cmsFetch<decideDeviceSignInResponse>(getDecideDeviceSignInUrl(userCode,decision),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getDecideDeviceSignInMutationKey = () => ['decideDeviceSignIn'] as const;
+
+export const getDecideDeviceSignInMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideDeviceSignIn>>, TError,DecideDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideDeviceSignIn>>, TError,DecideDeviceSignInMutationVariables, TContext> => {
+
+const mutationKey = getDecideDeviceSignInMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideDeviceSignIn>>, DecideDeviceSignInMutationVariables> = (props) => {
+          const {userCode,decision} = props ?? {};
+
+          return  decideDeviceSignIn(userCode,decision,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideDeviceSignInMutationResult = NonNullable<Awaited<ReturnType<typeof decideDeviceSignIn>>>
+
+    export type DecideDeviceSignInMutationError = Error
+    export type DecideDeviceSignInMutationVariables = {userCode: string;decision: 'approve' | 'deny'}
+
+    /** The owner approves or denies a sign-in. The owner only. */
+export const useDecideDeviceSignIn = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideDeviceSignIn>>, TError,DecideDeviceSignInMutationVariables, TContext>, request?: SecondParameter<typeof cmsFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof decideDeviceSignIn>>,
+        TError,
+        DecideDeviceSignInMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideDeviceSignInMutationOptions(options), queryClient);
+    }
 
 export type listPostsResponse200 = {
   data: ListPosts200

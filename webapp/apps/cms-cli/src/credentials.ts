@@ -16,12 +16,18 @@ const hasKeychain = () => process.platform === "darwin";
 export async function readToken(origin: string): Promise<{ token: string; source: "environment" | "keychain" } | undefined> {
   const fromEnvironment = process.env.HUSH_CMS_TOKEN;
   if (fromEnvironment) return { token: fromEnvironment, source: "environment" };
+  const stored = storedToken(origin);
+  return stored ? { token: stored, source: "keychain" } : undefined;
+}
+
+/** The Keychain item alone, whatever HUSH_CMS_TOKEN says. */
+export function storedToken(origin: string) {
   if (!hasKeychain()) return undefined;
   const found = Bun.spawnSync(["security", "find-generic-password", "-s", service, "-a", origin, "-w"], { stderr: "ignore" });
   // 44: no such item.
   if (found.exitCode === 44) return undefined;
   if (found.exitCode !== 0) throw new CredentialError("The Keychain refused to read the token.");
-  return { token: found.stdout.toString().trim(), source: "keychain" };
+  return found.stdout.toString().trim() || undefined;
 }
 
 export async function saveToken(origin: string, token: string) {

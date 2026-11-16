@@ -110,6 +110,22 @@ describe.skipIf(!serverUrl)("CMS admin", () => {
     expect(session).not.toContain(row!.tokenHash);
   });
 
+  test("CMS-ADMIN-008 sign-in returns to the admin page it started from, never to another site", async () => {
+    const start = await app.request(`/auth/github?next=${encodeURIComponent("/device?code=BCDF-GHJK")}`);
+    const state = new URL(start.headers.get("location")!).searchParams.get("state")!;
+    const verifier = cookieOf(start, "__Host-cms_oauth_verifier")!.split(";")[0]!.split("=")[1]!;
+    const next = cookieOf(start, "__Host-cms_oauth_next")!.split(";")[0]!.split("=").slice(1).join("=");
+    fakeGitHub({ id: 4242, login: "owner" }, verifier);
+    const callback = await app.request(`/auth/github/callback?code=c&state=${state}`, {
+      headers: { cookie: `__Host-cms_oauth_state=${state}; __Host-cms_oauth_verifier=${verifier}; __Host-cms_oauth_next=${next}` },
+    });
+    expect(callback.headers.get("location")).toBe("/device?code=BCDF-GHJK");
+    for (const offSite of ["//evil.example/x", "https://evil.example/", "/\\evil.example"]) {
+      const refused = await app.request(`/auth/github?next=${encodeURIComponent(offSite)}`);
+      expect(cookieOf(refused, "__Host-cms_oauth_next")).toMatch(/^__Host-cms_oauth_next=;/);
+    }
+  });
+
   test("CMS-ADMIN-002 GitHub accounts outside the allowlist get no session", async () => {
     const start = await app.request("/auth/github");
     const state = new URL(start.headers.get("location")!).searchParams.get("state")!;

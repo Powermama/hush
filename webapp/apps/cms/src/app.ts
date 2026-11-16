@@ -9,6 +9,7 @@ import type { AdminConfig } from "./config";
 import type { Cms } from "./media/service";
 import { PostError } from "./posts/service";
 import { authRoutes } from "./routes/auth";
+import { deviceRoutes } from "./routes/device";
 import { healthRoutes } from "./routes/health";
 import { meRoutes } from "./routes/me";
 import { validationHook } from "./routes/errors";
@@ -48,8 +49,15 @@ export function createApp(cms: Cms, options: AppOptions = {}) {
   }));
   // The admin API is never indexed, wherever it is hosted.
   app.use("*", async (context, next) => { await next(); context.header("x-robots-tag", "noindex, nofollow"); });
-  // Cookie sessions: unsafe cross-site requests are refused by their Origin.
-  if (options.admin) app.use("*", csrf({ origin: options.admin.publicUrl }));
+  // Cookie sessions: unsafe cross-site requests are refused by their Origin. A
+  // request with a bearer token is not authenticated by cookie (auth/tokens.ts
+  // reads the token first), and another site cannot send one without a CORS
+  // preflight, which the CMS never allows; so, as in Django REST Framework, the
+  // check applies to cookie requests only. CLIs send no Origin.
+  if (options.admin) {
+    const checkOrigin = csrf({ origin: options.admin.publicUrl });
+    app.use("*", (context, next) => /^Bearer \S/.test(context.req.header("authorization") ?? "") ? next() : checkOrigin(context, next));
+  }
   app.onError((error, context) => {
     if (error instanceof PostError) {
       return context.json({ error: { code: error.code, message: error.message, problems: error.problems.length ? error.problems : undefined } }, error.status);
@@ -63,6 +71,7 @@ export function createApp(cms: Cms, options: AppOptions = {}) {
   app.route("/", healthRoutes(cms.db, options.isDraining ?? (() => false)));
   if (options.admin) app.route("/", authRoutes(cms.db, options.admin));
   app.route("/", meRoutes(cms.db));
+  app.route("/", deviceRoutes(cms.db, options.admin?.publicUrl));
   app.route("/", postRoutes(cms));
   app.route("/", siteRoutes(cms));
   app.openAPIRegistry.registerComponent("securitySchemes", "bearer", { type: "http", scheme: "bearer" });

@@ -17,6 +17,8 @@ if (process.env.CI && !serverUrl) throw new Error("HUSH_TEST_DATABASE_URL is req
 const cmsDir = join(import.meta.dir, "../../cms");
 const fixtures = join(import.meta.dir, "fixtures");
 const article = "en/dictate-from-the-terminal.md";
+/** The admin's origin; the owner's requests come from it. */
+const ownerOrigin = "http://127.0.0.1";
 
 describe.skipIf(!serverUrl)("hush-cms CLI", () => {
   const databaseName = `hush_cms_cli_test_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -27,6 +29,14 @@ describe.skipIf(!serverUrl)("hush-cms CLI", () => {
   const tokens = { agent: "", publisher: "" };
   const databaseUrl = () => Object.assign(new URL(serverUrl!), { pathname: `/${databaseName}` }).toString();
   let connection: ReturnType<typeof postgres> | undefined;
+  /** A token made with the CMS's own command, as for the website build. */
+  const token = (name: string, scopes: string) => {
+    const created = Bun.spawnSync(["bun", "src/commands/create-token.ts", "--name", name, "--scopes", scopes], {
+      cwd: cmsDir, env: { ...process.env, CMS_DATABASE_URL: databaseUrl() },
+    });
+    if (created.exitCode !== 0) throw new Error(created.stderr.toString());
+    return created.stdout.toString().trim();
+  };
   /** The test's database, for what only the owner does in the admin. */
   const database = () => (connection ??= postgres(databaseUrl(), { max: 1, onnotice: () => {} }));
 
@@ -38,6 +48,8 @@ describe.skipIf(!serverUrl)("hush-cms CLI", () => {
       ...process.env, NODE_ENV: "test", CMS_DATABASE_URL: databaseUrl(), PORT: "0",
       CMS_MEDIA_DIR: join(work, "media"), CMS_BACKUP_DIR: join(work, "backups"), CMS_ADMIN_DIR: join(work, "no-admin"),
       CMS_SHUTDOWN_DRAIN_MS: "0",
+      // The admin as in production, so its cross-site check applies to every request the CLI sends.
+      CMS_PUBLIC_URL: ownerOrigin, CMS_ADMIN_GITHUB_IDS: "1", CMS_GITHUB_CLIENT_ID: "test", CMS_GITHUB_CLIENT_SECRET: "test",
     };
     cms = Bun.spawn(["bun", "src/index.ts"], { cwd: cmsDir, env: environment, stdout: "pipe", stderr: "inherit" });
     // The CMS migrates, then logs the port it listens on.
@@ -50,11 +62,6 @@ describe.skipIf(!serverUrl)("hush-cms CLI", () => {
     }
     reader.releaseLock();
     url = `http://127.0.0.1:${/"port":(\d+)/.exec(log)![1]}`;
-    const token = (name: string, scopes: string) => {
-      const created = Bun.spawnSync(["bun", "src/commands/create-token.ts", "--name", name, "--scopes", scopes], { cwd: cmsDir, env: environment });
-      if (created.exitCode !== 0) throw new Error(created.stderr.toString());
-      return created.stdout.toString().trim();
-    };
     tokens.agent = token("hush-seo", "posts:read,posts:write");
     tokens.publisher = token("hush-seo-publisher", "posts:read,posts:write,posts:publish");
   }, 60_000);
@@ -187,26 +194,57 @@ describe.skipIf(!serverUrl)("hush-cms CLI", () => {
     expect((await cli(["posts", "list"], { token: "hcms_unknownunknownunknownunknown" })).stderr).toContain("The token is unknown, expired or revoked.");
   });
 
-  test("CMS-CLI-007 shows the token's name, scopes and expiry, and keeps a token in the Keychain without echoing it", async () => {
+  /** The owner, signed in to the admin: a session cookie, as GitHub sign-in sets it. */
+  async function ownerCookie() {
+    const token = crypto.randomUUID();
+    const hash = new Bun.CryptoHasher("sha256").update(token).digest("hex");
+    await database()`insert into admin_sessions (token_hash, github_user_id, github_login, expires_at) values (${hash}, 1, 'owner', now() + interval '1 day')`;
+    return `__Host-cms_session=${token}`;
+  }
+
+  test("CMS-CLI-007 signs in through the browser like gh auth login: the owner approves the code, the token goes to the Keychain unseen", async () => {
     const status = await cli(["auth", "status"]);
     expect(status.stdout).toBe(`token:hush-seo on ${url}, from the environment: posts:read, posts:write; does not expire.\n`);
 
     if (process.platform !== "darwin") {
-      const login = await cli(["auth", "login"], { token: null, stdin: `${tokens.agent}\n` });
+      const login = await cli(["auth", "login", "--no-browser"], { token: null });
       expect([login.exitCode, login.stderr]).toEqual([1, "hush-cms: Only macOS has a Keychain here; set HUSH_CMS_TOKEN instead.\n"]);
       return;
     }
     // A Keychain item for this test's own origin, removed again below.
+    const environment: Record<string, string | undefined> = { ...process.env, HUSH_CMS_URL: url };
+    delete environment.HUSH_CMS_TOKEN;
+    const login = Bun.spawn(["bun", join(import.meta.dir, "../src/main.ts"), "auth", "login", "--no-browser"], { cwd: work, env: environment, stdout: "pipe", stderr: "pipe" });
     try {
-      const login = await cli(["auth", "login"], { token: null, stdin: `${tokens.agent}\n` });
-      expect(login.stdout).toBe(`Saved token:hush-seo for ${url} in the Keychain (posts:read, posts:write).\n`);
-      expect(login.stdout + login.stderr).not.toContain(tokens.agent);
-      expect((await cli(["auth", "status"], { token: null })).stdout).toContain("from the keychain");
+      // The CLI shows a one-time code and the page to approve it, then waits.
+      const reader = (login.stderr as ReadableStream<Uint8Array>).getReader();
+      let shown = "";
+      while (!/Open \S+ to authorize/.test(shown)) shown += new TextDecoder().decode((await reader.read()).value);
+      reader.releaseLock();
+      const userCode = /one-time code: ([A-Z]{4}-[A-Z]{4})/.exec(shown)![1]!;
+      expect(shown).toContain(`Open ${ownerOrigin}/device?code=${userCode} to authorize hush-cms.`);
+      const approved = await fetch(`${url}/v1/auth/device/${userCode}/approve`, { method: "POST", headers: { cookie: await ownerCookie(), origin: ownerOrigin } });
+      expect(approved.status).toBe(204);
+      expect(await login.exited).toBe(0);
+      const saved = await new Response(login.stdout).text();
+      expect(saved).toMatch(new RegExp(`^Saved token:hush-cms on .+ for ${url.replaceAll(".", "\\.")} in the Keychain \\(posts:read, posts:write, posts:publish\\)\\.\n$`));
+      expect((await cli(["auth", "status"], { token: null })).stdout).toMatch(/^token:hush-cms on .+, from the keychain: posts:read, posts:write, posts:publish; expires /);
       expect((await cli(["posts", "get", "dictate-from-the-terminal"], { token: null })).exitCode).toBe(0);
+
+      // Signing in again replaces the stored token, and the one it replaces stops working.
+      const scripted = token("script", "posts:read");
+      const replaced = await cli(["auth", "login", "--with-token"], { token: null, stdin: `${scripted}\n` });
+      expect(replaced.stdout).toBe(`Saved token:script for ${url} in the Keychain (posts:read).\n`);
+      expect(replaced.stdout + replaced.stderr).not.toContain(scripted);
+      const [device] = await database()`select revoked_at from api_tokens where name like 'hush-cms on %'`;
+      expect(device!.revoked_at).not.toBeNull();
     } finally {
-      expect((await cli(["auth", "logout"], { token: null })).stdout).toBe(`Removed the token for ${url} from the Keychain.\n`);
+      login.kill();
+      expect((await cli(["auth", "logout"], { token: null })).stdout).toBe(`Revoked the token for ${url} and removed it from the Keychain.\n`);
     }
     expect((await cli(["posts", "list"], { token: null })).stderr).toContain("Run hush-cms auth login");
-    expect((await cli(["auth", "login"], { token: null, stdin: "hcms_unknownunknownunknownunknown\n" })).exitCode).toBe(1);
-  });
+    const [scriptToken] = await database()`select revoked_at from api_tokens where name = 'script'`;
+    expect(scriptToken!.revoked_at).not.toBeNull();
+    expect((await cli(["auth", "login", "--with-token"], { token: null, stdin: "hcms_unknownunknownunknownunknown\n" })).exitCode).toBe(1);
+  }, 60_000);
 });

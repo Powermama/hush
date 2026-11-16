@@ -131,6 +131,26 @@ export const apiTokens = pgTable("api_tokens", {
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
 });
 
+/**
+ * A sign-in of the CLI through the OAuth 2.0 Device Authorization Grant
+ * (RFC 8628, auth/device.ts): the CLI polls with the device code, the owner
+ * approves or denies the user code in the admin, and the first poll after an
+ * approval receives a new token, once.
+ */
+export const deviceAuthorizations = pgTable("device_authorizations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  deviceCodeHash: text("device_code_hash").notNull().unique(),
+  userCode: text("user_code").notNull().unique(),
+  clientName: text("client_name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  lastPolledAt: timestamp("last_polled_at", { withTimezone: true }),
+  decidedBy: text("decided_by"),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  deniedAt: timestamp("denied_at", { withTimezone: true }),
+  tokenId: uuid("token_id").references(() => apiTokens.id, { onDelete: "set null" }),
+});
+
 export const apiTokenScopes = pgTable("api_token_scopes", {
   tokenId: uuid("token_id").notNull().references(() => apiTokens.id, { onDelete: "cascade" }),
   scope: tokenScope("scope").notNull(),
