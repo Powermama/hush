@@ -57,6 +57,9 @@ def classify(paths, dependents=None, workflow="ci"):
     code analysis finds, so only its own workflow file runs everything."""
     scope = dict.fromkeys(full_scope(), False)
     for path in paths:
+        # Encrypted deployment secrets (webapp/deploy/README.md) build and test nothing.
+        if path == "webapp/.sops.yaml" or path.startswith("webapp/deploy/"):
+            continue
         if workflow == "codeql" and path.startswith(".github/") and path != ".github/workflows/codeql.yml":
             continue
         if path.endswith(".md") or path.startswith(

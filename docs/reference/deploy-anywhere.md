@@ -51,6 +51,25 @@ platform this trigger is the one setting to point at its deploy hook.
 | Kubernetes | a Deployment per service (the scheduler as one replica or a CronJob); `kompose convert` turns the Compose files into a starting point | a PostgreSQL operator or a managed database | Deployments roll by default; readiness probe `/health/ready` |
 | Fly.io, Railway, Render | each runs a Dockerfile or a registry image | the platform's managed PostgreSQL | built in, using the health path |
 
+## Secrets
+
+The source of truth for every production secret is an encrypted file in this
+repository, [`webapp/deploy/`](../../webapp/deploy/README.md) (SOPS with age):
+the names are readable, the values are encrypted. A platform's secret store is
+filled from it and never the only copy, because platforms hide their secrets and
+cannot export them. On each platform:
+
+| Platform | Fill it from the SOPS file |
+| --- | --- |
+| Coolify | the environment's shared variables, referenced by each application ([CMS guide](../../webapp/apps/cms/docs/operations/coolify.md#secrets)) |
+| Kubernetes | a Secret from `sops decrypt`, or the External Secrets Operator with a SOPS or secret-manager backend |
+| Fly.io, Railway, Render | `sops decrypt deploy/production/cms.env \| fly secrets import` (in `webapp/`), or the platform's bulk variable editor |
+| Any Docker host | `sops exec-env deploy/production/cms.env 'docker compose -f apps/cms/compose.yaml up -d'` (in `webapp/`) |
+
+The services check their outside credentials at start and report not ready
+until they work (`apps/cms/src/config-check.ts`), so a wrong value never takes
+traffic during a rolling update.
+
 ## Moving data
 
 - **CMS database**: the scheduler keeps daily `pg_dump` backups in its backup
