@@ -4,7 +4,7 @@ This document defines the public download and first-launch experience for hush t
 
 ## Goal
 
-Visitors see only builds that are ready for distribution. Earlier unnotarized builds and their Terminal workaround have been withdrawn. The current download is alpha.5, build 14, which restores the Finder installer layout. Alpha.4 remains in the release history as the first notarized alpha. The notes identify the full public release and open sourcing as future intentions, not current availability.
+Visitors see only builds that are ready for distribution. Earlier unnotarized builds and their Terminal workaround have been withdrawn. The current download is alpha.6, build 15, which makes the persona editor follow Light and Dark mode. Alpha.5 restored the Finder installer layout. Alpha.4 remains in the release history as the first notarized alpha. The notes identify the full public release and open sourcing as future intentions, not current availability.
 
 ## State flow
 
@@ -34,7 +34,7 @@ Download selected
 
 ### DOWNLOAD-001 - Show current download availability
 
-Selecting a download action starts the exact alpha.5 build 14 DMG and opens its matching release notes. The shared header offers the same current download on release pages; their article content contains no redundant or older download. The release index retains the alpha.4 milestone. If the catalog is empty in the future, download actions lead to the availability page.
+Selecting a download action starts the exact alpha.6 build 15 DMG and opens its matching release notes. The shared header offers the same current download on release pages; their article content contains no redundant or older download. The release index retains the alpha.4 milestone. If the catalog is empty in the future, download actions lead to the availability page.
 
 ### DOWNLOAD-002 - Retire the old installation workaround
 
@@ -48,7 +48,7 @@ Given a release has been published, the stable DMG URL, signed archive, and appc
 
 | Journey | Automated evidence |
 | --- | --- |
-| DOWNLOAD-001 | `tests/landing.spec.ts` checks the immutable alpha.5 download, download event in Chromium, matching release popup in all browsers, retained alpha.4 milestone, and the future open-source intention on desktop, mobile, and WebKit. |
+| DOWNLOAD-001 | `tests/landing.spec.ts` checks the immutable alpha.6 download, download event in Chromium, matching release popup in all browsers, retained alpha.4 milestone, and the future open-source intention on desktop, mobile, and WebKit. |
 | DOWNLOAD-002 | `tests/landing.spec.ts` verifies removed release URLs return 404, retain no-index/no-store headers, contain no bypass command or download link, and allow returning to the release index. |
 | DOWNLOAD-003 | `macos/scripts/verify-update-feed.sh` checks public feed metadata and archive availability. The release's public-download verification report records byte equality, Gatekeeper, layout and Sparkle EdDSA signature checks. `macos/Hush/HushUITests/AppUpdateJourneyTests.swift` verifies the in-app update entry point. |
 
