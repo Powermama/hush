@@ -97,6 +97,15 @@ class ScopeTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertEqual(classify([path]), full_scope())
 
+    def test_codeql_skips_swift_for_ci_configuration_only(self):
+        # The Swift analysis reads Swift code; CI jobs and selection cannot change its findings.
+        for path in [".github/workflows/ci.yml", ".github/scripts/ci_scope.py", ".github/dependabot.yml"]:
+            with self.subTest(path=path):
+                self.assertFalse(classify([path], workflow="codeql")["native"])
+        self.assertEqual(classify([".github/workflows/codeql.yml"], workflow="codeql"), full_scope())
+        self.assertTrue(classify([".github/workflows/ci.yml", "macos/Hush/App.swift"], workflow="codeql")["native"])
+        self.assertEqual(classify(["Makefile"], workflow="codeql"), full_scope())
+
     def test_manual_initial_and_invalid_comparisons_run_everything(self):
         for name, event in [("workflow_dispatch", {}), ("merge_group", {}),
                             ("push", {"before": "0" * 40, "after": "a" * 40}),
