@@ -9,13 +9,15 @@
 // idempotent, so a restart or a second instance (during a rolling update) does
 // no harm. Like the API it answers health checks over HTTP on PORT (3100):
 // /health/live while it runs, /health/ready while its last tick without errors
-// is under five minutes old (or it started less than five minutes ago), so the
+// is under five minutes old (or it started less than five minutes ago) and its
+// backup bucket has answered (config-check.ts), so the
 // image's health check and any platform's probe work for it unchanged. It
 // applies pending migrations before its first tick,
 // as the API does at start (under one advisory lock), so neither depends on
 // the other having started.
 import { backupDatabase, backupTime, listBackups } from "../backups/backups";
 import { loadConfig } from "../config";
+import { storeCheck, watchConfiguration } from "../config-check";
 import { connectDatabase } from "../db/client";
 import { migrateDatabase } from "../db/migrate";
 import { publishDuePosts } from "../posts/service";
@@ -29,6 +31,8 @@ const config = loadConfig();
 await migrateDatabase(config.databaseUrl);
 const { db, close } = connectDatabase(config.databaseUrl);
 const backups = createObjectStore(config.backups);
+// Not ready until the backup bucket answers with these credentials (config-check.ts).
+const configuration = watchConfiguration([storeCheck("backup bucket", backups)]);
 const log = (level: "info" | "error", message: string, details: Record<string, unknown> = {}) =>
   console[level](JSON.stringify({ level, message, ...details }));
 
@@ -43,7 +47,7 @@ const health = Bun.serve({
     const { pathname } = new URL(request.url);
     if (pathname === "/health/live") return Response.json({ status: "ok" });
     if (pathname === "/health/ready") {
-      const ready = !stopping && Date.now() - (lastHealthyTick ?? startedAt) < readyWindowMs;
+      const ready = !stopping && configuration.configured() && Date.now() - (lastHealthyTick ?? startedAt) < readyWindowMs;
       return Response.json({ status: ready ? "ready" : "not ready" }, { status: ready ? 200 : 503 });
     }
     return new Response("Not found", { status: 404 });
@@ -85,5 +89,6 @@ while (!stopping) {
   await tick();
   for (let waited = 0; waited < 60_000 && !stopping; waited += 1_000) await Bun.sleep(1_000);
 }
+configuration.stop();
 await health.stop(true);
 await close();
