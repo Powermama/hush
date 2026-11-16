@@ -8,10 +8,13 @@
 // old it takes a new one. Both steps are
 // idempotent, so a restart or a second instance does no harm. After a tick
 // without errors it touches a heartbeat file, which the Compose healthcheck
-// requires to be recent.
+// requires to be recent. It applies pending migrations before its first tick,
+// as the API does at start (under one advisory lock), so neither depends on
+// the other having started.
 import { backupDatabase, backupTime, listBackups } from "../backups/backups";
 import { loadConfig } from "../config";
 import { connectDatabase } from "../db/client";
+import { migrateDatabase } from "../db/migrate";
 import { publishDuePosts } from "../posts/service";
 import { syncSite } from "../site/deploy";
 import { createObjectStore } from "../storage/object-store";
@@ -19,6 +22,7 @@ import { createObjectStore } from "../storage/object-store";
 const heartbeatPath = "/tmp/cms-scheduler-heartbeat";
 
 const config = loadConfig();
+await migrateDatabase(config.databaseUrl);
 const { db, close } = connectDatabase(config.databaseUrl);
 const backups = createObjectStore(config.backups);
 const log = (level: "info" | "error", message: string, details: Record<string, unknown> = {}) =>

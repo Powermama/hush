@@ -43,10 +43,10 @@ FROM mcr.microsoft.com/playwright:v1.62.1-noble AS build-cms
 COPY --from=source /usr/local/bin/bun /usr/local/bin/bunx /usr/local/bin/
 COPY --from=source /app /app
 WORKDIR /app/apps/web
-# Coolify builds with the host network, so the CMS answers on the server's
-# loopback. ADD re-fetches this URL on every build and keeps the next step's
-# cache only while the site revision is unchanged.
-ARG HUSH_CMS_URL=http://127.0.0.1:3100
+# The CMS's public address, so the build works on any builder (the CMS runs as
+# its own service and publishes no host port). ADD re-fetches this URL on every
+# build and keeps the next step's cache only while the site revision is unchanged.
+ARG HUSH_CMS_URL=https://cms.behu.sh
 ADD ${HUSH_CMS_URL}/v1/site/revision /tmp/cms-revision
 # The read-only token arrives as a build secret and never enters a layer.
 RUN --mount=type=secret,id=HUSH_CMS_TOKEN,env=HUSH_CMS_TOKEN,required=true \
