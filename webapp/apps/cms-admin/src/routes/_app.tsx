@@ -7,7 +7,7 @@
 // The editor (_editor) has no shell, as in Ghost.
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
-import { AppWindow, Check, ChevronRight, ChevronsUpDown, Ellipsis, ExternalLink, LogOut, Monitor, Moon, Palette, PenLine, Plus, Sun } from "lucide-react";
+import { AppWindow, Check, ChevronRight, ChevronsUpDown, Ellipsis, ExternalLink, LogOut, Monitor, Moon, Palette, PenLine, Plus, Settings, Sun } from "lucide-react";
 import { useMemo, useState, type CSSProperties } from "react";
 import { requireSession } from "@/api/require-session";
 import { sessionQuery, signOut } from "@/api/session";
@@ -25,6 +25,8 @@ import {
 import { useSidebar } from "@/components/ui/sidebar-context";
 import { cn } from "@/lib/utils";
 import { GlobalSearchProvider, SearchButton } from "@/search/global-search";
+import { SettingsProvider } from "@/settings/settings-context";
+import { SettingsNav } from "@/settings/settings-nav";
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: requireSession,
@@ -50,6 +52,22 @@ function SiteIdentity() {
       <HushLogo withName={false} className="[&_svg]:size-8" />
       <span className="heading-font-features min-w-0 truncate text-lg font-semibold text-foreground">hush</span>
     </Link>
+  );
+}
+
+/** Settings at the foot of the navigation, as Ghost's nav-settings.tsx. */
+function SettingsNavItem() {
+  const close = useCloseMobileSidebar();
+  return (
+    <SidebarGroup>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild>
+            <Link to="/settings/{-$section}" params={{ section: undefined }} onClick={close}><Settings /><span>Settings</span></Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroup>
   );
 }
 
@@ -178,13 +196,17 @@ function AppLayout() {
   // One appearance for the user menu and the search's switch.
   const [mode, setMode] = useThemeMode();
   const appearance = useMemo(() => ({ mode, setMode }), [mode, setMode]);
+  const inSettings = useRouterState({ select: (state) => /^\/settings(\/|$)/.test(state.location.pathname) });
   return (
+    <SettingsProvider>
     <GlobalSearchProvider appearance={appearance}>
     <SidebarProvider
       style={{ "--sidebar-width": "316px" } as CSSProperties}
       className="h-dvh [--content-width:1080px] [--page-gutter:20px] sidebar:[--page-gutter:40px] min-[1380px]:[--content-width:1280px] [&_[data-sidebar=sidebar]]:rounded-xl [&_[data-sidebar=sidebar]]:border-border [&_[data-sidebar=sidebar]]:shadow-none"
     >
       <Sidebar variant="floating">
+        {/* In Settings the sidebar becomes the settings navigation, as in Ghost. */}
+        {inSettings ? <SettingsNav /> : <>
         <SidebarHeader className="px-5 pt-5 pb-0">
           <div className="flex flex-col items-stretch gap-5">
             <SiteIdentity />
@@ -212,8 +234,10 @@ function AppLayout() {
               <SidebarMenu><PostsNav /></SidebarMenu>
             </SidebarGroup>
           </div>
+          <SettingsNavItem />
         </SidebarContent>
         <SidebarFooter className="gap-0 p-3"><UserMenu mode={mode} setMode={setMode} /></SidebarFooter>
+        </>}
       </Sidebar>
       <SidebarInset className="relative max-h-[calc(100%-var(--mobile-navbar-height))] overflow-y-auto bg-background sidebar:max-h-full">
         <Outlet />
@@ -221,5 +245,6 @@ function AppLayout() {
       </SidebarInset>
     </SidebarProvider>
     </GlobalSearchProvider>
+    </SettingsProvider>
   );
 }

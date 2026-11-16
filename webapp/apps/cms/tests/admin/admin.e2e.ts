@@ -483,6 +483,56 @@ test("CMS-013 Search site, or Cmd/Ctrl+K, finds posts and opens them, as Ghost's
   await expect(search.getByText("No results found")).toBeVisible();
 });
 
+test("CMS-014 Settings, as Ghost's: the sidebar becomes its navigation, and Integrations lists and revokes tokens", async ({ signedIn, baseURL }, testInfo) => {
+  const mobile = testInfo.project.name === "mobile";
+  // A CLI signed in through /device, as `hush-cms auth login` does.
+  const device = `hush-cms on a ${testInfo.project.name} Mac ${crypto.randomUUID().slice(0, 8)}`;
+  const { deviceCode, userCode } = await (await signedIn.request.post("/v1/auth/device", { data: { clientName: device } })).json() as { deviceCode: string; userCode: string };
+  expect((await signedIn.request.post(`/v1/auth/device/${userCode}/approve`, { headers: { origin: baseURL! } })).status()).toBe(204);
+  const { token } = await (await signedIn.request.post("/v1/auth/device/token", { data: { deviceCode } })).json() as { token: string };
+
+  await signedIn.goto("/");
+  if (mobile) await signedIn.getByRole("button", { name: "Toggle Sidebar" }).click();
+  await signedIn.getByRole("link", { name: "Settings" }).click();
+  await expect(signedIn).toHaveURL(/\/settings$/);
+  if (!mobile) {
+    // The sidebar is the settings navigation now, its search focused, as in Ghost.
+    const nav = signedIn.getByRole("navigation", { name: "Settings" });
+    await expect(signedIn.getByRole("textbox", { name: "Search settings" })).toBeFocused();
+    await nav.getByRole("button", { name: "Integrations" }).click();
+    await expect(nav.getByRole("button", { name: "Integrations" })).toHaveAttribute("aria-current", "page");
+  }
+  const integrations = signedIn.getByTestId("integrations");
+  const row = integrations.getByTestId("token").filter({ hasText: device });
+  await expect(row).toContainText("Read, write, publish");
+  await expect(row).toContainText("never used");
+
+  await integrations.getByRole("button", { name: "Connect CLI" }).click();
+  await expect(signedIn.getByRole("dialog", { name: "Connect the CLI" })).toContainText("hush-cms auth login");
+  await signedIn.keyboard.press("Escape");
+  await expect(signedIn).toHaveURL(/\/settings$/);
+
+  // The settings search hides what does not match.
+  await signedIn.getByRole("textbox", { name: "Search settings" }).first().fill("token");
+  await expect(signedIn.getByTestId("account")).toBeHidden();
+  await signedIn.getByRole("textbox", { name: "Search settings" }).first().fill("");
+
+  await row.hover();
+  await row.getByRole("button", { name: "Revoke" }).click();
+  await signedIn.getByRole("alertdialog", { name: "Revoke token?" }).getByRole("button", { name: "Revoke" }).click();
+  await expect(row).toHaveCount(0);
+  expect((await signedIn.request.get("/v1/me", { headers: { authorization: `Bearer ${token}` } })).status()).toBe(401);
+
+  // Cmd/Ctrl+K opens a settings section too; Escape goes back to the posts.
+  await signedIn.keyboard.press("ControlOrMeta+k");
+  await signedIn.keyboard.type("integrations");
+  await signedIn.getByRole("dialog", { name: "Search site" }).getByRole("option", { name: "Integrations" }).click();
+  await expect(signedIn).toHaveURL(/\/settings\/integrations$/);
+  await signedIn.locator("body").click({ position: { x: 5, y: 5 } });
+  await signedIn.keyboard.press("Escape");
+  await expect(signedIn).toHaveURL(/\/$/);
+});
+
 test("the admin runs under its Content Security Policy without violations", async ({ signedIn, draft }) => {
   const violations: string[] = [];
   signedIn.on("console", (message) => { if (/Content.Security.Policy|Refused to/i.test(message.text())) violations.push(message.text()); });

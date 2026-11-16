@@ -16,6 +16,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
+import { settingsSections } from "@/settings/settings-context";
 import { compareByStatus, isSearchShortcut, search, searchShortcutLabel, type SearchItem, type SearchResultGroup, type SearchSource } from "./search";
 
 const OpenSearchContext = createContext<(() => void) | null>(null);
@@ -78,6 +79,14 @@ function GlobalSearchPanel({ onClose, appearance }: { onClose: () => void; appea
           kind: "navigate", id: post.id, title: post.title || "(Untitled)", status: post.status,
           keywords: [post.slug, post.keyword, ...post.secondaryKeywords, post.lang === "de" ? "german deutsch" : "english"].join(" "),
           to: "/posts/$id", params: { id: post.id },
+        })),
+      },
+      // As Ghost's settings/search-source.ts: each settings section opens Settings at it.
+      {
+        id: "settings", heading: "Settings",
+        items: settingsSections.map((section) => ({
+          kind: "navigate" as const, id: section.id, title: section.title, keywords: `settings ${section.keywords.join(" ")}`,
+          to: "/settings/{-$section}", params: { section: section.id },
         })),
       },
       {

@@ -104,6 +104,22 @@ describe.skipIf(!serverUrl)("CMS device sign-in", () => {
     expect(normalizeUserCode("bcdf-ghj")).toBeUndefined();
   });
 
+  test("CMS-DEVICE-004 the owner sees every working token, never its secret, and revokes one", async () => {
+    const service = await createToken(database.db, { name: "website-build", scopes: ["posts:read"] });
+    const listed = await asOwner("GET", "/v1/tokens");
+    expect(listed.status).toBe(200);
+    const byName = Object.fromEntries((listed.body.tokens as Array<Record<string, any>>).map((token) => [token.name, token]));
+    expect(byName["website-build"]).toMatchObject({ kind: "service", scopes: ["posts:read"], lastUsedAt: null, expiresAt: null });
+    expect(byName["hush-cms on a test Mac"]).toMatchObject({ kind: "device", scopes: ["posts:read", "posts:write", "posts:publish"] });
+    expect(JSON.stringify(listed.body)).not.toContain(service);
+    expect((await cli("/v1/tokens", undefined, service, "GET")).status).toBe(403);
+
+    expect((await asOwner("DELETE", `/v1/tokens/${byName["website-build"].id}`)).status).toBe(204);
+    expect((await cli("/v1/me", undefined, service, "GET")).status).toBe(401);
+    expect((await asOwner("DELETE", `/v1/tokens/${byName["website-build"].id}`)).status).toBe(404);
+    expect((await asOwner("GET", "/v1/tokens")).body.tokens.some((token: { name: string }) => token.name === "website-build")).toBe(false);
+  });
+
   test("CMS-DEVICE-003 a token revokes itself when the CLI signs out", async () => {
     const token = await createToken(database.db, { name: "signing-out", scopes: ["posts:read"] });
     expect((await cli("/v1/me", undefined, token, "DELETE")).status).toBe(204);
