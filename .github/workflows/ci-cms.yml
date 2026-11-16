@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Copyright (c) 2026 Clemens Kressmann
+#
+# The CMS's checks: its API, admin, CLI and article package, the admin journeys,
+# the image, the rolling update and the backup drill. A reusable workflow:
+# ci.yml calls it when the selection (.github/scripts/ci_scope.py) finds the
+# component affected; a change to this file affects only this component.
+name: CMS
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  cms:
+    name: CMS service
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: webapp/apps/cms
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: hush_test
+          POSTGRES_USER: hush
+          POSTGRES_PASSWORD: hush-test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hush -d hush_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      HUSH_TEST_DATABASE_URL: postgresql://hush:hush-test@127.0.0.1:5432/hush_test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.9
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      # Journeys run against PostgreSQL; each test file creates and drops its own database.
+      - run: bun test
+      - run: bun run api:check
+      # The admin (apps/cms-admin) ships inside the CMS image.
+      - name: Check the admin and its generated API client
+        working-directory: webapp/apps/cms-admin
+        run: bun run lint && bun run api:check && bun run test
+      # The hush-cms CLI calls the API: its generated client, its journeys against
+      # a real CMS process, and its standalone binary.
+      - name: Check the CLI, its generated API client and its binary
+        working-directory: webapp/apps/cms-cli
+        run: bun run lint && bun run api:check && bun run test && bun run build && dist/hush-cms --help
+      # The article contract and blocks (packages/article) are the CMS's core.
+      - name: Check the article package
+        working-directory: webapp/packages/article
+        run: bun run lint && bun run test
+      - name: Install browsers for the admin journeys
+        run: bunx playwright install --with-deps chromium webkit
+      - name: Admin journeys on desktop, a phone and WebKit
+        run: bun run test:admin
+      # Traces and screenshots of failed admin journeys, as the website's journeys keep them.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: cms-admin-failures
+          path: webapp/apps/cms/test-results/
+          retention-days: 7
+      - name: Build the production image
+        run: docker build --tag hush-cms-build-check --file Dockerfile ../..
+      # The API must survive a rolling update without dropping a request, and
+      # the stop-then-start control must visibly fail (the probe sees outages).
+      - name: Replace the CMS API under continuous load
+        run: bun scripts/rolling-update-e2e.ts
+      # A backup counts only once it has been restored.
+      - name: Back up and restore the database
+        run: scripts/backup-drill.sh

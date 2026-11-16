@@ -8,7 +8,7 @@ import unittest
 
 import json
 
-from ci_scope import classify, full_scope, scope_for_event, workspace_dependents
+from ci_scope import COMPONENT_WORKFLOWS, REPOSITORY, classify, full_scope, scope_for_event, workspace_dependents
 
 
 class ScopeTests(unittest.TestCase):
@@ -91,9 +91,29 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual(classify(["macos/Hush/App.swift", "webapp/apps/web/src/main.tsx"]),
                          dict(web=True, cms=False, native=True, integration=True))
 
+    def test_a_component_workflow_runs_only_its_component(self):
+        self.assertEqual(classify([".github/workflows/ci-cms.yml"]), dict(web=False, cms=True, native=False, integration=False))
+        self.assertEqual(classify([".github/workflows/ci-web.yml"]), dict(web=True, cms=False, native=False, integration=False))
+        self.assertEqual(classify([".github/workflows/ci-macos.yml"]), dict(web=False, cms=False, native=True, integration=True))
+        self.assertEqual(classify([".github/workflows/ci-cms.yml", "webapp/apps/web/src/main.tsx"]),
+                         dict(web=True, cms=True, native=False, integration=False))
+
+    def test_configuration_without_a_component_runs_no_product_checks(self):
+        for path in [".github/workflows/pull-request.yml", ".github/dependabot.yml"]:
+            with self.subTest(path=path):
+                self.assertEqual(classify([path]), dict(web=False, cms=False, native=False, integration=False))
+
+    def test_every_component_workflow_exists_and_is_called(self):
+        workflows = REPOSITORY / ".github/workflows"
+        ci = (workflows / "ci.yml").read_text()
+        for path in COMPONENT_WORKFLOWS:
+            with self.subTest(path=path):
+                self.assertTrue((REPOSITORY / path).is_file())
+                self.assertIn(f"uses: ./{path}", ci)
+
     def test_workflow_or_unknown_configuration_runs_everything(self):
         for path in [".github/workflows/ci.yml", ".github/scripts/ci_scope.py",
-                     ".github/dependabot.yml", "future-component/main.rs", "Makefile"]:
+                     ".github/scripts/test_ci_scope.py", "future-component/main.rs", "Makefile"]:
             with self.subTest(path=path):
                 self.assertEqual(classify([path]), full_scope())
 

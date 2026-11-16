@@ -11,6 +11,19 @@ import subprocess
 
 # Each deployable web app has its own CI job, named after its folder.
 WEB_APPS = ("web", "cms")
+# Each component's checks live in its own reusable workflow, which ci.yml calls;
+# a change to one of them affects only that component (the standard monorepo
+# layout). ci.yml itself, this script and its tests affect every component.
+COMPONENT_WORKFLOWS = {
+    ".github/workflows/ci-web.yml": ("web",),
+    ".github/workflows/ci-cms.yml": ("cms",),
+    ".github/workflows/ci-macos.yml": ("native", "integration"),
+}
+# GitHub configuration that builds or tests no component: the pull request
+# title check (its own workflow, which runs on every pull request) and
+# Dependabot's schedule.
+NO_COMPONENT = {".github/workflows/pull-request.yml", ".github/dependabot.yml"}
+
 # Apps checked by another app's job: the admin ships inside the CMS image, and
 # the CLI is a client of the CMS API, so a change to either side runs both.
 SHIPPED_WITH = {"cms-admin": "cms", "cms-cli": "cms"}
@@ -58,6 +71,11 @@ def classify(paths, dependents=None, workflow="ci"):
     scope = dict.fromkeys(full_scope(), False)
     for path in paths:
         if workflow == "codeql" and path.startswith(".github/") and path != ".github/workflows/codeql.yml":
+            continue
+        if path in NO_COMPONENT:
+            continue
+        if path in COMPONENT_WORKFLOWS:
+            scope.update(dict.fromkeys(COMPONENT_WORKFLOWS[path], True))
             continue
         if path.endswith(".md") or path.startswith(
             ("docs/", "macos/docs/", ".github/ISSUE_TEMPLATE/")
