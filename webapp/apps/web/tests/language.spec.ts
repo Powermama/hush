@@ -35,6 +35,9 @@ test("LANG-002 sends a German device to /de on its first visit to the home page 
   await page.goto("/");
   await expect(page).toHaveURL(/\/de$/);
   await expect(page.locator("h1")).toHaveText("Die Sprachebene für deinen Mac.");
+  // The move to /de is a navigation of its own (public/language.js); it finishes
+  // before the next one starts, or WebKit can abort with an internal error.
+  await page.waitForLoadState("load");
   // Deep links are never redirected.
   await page.goto("/verified-messages");
   await expect(page).toHaveURL(/\/verified-messages$/);
