@@ -141,7 +141,7 @@ test("LANDING-ENTRY-004 keeps the public page readable when application JavaScri
   await expect(page.locator("h1")).toBeVisible();
 });
 
-test("LANDING-ENTRY-006 links every page's own styles in its prerendered head", async ({ page, request }) => {
+test("LANDING-ENTRY-008 links every page's own styles in its prerendered head", async ({ page, request }) => {
   for (const path of ["/", "/de", "/verified-messages", "/impressum", "/datenschutz"]) {
     const html = await (await request.get(path)).text();
     const head = html.slice(0, html.indexOf("</head>"));

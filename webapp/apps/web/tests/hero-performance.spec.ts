@@ -106,11 +106,15 @@ test("LANDING-ENTRY-006 stops hero draws at rest, offscreen and while hidden", a
   await expect(hero).toHaveAttribute("data-scene", "ready", { timeout: 15000 });
   await page.mouse.move(0, 0);
   await expect(canvas).toHaveAttribute("data-draw-count", /[1-9]/);
+  // At rest means the three-second entrance has finished and a whole second
+  // passes without a frame: without a GPU (CI's WebKit) one frame can take
+  // longer than 200 ms, so a shorter quiet spell can fall inside the entrance.
+  await expect(page.locator(".hush-landing")).toHaveAttribute("data-opening", "complete", { timeout: 15000 });
   await expect.poll(async () => {
     const count = await canvas.getAttribute("data-draw-count");
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(1000);
     return count === await canvas.getAttribute("data-draw-count");
-  }, { timeout: 8000 }).toBe(true);
+  }, { timeout: 15000 }).toBe(true);
   const idle = await canvas.getAttribute("data-draw-count");
   await page.waitForTimeout(5000);
   await expect(canvas).toHaveAttribute("data-draw-count", idle!);
