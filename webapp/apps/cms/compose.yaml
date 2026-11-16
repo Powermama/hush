@@ -2,8 +2,9 @@
 # and daily backups) and its own PostgreSQL. Any Docker Compose host runs it
 # with `docker compose up`; docs/reference/deploy-anywhere.md maps it to other
 # platforms. Each service stands alone: both the API and the scheduler apply
-# migrations at start, under one lock. The API publishes no host port, so a
-# platform can replace it with a rolling update; a proxy routes to port 3100.
+# migrations at start, under one lock, and answer health checks on port 3100.
+# The API publishes no host port, so a platform can replace it with a rolling
+# update; a proxy routes to its port 3100.
 # compose.local.yaml adds what local development needs, and webapp/compose.yaml
 # includes both. Secrets are references: their values live in the platform's
 # secret store. Empty defaults keep local runs quiet; in production the CMS
@@ -51,16 +52,10 @@ services:
       context: ../..
       dockerfile: apps/cms/Dockerfile
     command: ["bun", "run", "cms:scheduler"]
+    # Healthy while ticks succeed: it answers the image's health check
+    # (/health/ready on 3100) as the API does.
     environment:
       <<: *cms-environment
-    # Healthy while ticks succeed: the scheduler touches its heartbeat file
-    # after each tick without errors, once a minute.
-    healthcheck:
-      test: ["CMD-SHELL", "find /tmp/cms-scheduler-heartbeat -mmin -5 | grep -q ."]
-      interval: 30s
-      timeout: 5s
-      start_period: 2m
-      retries: 3
     depends_on:
       cms-postgres:
         condition: service_healthy

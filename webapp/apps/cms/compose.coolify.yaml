@@ -1,53 +1,12 @@
-# Coolify's part of compose.yaml: the scheduler and PostgreSQL as one Docker
-# Compose resource. The API runs beside it as its own Coolify Dockerfile
-# application, because Coolify replaces only applications with a rolling
-# update, never Compose services (docs/operations/coolify.md). The services and
-# their settings are those of compose.yaml (tests/compose.test.ts keeps them in
-# step); other platforms run compose.yaml itself or map it
-# (docs/reference/deploy-anywhere.md).
-x-cms-environment: &cms-environment
-  NODE_ENV: ${NODE_ENV:-production}
-  CMS_DATABASE_URL: postgresql://cms:${SERVICE_PASSWORD_64_CMSPOSTGRES:-}@cms-postgres:5432/cms
-  CMS_S3_BUCKET: ${CMS_S3_BUCKET:-hush-blog-media}
-  CMS_S3_ENDPOINT: ${CMS_S3_ENDPOINT:-}
-  CMS_S3_ACCESS_KEY_ID: ${CMS_S3_ACCESS_KEY_ID:-}
-  CMS_S3_SECRET_ACCESS_KEY: ${CMS_S3_SECRET_ACCESS_KEY:-}
-  CMS_BACKUP_S3_BUCKET: ${CMS_BACKUP_S3_BUCKET:-hush-cms-backups}
-  CMS_BACKUP_S3_ENDPOINT: ${CMS_BACKUP_S3_ENDPOINT:-}
-  CMS_BACKUP_S3_ACCESS_KEY_ID: ${CMS_BACKUP_S3_ACCESS_KEY_ID:-}
-  CMS_BACKUP_S3_SECRET_ACCESS_KEY: ${CMS_BACKUP_S3_SECRET_ACCESS_KEY:-}
-  CMS_BACKUP_KEEP_DAYS: ${CMS_BACKUP_KEEP_DAYS:-30}
-  CMS_SITE_URL: ${CMS_SITE_URL:-}
-  CMS_COOLIFY_URL: ${CMS_COOLIFY_URL:-}
-  CMS_COOLIFY_TOKEN: ${CMS_COOLIFY_TOKEN:-}
-  CMS_COOLIFY_WEBSITE_UUID: ${CMS_COOLIFY_WEBSITE_UUID:-}
-  CMS_INDEXNOW_KEY: ${CMS_INDEXNOW_KEY:-}
-  CMS_PUBLIC_URL: ${CMS_PUBLIC_URL:-}
-  CMS_ADMIN_GITHUB_IDS: ${CMS_ADMIN_GITHUB_IDS:-}
-  CMS_GITHUB_CLIENT_ID: ${CMS_GITHUB_CLIENT_ID:-}
-  CMS_GITHUB_CLIENT_SECRET: ${CMS_GITHUB_CLIENT_SECRET:-}
-
+# Coolify's part of compose.yaml: PostgreSQL alone, as a Docker Compose
+# resource that keeps the database's volume. The API and the scheduler run as
+# Coolify Dockerfile applications beside it, because Coolify replaces only
+# applications with a rolling update and stops every service of a Compose
+# resource on each deploy (docs/operations/coolify.md); alone, PostgreSQL is
+# redeployed only when this file changes. Its settings are those of
+# compose.yaml (tests/compose.test.ts keeps them in step); other platforms run
+# compose.yaml itself or map it (docs/reference/deploy-anywhere.md).
 services:
-  cms-scheduler:
-    build:
-      context: ../..
-      dockerfile: apps/cms/Dockerfile
-    command: ["bun", "run", "cms:scheduler"]
-    environment:
-      <<: *cms-environment
-    # Healthy while ticks succeed: the scheduler touches its heartbeat file
-    # after each tick without errors, once a minute.
-    healthcheck:
-      test: ["CMD-SHELL", "find /tmp/cms-scheduler-heartbeat -mmin -5 | grep -q ."]
-      interval: 30s
-      timeout: 5s
-      start_period: 2m
-      retries: 3
-    depends_on:
-      cms-postgres:
-        condition: service_healthy
-    restart: unless-stopped
-
   cms-postgres:
     image: postgres:17-alpine
     environment:

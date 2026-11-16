@@ -33,7 +33,7 @@ is writing that platform's configuration from it, and copying the data.
 | --- | --- | --- | --- | --- | --- |
 | Website and proof service (`web`) | `apps/web/Dockerfile`, target `runtime-cms` in production | 3000 | `/health/live`, `/health/ready` | Any number of copies once proof objects are in S3; one while they are on disk | PostgreSQL (`DATABASE_URL`); proof objects in S3 or on disk (`HUSH_DATA_DIR`); the proof-signing key in `HUSH_DATA_DIR` (a persistent volume) |
 | CMS API and admin (`cms`) | `apps/cms/Dockerfile` | 3100 | `/health/live`, `/health/ready` | Any number of copies | PostgreSQL (`CMS_DATABASE_URL`); images and backups in S3-compatible buckets |
-| CMS scheduler (`cms-scheduler`) | `apps/cms/Dockerfile`, command `bun run cms:scheduler` | none | heartbeat file, see `compose.yaml` | **Exactly one copy** (a single replica, or a CronJob every minute on Kubernetes) | as the API |
+| CMS scheduler (`cms-scheduler`) | `apps/cms/Dockerfile`, command `bun run cms:scheduler` | 3100, health only | `/health/live`, `/health/ready` (a tick succeeded in the last five minutes) | **One copy** (two for a moment during a rolling update are safe); on Kubernetes one replica | as the API |
 | Databases | `postgres:17-alpine`, or the platform's managed PostgreSQL 17 | 5432 | `pg_isready` | one each for web and CMS | a persistent volume, or managed |
 
 Building the production website reads the CMS: it needs the build argument
