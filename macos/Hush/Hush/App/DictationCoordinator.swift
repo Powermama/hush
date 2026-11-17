@@ -820,7 +820,9 @@ final class DictationCoordinator {
                 }
             }
             let processed: String
-            var completionWarningMessage: String? = reachedLimit
+            var completionWarningMessage: String?
+            // Neutral, not an error: the dictation worked, it only stopped early.
+            let limitNotice = reachedLimit
                 ? "Stopped at \(AudioRecorder.limitDescription). Everything until then was kept." : nil
             do {
                 if let profile {
@@ -928,6 +930,8 @@ final class DictationCoordinator {
                 // used elsewhere in the codebase via `hud.flash`.
                 if let msg = completionWarningMessage {
                     hud.show(state: .error(msg))
+                } else if let limitNotice {
+                    hud.flash(message: limitNotice)
                 } else if let suppression = verifiedText.destinationSuppression,
                           shouldShowSuppressionNotice(
                             suppression,
@@ -945,6 +949,8 @@ final class DictationCoordinator {
                 phase.send(.inserted)
                 if let msg = completionWarningMessage {
                     hud.show(state: .error(msg))
+                } else if let limitNotice {
+                    hud.flash(message: limitNotice)
                 } else {
                     hud.show(state: .copiedToClipboard(verified: verifiedText.isVerified))
                 }
@@ -952,7 +958,7 @@ final class DictationCoordinator {
                 phase.send(.inserted)
                 hud.show(state: .needsAccessibility)
             }
-            hud.hideAfter(seconds: completionWarningMessage == nil ? 1.9 : 2.6)
+            hud.hideAfter(seconds: completionWarningMessage == nil && limitNotice == nil ? 1.9 : 2.6)
             phase.send(.idle)
         } catch {
             Self.log.error("Transcribe failed: \(error.localizedDescription, privacy: .public)")
