@@ -360,6 +360,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             destination = .activity()
         } else if arguments.contains("--preview-history") {
             destination = .history()
+        } else if arguments.contains("--preview-general") {
+            destination = .general
         } else if arguments.contains("--preview-hud") {
             destination = .interface
         } else if arguments.contains("--preview-verified-messages") {

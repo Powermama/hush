@@ -903,6 +903,11 @@ final class DictationCoordinator {
             )
             // Single-line summary at `.notice` so it shows in Xcode console and
             // Console.app by default (no need to enable "Info messages").
+            DictationTimingStore.shared.record(DictationTiming(
+                date: Date(), audio: audioSec, transcribe: transcribeSec, write: llmActive ? postSec : 0,
+                insert: insertSec, wait: totalSec, speechModel: Settings.shared.modelID,
+                writingEngine: llmActive ? provider.displayName : nil
+            ))
             Self.log.notice("⏱️ pipeline: total=\(totalSec, format: .fixed(precision: 2))s (transcribe=\(transcribeSec, format: .fixed(precision: 2))s · post=\(postSec, format: .fixed(precision: 2))s · insert=\(insertSec, format: .fixed(precision: 2))s) for \(audioSec, format: .fixed(precision: 2))s audio")
 
             switch outcome {
