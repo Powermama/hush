@@ -4,18 +4,18 @@ final class PermissionJourneyTests: XCTestCase {
     func testLandingShowsWorkflowsAndModelsStayInContext() {
         let app = launch("--preview-hush-ai", "--preview-light-appearance")
         defer { app.terminate() }
-        XCTAssertTrue(app.buttons["Open Personas"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Open Live Write"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Open Assistant"].exists)
         XCTAssertFalse(app.staticTexts["Model library"].exists)
         XCTAssertFalse(app.staticTexts["Kokoro"].exists)
-        XCTAssertFalse(app.scrollViews.firstMatch.buttons["Personas"].exists) // No duplicate sidebar entry.
-        attach(app, "Hush AI - light")
+        XCTAssertFalse(app.scrollViews.firstMatch.buttons["Live Write"].exists) // No duplicate sidebar entry.
+        attach(app, "hush AI - light")
         app.buttons["Permissions"].click()
         XCTAssertTrue(app.staticTexts["Microphone"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.staticTexts["Screen Recording"].exists)
-        app.buttons["Hush AI"].click()
+        app.buttons["hush AI"].click()
         app.buttons["Open Assistant"].click()
-        XCTAssertTrue(app.staticTexts["Hush Assistant"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.switches["hush.assistant.enabled"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Screen Recording"].exists)
         XCTAssertTrue(app.staticTexts["hush.assistant.screen.status"].exists)
         XCTAssertTrue(app.popUpButtons["Assistant intelligence model"].exists)
@@ -23,22 +23,24 @@ final class PermissionJourneyTests: XCTestCase {
         XCTAssertFalse(app.buttons["Test voice"].exists)
         attach(app, "Assistant - light")
         app.buttons["control-center-back"].click()
-        XCTAssertTrue(app.buttons["Open Personas"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Open Live Write"].waitForExistence(timeout: 3))
     }
 
-    func testPersonasUsesSharedModelsAndKeepsStyleEditing() {
+    func testLiveWriteUsesSharedModelsAndKeepsOptionalPersonas() {
         let app = launch("--preview-hush-ai", "--preview-light-appearance")
         defer { app.terminate() }
-        XCTAssertTrue(app.buttons["Open Personas"].waitForExistence(timeout: 5))
-        app.buttons["Open Personas"].click()
-        XCTAssertTrue(app.staticTexts["Choose your style"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["Use Polish"].exists)
+        XCTAssertTrue(app.buttons["Open Live Write"].waitForExistence(timeout: 5))
+        app.buttons["Open Live Write"].click()
+        XCTAssertTrue(app.staticTexts["What it does"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.radioButtons["Polish"].exists)
         XCTAssertTrue(app.checkBoxes["hush.personas.engines"].exists)
-        attach(app, "Personas - light")
+        attach(app, "Live Write - light")
         app.buttons["Edit Polish"].click()
         XCTAssertTrue(app.staticTexts["Make this persona yours"].waitForExistence(timeout: 3))
         app.buttons["Cancel"].click()
         app.buttons["Add Persona"].click()
+        XCTAssertTrue(app.menuItems["Clean Up My Words"].waitForExistence(timeout: 2))
+        app.menuItems["Clean Up My Words"].click()
         XCTAssertTrue(app.staticTexts["Create a persona"].waitForExistence(timeout: 3))
         app.buttons["Cancel"].click()
         let engine = app.checkBoxes["hush.personas.engines"]
@@ -48,7 +50,7 @@ final class PermissionJourneyTests: XCTestCase {
         let model = modelControl("qwen35_4b", in: app)
         XCTAssertTrue(model.exists)
         reveal(model, in: app)
-        attach(app, "Personas - engines expanded")
+        attach(app, "Live Write - engines expanded")
         if model.label == "More options for Qwen 3.5 4B" {
             model.click()
             app.menuItems["Remove Qwen 3.5 4B…"].click()
@@ -63,19 +65,19 @@ final class PermissionJourneyTests: XCTestCase {
     func testAISettingsInDarkAppearance() {
         let app = launch("--preview-hush-ai", "--preview-dark-appearance")
         defer { app.terminate() }
-        XCTAssertTrue(app.buttons["Open Personas"].waitForExistence(timeout: 5))
-        attach(app, "Hush AI - dark")
-        app.buttons["Open Personas"].click()
-        XCTAssertTrue(app.buttons["Use Polish"].waitForExistence(timeout: 3))
-        attach(app, "Personas - dark")
+        XCTAssertTrue(app.buttons["Open Live Write"].waitForExistence(timeout: 5))
+        attach(app, "hush AI - dark")
+        app.buttons["Open Live Write"].click()
+        XCTAssertTrue(app.radioButtons["Polish"].waitForExistence(timeout: 3))
+        attach(app, "Live Write - dark")
         let engine = app.checkBoxes["hush.personas.engines"]
         reveal(engine, in: app)
         engine.click()
         reveal(modelControl("qwen35_4b", in: app), in: app)
-        attach(app, "Personas - engines dark")
+        attach(app, "Live Write - engines dark")
         app.buttons["control-center-back"].click()
         app.buttons["Open Assistant"].click()
-        XCTAssertTrue(app.staticTexts["Hush Assistant"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.switches["hush.assistant.enabled"].waitForExistence(timeout: 3))
         attach(app, "Assistant - dark")
     }
 
@@ -83,8 +85,8 @@ final class PermissionJourneyTests: XCTestCase {
         let app = launch("--preview-hush-ai", "--preview-light-appearance", "--preview-compact-window")
         defer { app.terminate() }
         XCTAssertTrue(app.buttons["Open Assistant"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Open Personas"].isHittable)
-        attach(app, "Hush AI - compact")
+        XCTAssertTrue(app.buttons["Open Live Write"].isHittable)
+        attach(app, "hush AI - compact")
         XCTAssertTrue(app.staticTexts["hush.ai.assistant.status"].exists)
         app.buttons["Open Assistant"].click()
         let voice = modelControl("kokoro", in: app)
@@ -96,14 +98,14 @@ final class PermissionJourneyTests: XCTestCase {
     func testOneSetupButtonCanCancelAndResume() {
         let app = launch("--preview-assistant-settings", "--preview-light-appearance", "--preview-assistant-setup-flow")
         defer { app.terminate() }
-        let setup = app.buttons["hush.assistant.setup.start"]
+        let setup = app.buttons["hush.assistant.action"]
         XCTAssertTrue(setup.waitForExistence(timeout: 5))
         setup.click()
         XCTAssertTrue(app.buttons["Cancel"].waitForExistence(timeout: 2))
         app.buttons["Cancel"].click()
         XCTAssertTrue(app.buttons["Resume setup"].waitForExistence(timeout: 4))
         app.buttons["Resume setup"].click()
-        XCTAssertTrue(app.staticTexts["Ready when you are"].waitForExistence(timeout: 12))
+        XCTAssertTrue(app.staticTexts["Ready. Hold Control + Fn in any app to talk."].waitForExistence(timeout: 12))
         XCTAssertFalse(app.buttons["Cancel"].isHittable)
         XCTAssertFalse(setup.isHittable)
         attach(app, "Assistant - setup completed fixture")

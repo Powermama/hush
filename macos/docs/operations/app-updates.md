@@ -168,9 +168,10 @@ labels and a DMG whose filename disagrees with the embedded bundle identity.
 This prevents retries or parallel release work from replacing an immutable
 tester build.
 
-The current public alpha is `0.1.0-alpha.5 (14)`, with the restored Finder layout.
-Alpha.4 was the first notarized download. The next tester release must use a
-build number greater than 14.
+The current public alpha is `0.1.0-alpha.6 (15)`, which makes the persona
+editor follow Light and Dark mode. Alpha.5 restored the Finder layout; alpha.4
+was the first notarized download. The next tester release must use a build
+number greater than 15.
 
 Build a signed candidate app and DMG for local review. This does not submit to
 Apple or publish anything:
@@ -196,12 +197,15 @@ Package, sign, and publish the Sparkle update. Pass the DMG path to also update
 the stable website download URL:
 
 ```sh
-HUSH_RELEASE_DIRECTORY="artifacts/release-alpha5" \
-HUSH_DMG_PATH="artifacts/release-alpha5/dist/hush-0.1.0-alpha.5-build.14.dmg" \
+HUSH_RELEASE_DIRECTORY="artifacts/release-alpha6" \
+HUSH_DMG_PATH="artifacts/release-alpha6/final/hush-0.1.0-alpha.6-build.15.dmg" \
   ./scripts/publish-update-r2.sh
 ```
 
-The publisher performs the safe order:
+Each run stages a fresh mirror of the published channel under the release
+directory (`updates.XXXXXX/<channel>`), so files Sparkle moved to `old_updates/`
+in an earlier release never collide with the next one. The publisher performs
+the safe order:
 
 1. Downloads the existing alpha appcast and archives for delta generation.
 2. Creates a metadata-preserving ZIP with `ditto`.

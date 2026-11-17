@@ -490,13 +490,13 @@ final class DictationCoordinator {
         personaWheel.toggle(
             profiles: Settings.shared.profiles,
             activeProfileID: Settings.shared.activeProfileID,
-            personaEnabled: Settings.shared.activeDictationProfile != nil,
+            personaEnabled: Settings.shared.liveWriteEnabled && Settings.shared.dictationPersonaEnabled,
             personasAvailable: true
         ) { [weak self] selection in
             switch selection {
             case .noPersona:
                 Settings.shared.dictationPersonaEnabled = false
-                self?.hud.flash(message: "No persona active")
+                self?.hud.flash(message: Settings.shared.liveWriteEnabled ? "Live Write, no persona" : "No persona active")
             case .profile(let profile):
                 Settings.shared.activeProfileID = profile.id
                 self?.hud.flash(message: "\(profile.name) active")

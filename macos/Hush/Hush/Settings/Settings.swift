@@ -63,6 +63,8 @@ final class Settings {
         static let profilesData = "postprocess.profiles.v2"
         static let activeProfileID = "postprocess.activeProfileID.v2"
         static let dictationPersonaEnabled = "postprocess.dictationPersona.enabled.v1"
+        static let liveWriteEnabled = "postprocess.liveWrite.enabled.v1"
+        static let assistantEnabled = "assistant.enabled.v1"
         static let llmProvider = "postprocess.llmProvider"
         static let historyRetention = "activity.historyRetention"
         static let typingTestResults = "activity.typingTestResults.v1"
@@ -422,6 +424,18 @@ final class Settings {
         }
     }
 
+    /// Live Write replaced "Style your dictation" plus a persona. Settings saved before it
+    /// keep doing exactly what they did: AI on with a persona becomes Live Write with that
+    /// persona on top; AI on with "No persona" (plain dictation) becomes Live Write off.
+    /// New installs start with Live Write off and no persona.
+    func migrateToLiveWrite() {
+        guard defaults.object(forKey: Keys.liveWriteEnabled) == nil else { return }
+        let aiOn = llmProvider != .off
+        let personaOn = (defaults.object(forKey: Keys.dictationPersonaEnabled) as? Bool) ?? aiOn
+        defaults.set(aiOn && personaOn, forKey: Keys.liveWriteEnabled)
+        defaults.set(aiOn && personaOn, forKey: Keys.dictationPersonaEnabled)
+    }
+
     /// Style profile applied to every dictation **when `llmProvider != .off`**.
     /// Default = Polish (the safest first pick — "fix grammar, keep meaning").
     /// Inert when `llmProvider == .off`; pipeline runs `BasicPostProcessor`
@@ -436,30 +450,49 @@ final class Settings {
         }
         set {
             defaults.set(newValue.uuidString, forKey: Keys.activeProfileID)
+            // Choosing a persona means writing with it: it goes on top of Live Write.
             defaults.set(true, forKey: Keys.dictationPersonaEnabled)
+            defaults.set(true, forKey: Keys.liveWriteEnabled)
             didChange.send()
         }
     }
 
-    /// Whether regular dictation uses the selected persona. This is separate
-    /// from the provider so `No persona` can stay fast without unloading the
-    /// user's on-device AI engine.
-    var dictationPersonaEnabled: Bool {
-        get {
-            if let stored = defaults.object(forKey: Keys.dictationPersonaEnabled) as? Bool {
-                return stored
-            }
-            return llmProvider != .off
+    /// Live Write: dictation goes through the writing model, which writes what was asked
+    /// for or cleans up the speaker's words. Separate from the provider, which the
+    /// Assistant shares, so turning Live Write off never unloads the user's AI engine.
+    var liveWriteEnabled: Bool {
+        get { defaults.bool(forKey: Keys.liveWriteEnabled) }
+        set {
+            defaults.set(newValue, forKey: Keys.liveWriteEnabled)
+            didChange.send()
         }
+    }
+
+    /// Whether the selected persona applies on top of Live Write. Optional: without one,
+    /// Live Write's own behaviour (`Profile.liveWrite`) applies.
+    var dictationPersonaEnabled: Bool {
+        get { defaults.bool(forKey: Keys.dictationPersonaEnabled) }
         set {
             defaults.set(newValue, forKey: Keys.dictationPersonaEnabled)
             didChange.send()
         }
     }
 
+    /// What each dictation is processed with: nothing (Live Write off or no engine),
+    /// Live Write's own behaviour, or the persona the user put on top.
     var activeDictationProfile: Profile? {
-        guard dictationPersonaEnabled, llmProvider != .off else { return nil }
-        return activeProfile
+        guard liveWriteEnabled, llmProvider != .off else { return nil }
+        return dictationPersonaEnabled ? activeProfile : .liveWrite
+    }
+
+    /// The voice Assistant answers its shortcut. On by default, so a set-up Assistant
+    /// keeps working; turning it off leaves its models and permissions in place.
+    var assistantEnabled: Bool {
+        get { defaults.object(forKey: Keys.assistantEnabled) as? Bool ?? true }
+        set {
+            defaults.set(newValue, forKey: Keys.assistantEnabled)
+            didChange.send()
+        }
     }
 
     /// Convenience: resolve the active profile against the stored array.
