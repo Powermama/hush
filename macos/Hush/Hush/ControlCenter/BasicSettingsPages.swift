@@ -34,6 +34,7 @@ final class GeneralSettingsPageViewController: ControlCenterPageViewController {
         ))
         buildShortcutCard()
         buildBehaviorCard()
+        buildSpeedCard()
         configureControls()
         Settings.shared.didChange
             .receive(on: RunLoop.main)
@@ -116,6 +117,38 @@ final class GeneralSettingsPageViewController: ControlCenterPageViewController {
         #else
         addFullWidth(subtitle("Auto-paste requires Accessibility permission. Clipboard-only output remains available without it."))
         #endif
+    }
+
+    /// R7: the wait from key release to inserted text, measured on this Mac.
+    private func buildSpeedCard() {
+        let rows = NSStackView()
+        rows.orientation = .vertical
+        rows.alignment = .leading
+        rows.spacing = 0
+        let store = DictationTimingStore.shared
+        let entries: [(String, String, DictationWaitSummary?)] = [
+            ("Dictation", "From releasing the key to text in your app.", store.summary(writing: false)),
+            ("With hush AI", "When Live Write or a persona writes the text.", store.summary(writing: true)),
+        ]
+        for (index, entry) in entries.enumerated() {
+            let value = NSTextField(labelWithString: Self.speedText(entry.2))
+            value.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
+            value.textColor = entry.2 == nil ? .tertiaryLabelColor : .labelColor
+            value.setAccessibilityIdentifier("hush.general.speed.\(index)")
+            rows.addArrangedSubview(ControlCenterKeyValueRow(
+                title: entry.0, subtitle: entry.1, trailing: value, showsSeparator: index < entries.count - 1
+            ))
+        }
+        for row in rows.arrangedSubviews { row.widthAnchor.constraint(equalTo: rows.widthAnchor).isActive = true }
+        addFullWidth(sectionTitle("Speed on this Mac"))
+        addFullWidth(makeCard(content: rows))
+        addFullWidth(subtitle("Measured over your last 50 dictations and stored only on this Mac. hush keeps only the times, never what you said, and never sends them anywhere."))
+    }
+
+    static func speedText(_ summary: DictationWaitSummary?) -> String {
+        guard let summary else { return "Not measured yet" }
+        func seconds(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(1))) + " s" }
+        return "\(seconds(summary.median)) typical · 9 in 10 under \(seconds(summary.p90))"
     }
 
     private func configureControls() {
