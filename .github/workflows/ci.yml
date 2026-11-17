@@ -251,6 +251,11 @@ jobs:
         run: |
           xcodebuild -version
           swift --version
+      - name: Keep dictated text out of the system log
+        working-directory: macos
+        run: |
+          python3 -m unittest discover -s scripts/tests
+          python3 scripts/check_log_privacy.py Hush/Hush
       - name: Test the proof package
         run: swift test --package-path macos/Packages/HushProvenance --force-resolved-versions
       - name: Install the service dependencies
