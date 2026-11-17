@@ -1,0 +1,22 @@
+{
+  "about": "Hesitation sounds hush removes from every dictation, in code. 'universal' sounds are a word in no language and are always removed. 'languages' lists sounds that are a real word somewhere (German 'um' = at, Portuguese 'um' = a), removed only once the dictation's language is known. Add a language only with a source and benchmark cases in HushTests/Fixtures/Cleanup/filler-words.json.",
+  "sources": [
+    {
+      "name": "Handy",
+      "url": "https://github.com/cjpais/Handy/blob/aca8985/src-tauri/src/audio_toolkit/text.rs",
+      "license": "MIT",
+      "copyright": "Copyright (c) 2025 CJ Pais",
+      "used": "The two tiers, the universal list and the en, de and fr lists"
+    },
+    {
+      "name": "hush",
+      "used": "English 'er' and 'erm', the British spellings of the same sound"
+    }
+  ],
+  "universal": ["uh", "uhh", "uhhh", "uhm", "umm", "ehh", "ehm", "ahm", "hmm", "hm", "mmm", "хм", "ммм"],
+  "languages": {
+    "en": ["um", "ah", "eh", "er", "erm"],
+    "de": ["äh", "ähm", "öhm"],
+    "fr": ["euh"]
+  }
+}

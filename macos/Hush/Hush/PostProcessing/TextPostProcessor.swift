@@ -12,10 +12,12 @@ struct IdentityPostProcessor: TextPostProcessor {
     func process(_ text: String, language: String) async throws -> String { text }
 }
 
-/// Light-touch local cleanup that doesn't need an LLM: trims whitespace, collapses repeats.
+/// Light-touch local cleanup that doesn't need an LLM, for every dictation with or
+/// without AI: removes hesitation sounds, trims whitespace, collapses repeats. Neither
+/// Whisper nor Parakeet removes them reliably, so code does it for both engines.
 struct BasicPostProcessor: TextPostProcessor {
     func process(_ text: String, language: String) async throws -> String {
-        var s = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        var s = FillerWords.removing(from: text, language: language).trimmingCharacters(in: .whitespacesAndNewlines)
         // Collapse runs of >2 spaces (Whisper occasionally emits extras between segments).
         while s.contains("  ") { s = s.replacingOccurrences(of: "  ", with: " ") }
         return s
