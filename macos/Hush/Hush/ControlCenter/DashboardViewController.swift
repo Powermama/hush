@@ -1737,7 +1737,7 @@ private struct DashboardLocalStack: View {
                 }
                 Divider().padding(.leading, 58).opacity(0.55)
                 DashboardLocalRow(symbol: "sparkles", title: setup.personaName, detail: setup.personaStatus) {
-                    onNavigate(.personas(focusEnableAI: setup.personaIsOff))
+                    onNavigate(.liveWrite(focusEnableAI: setup.personaIsOff))
                 }
                 Divider().padding(.leading, 58).opacity(0.55)
                 DashboardLocalRow(
@@ -1745,7 +1745,7 @@ private struct DashboardLocalStack: View {
                     title: "\(setup.profileCount) \(setup.profileCount == 1 ? "profile" : "profiles")",
                     detail: ""
                 ) {
-                    onNavigate(.personas())
+                    onNavigate(.liveWrite())
                 }
 
                 Divider().opacity(0.55)
