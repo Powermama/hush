@@ -11,7 +11,7 @@ test("renders the visual landing page with a clear download", async ({ page, isM
     await expect(download).toHaveText("Get hush for Mac");
     await expect(download).toHaveAttribute("aria-haspopup", "dialog");
   } else {
-    await expect(download).toHaveAttribute("href", "https://updates.behu.sh/downloads/hush-0.1.0-alpha.5-build.14.dmg");
+    await expect(download).toHaveAttribute("href", "https://updates.behu.sh/downloads/hush-0.1.0-alpha.6-build.15.dmg");
     await expect(page.getByRole("link", { name: "Download", exact: true })).toHaveAttribute("href", await download.getAttribute("href") as string);
   }
   await expect(page.getByRole("img", { name: /hush connects your voice/ })).toBeVisible();
@@ -171,14 +171,14 @@ test("keeps download colors and position on hover and press", async ({ page }, t
 test("downloads the notarized alpha and opens its release notes", async ({
   browserName, context, page, isMobile,
 }, testInfo) => {
-  const downloadURL = "https://updates.behu.sh/downloads/hush-0.1.0-alpha.5-build.14.dmg";
+  const downloadURL = "https://updates.behu.sh/downloads/hush-0.1.0-alpha.6-build.15.dmg";
   await context.route(downloadURL, async (route) => {
     await route.fulfill({
       status: 200,
       body: "test dmg",
       headers: {
         "content-type": "application/x-apple-diskimage",
-        "content-disposition": 'attachment; filename="hush-0.1.0-alpha.5-build.14.dmg"',
+        "content-disposition": 'attachment; filename="hush-0.1.0-alpha.6-build.15.dmg"',
         "cache-control": "public,max-age=31536000,immutable",
       },
     });
@@ -197,15 +197,15 @@ test("downloads the notarized alpha and opens its release notes", async ({
   await requestPromise;
   if (downloadPromise) {
     const download = await downloadPromise;
-    expect(download.suggestedFilename()).toBe("hush-0.1.0-alpha.5-build.14.dmg");
+    expect(download.suggestedFilename()).toBe("hush-0.1.0-alpha.6-build.15.dmg");
     await download.cancel();
   }
   const releasePage = await releasePagePromise;
-  await expect(releasePage).toHaveURL(/\/releases\/0\.1\.0-alpha\.5$/);
-  await expect(releasePage.getByRole("heading", { level: 1, name: "A clearer first step." })).toBeVisible();
+  await expect(releasePage).toHaveURL(/\/releases\/0\.1\.0-alpha\.6$/);
+  await expect(releasePage.getByRole("heading", { level: 1, name: "Personas, in any light." })).toBeVisible();
   await expect(releasePage.getByText(/I'd like to open-source the app in the future/)).toBeVisible();
   await expect(releasePage.getByText(/full public release/).first()).toBeVisible();
-  await expect(releasePage.getByText(/Build 14/)).toBeVisible();
+  await expect(releasePage.getByText(/Build 15/)).toBeVisible();
   await expect(releasePage.getByText(/xattr|com\.apple\.quarantine|One extra step/)).toHaveCount(0);
   await expect(releasePage.getByRole("button", { name: /copy.*command/i })).toHaveCount(0);
   await expect(releasePage.locator('main a[download], main a[href*="updates.behu.sh/downloads/"]')).toHaveCount(0);
@@ -365,6 +365,7 @@ test("keeps unavailable release routes out of search indexing", async ({ request
     ["/releases/latest", 200],
     ["/releases/0.1.0-alpha.4", 200],
     ["/releases/0.1.0-alpha.5", 200],
+    ["/releases/0.1.0-alpha.6", 200],
     ["/releases/0.1.0-alpha.2", 404],
     ["/releases/0.1.0-alpha.1", 404],
     ["/releases/unknown", 404],
@@ -381,13 +382,14 @@ test("lists the corrected installer and retains the first notarized milestone", 
   await expect(page.getByRole("heading", { level: 1, name: "Release notes." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Our first notarized alpha." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "A clearer first step." })).toBeVisible();
-  await expect(page.locator('a[href*="/releases/0.1.0-"]')).toHaveCount(2);
+  await expect(page.getByRole("heading", { name: "Personas, in any light." })).toBeVisible();
+  await expect(page.locator('a[href*="/releases/0.1.0-"]')).toHaveCount(3);
   await expect(page.getByRole("link", { name: "Open permanent page for 0.1 alpha 4" }))
     .toHaveAttribute("href", "/releases/0.1.0-alpha.4");
   await expect(page.getByText(/A smoother way into hush|Your voice, typed privately/)).toHaveCount(0);
   await page.goto("/releases/latest");
-  await expect(page.getByRole("heading", { level: 1, name: "A clearer first step." })).toBeVisible();
-  await expect(page.getByText(/Build 14/)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Personas, in any light." })).toBeVisible();
+  await expect(page.getByText(/Build 15/)).toBeVisible();
 });
 
 

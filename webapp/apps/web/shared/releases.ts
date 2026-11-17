@@ -30,6 +30,40 @@ export type HushRelease = {
 // Older unnotarized builds have been withdrawn from the website.
 export const releases: readonly HushRelease[] = [
   {
+    slug: "0.1.0-alpha.6",
+    version: "0.1.0-alpha.6",
+    displayVersion: "0.1 alpha 6",
+    build: 15,
+    releasedAt: "2026-11-16",
+    displayDate: "16 November 2026",
+    channel: "Private alpha",
+    visibility: "private",
+    title: "Personas, in any light.",
+    summary:
+      "A fix for the persona editor: it now follows your Mac's appearance the moment you switch between Light and Dark.",
+    downloadURL:
+      "https://updates.behu.sh/downloads/hush-0.1.0-alpha.6-build.15.dmg",
+    downloadName: "hush-0.1.0-alpha.6-build.15.dmg",
+    systemRequirements: "Apple silicon and macOS 15 or later",
+    sections: [
+      {
+        label: "Fixed",
+        items: [
+          {
+            title: "Your instructions stay readable",
+            detail:
+              "Switching between Light and Dark while hush was open could leave the persona editor in the old colors, so its instructions looked empty and typing seemed not to work until hush was reopened. The editor and the shortcut fields now redraw as soon as you switch.",
+          },
+        ],
+      },
+    ],
+    knownNotes: [
+      "macOS may ask you to approve the first launch and name Safari as the download source. This is a normal security prompt; no Terminal command is needed.",
+      "This is still an early alpha. I'm working toward a full public release, and I'd like to open-source the app in the future.",
+      "Built for Macs with Apple silicon. We recommend 16 GB of memory for the optional assistant; it is not a requirement for core dictation.",
+    ],
+  },
+  {
     slug: "0.1.0-alpha.5",
     version: "0.1.0-alpha.5",
     displayVersion: "0.1 alpha 5",
