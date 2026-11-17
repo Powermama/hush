@@ -39,6 +39,8 @@ final class PermissionJourneyTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Make this persona yours"].waitForExistence(timeout: 3))
         app.buttons["Cancel"].click()
         app.buttons["Add Persona"].click()
+        XCTAssertTrue(app.menuItems["Clean Up My Words"].waitForExistence(timeout: 2))
+        app.menuItems["Clean Up My Words"].click()
         XCTAssertTrue(app.staticTexts["Create a persona"].waitForExistence(timeout: 3))
         app.buttons["Cancel"].click()
         let engine = app.checkBoxes["hush.personas.engines"]

@@ -63,6 +63,7 @@ final class Settings {
         static let profilesData = "postprocess.profiles.v2"
         static let activeProfileID = "postprocess.activeProfileID.v2"
         static let dictationPersonaEnabled = "postprocess.dictationPersona.enabled.v1"
+        static let writeForMeOffered = "postprocess.builtIn.writeForMe.offered.v1"
         static let llmProvider = "postprocess.llmProvider"
         static let historyRetention = "activity.historyRetention"
         static let typingTestResults = "activity.typingTestResults.v1"
@@ -419,6 +420,19 @@ final class Settings {
                 defaults.set(data, forKey: Keys.profilesData)
                 didChange.send()
             }
+        }
+    }
+
+    /// Adds built-in personas that arrived after a library was saved, once each:
+    /// a persona the user deletes later stays deleted. New libraries get them
+    /// from `Profile.seededProfiles`.
+    func addNewBuiltInPersonas() {
+        guard !defaults.bool(forKey: Keys.writeForMeOffered) else { return }
+        defaults.set(true, forKey: Keys.writeForMeOffered)
+        guard defaults.data(forKey: Keys.profilesData) != nil else { return }
+        let library = profiles
+        if !library.contains(where: { $0.id == Profile.writeForMe.id }) {
+            profiles = library + [Profile.writeForMe]
         }
     }
 
