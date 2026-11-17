@@ -18,7 +18,12 @@ final class PermissionJourneyTests: XCTestCase {
         XCTAssertTrue(app.switches["hush.assistant.enabled"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Screen Recording"].exists)
         XCTAssertTrue(app.staticTexts["hush.assistant.screen.status"].exists)
-        XCTAssertTrue(app.popUpButtons["Assistant intelligence model"].exists)
+        // The AI model comes first as its own list, ChatGPT last; listening and voice follow.
+        XCTAssertTrue(app.staticTexts["AI model"].exists)
+        XCTAssertTrue(app.staticTexts["Required models"].exists)
+        XCTAssertTrue(app.staticTexts["ChatGPT"].exists)
+        XCTAssertTrue(app.staticTexts["Kokoro"].exists)
+        XCTAssertTrue(app.staticTexts["hush.assistant.privacy"].exists)
         XCTAssertTrue(app.staticTexts["hush.assistant.local-processing"].exists)
         XCTAssertFalse(app.buttons["Test voice"].exists)
         attach(app, "Assistant - light")

@@ -41,6 +41,10 @@ Given Assistant is on but not set up, when the user turns it on or chooses `Set 
 
 Given Live Write's engine list, when the user chooses `Continue with ChatGPT`, then hush explains what is sent, the browser handles sign-in and consent, and the ChatGPT row offers `Use`. With ChatGPT in use, dictations are written on the plan and the HUD shows the cloud mark; at a limit the dictation is written on this Mac and a note says so.
 
+### AI-006 - Assistant with a ChatGPT plan
+
+Given the Assistant page, the user sees an `AI model` list (Qwen 3.5 4B recommended, Qwen 3.5 2B, ChatGPT) above `Required models` (transcription, Kokoro voice). Choosing ChatGPT asks for the Assistant's own consent, which names what is sent: the request, text read from the current app and, when it helps, a screenshot of that window. Live Write's consent never covers this. Once agreed, the browser signs in if needed and ChatGPT becomes Active. The page header and privacy note then say the plan answers instead of "entirely on this Mac". When ChatGPT can't answer, the Assistant answers with the model on this Mac if one is installed and shows a short note in its bubble. A model that rejects images gets text only from then on. Disconnecting withdraws both features' consent and returns both to this Mac.
+
 ## Test ownership
 
 | Journey | Automated coverage |
@@ -50,3 +54,4 @@ Given Live Write's engine list, when the user chooses `Continue with ChatGPT`, t
 | AI-003 | `LiveWriteSettingsTests.personaIsOptional`, `DictationPromptTests`, opt-in `PersonaLiveTests` |
 | AI-004 | `LiveWriteSettingsTests.assistantSwitch`, `PermissionJourneyTests.testOneSetupButtonCanCancelAndResume` |
 | AI-005 | `ChatGPTConnectionTests` (protocol, tokens, errors, Keychain, callback), `PermissionJourneyTests.testLiveWriteUsesSharedModelsAndKeepsOptionalPersonas` (ChatGPT row); live sign-in is manual |
+| AI-006 | `AssistantChatGPTTests` (consent per feature, withdrawal, readiness, image part, JSON extraction, image rejection, error text), `PermissionJourneyTests.testLandingShowsWorkflowsAndModelsStayInContext` (layout); live sign-in is manual |

@@ -527,7 +527,7 @@ final class LLMRuntime {
                 input: Array(input)
             )
             return Self.extractOutput(raw)
-        } catch let error as ChatGPTError {
+        } catch let error as ChatGPTError where error != .cancelled {
             guard let local = LiveWriteStatus.bestReadyEngine(), local != .chatGPT else {
                 pendingNotice = ChatGPTAccount.message(for: error) + " Your words were inserted as spoken."
                 throw error
@@ -933,6 +933,39 @@ final class LLMRuntime {
             return try await generateCoworkerReply(repair, provider: provider)
         }
         return reply
+    }
+
+    /// The Assistant on the user's ChatGPT plan: the same instructions and schema as on this
+    /// Mac, the screenshot as an image part. Without constrained decoding the schema is part
+    /// of the instructions; `validatedResponse` checks and repairs the reply as it does locally.
+    func generateChatGPTCoworkerReply(_ request: CoworkerRequest) async throws -> CoworkerReply {
+        try Task.checkCancellation()
+        guard request.text.utf8.count <= 4_000 else { throw AssistantFailure.modelSetup }
+        let schema = CoworkerReply.schema(for: request)
+        let instructions = CoworkerReply.instructions(for: request.observation)
+            + "\nOutput schema:\n" + schema
+            + "\nReply with exactly one JSON object that matches the schema. No Markdown, no other text."
+        request.onStage?(.readingContext)
+        let model = Settings.shared.chatGPTModel
+        func send(image: Data?) async throws -> String {
+            var parts: [ChatGPTResponses.Part] = [.text(request.prompt)]
+            if let image { parts.append(.image(image)) }
+            return try await ChatGPTAccount.shared.write(instructions: instructions, input: [.init(role: "user", parts: parts)])
+        }
+        request.onStage?(.choosingAction)
+        let raw: String
+        do {
+            raw = try await send(image: ChatGPTAccount.shared.acceptsImages(model) ? request.screenshot : nil)
+        } catch ChatGPTError.unsupported(let param) where request.screenshot != nil && ChatGPTAccount.shared.acceptsImages(model) {
+            // The docs: remove the unsupported input and never resend the same body. A model that
+            // rejects images keeps answering from the window's text.
+            Self.log.notice("ChatGPT model rejected the screenshot (\(param ?? "no param", privacy: .public)); answering from text")
+            ChatGPTAccount.shared.rejectImages(model)
+            raw = try await send(image: nil)
+        }
+        try Task.checkCancellation()
+        guard let json = ChatGPTResponses.jsonObject(in: raw) else { throw CoworkerError.invalidResponse }
+        return try CoworkerReply.decode(json)
     }
 
     /// Shared with the opt-in native model conformance test. Callers supply a

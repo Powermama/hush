@@ -130,6 +130,21 @@ actor ChatGPTConnection {
     /// Writes one answer on the user's plan and returns its full text.
     func write(model: String, instructions: String, input: [ChatGPTResponses.Message]) async throws -> String {
         let request = try ChatGPTResponses.request(model: model, instructions: instructions, input: input, accessToken: try await accessToken())
+        do {
+            return try await stream(request)
+        } catch let error as ChatGPTError {
+            throw error
+        } catch is CancellationError {
+            throw ChatGPTError.cancelled
+        } catch let error as URLError where error.code == .cancelled {
+            throw ChatGPTError.cancelled
+        } catch {
+            // A dropped connection mid-stream is a network failure, so callers can fall back.
+            throw ChatGPTError.network(error.localizedDescription)
+        }
+    }
+
+    private func stream(_ request: URLRequest) async throws -> String {
         let (bytes, response) = try await urlSession.bytes(for: request)
         guard let http = response as? HTTPURLResponse else { throw ChatGPTError.badResponse("No HTTP response") }
         guard http.statusCode == 200 else {

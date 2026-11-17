@@ -96,7 +96,7 @@ extension AssistantSetupFlow.Dependencies {
             case .microphone: PermissionsChecker.microphoneStatus == .authorized
             case .accessibility: PermissionsChecker.isAccessibilityGranted
             case .screen: PermissionsChecker.isScreenRecordingGranted
-            case .intelligence: LLMRuntime.shared.isReady(provider: CoworkerModelSettings.provider)
+            case .intelligence: CoworkerModelSettings.isReady()
             case .transcription: ModelManager.isAvailable(Settings.shared.modelID)
             case .voice: CoworkerVoice.shared.setupState.value == .ready
             }
@@ -109,7 +109,14 @@ extension AssistantSetupFlow.Dependencies {
             case .accessibility: PermissionsChecker.openAccessibilitySettings()
             case .screen: PermissionsChecker.openScreenRecordingSettings()
             case .intelligence:
-                try await AIModelLibrary.shared.install(.intelligence(CoworkerModelSettings.provider))
+                if CoworkerModelSettings.provider == .chatGPT {
+                    // Consent was given when ChatGPT was chosen; this signs in in the browser.
+                    guard await ChatGPTAccount.shared.ensureConnected() else {
+                        throw ChatGPTAccount.shared.lastError ?? ChatGPTError.cancelled
+                    }
+                } else {
+                    try await AIModelLibrary.shared.install(.intelligence(CoworkerModelSettings.provider))
+                }
             case .transcription:
                 try await AIModelLibrary.shared.install(.speech(Settings.shared.modelID))
                 if let coordinator = AIModelLibrary.shared.coordinator { await coordinator.prepareModelInBackground() }

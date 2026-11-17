@@ -25,11 +25,16 @@ final class ChatGPTAccount {
     private(set) var models: [ChatGPTResponses.Model] = [] { didSet { changes.send() } }
     private(set) var limitReachedAt: Date? { didSet { changes.send() } }
     private let connection: ChatGPTConnection
+    /// Where each feature's consent is kept.
+    let defaults: UserDefaults
     private var connectTask: Task<Void, Never>?
+    /// Why the last sign-in failed, for callers that await it.
+    private(set) var lastError: ChatGPTError?
 
-    init(connection: ChatGPTConnection = .shared) {
+    init(connection: ChatGPTConnection = .shared, defaults: UserDefaults = .standard, loads: Bool = true) {
         self.connection = connection
-        Task { await load() }
+        self.defaults = defaults
+        if loads { Task { await load() } }
     }
 
     var isConnected: Bool { if case .connected(_, true) = state { return true }; return false }
@@ -39,6 +44,8 @@ final class ChatGPTAccount {
 
     func load() async {
         if let account = await connection.account() {
+            // Connections made before consent was tracked per feature were made from Live Write.
+            if Settings.shared.llmProvider == .chatGPT, !hasConsent(.liveWrite) { grantConsent(.liveWrite) }
             state = .connected(email: account.identity.email, planUsage: account.planUsage)
             await refreshModels()
         } else {
@@ -49,21 +56,46 @@ final class ChatGPTAccount {
     func connect() {
         connectTask?.cancel()
         state = .connecting
-        connectTask = Task {
-            do {
-                let identity = try await connection.signIn()
-                state = .connected(email: identity.email, planUsage: true)
-                limitReachedAt = nil
-                await refreshModels()
-            } catch ChatGPTError.planUsageNotGranted {
-                let email = await connection.account()?.identity.email
-                state = .connected(email: email, planUsage: false)
-            } catch ChatGPTError.cancelled {
-                state = .disconnected
-            } catch {
-                state = .failed(Self.message(for: error))
-            }
+        connectTask = Task { _ = await self.signIn() }
+    }
+
+    /// Signs in (or returns at once when connected) and reports whether the plan is usable.
+    /// Assistant setup awaits this as its intelligence step.
+    func ensureConnected() async -> Bool {
+        if isConnected { return true }
+        if let connectTask, state == .connecting {
+            await connectTask.value
+            return isConnected
         }
+        connectTask?.cancel()
+        state = .connecting
+        let task = Task { _ = await self.signIn() }
+        connectTask = task
+        await withTaskCancellationHandler { await task.value } onCancel: { task.cancel() }
+        return isConnected
+    }
+
+    private func signIn() async -> Bool {
+        lastError = nil
+        do {
+            let identity = try await connection.signIn()
+            state = .connected(email: identity.email, planUsage: true)
+            limitReachedAt = nil
+            await refreshModels()
+            return true
+        } catch ChatGPTError.planUsageNotGranted {
+            lastError = .planUsageNotGranted
+            let email = await connection.account()?.identity.email
+            state = .connected(email: email, planUsage: false)
+        } catch ChatGPTError.cancelled {
+            state = .disconnected
+        } catch is CancellationError {
+            state = .disconnected
+        } catch {
+            lastError = error as? ChatGPTError ?? .network(error.localizedDescription)
+            state = .failed(Self.message(for: error))
+        }
+        return false
     }
 
     func cancelConnect() {
@@ -72,7 +104,8 @@ final class ChatGPTAccount {
         if state == .connecting { state = .disconnected }
     }
 
-    /// Revokes and forgets the session; Live Write goes back to an engine on this Mac.
+    /// Revokes and forgets the session. Live Write and Assistant go back to engines on this
+    /// Mac, and the Assistant's consent is withdrawn, so a new connection asks again.
     @discardableResult
     func disconnect() async -> Bool {
         let confirmed = await connection.signOut()
@@ -81,7 +114,15 @@ final class ChatGPTAccount {
         if Settings.shared.llmProvider == .chatGPT {
             Settings.shared.llmProvider = LiveWriteStatus.bestReadyEngine() ?? .off
         }
+        withdrawConsent()
         return confirmed
+    }
+
+    /// Forgets every feature's consent; Assistant goes back to its model on this Mac.
+    func withdrawConsent() {
+        for purpose in [Purpose.liveWrite, .assistant] { defaults.removeObject(forKey: purpose.consentKey) }
+        CoworkerModelSettings.withdrawChatGPT()
+        changes.send()
     }
 
     func refreshModels() async {
@@ -93,6 +134,11 @@ final class ChatGPTAccount {
             }
         }
     }
+
+    /// Models that rejected image input, so the Assistant sends them text only.
+    private var textOnlyModels: Set<String> = []
+    func acceptsImages(_ slug: String?) -> Bool { slug.map { !textOnlyModels.contains($0) } ?? false }
+    func rejectImages(_ slug: String?) { if let slug { textOnlyModels.insert(slug) } }
 
     func modelName(_ slug: String?) -> String {
         guard let slug else { return "ChatGPT" }
@@ -113,43 +159,102 @@ final class ChatGPTAccount {
         }
     }
 
-    static func message(for error: Error) -> String {
-        switch error as? ChatGPTError {
+    nonisolated static func message(for error: Error) -> String {
+        (error as? ChatGPTError)?.errorDescription ?? "ChatGPT couldn\u{2019}t write this one."
+    }
+}
+
+extension ChatGPTError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
         case .usageLimitReached: "Your ChatGPT plan\u{2019}s limit for hush is reached."
         case .notEligible: "This ChatGPT account can\u{2019}t use its plan in hush."
         case .temporarilyUnavailable: "ChatGPT is not available right now."
         case .signInRequired: "Sign in to ChatGPT again."
         case .planUsageNotGranted: "hush wasn\u{2019}t allowed to use your ChatGPT plan."
         case .network: "hush couldn\u{2019}t reach ChatGPT."
-        default: "ChatGPT couldn\u{2019}t write this one."
+        case .cancelled: "Stopped."
+        default: "ChatGPT couldn\u{2019}t do this one."
         }
     }
 }
 
 extension ChatGPTAccount {
-    /// Says plainly what leaves the Mac before the browser opens, then connects.
-    func connectAfterConsent(in window: NSWindow?) {
-        let alert = NSAlert()
-        alert.messageText = "Write with your ChatGPT plan?"
-        alert.informativeText = """
-        Live Write will send what you dictate to OpenAI, which writes the text with your ChatGPT plan and counts it toward the plan\u{2019}s limits. hush sends these requests with storage turned off.
+    /// What a feature sends to OpenAI. Each feature asks for its own consent, because the
+    /// Assistant shares far more than Live Write.
+    enum Purpose: String {
+        case liveWrite, assistant
 
-        You sign in on OpenAI\u{2019}s website; hush never sees your password or your ChatGPT chats. Your screen is not sent. You can disconnect at any time, and Live Write then writes on this Mac again.
-        """
-        alert.addButton(withTitle: "Continue with ChatGPT")
+        var consentKey: String { "chatgpt.consent.\(rawValue).v1" }
+
+        var consentTitle: String {
+            switch self {
+            case .liveWrite: "Write with your ChatGPT plan?"
+            case .assistant: "Use your ChatGPT plan for Assistant?"
+            }
+        }
+
+        var consentText: String {
+            let account = "You sign in on OpenAI\u{2019}s website; hush never sees your password or your ChatGPT chats. Requests count toward your plan\u{2019}s limits and are sent with storage turned off."
+            switch self {
+            case .liveWrite:
+                return """
+                Live Write will send what you dictate to OpenAI, which writes the text with your ChatGPT plan. Your screen is not sent.
+
+                \(account) You can disconnect at any time, and Live Write then writes on this Mac again.
+                """
+            case .assistant:
+                return """
+                Assistant will send OpenAI what you ask, text it reads from the app you\u{2019}re working in, and, when it helps, a screenshot of that window. Your conversation stays in hush.
+
+                \(account) If ChatGPT can\u{2019}t answer, Assistant uses a model on this Mac when one is installed. You can switch back at any time.
+                """
+            }
+        }
+    }
+
+    /// Says plainly what leaves the Mac, then connects when needed. `onAccept` runs once the
+    /// user agreed, so a feature records its own consent before the browser opens.
+    func hasConsent(_ purpose: Purpose) -> Bool { defaults.bool(forKey: purpose.consentKey) }
+
+    /// Records that the user agreed to what this feature sends.
+    func grantConsent(_ purpose: Purpose) {
+        defaults.set(true, forKey: purpose.consentKey)
+        changes.send()
+    }
+
+    /// Asks only when this feature has no consent yet, then runs `onAccept`.
+    func withConsent(for purpose: Purpose, in window: NSWindow?, onAccept: @escaping () -> Void) {
+        if hasConsent(purpose) {
+            onAccept()
+            if !isConnected { connect() }
+        } else {
+            requestConsent(for: purpose, in: window, onAccept: onAccept)
+        }
+    }
+
+    func requestConsent(for purpose: Purpose, in window: NSWindow?, onAccept: (() -> Void)? = nil) {
+        let alert = NSAlert()
+        alert.messageText = purpose.consentTitle
+        alert.informativeText = purpose.consentText
+        alert.addButton(withTitle: isConnected ? "Use ChatGPT" : "Continue with ChatGPT")
         alert.addButton(withTitle: "Cancel")
         let proceed: (NSApplication.ModalResponse) -> Void = { [weak self] response in
-            guard response == .alertFirstButtonReturn else { return }
-            self?.connect()
+            guard response == .alertFirstButtonReturn, let self else { return }
+            self.grantConsent(purpose)
+            onAccept?()
+            if !self.isConnected { self.connect() }
         }
         if let window { alert.beginSheetModal(for: window, completionHandler: proceed) } else { proceed(alert.runModal()) }
     }
+
+    func connectAfterConsent(in window: NSWindow?) { requestConsent(for: .liveWrite, in: window) }
 
     /// Disconnects after confirmation and says when OpenAI did not confirm the revocation.
     func disconnectReporting(in window: NSWindow?) {
         let confirm = NSAlert()
         confirm.messageText = "Disconnect ChatGPT?"
-        confirm.informativeText = "hush signs out and stops using your ChatGPT plan. Live Write writes on this Mac again."
+        confirm.informativeText = "hush signs out and stops using your ChatGPT plan. Live Write and Assistant use models on this Mac again."
         confirm.addButton(withTitle: "Disconnect")
         confirm.addButton(withTitle: "Cancel")
         let proceed: (NSApplication.ModalResponse) -> Void = { [weak self] response in

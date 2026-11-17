@@ -11,7 +11,7 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
         colors: AIFeatureIcon.liveWrite,
         identifier: "hush.livewrite"
     )
-    private let engineModels = AIModelControlsView(scope: .personas)
+    private let engineModels = AIModelControlsView(scope: .liveWrite)
     private var subscriptions = Set<AnyCancellable>()
     private var isRefreshing = false
     private let personaListStack = NSStackView()
