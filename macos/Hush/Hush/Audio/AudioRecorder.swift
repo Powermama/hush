@@ -51,6 +51,14 @@ final class AudioRecorder {
     var onLimitReached: (() -> Void)?
     var reachedLimit: Bool { capture.reachedLimit }
 
+    /// The recording so far, for recognition while the user speaks.
+    var recordedSampleCount: Int { capture.samples.count }
+    func recordedSamples(in range: Range<Int>) -> [Float] {
+        let samples = capture.samples
+        let lower = min(range.lowerBound, samples.count), upper = min(range.upperBound, samples.count)
+        return Array(samples[lower ..< upper])
+    }
+
     enum State { case idle, recording }
     private(set) var state: State = .idle
 
