@@ -186,3 +186,32 @@ the background image. Release packaging and publication now reject that case.
   from alpha.4; this release changes packaging and version metadata.
 
 Reports are in `artifacts/release-alpha5/reports` and `artifacts/notarization`.
+
+## Alpha.6 distribution record
+
+Published 2026-11-16 as `0.1.0-alpha.6 (15)` from clean source revision
+`c1c905a7da0c9fe2364846b562d1772e0b636d81` (identical to `main` after #89). It
+makes the persona editor follow Light and Dark mode (#88).
+
+- Only submission: DMG `a5cf77d0-abc9-46ea-8b41-dfc520f49637`, submitted
+  17:34 UTC and accepted within minutes: "Ready for distribution", no issues,
+  35 files in the ticket. The exported app was stapled from that ticket.
+- Final Finder layout reviewed visually before submission.
+- Public DMG SHA-256:
+  `5238bda433834a8dd7a70e6fa80ce7438e0e7d1ac2f8ac1b8c6848bc6e3e021e`.
+- Download: `https://updates.behu.sh/downloads/hush-0.1.0-alpha.6-build.15.dmg`.
+- The public file matches the accepted artifact; Gatekeeper reports
+  `Notarized Developer ID` and the staple validates. `verify-update-feed.sh`
+  passed; the feed offers build 15 with deltas from 14, 13 and 12.
+- Pre-release checks: release-tool tests 13 run (1 skipped), Swift package tests
+  27 passed, Swift-to-Hono integration passed, assistant-release check passed,
+  163 app unit tests passed, Release archive and Developer ID export passed.
+- `generate_appcast` warned that build 12 (alpha.3) carries a different code
+  signing identity. Alpha.3 was a withdrawn build from before the notarized
+  alphas, signed with another certificate. Sparkle still accepts
+  updates signed with the unchanged EdDSA key, and a client whose delta fails
+  falls back to the full archive. A local `old_updates/` collision was caused
+  by a reused staging folder, which the publisher no longer reuses.
+- A clean-Mac offline installation remains untested.
+
+Reports are in `artifacts/release-alpha6/reports` and `artifacts/notarization`.

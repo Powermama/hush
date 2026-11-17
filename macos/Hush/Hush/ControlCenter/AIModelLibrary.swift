@@ -73,8 +73,10 @@ final class AIModelLibrary {
         switch item {
         case .intelligence(let provider): return provider.displayName
         case .speech(let id):
-            let name = ModelCatalogService.shared.models.value.first { $0.id == id }?.displayName
-                ?? ModelInfo.deriveDisplayName(from: id)
+            // The row shows the measured size, so a catalog size in the name would only disagree.
+            let name = (ModelCatalogService.shared.models.value.first { $0.id == id }?.displayName
+                ?? ModelInfo.deriveDisplayName(from: id))
+                .replacingOccurrences(of: #"\s*\(\d+\s*[MG]B\)$"#, with: "", options: .regularExpression)
             return SpeechEngine.engine(for: id) == .whisperKit ? "Whisper " + name : name
         case .voice: return "Kokoro"
         }
@@ -111,7 +113,7 @@ final class AIModelLibrary {
         case .intelligence(let provider):
             if let model = LLMRuntime.QwenModel(provider: provider), case .downloading(let progress) = LLMRuntime.shared.qwenState(for: model) { return progress.statusText }
             var uses: [String] = []
-            if provider == Settings.shared.llmProvider { uses.append("Personas") }
+            if provider == Settings.shared.llmProvider { uses.append("Live Write") }
             if provider == CoworkerModelSettings.provider { uses.append("Assistant") }
             return installed(item) ? "Intelligence & vision" + (uses.isEmpty ? "" : " · " + uses.joined(separator: ", ")) : "Intelligence & vision · \(provider.approxDownloadSize ?? "") download"
         case .speech(let id):
