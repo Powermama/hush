@@ -52,3 +52,12 @@ struct DictationTimingTests {
         #expect(try #require(store.summary(writing: false)).p90 == 0.2)
     }
 }
+
+@Suite("Dictation timing storage")
+@MainActor
+struct DictationTimingStorageTests {
+    @Test("Inside tests the shared store never points at the user's file")
+    func testsUseTemporaryFile() {
+        #expect(DictationTimingStore.defaultURL.path.hasPrefix(FileManager.default.temporaryDirectory.path))
+    }
+}

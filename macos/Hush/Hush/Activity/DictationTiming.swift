@@ -50,7 +50,17 @@ final class DictationTimingStore {
     private let url: URL
     private(set) var timings: [DictationTiming]
 
-    init(url: URL = AIModelStorage.root.deletingLastPathComponent().appendingPathComponent("dictation-timings.json")) {
+    /// Tests and previews run inside the app; they never write into the user's own timings.
+    static var defaultURL: URL {
+        let environment = ProcessInfo.processInfo.environment
+        if environment["HUSH_TEST_HOST"] == "1" || environment["XCTestConfigurationFilePath"] != nil
+            || ProcessInfo.processInfo.arguments.contains(where: { $0.hasPrefix("--preview-") }) {
+            return FileManager.default.temporaryDirectory.appendingPathComponent("hush-dictation-timings-\(ProcessInfo.processInfo.processIdentifier).json")
+        }
+        return AIModelStorage.root.deletingLastPathComponent().appendingPathComponent("dictation-timings.json")
+    }
+
+    init(url: URL = DictationTimingStore.defaultURL) {
         self.url = url
         timings = (try? JSONDecoder().decode([DictationTiming].self, from: Data(contentsOf: url))) ?? []
     }
