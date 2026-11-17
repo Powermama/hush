@@ -34,13 +34,16 @@ struct AssistantStatus {
     let progress: Double?
 
     /// On starts setup when something is missing; off keeps models and permissions.
-    static func setEnabled(_ on: Bool, flow: AssistantSetupFlow = .shared) {
+    static func setEnabled(_ on: Bool, flow: AssistantSetupFlow? = nil) {
+        // Default values are evaluated outside the main actor (SE-0411); resolve here instead.
+        let flow = flow ?? .shared
         Settings.shared.assistantEnabled = on
         if on, !flow.isReady, !flow.isRunning, !AIModelLibrary.shared.isRemoving { flow.start() }
     }
 
     /// The card's button: continue a setup that needs the user, or start one.
-    static func performNextStep(flow: AssistantSetupFlow = .shared) {
+    static func performNextStep(flow: AssistantSetupFlow? = nil) {
+        let flow = flow ?? .shared
         if case .working(let step) = flow.state, [.microphone, .accessibility, .screen].contains(step) {
             flow.openPermissionSettings()
         } else if flow.isRunning {
@@ -51,7 +54,8 @@ struct AssistantStatus {
         }
     }
 
-    static func current(flow: AssistantSetupFlow = .shared) -> AssistantStatus {
+    static func current(flow: AssistantSetupFlow? = nil) -> AssistantStatus {
+        let flow = flow ?? .shared
         let on = Settings.shared.assistantEnabled
         if case .working(let step) = flow.state {
             let needsUser = [.microphone, .accessibility, .screen].contains(step)

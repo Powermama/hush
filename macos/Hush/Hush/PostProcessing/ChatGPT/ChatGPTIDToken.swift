@@ -4,14 +4,14 @@ import Security
 /// The account behind a ChatGPT sign-in, from an ID token checked the way the
 /// documentation asks: RS256 signature against OpenAI's published JWKS, then issuer,
 /// audience (the issued client ID), expiry and the nonce of this attempt.
-struct ChatGPTIdentity: Codable, Equatable, Sendable {
+nonisolated struct ChatGPTIdentity: Codable, Equatable, Sendable {
     /// The validated `sub`: the account identity.
     let subject: String
     let email: String?
     let name: String?
 }
 
-enum ChatGPTIDToken {
+nonisolated enum ChatGPTIDToken {
     enum Failure: Error, Equatable {
         case malformed
         case unsupportedAlgorithm
