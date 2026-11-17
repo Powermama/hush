@@ -56,14 +56,14 @@ final class OnboardingJourneyTests: XCTestCase {
 
         app.buttons["hush.onboarding.primary"].click()
         XCTAssertTrue(app.staticTexts["Enable your"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["local personas."].exists)
+        XCTAssertTrue(app.staticTexts["Live Write."].exists)
         XCTAssertTrue(app.staticTexts["3 of 4"].exists)
 
         let personas = app.checkBoxes["hush.onboarding.personas"]
         XCTAssertTrue(personas.exists)
         personas.click()
         XCTAssertTrue(
-            app.staticTexts["Apple Intelligence is on. Your personas are ready."]
+            app.staticTexts["Apple Intelligence is on. Live Write is ready."]
                 .waitForExistence(timeout: 2)
         )
         keepScreenshot(named: "Onboarding 08 Personas enabled")

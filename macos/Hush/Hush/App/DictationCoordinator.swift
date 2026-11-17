@@ -491,13 +491,13 @@ final class DictationCoordinator {
         personaWheel.toggle(
             profiles: Settings.shared.profiles,
             activeProfileID: Settings.shared.activeProfileID,
-            personaEnabled: Settings.shared.activeDictationProfile != nil,
+            personaEnabled: Settings.shared.liveWriteEnabled && Settings.shared.dictationPersonaEnabled,
             personasAvailable: true
         ) { [weak self] selection in
             switch selection {
             case .noPersona:
                 Settings.shared.dictationPersonaEnabled = false
-                self?.hud.flash(message: "No persona active")
+                self?.hud.flash(message: Settings.shared.liveWriteEnabled ? "Live Write, no persona" : "No persona active")
             case .profile(let profile):
                 Settings.shared.activeProfileID = profile.id
                 self?.hud.flash(message: "\(profile.name) active")
@@ -815,7 +815,8 @@ final class DictationCoordinator {
                 if Settings.shared.showHUD {
                     hud.show(state: .polishing(
                         profileName: profile.name,
-                        providerName: provider.displayName
+                        providerName: provider.displayName,
+                        isCloud: provider == .chatGPT
                     ))
                 }
             }
@@ -844,6 +845,9 @@ final class DictationCoordinator {
             } catch {
                 Self.log.error("Post-process failed: \(error.localizedDescription, privacy: .public)")
                 processed = (try? await BasicPostProcessor().process(raw, language: language)) ?? raw
+            }
+            if completionWarningMessage == nil, let notice = LLMRuntime.shared.takeNotice() {
+                completionWarningMessage = notice
             }
             let postSec = CFAbsoluteTimeGetCurrent() - postStart
 

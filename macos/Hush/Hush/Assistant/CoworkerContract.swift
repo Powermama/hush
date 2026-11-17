@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 struct CoworkerObservation: Codable, Sendable, Equatable {
@@ -439,25 +440,94 @@ extension CoworkerGenerating {
     var supportsImages: Bool { false }
 }
 
+/// Answers with the Assistant's chosen model. With a ChatGPT plan it falls back to a model on
+/// this Mac when ChatGPT can't answer, and says so in `fallbackNotice`.
 @MainActor
 struct CoworkerLocalGenerator: CoworkerGenerating {
     var supportsImages: Bool { true }
     func respond(to request: CoworkerRequest) async throws -> CoworkerReply {
-        try await LLMRuntime.shared.generateCoworkerReply(request, provider: CoworkerModelSettings.provider)
+        let provider = CoworkerModelSettings.provider
+        guard provider == .chatGPT else {
+            return try await LLMRuntime.shared.generateCoworkerReply(request, provider: provider)
+        }
+        do {
+            guard ChatGPTAccount.shared.isUsable else {
+                throw ChatGPTAccount.shared.isLimitPaused ? ChatGPTError.usageLimitReached : ChatGPTError.signInRequired
+            }
+            return try await LLMRuntime.shared.generateChatGPTCoworkerReply(request)
+        } catch let error as ChatGPTError where error != .cancelled {
+            let local = CoworkerModelSettings.localProvider
+            guard LLMRuntime.shared.isReady(provider: local) else { throw error }
+            CoworkerModelSettings.fallbackNotice = "\(error.errorDescription ?? "ChatGPT couldn\u{2019}t answer.") Answered on this Mac with \(local.displayName)."
+            return try await LLMRuntime.shared.generateCoworkerReply(request, provider: local)
+        }
     }
 }
 
-/// Assistant intelligence is independent of dictation's optional rewriting setting.
+/// Assistant intelligence is independent of Live Write's engine. A ChatGPT plan needs the
+/// Assistant's own consent, because it sends screenshots and text from other apps.
 @MainActor
 enum CoworkerModelSettings {
+    /// The engines Assistant can use, recommended first. Apple Intelligence is not offered:
+    /// Assistant needs image input and structured replies.
+    static let choices: [LLMProvider] = [.qwen35_4b, .qwen35_2b, .chatGPT]
+
+    private static let modelKey = "assistant.model"
+    /// Swapped by tests; the app uses the standard defaults and the shared account.
+    static var defaults: UserDefaults = .standard
+    static var account: ChatGPTAccount = .shared
+
     static var provider: LLMProvider {
         get {
-            if let raw = UserDefaults.standard.string(forKey: "assistant.model"),
-               let selected = LLMProvider(rawValue: raw), [.qwen35_2b, .qwen35_4b].contains(selected) { return selected }
-            if LLMRuntime.cachedQwenSnapshotURL(for: .qwen35_4b) != nil { return .qwen35_4b }
-            if LLMRuntime.cachedQwenSnapshotURL(for: .qwen35_2b) != nil { return .qwen35_2b }
-            return .qwen35_4b
+            if let raw = defaults.string(forKey: modelKey), let selected = LLMProvider(rawValue: raw) {
+                if [.qwen35_2b, .qwen35_4b].contains(selected) { return selected }
+                if selected == .chatGPT, hasChatGPTConsent { return selected }
+            }
+            return localProvider
         }
-        set { UserDefaults.standard.set(newValue.rawValue, forKey: "assistant.model") }
+        set {
+            guard choices.contains(newValue) else { return assertionFailure("Assistant can't use \(newValue)") }
+            defaults.set(newValue.rawValue, forKey: modelKey)
+        }
     }
+
+    /// The model on this Mac: the chosen one, else the one downloaded, else the recommended one.
+    static var localProvider: LLMProvider {
+        if let raw = defaults.string(forKey: modelKey), let selected = LLMProvider(rawValue: raw),
+           [.qwen35_2b, .qwen35_4b].contains(selected) { return selected }
+        if LLMRuntime.cachedQwenSnapshotURL(for: .qwen35_4b) != nil { return .qwen35_4b }
+        if LLMRuntime.cachedQwenSnapshotURL(for: .qwen35_2b) != nil { return .qwen35_2b }
+        return .qwen35_4b
+    }
+
+    static var hasChatGPTConsent: Bool { account.hasConsent(.assistant) }
+
+    static var isCloud: Bool { provider == .chatGPT }
+
+    /// Ready to answer: a downloaded model, or a connected plan with a model chosen.
+    static func isReady() -> Bool { isReady(provider) }
+
+    static func isReady(_ provider: LLMProvider) -> Bool {
+        provider == .chatGPT
+            ? account.isConnected && Settings.shared.chatGPTModel != nil
+            : LLMRuntime.shared.isReady(provider: provider)
+    }
+
+    static func select(_ newValue: LLMProvider) {
+        provider = newValue
+        changes.send()
+    }
+
+    /// On disconnect: back to the model on this Mac (the account withdraws the consent).
+    static func withdrawChatGPT() {
+        if defaults.string(forKey: modelKey) == LLMProvider.chatGPT.rawValue {
+            defaults.removeObject(forKey: modelKey)
+        }
+        changes.send()
+    }
+
+    static let changes = PassthroughSubject<Void, Never>()
+
+    /// Set when ChatGPT couldn't answer and a model on this Mac did; shown once.
+    static var fallbackNotice: String?
 }

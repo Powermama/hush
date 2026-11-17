@@ -1126,7 +1126,8 @@ final class SettingsViewController: NSViewController {
     private func refreshProviderCard(_ provider: LLMProvider, isActive: Bool, runtime: LLMRuntime) {
         guard let row = providerRows[provider] else { return }
         switch provider {
-        case .off:
+        case .off, .chatGPT:
+            // ChatGPT is set up in Live Write, not in this legacy engine list.
             return
         case .appleIntelligence:
             switch runtime.appleAvailability {
