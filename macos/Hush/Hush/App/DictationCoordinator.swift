@@ -947,10 +947,9 @@ final class DictationCoordinator {
                 }
             case .copiedToClipboard:
                 phase.send(.inserted)
-                if let msg = completionWarningMessage {
+                if let msg = completionWarningMessage ?? limitNotice {
+                    // Not inserted: the error style makes sure the user notices.
                     hud.show(state: .error(msg))
-                } else if let limitNotice {
-                    hud.flash(message: limitNotice)
                 } else {
                     hud.show(state: .copiedToClipboard(verified: verifiedText.isVerified))
                 }

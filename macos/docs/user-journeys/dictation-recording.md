@@ -12,7 +12,7 @@ This document defines the user-visible contract for recording a dictation. See P
 
 ### DR-001 - Talk past the recording limit
 
-Given the user holds the hotkey and keeps talking for more than 2 minutes, when the limit is reached, then the HUD goes from Listening to Processing without waiting for the release. The text of the first 2 minutes is inserted, and the HUD shows the neutral notice "Stopped at 2 minutes. Everything until then was kept." Before this contract the recording was discarded and the HUD asked the user to hold the hotkey while speaking.
+Given the user holds the hotkey and keeps talking for more than 2 minutes, when the limit is reached, then the HUD goes from Listening to Processing without waiting for the release. The text of the first 2 minutes is inserted, and the HUD shows the neutral notice "Stopped at 2 minutes. Everything until then was kept." When the text could not be inserted and was only copied, the same sentence appears in the error style, so the user notices Before this contract the recording was discarded and the HUD asked the user to hold the hotkey while speaking.
 
 ## Test ownership
 
