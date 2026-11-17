@@ -24,8 +24,32 @@ final class AudioRecorder {
 
     static let targetSampleRate: Double = 16_000
 
-    /// Hard cap to protect memory and stay under Whisper's 30-second window.
+    /// Cap for one dictation, so a stuck key cannot record forever. At the cap the
+    /// recording stops capturing but keeps its audio, and `onLimitReached` lets the
+    /// coordinator finish the dictation as if the key had been released.
     static let maxDurationSeconds: TimeInterval = 120
+
+    /// The cap in use. Debug builds accept `-hush.debug.recording.maxSeconds <n>` so the
+    /// limit journey can be checked in seconds instead of minutes.
+    static var maxDuration: TimeInterval {
+        #if DEBUG
+        let override = UserDefaults.standard.double(forKey: "hush.debug.recording.maxSeconds")
+        if override > 0 { return override }
+        #endif
+        return maxDurationSeconds
+    }
+
+    /// The cap in words, such as "2 minutes".
+    static var limitDescription: String {
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .full
+        formatter.allowedUnits = maxDuration >= 60 ? [.minute] : [.second]
+        return formatter.string(from: maxDuration) ?? "\(Int(maxDuration)) seconds"
+    }
+
+    /// Called once when a recording reaches the cap; its audio is kept until `stop()`.
+    var onLimitReached: (() -> Void)?
+    var reachedLimit: Bool { capture.reachedLimit }
 
     enum State { case idle, recording }
     private(set) var state: State = .idle
@@ -42,8 +66,7 @@ final class AudioRecorder {
     private var engine = AVAudioEngine()
     private var converter: AVAudioConverter?
     private var sourceFormat: AVAudioFormat?
-    private var samples: [Float] = []
-    private var startedAt: Date?
+    private var capture = RecordingBuffer(maxDuration: AudioRecorder.maxDuration, sampleRate: AudioRecorder.targetSampleRate)
     private var tapCallbacks: Int = 0
 
     private let targetFormat: AVAudioFormat = {
@@ -102,9 +125,8 @@ final class AudioRecorder {
 
         converter = nil
         sourceFormat = nil
-        samples.removeAll(keepingCapacity: true)
+        capture = RecordingBuffer(maxDuration: Self.maxDuration, sampleRate: Self.targetSampleRate)
         currentLevel = 0
-        startedAt = Date()
         tapCallbacks = 0
 
         // After bindInputToDefaultDevice rebinds the AUHAL's underlying device
@@ -127,12 +149,10 @@ final class AudioRecorder {
 
     func stop() -> [Float] {
         guard state == .recording else { return [] }
-        engine.inputNode.removeTap(onBus: 0)
-        engine.stop()
+        if !capture.reachedLimit { haltEngine() }
         state = .idle
 
-        let result = samples
-        samples.removeAll(keepingCapacity: false)
+        let result = capture.take()
         currentLevel = 0
 
         var peak: Float = 0
@@ -159,8 +179,8 @@ final class AudioRecorder {
     }
 
     private func consume(buffer: AVAudioPCMBuffer) {
-        // The tap can fire one last time after we've removed it; ignore those.
-        guard state == .recording else { return }
+        // The tap can fire one last time after we've removed it, or after the cap; ignore those.
+        guard state == .recording, !capture.reachedLimit else { return }
         tapCallbacks += 1
 
         // Snapshot source format once, mostly for diagnostics.
@@ -184,11 +204,9 @@ final class AudioRecorder {
            buffer.format.commonFormat == .pcmFormatFloat32,
            let raw = buffer.floatChannelData?[0] {
             let frames = Int(buffer.frameLength)
-            samples.reserveCapacity(samples.count + frames)
-            for i in 0..<frames { samples.append(raw[i]) }
             currentLevel = min(1, prePeak * 1.5)
             onLevel?(currentLevel)
-            checkMaxDuration()
+            record(UnsafeBufferPointer(start: raw, count: frames))
             return
         }
 
@@ -237,18 +255,29 @@ final class AudioRecorder {
         guard outBuffer.frameLength > 0,
               let channel = outBuffer.floatChannelData?[0] else { return }
 
-        let frames = Int(outBuffer.frameLength)
+        let frames = UnsafeBufferPointer(start: channel, count: Int(outBuffer.frameLength))
         var peak: Float = 0
-        samples.reserveCapacity(samples.count + frames)
-        for i in 0..<frames {
-            let v = channel[i]
-            samples.append(v)
+        for v in frames {
             let abs = v < 0 ? -v : v
             if abs > peak { peak = abs }
         }
         currentLevel = min(1, peak * 1.5)
         onLevel?(currentLevel)
-        checkMaxDuration()
+        record(frames)
+    }
+
+    /// Keeps the frames; at the cap, stops capturing and tells the coordinator once.
+    private func record(_ frames: UnsafeBufferPointer<Float>) {
+        guard capture.append(frames) else { return }
+        haltEngine()
+        let seconds = Double(capture.samples.count) / Self.targetSampleRate
+        Self.log.notice("Recording reached the \(seconds, format: .fixed(precision: 0)) s limit; keeping its audio")
+        onLimitReached?()
+    }
+
+    private func haltEngine() {
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
     }
 
     // MARK: - Helpers
@@ -287,12 +316,6 @@ final class AudioRecorder {
             break
         }
         return peak
-    }
-
-    private func checkMaxDuration() {
-        if let started = startedAt, Date().timeIntervalSince(started) > Self.maxDurationSeconds {
-            _ = stop()
-        }
     }
 
     /// Pin the engine's input AudioUnit to the current system default input

@@ -126,6 +126,7 @@ final class DictationCoordinator {
         // through `phase` made the menu-bar controller re-render its icon /
         // tooltip at audio rate for nothing. The HUD waveform itself is the
         // only meaningful consumer; it gates by its own `.live` style internally.
+        recorder.onLimitReached = { [weak self] in self?.recordingLimitReached() }
         recorder.onLevel = { [weak self] level in
             guard let self else { return }
             if self.recordingAssistantSessionID != nil {
@@ -686,9 +687,18 @@ final class DictationCoordinator {
         }
     }
 
+    /// R1: a dictation that reaches the recording limit is finished as if the key had been
+    /// released, so a stuck key or a lost release never throws away what was said.
+    private func recordingLimitReached() {
+        guard !onboardingPracticeActive, recorder.state == .recording else { return }
+        Self.log.notice("Recording limit reached; transcribing what was recorded")
+        endRecordingAndTranscribe()
+    }
+
     private func endRecordingAndTranscribe() {
         let captureStartedAt = recordingStartedAt ?? Date()
         recordingStartedAt = nil
+        let reachedLimit = recorder.reachedLimit
         let samples = recorder.stop()
         let editorTarget = recordingEditorTarget
         recordingEditorTarget = nil
@@ -738,7 +748,8 @@ final class DictationCoordinator {
                 captureStartedAt: captureStartedAt,
                 editorTarget: editorTarget,
                 assistantTarget: assistantTarget,
-                persona: persona
+                persona: persona,
+                reachedLimit: reachedLimit
             )
             self.transcribeTask = nil
         }
@@ -750,7 +761,8 @@ final class DictationCoordinator {
                                    captureStartedAt: Date,
                                    editorTarget: HushEditorRecordingTarget?,
                                    assistantTarget: UUID?,
-                                   persona: RecordingPersona?) async {
+                                   persona: RecordingPersona?,
+                                   reachedLimit: Bool = false) async {
         do {
             let transcribeStart = CFAbsoluteTimeGetCurrent()
             guard let raw = try await transcriber.transcribe(samples: samples, language: language, fallbackCount: fallbackCount) else {
@@ -810,6 +822,9 @@ final class DictationCoordinator {
             }
             let processed: String
             var completionWarningMessage: String?
+            // Neutral, not an error: the dictation worked, it only stopped early.
+            let limitNotice = reachedLimit
+                ? "Stopped at \(AudioRecorder.limitDescription). Everything until then was kept." : nil
             do {
                 if let profile {
                     processed = try await LLMPostProcessor.make(
@@ -919,6 +934,8 @@ final class DictationCoordinator {
                 // used elsewhere in the codebase via `hud.flash`.
                 if let msg = completionWarningMessage {
                     hud.show(state: .error(msg))
+                } else if let limitNotice {
+                    hud.flash(message: limitNotice)
                 } else if let suppression = verifiedText.destinationSuppression,
                           shouldShowSuppressionNotice(
                             suppression,
@@ -934,7 +951,8 @@ final class DictationCoordinator {
                 }
             case .copiedToClipboard:
                 phase.send(.inserted)
-                if let msg = completionWarningMessage {
+                if let msg = completionWarningMessage ?? limitNotice {
+                    // Not inserted: the error style makes sure the user notices.
                     hud.show(state: .error(msg))
                 } else {
                     hud.show(state: .copiedToClipboard(verified: verifiedText.isVerified))
@@ -943,7 +961,7 @@ final class DictationCoordinator {
                 phase.send(.inserted)
                 hud.show(state: .needsAccessibility)
             }
-            hud.hideAfter(seconds: completionWarningMessage == nil ? 1.9 : 2.6)
+            hud.hideAfter(seconds: completionWarningMessage == nil && limitNotice == nil ? 1.9 : 2.6)
             phase.send(.idle)
         } catch {
             Self.log.error("Transcribe failed: \(error.localizedDescription, privacy: .public)")
