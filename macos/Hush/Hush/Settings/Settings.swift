@@ -65,6 +65,7 @@ final class Settings {
         static let dictationPersonaEnabled = "postprocess.dictationPersona.enabled.v1"
         static let liveWriteEnabled = "postprocess.liveWrite.enabled.v1"
         static let assistantEnabled = "assistant.enabled.v1"
+        static let chatGPTModel = "postprocess.chatgpt.model.v1"
         static let llmProvider = "postprocess.llmProvider"
         static let historyRetention = "activity.historyRetention"
         static let typingTestResults = "activity.typingTestResults.v1"
@@ -483,6 +484,15 @@ final class Settings {
     var activeDictationProfile: Profile? {
         guard liveWriteEnabled, llmProvider != .off else { return nil }
         return dictationPersonaEnabled ? activeProfile : .liveWrite
+    }
+
+    /// The ChatGPT model Live Write uses, chosen from the signed-in account's models.
+    var chatGPTModel: String? {
+        get { defaults.string(forKey: Keys.chatGPTModel) }
+        set {
+            defaults.set(newValue, forKey: Keys.chatGPTModel)
+            didChange.send()
+        }
     }
 
     /// The voice Assistant answers its shortcut. On by default, so a set-up Assistant

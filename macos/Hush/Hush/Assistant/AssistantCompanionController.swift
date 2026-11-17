@@ -14,6 +14,8 @@ final class AssistantCompanionController: NSObject, ObservableObject {
     @Published private(set) var spokenText = ""
     @Published private(set) var sourceName = "Your Mac"
     @Published private(set) var voiceStatus = "Kokoro · English · On this Mac"
+    /// A short note about the last answer, such as ChatGPT falling back to this Mac.
+    @Published private(set) var notice: String?
     @Published private(set) var level: Float = 0
     @Published private(set) var pending: CoworkerReply?
     @Published var expanded = false
@@ -191,6 +193,8 @@ final class AssistantCompanionController: NSObject, ObservableObject {
         phase = .thinking
         status = "Thinking…"
         response = ""
+        notice = nil
+        CoworkerModelSettings.fallbackNotice = nil
         let observation = (context ?? contextCapture(sourceApplication))
         context = observation
         var input = CoworkerRequest(text: request, observation: observation.observation,
@@ -251,6 +255,8 @@ final class AssistantCompanionController: NSObject, ObservableObject {
                 #endif
                 deadline?.cancel()
                 response = reply.message
+                notice = CoworkerModelSettings.fallbackNotice
+                CoworkerModelSettings.fallbackNotice = nil
                 let unverifiedCompletion = continuing && reply.action == .answer && !reply.message.trimmingCharacters(in: .whitespacesAndNewlines).hasSuffix("?")
                 if unverifiedCompletion, let last = progress?.checkpoints.last {
                     // A model's terminal prose cannot certify that the remaining goal was
@@ -945,6 +951,12 @@ private struct CompanionDetailView: View {
                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 7))
                     }
                 }
+            }
+            if let notice = controller.notice {
+                Label(notice, systemImage: "exclamationmark.circle")
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("hush.companion.notice")
             }
             if controller.spokenText.isEmpty {
                 Text("Hold ⌃ Fn to answer · Esc to stop")

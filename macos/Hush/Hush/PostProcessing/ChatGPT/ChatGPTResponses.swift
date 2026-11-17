@@ -49,9 +49,67 @@ enum ChatGPTResponses {
     static let endpoint = URL(string: "https://api.openai.com/v1/responses")!
     static let modelsEndpoint = URL(string: "https://api.openai.com/v1/models")!
 
+    /// A turn's content: plain text, or parts when it carries an image.
     struct Message: Encodable, Equatable {
         let role: String
-        let content: String
+        let content: Content
+
+        init(role: String, content: String) {
+            self.role = role
+            self.content = .text(content)
+        }
+
+        init(role: String, parts: [Part]) {
+            self.role = role
+            self.content = .parts(parts)
+        }
+    }
+
+    enum Content: Encodable, Equatable {
+        case text(String)
+        case parts([Part])
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case .text(let text): try container.encode(text)
+            case .parts(let parts): try container.encode(parts)
+            }
+        }
+    }
+
+    /// Inputs the docs support "when the selected model accepts them": text and images.
+    enum Part: Encodable, Equatable {
+        case text(String)
+        /// An image inlined as a data URL; nothing is uploaded or stored.
+        case image(Data)
+
+        private enum Keys: String, CodingKey { case type, text, image_url }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: Keys.self)
+            switch self {
+            case .text(let text):
+                try container.encode("input_text", forKey: .type)
+                try container.encode(text, forKey: .text)
+            case .image(let data):
+                try container.encode("input_image", forKey: .type)
+                try container.encode("data:\(Self.mediaType(of: data));base64,\(data.base64EncodedString())", forKey: .image_url)
+            }
+        }
+
+        static func mediaType(of data: Data) -> String {
+            if data.starts(with: [0x89, 0x50, 0x4E, 0x47]) { return "image/png" }
+            if data.starts(with: [0xFF, 0xD8, 0xFF]) { return "image/jpeg" }
+            if data.count > 12, data[data.startIndex + 8 ..< data.startIndex + 12].elementsEqual("WEBP".utf8) { return "image/webp" }
+            return "image/png"
+        }
+    }
+
+    /// The JSON object in a reply, without a Markdown fence or prose around it.
+    static func jsonObject(in text: String) -> String? {
+        guard let start = text.firstIndex(of: "{"), let end = text.lastIndex(of: "}"), start < end else { return nil }
+        return String(text[start ... end])
     }
 
     struct Request: Encodable {

@@ -107,12 +107,15 @@ final class DashboardViewController: NSViewController {
         }
 
         let provider = Settings.shared.llmProvider
+        let liveWriteOff = !Settings.shared.liveWriteEnabled || provider == .off
+        let isCloud = !liveWriteOff && provider == .chatGPT
         model.localSetup = DashboardLocalSetup(
             modelName: modelName,
             modelStatus: modelStatus,
-            personaName: provider == .off ? "Persona AI off" : Settings.shared.activeProfile.name,
-            personaStatus: provider == .off ? "Optional" : "\(provider.displayName) on this Mac",
-            personaIsOff: provider == .off,
+            personaName: "Live Write",
+            personaStatus: liveWriteOff ? "Off" : isCloud ? "Your ChatGPT plan" : "\(provider.displayName) on this Mac",
+            personaIsOff: liveWriteOff,
+            isCloud: isCloud,
             profileCount: Settings.shared.profiles.count
         )
     }
@@ -293,9 +296,10 @@ private final class DashboardViewModel: ObservableObject {
     @Published var localSetup = DashboardLocalSetup(
         modelName: "Transcription model",
         modelStatus: "On this Mac",
-        personaName: "Persona AI off",
-        personaStatus: "Optional",
+        personaName: "Live Write",
+        personaStatus: "Off",
         personaIsOff: true,
+        isCloud: false,
         profileCount: 1
     )
 
@@ -346,6 +350,8 @@ private struct DashboardLocalSetup: Equatable {
     let personaName: String
     let personaStatus: String
     let personaIsOff: Bool
+    /// Live Write sends text to OpenAI, so the card must not claim everything stays local.
+    let isCloud: Bool
     let profileCount: Int
 }
 
@@ -1722,12 +1728,18 @@ private struct DashboardLocalStack: View {
         DashboardPanel {
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Text("On this Mac")
+                    Text(setup.isCloud ? "Your setup" : "On this Mac")
                         .font(.system(size: 15, weight: .semibold))
                     Spacer()
-                    Label("Local", systemImage: "checkmark.circle.fill")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(Color(nsColor: DesignTokens.good))
+                    if setup.isCloud {
+                        Label("ChatGPT", systemImage: "cloud.fill")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Label("Local", systemImage: "checkmark.circle.fill")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(Color(nsColor: DesignTokens.good))
+                    }
                 }
                 .padding(.horizontal, 18)
                 .padding(.vertical, 17)
@@ -1749,7 +1761,8 @@ private struct DashboardLocalStack: View {
                 }
 
                 Divider().opacity(0.55)
-                Label("Audio and text processing stay on this Mac.", systemImage: "lock.shield.fill")
+                Label(setup.isCloud ? "Audio stays on this Mac. Live Write sends your words to OpenAI." : "Audio and text processing stay on this Mac.",
+                      systemImage: setup.isCloud ? "cloud" : "lock.shield.fill")
                     .font(.system(size: 10.5))
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 18)

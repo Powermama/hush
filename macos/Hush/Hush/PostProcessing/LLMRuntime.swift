@@ -358,6 +358,7 @@ final class LLMRuntime {
         switch provider {
         case .off: return true
         case .appleIntelligence: return appleAvailability == .available
+        case .chatGPT: return ChatGPTAccount.shared.isUsable
         case .qwen35_2b, .qwen35_4b:
             guard let model = QwenModel(provider: provider) else { return false }
             switch qwenStates[model] ?? .notDownloaded {
@@ -463,6 +464,9 @@ final class LLMRuntime {
         switch provider {
         case .off:
             return UnavailableConversationalEditingSession(error: .providerOff)
+        case .chatGPT:
+            // The editor keeps the source text on this Mac: ChatGPT consent covers Live Write only.
+            return makeConversationalEditingSession(provider: LiveWriteStatus.bestReadyEngine() ?? .off)
         case .appleIntelligence:
             #if canImport(FoundationModels)
             if #available(macOS 26.0, *) {
@@ -512,12 +516,43 @@ final class LLMRuntime {
         return output
     }
 
+    /// The same rules and examples as on this Mac, as Responses `instructions` and turns.
+    /// Falls back to the best engine on this Mac when the plan cannot write this one.
+    private func generateChatGPTDictation(transcript: String, profile: Profile) async throws -> String {
+        let messages = Self.qwenDictationMessages(transcript: transcript, profile: profile)
+        let input = messages.dropFirst().map { ChatGPTResponses.Message(role: $0.role == .assistant ? "assistant" : "user", content: $0.content) }
+        do {
+            let raw = try await ChatGPTAccount.shared.write(
+                instructions: Profile.qwenDictationSystemPrompt(for: profile.mode),
+                input: Array(input)
+            )
+            return Self.extractOutput(raw)
+        } catch let error as ChatGPTError where error != .cancelled {
+            guard let local = LiveWriteStatus.bestReadyEngine(), local != .chatGPT else {
+                pendingNotice = ChatGPTAccount.message(for: error) + " Your words were inserted as spoken."
+                throw error
+            }
+            Self.log.notice("ChatGPT could not write (\(String(describing: error), privacy: .public)); writing on \(local.displayName, privacy: .public)")
+            pendingNotice = ChatGPTAccount.message(for: error) + " Written on this Mac with \(local.displayName)."
+            return try await generateDictation(transcript: transcript, profile: profile, provider: local)
+        }
+    }
+
+    /// A message for the user about the last dictation, such as a ChatGPT fallback.
+    private(set) var pendingNotice: String?
+    func takeNotice() -> String? {
+        defer { pendingNotice = nil }
+        return pendingNotice
+    }
+
     private func generateDictation(transcript: String, profile: Profile, provider: LLMProvider) async throws -> String {
         switch provider {
         case .off:
             throw Error.providerOff
         case .appleIntelligence:
             return try await generateAppleDictation(transcript: transcript, profile: profile)
+        case .chatGPT:
+            return try await generateChatGPTDictation(transcript: transcript, profile: profile)
         case .qwen35_2b, .qwen35_4b:
             guard let model = QwenModel(provider: provider) else { throw Error.providerOff }
             #if canImport(MLXLLM) && canImport(MLXLMCommon) && canImport(MLXHuggingFace) && canImport(HuggingFace)
@@ -570,6 +605,8 @@ final class LLMRuntime {
             throw Error.providerOff
         case .appleIntelligence:
             return try await generateApple(userPrompt: userPrompt, systemPrompt: systemPrompt, profile: profile)
+        case .chatGPT:
+            return Self.extractOutput(try await ChatGPTAccount.shared.write(instructions: systemPrompt, input: [.init(role: "user", content: userPrompt)]))
         case .qwen35_2b, .qwen35_4b:
             guard let model = QwenModel(provider: provider) else { throw Error.providerOff }
             return try await generateQwen(model: model, userPrompt: userPrompt, systemPrompt: systemPrompt, profile: profile)
@@ -896,6 +933,39 @@ final class LLMRuntime {
             return try await generateCoworkerReply(repair, provider: provider)
         }
         return reply
+    }
+
+    /// The Assistant on the user's ChatGPT plan: the same instructions and schema as on this
+    /// Mac, the screenshot as an image part. Without constrained decoding the schema is part
+    /// of the instructions; `validatedResponse` checks and repairs the reply as it does locally.
+    func generateChatGPTCoworkerReply(_ request: CoworkerRequest) async throws -> CoworkerReply {
+        try Task.checkCancellation()
+        guard request.text.utf8.count <= 4_000 else { throw AssistantFailure.modelSetup }
+        let schema = CoworkerReply.schema(for: request)
+        let instructions = CoworkerReply.instructions(for: request.observation)
+            + "\nOutput schema:\n" + schema
+            + "\nReply with exactly one JSON object that matches the schema. No Markdown, no other text."
+        request.onStage?(.readingContext)
+        let model = Settings.shared.chatGPTModel
+        func send(image: Data?) async throws -> String {
+            var parts: [ChatGPTResponses.Part] = [.text(request.prompt)]
+            if let image { parts.append(.image(image)) }
+            return try await ChatGPTAccount.shared.write(instructions: instructions, input: [.init(role: "user", parts: parts)])
+        }
+        request.onStage?(.choosingAction)
+        let raw: String
+        do {
+            raw = try await send(image: ChatGPTAccount.shared.acceptsImages(model) ? request.screenshot : nil)
+        } catch ChatGPTError.unsupported(let param) where request.screenshot != nil && ChatGPTAccount.shared.acceptsImages(model) {
+            // The docs: remove the unsupported input and never resend the same body. A model that
+            // rejects images keeps answering from the window's text.
+            Self.log.notice("ChatGPT model rejected the screenshot (\(param ?? "no param", privacy: .public)); answering from text")
+            ChatGPTAccount.shared.rejectImages(model)
+            raw = try await send(image: nil)
+        }
+        try Task.checkCancellation()
+        guard let json = ChatGPTResponses.jsonObject(in: raw) else { throw CoworkerError.invalidResponse }
+        return try CoworkerReply.decode(json)
     }
 
     /// Shared with the opt-in native model conformance test. Callers supply a

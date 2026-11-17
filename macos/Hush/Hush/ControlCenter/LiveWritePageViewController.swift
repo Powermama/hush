@@ -11,10 +11,7 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
         colors: AIFeatureIcon.liveWrite,
         identifier: "hush.livewrite"
     )
-    private let engineDisclosure = NSButton()
-    private let engineSummary = NSTextField(labelWithString: "")
-    private let engineModels = AIModelControlsView(scope: .personas)
-    private var enginesExpanded = false
+    private let engineModels = AIModelControlsView(scope: .liveWrite)
     private var subscriptions = Set<AnyCancellable>()
     private var isRefreshing = false
     private let personaListStack = NSStackView()
@@ -30,7 +27,7 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
     override func loadView() {
         super.loadView()
         stack.spacing = 14
-        addFullWidth(aiPageHeader(title: "Live Write", detail: "Say what you want. Get finished text, entirely on this Mac."))
+        addFullWidth(aiPageHeader(title: "Live Write", detail: "Say what you want. Get finished text."))
         stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
         feature.onToggle = { [weak self] on in self?.setLiveWrite(on) }
         feature.onAction = { [weak self] in self?.performNextStep() }
@@ -41,8 +38,6 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
         bind()
         refresh()
         if focusEnableAI {
-            enginesExpanded = !LLMRuntime.shared.isReady(provider: Settings.shared.llmProvider) || Settings.shared.llmProvider == .off
-            refreshEngines()
             DispatchQueue.main.async { [weak self] in self?.view.window?.makeFirstResponder(self?.feature.toggle) }
         }
     }
@@ -105,24 +100,10 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
 
     private func buildEngines() {
         stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
-        engineDisclosure.setButtonType(.onOff)
-        engineDisclosure.isBordered = false
-        engineDisclosure.font = .systemFont(ofSize: 13, weight: .semibold)
-        engineDisclosure.imagePosition = .imageLeading
-        engineDisclosure.title = "Writing engine"
-        engineDisclosure.setAccessibilityLabel("Writing engine")
-        engineDisclosure.setAccessibilityIdentifier("hush.personas.engines")
-        engineDisclosure.target = self; engineDisclosure.action = #selector(toggleEngines)
-        engineSummary.font = .systemFont(ofSize: 12); engineSummary.textColor = .secondaryLabelColor
-        let heading = NSStackView(views: [engineDisclosure, NSView(), engineSummary])
-        heading.spacing = 12
-        let content = NSStackView(views: [heading, engineModels])
-        content.orientation = .vertical; content.alignment = .leading; content.spacing = 10
-        heading.widthAnchor.constraint(equalTo: content.widthAnchor).isActive = true
-        engineModels.widthAnchor.constraint(equalTo: content.widthAnchor).isActive = true
-        addFullWidth(makeCard(content: content, insets: .init(top: 14, left: 16, bottom: 14, right: 16)))
-        addFullWidth(subtitle("Qwen 3.5 4B writes best on this Mac in hush\u{2019}s tests. Models stay on this Mac and are shared with Assistant."))
-        refreshEngines()
+        addFullWidth(sectionHeading("Writing engine"))
+        engineModels.setAccessibilityIdentifier("hush.livewrite.engines")
+        addFullWidth(makeCard(content: engineModels))
+        addFullWidth(subtitle("Qwen 3.5 4B wrote best in hush\u{2019}s tests. Engines on this Mac keep your words here and are shared with Assistant; with ChatGPT, what you dictate is sent to OpenAI."))
     }
 
     private func buildPersonas() {
@@ -171,17 +152,8 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
         defer { isRefreshing = false }
         let status = LiveWriteStatus.current()
         feature.update(isOn: status.isOn, status: status.text, tone: status.tone, action: status.action, progress: status.progress)
-        refreshEngines()
         refreshPersonaList()
     }
-
-    private func refreshEngines() {
-        engineDisclosure.state = enginesExpanded ? .on : .off
-        engineDisclosure.image = NSImage(systemSymbolName: enginesExpanded ? "chevron.down" : "chevron.right", accessibilityDescription: nil)
-        engineModels.isHidden = !enginesExpanded
-        engineSummary.stringValue = Settings.shared.llmProvider == .off ? "Choose an engine" : Settings.shared.llmProvider.displayName
-    }
-    @objc private func toggleEngines() { enginesExpanded.toggle(); refreshEngines() }
 
     private func refreshPersonaList() {
         personaListStack.arrangedSubviews.forEach {
@@ -223,16 +195,13 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
     // MARK: Actions
 
     private func setLiveWrite(_ on: Bool) {
-        if !LiveWriteStatus.setEnabled(on) { enginesExpanded = true }
+        LiveWriteStatus.setEnabled(on)
         refresh()
     }
 
     /// The card's button: download the recommended engine, or open the engine list.
     private func performNextStep() {
-        if !LiveWriteStatus.downloadRecommendedEngine() {
-            enginesExpanded = true
-            refreshEngines()
-        }
+        LiveWriteStatus.downloadRecommendedEngine()
     }
 
     /// A new persona starts from what it should do: write what you describe, or clean up your words.
@@ -735,9 +704,14 @@ struct LiveWriteStatus {
         return true
     }
 
-    /// Starts downloading Qwen 3.5 4B and selects it. False when it is already here or on its way.
+    /// Starts downloading Qwen 3.5 4B and selects it, or, at a ChatGPT plan limit, opens
+    /// Manage usage. False when there is nothing to do here.
     @discardableResult
     static func downloadRecommendedEngine() -> Bool {
+        if Settings.shared.llmProvider == .chatGPT, ChatGPTAccount.shared.isLimitPaused {
+            NSWorkspace.shared.open(ChatGPTAccount.manageUsageURL)
+            return true
+        }
         guard let model = LLMRuntime.QwenModel(provider: .qwen35_4b),
               case .notDownloaded = LLMRuntime.shared.qwenState(for: model) else { return false }
         Settings.shared.llmProvider = .qwen35_4b
@@ -761,6 +735,18 @@ struct LiveWriteStatus {
             return LiveWriteStatus(isOn: false, text: "Off. Your words go in as you say them.", tone: .neutral, action: nil, progress: nil)
         }
         let provider = settings.llmProvider
+        if provider == .chatGPT {
+            let account = ChatGPTAccount.shared
+            if account.isLimitPaused {
+                let fallback = bestReadyEngine().map { "Writing on \($0.displayName) for now." } ?? "Your words go in as you say them for now."
+                return LiveWriteStatus(isOn: true, text: "ChatGPT plan limit reached. \(fallback)", tone: .attention, action: "Manage usage", progress: nil)
+            }
+            if account.isUsable {
+                let persona = settings.dictationPersonaEnabled ? " with \(settings.activeProfile.name)" : ""
+                return LiveWriteStatus(isOn: true, text: "Ready on \(account.modelName(settings.chatGPTModel))\(persona). Using ChatGPT plan.", tone: .ready, action: nil, progress: nil)
+            }
+            return LiveWriteStatus(isOn: true, text: "ChatGPT is not connected. Connect it below or choose an engine on this Mac.", tone: .attention, action: nil, progress: nil)
+        }
         if provider != .off, runtime.isReady(provider: provider) {
             let persona = settings.dictationPersonaEnabled ? " with \(settings.activeProfile.name)" : ""
             return LiveWriteStatus(isOn: true, text: "Ready on \(provider.displayName)\(persona)", tone: .ready, action: nil, progress: nil)

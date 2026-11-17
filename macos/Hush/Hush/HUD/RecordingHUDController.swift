@@ -17,7 +17,7 @@ final class RecordingHUDController {
     enum State {
         case recording
         case transcribing
-        case polishing(profileName: String, providerName: String)
+        case polishing(profileName: String, providerName: String, isCloud: Bool = false)
         case signing
         case inserted(words: Int, app: String?, verified: Bool)
         case copiedToClipboard(verified: Bool)
@@ -69,6 +69,7 @@ final class RecordingHUDController {
 
         switch state {
         case .recording:
+            model.writing = nil
             model.seconds = 0
             model.resetLevels()
             model.message = ""
@@ -78,10 +79,12 @@ final class RecordingHUDController {
             startElapsedTimer()
         case .transcribing:
             model.isVerified = false
+            model.writing = nil
             model.state = .processing
             stopElapsedTimer()
-        case .polishing:
+        case .polishing(_, let providerName, let isCloud):
             model.isVerified = false
+            model.writing = HUDWriting(engine: providerName, isCloud: isCloud)
             model.state = .processing
             stopElapsedTimer()
         case .signing:

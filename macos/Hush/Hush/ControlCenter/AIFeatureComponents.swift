@@ -193,15 +193,30 @@ final class AIFeatureSwitchCard: ControlCenterCardView {
 
 /// The page title of an AI feature: large name, one line of value, no decoration.
 @MainActor
-func aiPageHeader(title: String, detail: String) -> NSView {
-    let heading = NSTextField(labelWithString: title)
-    heading.font = .systemFont(ofSize: 26, weight: .bold)
-    let description = NSTextField(wrappingLabelWithString: detail)
-    description.font = .systemFont(ofSize: 13)
-    description.textColor = .secondaryLabelColor
-    let stack = NSStackView(views: [heading, description])
-    stack.orientation = .vertical
-    stack.alignment = .leading
-    stack.spacing = 4
-    return stack
+func aiPageHeader(title: String, detail: String) -> AIPageHeader { AIPageHeader(title: title, detail: detail) }
+
+/// A page title with a one-line description that can change with the page's state.
+@MainActor
+final class AIPageHeader: NSStackView {
+    private let detailLabel = NSTextField(wrappingLabelWithString: "")
+
+    var detail: String {
+        get { detailLabel.stringValue }
+        set { detailLabel.stringValue = newValue }
+    }
+
+    init(title: String, detail: String) {
+        super.init(frame: .zero)
+        let heading = NSTextField(labelWithString: title)
+        heading.font = .systemFont(ofSize: 26, weight: .bold)
+        detailLabel.font = .systemFont(ofSize: 13)
+        detailLabel.textColor = .secondaryLabelColor
+        detailLabel.stringValue = detail
+        addArrangedSubview(heading)
+        addArrangedSubview(detailLabel)
+        orientation = .vertical
+        alignment = .leading
+        spacing = 4
+    }
+    required init?(coder: NSCoder) { fatalError() }
 }

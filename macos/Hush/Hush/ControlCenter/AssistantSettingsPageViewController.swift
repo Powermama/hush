@@ -96,9 +96,11 @@ final class AssistantSettingsPageViewController: ControlCenterPageViewController
         badge: "BETA",
         identifier: "hush.assistant"
     )
-    private let models = AIModelControlsView(scope: .assistant)
+    private let intelligenceModels = AIModelControlsView(scope: .assistantIntelligence)
+    private let requiredModels = AIModelControlsView(scope: .assistantSupport)
     private var statuses: [AssistantSetupFlow.Step: NSTextField] = [:]
-    private let modelPicker = NSPopUpButton()
+    private let header = aiPageHeader(title: "Assistant", detail: "")
+    private let privacyNote = NSTextField(wrappingLabelWithString: "")
 
     init(coordinator: DictationCoordinator?, onNavigate: @escaping (HushDestination) -> Void) {
         self.onNavigate = onNavigate
@@ -116,7 +118,7 @@ final class AssistantSettingsPageViewController: ControlCenterPageViewController
     override func loadView() {
         super.loadView()
         stack.spacing = 14
-        addFullWidth(aiPageHeader(title: "Assistant", detail: "Talk to hush about what\u{2019}s on your screen, entirely on this Mac."))
+        addFullWidth(header)
         stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
         feature.onToggle = { [weak self] on in
             guard let self else { return }
@@ -135,14 +137,15 @@ final class AssistantSettingsPageViewController: ControlCenterPageViewController
         addFullWidth(usage)
 
         stack.setCustomSpacing(22, after: usage)
-        let modelHeading = NSStackView(views: [sectionHeading("Models"), NSView(), modelPicker]); modelHeading.spacing = 12
-        modelHeading.alignment = .centerY
-        modelPicker.addItems(withTitles: ["Qwen 3.5 4B", "Qwen 3.5 2B"])
-        modelPicker.controlSize = .small
-        modelPicker.setAccessibilityLabel("Assistant intelligence model")
-        modelPicker.target = self; modelPicker.action = #selector(changeModel)
-        addFullWidth(modelHeading)
-        addFullWidth(makeCard(content: models))
+        addFullWidth(sectionHeading("AI model"))
+        intelligenceModels.setAccessibilityIdentifier("hush.assistant.models.intelligence")
+        addFullWidth(makeCard(content: intelligenceModels))
+        addFullWidth(subtitle("Qwen 3.5 4B understands screens best on this Mac. Models here are shared with Live Write."))
+
+        stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
+        addFullWidth(sectionHeading("Required models"))
+        requiredModels.setAccessibilityIdentifier("hush.assistant.models.required")
+        addFullWidth(makeCard(content: requiredModels))
 
         let permissionsHeading = sectionHeading("Permissions")
         stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
@@ -162,10 +165,14 @@ final class AssistantSettingsPageViewController: ControlCenterPageViewController
             rows.addArrangedSubview(row); row.widthAnchor.constraint(equalTo: rows.widthAnchor).isActive = true
         }
         addFullWidth(makeCard(content: rows))
-        addFullWidth(subtitle("Setup downloads what is missing and walks you through each macOS permission. What you say and show hush stays on this Mac; downloads and websites you open use the internet."))
+        privacyNote.font = .systemFont(ofSize: 12)
+        privacyNote.textColor = .secondaryLabelColor
+        privacyNote.setAccessibilityIdentifier("hush.assistant.privacy")
+        addFullWidth(privacyNote)
         library.changes.receive(on: RunLoop.main).sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
         flow.changes.receive(on: RunLoop.main).sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
-        Settings.shared.didChange.receive(on: RunLoop.main).sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
+        Settings.shared.didChange.merge(with: CoworkerModelSettings.changes, ChatGPTAccount.shared.changes)
+            .receive(on: RunLoop.main).sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
         refresh()
     }
     override func viewWillAppear() {
@@ -194,13 +201,14 @@ final class AssistantSettingsPageViewController: ControlCenterPageViewController
             label.textColor = available ? DesignTokens.goodInk : .secondaryLabelColor
             if case .working(let current) = flow.state, current == step, flow.isRunning { label.stringValue = "Waiting for you\u{2026}" }
         }
-        modelPicker.selectItem(at: CoworkerModelSettings.provider == .qwen35_4b ? 0 : 1)
-        modelPicker.isEnabled = !flow.isRunning
-    }
-    @objc private func changeModel() {
-        CoworkerModelSettings.provider = modelPicker.indexOfSelectedItem == 0 ? .qwen35_4b : .qwen35_2b
-        // Recreate static labels for the chosen configuration through navigation.
-        onNavigate(.assistant)
+        // Never claim everything stays on this Mac while the plan answers.
+        let cloud = CoworkerModelSettings.isCloud
+        header.detail = cloud
+            ? "Talk to hush about what\u{2019}s on your screen, answered with your ChatGPT plan."
+            : "Talk to hush about what\u{2019}s on your screen, entirely on this Mac."
+        privacyNote.stringValue = cloud
+            ? "Setup walks you through each macOS permission. Listening and spoken replies stay on this Mac; what you ask, text from the app you\u{2019}re in and, when it helps, a screenshot of that window are sent to OpenAI."
+            : "Setup downloads what is missing and walks you through each macOS permission. What you say and show hush stays on this Mac; downloads and websites you open use the internet."
     }
 }
 
