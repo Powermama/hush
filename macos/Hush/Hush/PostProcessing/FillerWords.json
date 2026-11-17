@@ -1,22 +1,17 @@
 {
-  "about": "Hesitation sounds hush removes from every dictation, in code. 'universal' sounds are a word in no language and are always removed. 'languages' lists sounds that are a real word somewhere (German 'um' = at, Portuguese 'um' = a), removed only once the dictation's language is known. Add a language only with a source and benchmark cases in HushTests/Fixtures/Cleanup/filler-words.json.",
+  "about": "The safety floor of hesitation removal: sounds that are a word in no language, removed in code from every dictation, with or without AI, in any language. Nothing language-dependent belongs here: 'um' is German and Portuguese, 'er' German, 'eh' and 'ah' interjections, 'like', 'also' and 'este' real words. Those are left to the speech model and the language model. Add a sound only when it is a word in no language, with a source and a benchmark case in HushTests/Fixtures/Cleanup/filler-words.json.",
   "sources": [
     {
       "name": "Handy",
       "url": "https://github.com/cjpais/Handy/blob/aca8985/src-tauri/src/audio_toolkit/text.rs",
       "license": "MIT",
       "copyright": "Copyright (c) 2025 CJ Pais",
-      "used": "The two tiers, the universal list and the en, de and fr lists"
+      "used": "Its universal list of sounds that are a word in no language, and the German 'äh', 'ähm' and French 'euh'"
     },
     {
       "name": "hush",
-      "used": "English 'er' and 'erm', the British spellings of the same sound"
+      "used": "'öhm' and 'erm'"
     }
   ],
-  "universal": ["uh", "uhh", "uhhh", "uhm", "umm", "ehh", "ehm", "ahm", "hmm", "hm", "mmm", "хм", "ммм"],
-  "languages": {
-    "en": ["um", "ah", "eh", "er", "erm"],
-    "de": ["äh", "ähm", "öhm"],
-    "fr": ["euh"]
-  }
+  "sounds": ["uh", "uhh", "uhhh", "uhm", "umm", "ehh", "ehm", "ahm", "hmm", "hm", "mmm", "хм", "ммм", "äh", "ähm", "öhm", "euh", "erm"]
 }

@@ -55,14 +55,14 @@ struct FillerWordsBenchmark {
     @Test("Benchmark: quality and speed against the corpus")
     func benchmark() throws {
         let corpus = try Self.corpus()
-        let results = corpus.cases.map { Result(item: $0, output: FillerWords.removing(from: $0.input, language: $0.language)) }
+        let results = corpus.cases.map { Result(item: $0, output: FillerWords.removing(from: $0.input)) }
 
         // Speed: every case 200 times, so the median and slowest dictation are stable.
         var timings: [Double] = []
         for item in corpus.cases {
             for _ in 0..<200 {
                 let start = DispatchTime.now().uptimeNanoseconds
-                _ = FillerWords.removing(from: item.input, language: item.language)
+                _ = FillerWords.removing(from: item.input)
                 timings.append(Double(DispatchTime.now().uptimeNanoseconds - start) / 1_000)
             }
         }

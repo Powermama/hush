@@ -1,20 +1,20 @@
 {
-  "about": "Benchmark for hesitation removal in code (FillerWords). Each case is a transcript as a speech model writes it and the text hush must insert. 'language' is the spoken-language setting ('auto' runs language detection). A case with 'knownGap' records what the word list cannot do yet: it is measured but does not fail the run, and once it passes the benchmark asks for it to be promoted, so quality only moves up. Never edit an expected text to make a run pass.",
-  "version": 1,
+  "about": "Benchmark for the language-independent hesitation floor in code (FillerWords). Each case is a transcript as a speech model writes it and the text hush must insert. 'language' records the spoken language; the floor itself does not use it. A case with 'knownGap' records what the word list cannot do yet: it is measured but does not fail the run, and once it passes the benchmark asks for it to be promoted, so quality only moves up. Never edit an expected text to make a run pass.",
+  "version": 2,
   "cases": [
-    { "id": "en-fillers-commas", "language": "en", "input": "Um, so I think we should, uh, move the meeting to Monday.", "expected": "So I think we should move the meeting to Monday." },
+    { "id": "en-fillers-commas", "language": "en", "input": "Um, so I think we should, uh, move the meeting to Monday.", "expected": "So I think we should move the meeting to Monday.", "knownGap": "'um' and 'er' are real words in German and Portuguese, so the language-independent floor leaves them to the speech or language model." },
     { "id": "en-uhm-mid", "language": "en", "input": "I was, uhm, thinking about it.", "expected": "I was thinking about it." },
     { "id": "en-stretched", "language": "en", "input": "Ummm, let me check.", "expected": "Let me check." },
-    { "id": "en-sentence-end", "language": "en", "input": "That's it, um.", "expected": "That's it." },
+    { "id": "en-sentence-end", "language": "en", "input": "That's it, um.", "expected": "That's it.", "knownGap": "'um' and 'er' are real words in German and Portuguese, so the language-independent floor leaves them to the speech or language model." },
     { "id": "en-hmm", "language": "en", "input": "Hmm, interesting.", "expected": "Interesting." },
-    { "id": "en-er", "language": "en", "input": "Er, the report is ready.", "expected": "The report is ready." },
+    { "id": "en-er", "language": "en", "input": "Er, the report is ready.", "expected": "The report is ready.", "knownGap": "'um' and 'er' are real words in German and Portuguese, so the language-independent floor leaves them to the speech or language model." },
     { "id": "en-err-verb", "language": "en", "input": "To err is human.", "expected": "To err is human." },
     { "id": "en-ellipsis", "language": "en", "input": "Uh... I forgot the name.", "expected": "I forgot the name." },
     { "id": "en-lowercase", "language": "en", "input": "uh can you send me the report by friday", "expected": "can you send me the report by friday" },
     { "id": "en-millimetres", "language": "en", "input": "The screw is 5 mm long.", "expected": "The screw is 5 mm long." },
     { "id": "en-uh-oh", "language": "en", "input": "Uh-oh, the build failed.", "expected": "Uh-oh, the build failed." },
     { "id": "en-acronym", "language": "en", "input": "The UM campus is big.", "expected": "The UM campus is big." },
-    { "id": "en-two-sentences", "language": "en", "input": "Thanks for the update. Um, I will reply tomorrow.", "expected": "Thanks for the update. I will reply tomorrow." },
+    { "id": "en-two-sentences", "language": "en", "input": "Thanks for the update. Um, I will reply tomorrow.", "expected": "Thanks for the update. I will reply tomorrow.", "knownGap": "'um' and 'er' are real words in German and Portuguese, so the language-independent floor leaves them to the speech or language model." },
     { "id": "en-discourse-like", "language": "en", "input": "I was like, you know, really tired.", "expected": "I was really tired.", "knownGap": "Discourse fillers ('like', 'you know') are real words; a list cannot tell their uses apart. Needs the disfluency tagger." },
     { "id": "en-self-correction", "language": "en", "input": "Let's meet Tuesday, no, Wednesday.", "expected": "Let's meet Wednesday.", "knownGap": "Self-corrections need the disfluency tagger or a language model." },
 
@@ -40,7 +40,7 @@
 
     { "id": "ru-kh", "language": "ru", "input": "Хм, интересно.", "expected": "Интересно." },
 
-    { "id": "auto-en", "language": "auto", "input": "Um, so I think we should, uh, move the meeting to Monday.", "expected": "So I think we should move the meeting to Monday." },
+    { "id": "auto-en", "language": "auto", "input": "Um, so I think we should, uh, move the meeting to Monday.", "expected": "So I think we should move the meeting to Monday.", "knownGap": "'um' and 'er' are real words in German and Portuguese, so the language-independent floor leaves them to the speech or language model." },
     { "id": "auto-de-um-time", "language": "auto", "input": "Wir treffen uns morgen um 10 Uhr im Büro.", "expected": "Wir treffen uns morgen um 10 Uhr im Büro." },
     { "id": "auto-de", "language": "auto", "input": "Ähm, ich komme heute etwas später ins Büro.", "expected": "Ich komme heute etwas später ins Büro." },
     { "id": "auto-pt-um", "language": "auto", "input": "Comprei um carro novo ontem.", "expected": "Comprei um carro novo ontem." },

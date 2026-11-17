@@ -17,7 +17,7 @@ struct IdentityPostProcessor: TextPostProcessor {
 /// Whisper nor Parakeet removes them reliably, so code does it for both engines.
 struct BasicPostProcessor: TextPostProcessor {
     func process(_ text: String, language: String) async throws -> String {
-        var s = FillerWords.removing(from: text, language: language).trimmingCharacters(in: .whitespacesAndNewlines)
+        var s = FillerWords.removing(from: text).trimmingCharacters(in: .whitespacesAndNewlines)
         // Collapse runs of >2 spaces (Whisper occasionally emits extras between segments).
         while s.contains("  ") { s = s.replacingOccurrences(of: "  ", with: " ") }
         return s
