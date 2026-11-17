@@ -87,7 +87,7 @@ final class OnboardingFlowModel: ObservableObject {
 
     let headlinePhrases = [
         "does the typing.",
-        "ships it with personas.",
+        "writes it for you.",
         "proves its origin.",
     ]
 
@@ -140,7 +140,7 @@ final class OnboardingFlowModel: ObservableObject {
         case .personas:
             if let personaStatus { return personaStatus }
             return personasEnabled
-                ? "Apple Intelligence is on. Your personas are ready."
+                ? "Apple Intelligence is on. Live Write is ready."
                 : "Everything runs on-device. Nothing goes to the cloud or to ChatGPT."
         case .proof:
             switch proofState {
@@ -294,7 +294,7 @@ final class OnboardingFlowModel: ObservableObject {
     func togglePersonas(_ enabled: Bool) {
         guard enabled else {
             Settings.shared.llmProvider = .off
-            Settings.shared.dictationPersonaEnabled = false
+            Settings.shared.liveWriteEnabled = false
             personasEnabled = false
             personaStatus = nil
             return
@@ -302,7 +302,8 @@ final class OnboardingFlowModel: ObservableObject {
 
         if isUITest {
             Settings.shared.llmProvider = .appleIntelligence
-            Settings.shared.dictationPersonaEnabled = true
+            Settings.shared.liveWriteEnabled = true
+            Settings.shared.dictationPersonaEnabled = false
             personasEnabled = true
             personaStatus = nil
             return
@@ -312,7 +313,8 @@ final class OnboardingFlowModel: ObservableObject {
         switch LLMRuntime.shared.appleAvailability {
         case .available:
             Settings.shared.llmProvider = .appleIntelligence
-            Settings.shared.dictationPersonaEnabled = true
+            Settings.shared.liveWriteEnabled = true
+            Settings.shared.dictationPersonaEnabled = false
             personasEnabled = true
             personaStatus = nil
         case .unavailable(let reason):
@@ -1225,8 +1227,8 @@ private struct PersonasOnboardingStep: View {
                 Text("Enable your")
                     .font(.system(size: 58, weight: .bold))
                     .tracking(-3)
-                GradientHeadline(text: "local personas.")
-                Text("Your personas run entirely on your Mac, powered by Apple’s on-device Foundation Models. Nothing is ever sent to the cloud or to ChatGPT.")
+                GradientHeadline(text: "Live Write.")
+                Text("Say \u{201C}an email to Tom that I\u{2019}m running late\u{201D} and get the finished email. Everything else is cleaned up in your words. It runs entirely on your Mac with Apple\u{2019}s on-device model; nothing is sent to the cloud.")
                     .font(.system(size: 17))
                     .foregroundStyle(OnboardingPalette.muted)
                     .lineSpacing(7)

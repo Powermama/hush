@@ -49,6 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if showControlCenterPreviewIfRequested() { return }
         #endif
 
+        Settings.shared.migrateToLiveWrite()
         let coordinator = DictationCoordinator()
         self.dictationCoordinator = coordinator
         AIModelLibrary.shared.coordinator = coordinator
@@ -73,7 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         coordinator.onShowPersonaSettings = { [weak self] in
             let needsSetup = Settings.shared.llmProvider == .off
                 || !LLMRuntime.shared.isActiveProviderReady
-            self?.showHush(destination: .personas(focusEnableAI: needsSetup))
+            self?.showHush(destination: .liveWrite(focusEnableAI: needsSetup))
         }
         startTrackingExternalApplications()
 
@@ -125,6 +126,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showAssistant() {
+        guard Settings.shared.assistantEnabled else {
+            dictationCoordinator?.hud.flash(message: "Assistant is off. Turn it on in hush AI.")
+            return
+        }
         guard dictationCoordinator?.canOpenAssistant == true else {
             dictationCoordinator?.hud.flash(message: "Finish the current recording first")
             return
@@ -353,7 +358,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else if arguments.contains("--preview-assistant-settings") {
             destination = .assistant
         } else if arguments.contains("--preview-personas") {
-            destination = .personas()
+            destination = .liveWrite()
         } else if arguments.contains("--preview-time-saved") {
             destination = .timeSaved()
         } else if arguments.contains("--preview-activity") {

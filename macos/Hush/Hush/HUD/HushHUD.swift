@@ -58,6 +58,14 @@ enum HUDPalette {
 
 public enum HushState: Equatable { case listening, processing, signing, inserted, notice }
 
+/// What the AI writing step shows while it runs: the engine at work, and whether the text
+/// left the Mac for it. Nil means plain processing (speech to text).
+public struct HUDWriting: Equatable {
+    public var engine: String
+    public var isCloud: Bool
+    public init(engine: String, isCloud: Bool) { self.engine = engine; self.isCloud = isCloud }
+}
+
 // MARK: - Model (driven by RecordingHUDController)
 
 @MainActor
@@ -71,6 +79,7 @@ final class HUDModel: ObservableObject {
     @Published var message: String = ""
     @Published var isError: Bool = false
     @Published var isVerified: Bool = false
+    @Published var writing: HUDWriting?
     /// Bumped each time a new recording starts. Bound to the view's `.id` so
     /// SwiftUI rebuilds the HUD fresh instead of cross-fading from a lingering
     /// notice (e.g. "No speech detected") into "Listening".
@@ -101,7 +110,8 @@ struct HushHUDRoot: View {
     var body: some View {
         HushHUD(state: model.state, seconds: model.seconds, wordCount: model.wordCount,
                 targetApp: model.targetApp, message: model.message,
-                isError: model.isError, isVerified: model.isVerified, levels: model.levels)
+                isError: model.isError, isVerified: model.isVerified, levels: model.levels,
+                writing: model.writing)
             .id(model.session)
     }
 }
@@ -117,12 +127,15 @@ public struct HushHUD: View {
     public var isError: Bool
     public var isVerified: Bool
     public var levels: [CGFloat]
+    public var writing: HUDWriting?
 
     @State private var badgeScale: CGFloat = 1
 
     public init(state: HushState, seconds: Int = 0, wordCount: Int = 34,
                 targetApp: String = "Mail", message: String = "",
-                isError: Bool = false, isVerified: Bool = false, levels: [CGFloat] = []) {
+                isError: Bool = false, isVerified: Bool = false, levels: [CGFloat] = [],
+                writing: HUDWriting? = nil) {
+        self.writing = writing
         self.state = state; self.seconds = seconds; self.wordCount = wordCount
         self.targetApp = targetApp; self.message = message
         self.isError = isError; self.isVerified = isVerified; self.levels = levels
@@ -141,7 +154,7 @@ public struct HushHUD: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 HushLabel(state: state, seconds: seconds,
-                          wordCount: wordCount, targetApp: targetApp)
+                          wordCount: wordCount, targetApp: targetApp, writing: writing)
                     .frame(width: 116, alignment: .leading)
                     .foregroundStyle(HUDPalette.primary)
 
@@ -294,6 +307,7 @@ struct HushLabel: View {
     var seconds: Int
     var wordCount: Int
     var targetApp: String
+    var writing: HUDWriting? = nil
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -315,8 +329,16 @@ struct HushLabel: View {
     }
     private var processing: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text("Processing").font(.system(size: 14.5, weight: .semibold))
-            Text("on-device").font(.system(size: 11)).foregroundColor(HUDPalette.secondary)
+            Text(writing == nil ? "Processing" : "Writing").font(.system(size: 14.5, weight: .semibold))
+            HStack(spacing: 4) {
+                if writing?.isCloud == true {
+                    Image(systemName: "cloud.fill").font(.system(size: 9, weight: .semibold))
+                }
+                Text(writing?.engine ?? "on-device").font(.system(size: 11)).lineLimit(1).truncationMode(.tail)
+            }
+            .foregroundColor(HUDPalette.secondary)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(writing.map { $0.isCloud ? "\($0.engine), sent to the cloud" : $0.engine } ?? "on-device")
         }
     }
     private var signing: some View {
