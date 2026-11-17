@@ -120,6 +120,21 @@ final class FluidAudioTranscriber: Transcriber, @unchecked Sendable {
         return text.isEmpty ? nil : text
     }
 
+    /// The words of `samples` with their start times, for recognition while the user
+    /// speaks (SpeechRounds). `offset` is where the samples begin in the recording.
+    func transcribeWords(samples: [Float], language: String, offset: TimeInterval = 0) async throws -> [TimedWord] {
+        let asr = queue.sync { manager }
+        guard let asr else { throw TranscriberError.modelNotLoaded }
+        guard samples.count >= ASRConstants.minimumRequiredSamples(forSampleRate: Self.sampleRate) else { return [] }
+        var state = TdtDecoderState.make()
+        let result = try await asr.transcribe(samples, decoderState: &state, language: Self.languageHint(for: language))
+        guard let timings = result.tokenTimings, !timings.isEmpty else {
+            // No timings: one word list at the window start keeps the text, not the cut.
+            return result.text.split(separator: " ").map { TimedWord(text: String($0), start: offset) }
+        }
+        return TimedWord.words(from: timings.map { ($0.token, $0.startTime) }, offset: offset)
+    }
+
     func unload() async {
         let asr = queue.sync { () -> AsrManager? in
             defer {
