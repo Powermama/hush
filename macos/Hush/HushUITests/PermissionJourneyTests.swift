@@ -33,7 +33,7 @@ final class PermissionJourneyTests: XCTestCase {
         app.buttons["Open Live Write"].click()
         XCTAssertTrue(app.staticTexts["What it does"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.radioButtons["Polish"].exists)
-        XCTAssertTrue(app.checkBoxes["hush.personas.engines"].exists)
+        XCTAssertTrue(app.staticTexts["Writing engine"].exists)
         attach(app, "Live Write - light")
         app.buttons["Edit Polish"].click()
         XCTAssertTrue(app.staticTexts["Make this persona yours"].waitForExistence(timeout: 3))
@@ -43,10 +43,8 @@ final class PermissionJourneyTests: XCTestCase {
         app.menuItems["Clean Up My Words"].click()
         XCTAssertTrue(app.staticTexts["Create a persona"].waitForExistence(timeout: 3))
         app.buttons["Cancel"].click()
-        let engine = app.checkBoxes["hush.personas.engines"]
-        reveal(engine, in: app)
-        engine.click()
         XCTAssertTrue(app.staticTexts["Apple Intelligence"].exists)
+        XCTAssertTrue(app.staticTexts["ChatGPT"].exists, "The ChatGPT plan is one of the engines")
         let model = modelControl("qwen35_4b", in: app)
         XCTAssertTrue(model.exists)
         reveal(model, in: app)
@@ -57,9 +55,6 @@ final class PermissionJourneyTests: XCTestCase {
             XCTAssertTrue(app.staticTexts["Remove Qwen 3.5 4B?"].waitForExistence(timeout: 3))
             app.sheets.buttons["Cancel"].click()
         }
-        reveal(engine, in: app)
-        engine.click()
-        XCTAssertFalse(app.buttons["Use Apple Intelligence"].isHittable)
     }
 
     func testAISettingsInDarkAppearance() {
@@ -70,9 +65,6 @@ final class PermissionJourneyTests: XCTestCase {
         app.buttons["Open Live Write"].click()
         XCTAssertTrue(app.radioButtons["Polish"].waitForExistence(timeout: 3))
         attach(app, "Live Write - dark")
-        let engine = app.checkBoxes["hush.personas.engines"]
-        reveal(engine, in: app)
-        engine.click()
         reveal(modelControl("qwen35_4b", in: app), in: app)
         attach(app, "Live Write - engines dark")
         app.buttons["control-center-back"].click()
@@ -96,7 +88,7 @@ final class PermissionJourneyTests: XCTestCase {
     }
 
     func testOneSetupButtonCanCancelAndResume() {
-        let app = launch("--preview-assistant-settings", "--preview-light-appearance", "--preview-assistant-setup-flow")
+        let app = launch("--preview-assistant-settings", "--preview-light-appearance", "--preview-assistant-setup-flow", "-assistant.enabled.v1", "YES")
         defer { app.terminate() }
         let setup = app.buttons["hush.assistant.action"]
         XCTAssertTrue(setup.waitForExistence(timeout: 5))

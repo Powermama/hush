@@ -803,7 +803,8 @@ final class DictationCoordinator {
                 if Settings.shared.showHUD {
                     hud.show(state: .polishing(
                         profileName: profile.name,
-                        providerName: provider.displayName
+                        providerName: provider.displayName,
+                        isCloud: provider == .chatGPT
                     ))
                 }
             }
@@ -829,6 +830,9 @@ final class DictationCoordinator {
             } catch {
                 Self.log.error("Post-process failed: \(error.localizedDescription, privacy: .public)")
                 processed = (try? await BasicPostProcessor().process(raw, language: language)) ?? raw
+            }
+            if completionWarningMessage == nil, let notice = LLMRuntime.shared.takeNotice() {
+                completionWarningMessage = notice
             }
             let postSec = CFAbsoluteTimeGetCurrent() - postStart
 

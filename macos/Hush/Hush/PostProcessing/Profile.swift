@@ -428,6 +428,9 @@ enum LLMProvider: String, Codable, CaseIterable, Sendable {
     case qwen35_2b
     /// Higher-quality generation: Qwen 3.5 4B 4-bit MLX.
     case qwen35_4b
+    /// The user's own ChatGPT plan through Sign in with ChatGPT. The only engine that
+    /// sends what was dictated off the Mac; never chosen without the user's explicit consent.
+    case chatGPT
 
     /// Single source of truth for the engines rendered by every settings
     /// surface. `.off` is represented by the master switch, not a row.
@@ -450,6 +453,7 @@ enum LLMProvider: String, Codable, CaseIterable, Sendable {
         case .appleIntelligence:  return "Apple Intelligence"
         case .qwen35_2b:          return "Qwen 3.5 2B"
         case .qwen35_4b:          return "Qwen 3.5 4B"
+        case .chatGPT:            return "ChatGPT"
         }
     }
 
@@ -469,6 +473,8 @@ enum LLMProvider: String, Codable, CaseIterable, Sendable {
             return "Fast local writing for everyday edits."
         case .qwen35_4b:
             return "Higher-quality writing and translation."
+        case .chatGPT:
+            return "Your ChatGPT plan. What you dictate is sent to OpenAI."
         }
     }
 

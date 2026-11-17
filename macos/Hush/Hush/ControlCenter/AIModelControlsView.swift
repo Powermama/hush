@@ -13,7 +13,11 @@ final class AIModelControlsView: NSStackView {
         self.scope = scope
         super.init(frame: .zero)
         orientation = .vertical; alignment = .leading; spacing = 0
-        library.changes.merge(with: AssistantSetupFlow.shared.changes)
+        var changes = library.changes.merge(with: AssistantSetupFlow.shared.changes).eraseToAnyPublisher()
+        if scope == .personas {
+            changes = changes.merge(with: ChatGPTAccount.shared.changes, Settings.shared.didChange, LLMRuntime.shared.stateChange).eraseToAnyPublisher()
+        }
+        changes
             .throttle(for: .milliseconds(200), scheduler: RunLoop.main, latest: true)
             .sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
         refresh()
@@ -26,11 +30,17 @@ final class AIModelControlsView: NSStackView {
         let items: [LocalAIModel] = scope == .personas
             ? [.intelligence(.qwen35_4b), .intelligence(.qwen35_2b)]
             : [.intelligence(CoworkerModelSettings.provider), .speech(Settings.shared.modelID), .voice]
-        if scope == .personas {
-            addRow(title: "Apple Intelligence", detail: "On this Mac · Managed by macOS",
-                   controls: selectionControl(for: .appleIntelligence), separator: true)
-        }
         for (index, item) in items.enumerated() {
+            // Recommended first, then Apple's built-in engine, then the faster small model.
+            if scope == .personas, index == 1 {
+                // A menu-width spacer keeps Use in the same column as the rows with a More menu.
+                let spacer = NSView()
+                spacer.widthAnchor.constraint(equalToConstant: 28).isActive = true
+                let controls = NSStackView(views: [selectionControl(for: .appleIntelligence), spacer])
+                controls.spacing = 14; controls.alignment = .centerY
+                addRow(title: "Apple Intelligence", detail: "On this Mac · Managed by macOS",
+                       controls: controls, separator: true)
+            }
             let installed = library.installed(item)
             let busy = library.busy(item)
             let controls = NSStackView(); controls.spacing = 14; controls.alignment = .centerY
@@ -69,7 +79,7 @@ final class AIModelControlsView: NSStackView {
             }
             let purpose: String
             switch item {
-            case .intelligence: purpose = scope == .personas ? "Writing engine" : "Intelligence & vision"
+            case .intelligence(let provider): purpose = scope == .personas ? (provider == .qwen35_4b ? "Recommended · On this Mac" : "Faster · On this Mac") : "Intelligence & vision"
             case .speech: purpose = "Listening"
             case .voice: purpose = "Spoken replies · English"
             }
@@ -79,8 +89,45 @@ final class AIModelControlsView: NSStackView {
             else if library.bundled(item) { detail += " · Included with Hush" }
             else if let size = library.sizes[item], installed { detail += " · " + ByteCountFormatter.string(fromByteCount: size, countStyle: .file) }
             else { detail += installed ? " · On this Mac" : " · Not installed" }
-            addRow(title: library.name(item), detail: detail, controls: controls, separator: index < items.count - 1)
+            addRow(title: library.name(item), detail: detail, controls: controls, separator: scope == .personas || index < items.count - 1)
         }
+        if scope == .personas { addChatGPTRow() }
+    }
+
+    /// The user's ChatGPT plan as the last engine: connect with consent, then Use or Active,
+    /// with the model, Manage usage and Disconnect in its More menu.
+    private func addChatGPTRow() {
+        let account = ChatGPTAccount.shared
+        let controls = NSStackView(); controls.spacing = 14; controls.alignment = .centerY
+        var detail = "Your ChatGPT plan · Sent to OpenAI"
+        switch account.state {
+        case .disconnected, .failed:
+            if case .failed(let message) = account.state { detail = message }
+            let connect = AIModelActionButton(title: "Continue with ChatGPT", inline: true, symbol: "cloud")
+            connect.setAccessibilityIdentifier("hush.ai.model.chatgpt")
+            connect.onPress = { [weak self] in account.connectAfterConsent(in: self?.window) }
+            controls.addArrangedSubview(connect)
+        case .connecting:
+            detail = "Finish signing in in your browser"
+            let cancel = AIModelActionButton(title: "Cancel", inline: true, symbol: "xmark.circle")
+            cancel.onPress = { account.cancelConnect() }
+            controls.addArrangedSubview(cancel)
+        case .connected(let email, let planUsage):
+            if planUsage {
+                let model = account.modelName(Settings.shared.chatGPTModel)
+                detail = account.isLimitPaused ? "Plan limit reached · Writing on this Mac for now" : "\(model) · Using ChatGPT plan"
+                controls.addArrangedSubview(selectionControl(for: .chatGPT))
+            } else {
+                detail = "\(email ?? "Signed in") · Plan use not allowed yet"
+                let allow = AIModelActionButton(title: "Continue with ChatGPT", inline: true, symbol: "cloud")
+                allow.onPress = { [weak self] in account.connectAfterConsent(in: self?.window) }
+                controls.addArrangedSubview(allow)
+            }
+            let menu = ChatGPTMenuButton(account: account)
+            menu.onDisconnect = { [weak self] in account.disconnectReporting(in: self?.window) }
+            controls.addArrangedSubview(menu)
+        }
+        addRow(title: "ChatGPT", detail: detail, controls: controls, separator: false)
     }
 
     private func selectionControl(for provider: LLMProvider) -> NSView {
@@ -91,7 +138,10 @@ final class AIModelControlsView: NSStackView {
         let use = AIModelActionButton(title: "Use", inline: true)
         use.setAccessibilityLabel("Use \(provider.displayName)")
         use.isEnabled = ready && !library.isRemoving
-        use.onPress = { Settings.shared.llmProvider = provider }
+        use.onPress = {
+            Settings.shared.llmProvider = provider
+            if provider == .chatGPT { Settings.shared.liveWriteEnabled = true }
+        }
         return use
     }
 
@@ -192,4 +242,46 @@ private final class AIModelMenuButton: NSPopUpButton {
     }
     required init?(coder: NSCoder) { fatalError() }
     @objc private func removeModel() { onRemove?() }
+}
+
+/// ChatGPT's secondary actions in a standard pull-down: the model, Manage usage, Disconnect.
+@MainActor
+private final class ChatGPTMenuButton: NSPopUpButton {
+    var onDisconnect: (() -> Void)?
+    private let account: ChatGPTAccount
+
+    init(account: ChatGPTAccount) {
+        self.account = account
+        super.init(frame: .zero, pullsDown: true)
+        isBordered = false; controlSize = .small
+        (cell as? NSPopUpButtonCell)?.arrowPosition = .noArrow
+        addItem(withTitle: "")
+        item(at: 0)?.image = NSImage(systemSymbolName: "ellipsis.circle", accessibilityDescription: nil)
+        if !account.models.isEmpty {
+            let models = NSMenuItem(title: "Model", action: nil, keyEquivalent: "")
+            let submenu = NSMenu()
+            for model in account.models {
+                let item = NSMenuItem(title: model.displayName, action: #selector(chooseModel(_:)), keyEquivalent: "")
+                item.representedObject = model.slug
+                item.state = model.slug == Settings.shared.chatGPTModel ? .on : .off
+                item.target = self
+                submenu.addItem(item)
+            }
+            models.submenu = submenu
+            menu?.addItem(models)
+            menu?.addItem(.separator())
+        }
+        let manage = NSMenuItem(title: "Manage Usage\u{2026}", action: #selector(manageUsage), keyEquivalent: "")
+        manage.target = self
+        menu?.addItem(manage)
+        let disconnect = NSMenuItem(title: "Disconnect ChatGPT\u{2026}", action: #selector(disconnect), keyEquivalent: "")
+        disconnect.target = self
+        menu?.addItem(disconnect)
+        setAccessibilityLabel("More options for ChatGPT")
+        NSLayoutConstraint.activate([widthAnchor.constraint(equalToConstant: 28), heightAnchor.constraint(equalToConstant: 26)])
+    }
+    required init?(coder: NSCoder) { fatalError() }
+    @objc private func chooseModel(_ sender: NSMenuItem) { Settings.shared.chatGPTModel = sender.representedObject as? String }
+    @objc private func manageUsage() { NSWorkspace.shared.open(ChatGPTAccount.manageUsageURL) }
+    @objc private func disconnect() { onDisconnect?() }
 }
