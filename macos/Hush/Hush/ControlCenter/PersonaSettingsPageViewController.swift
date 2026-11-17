@@ -185,12 +185,33 @@ final class PersonaSettingsPageViewController: ControlCenterPageViewController {
         refreshProviders()
     }
 
+    /// A new persona starts from what it should do: write what you describe, or clean up your words.
     @objc private func addPersona(_ sender: Any?) {
+        let menu = NSMenu()
+        for (title, mode) in [("Write for Me", Profile.Mode.compose), ("Clean Up My Words", .correct)] {
+            let item = NSMenuItem(title: title, action: #selector(createPersona(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = mode.rawValue
+            item.toolTip = mode == .compose
+                ? "Turns \"an email to Tom that I'm running late\" into the finished email."
+                : "Fixes grammar and filler words and keeps your own words."
+            menu.addItem(item)
+        }
+        if let button = sender as? NSButton {
+            menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
+        } else {
+            menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        }
+    }
+
+    @objc private func createPersona(_ sender: NSMenuItem) {
+        let mode = (sender.representedObject as? String).flatMap(Profile.Mode.init(rawValue:)) ?? .correct
         let profile = Profile(
             id: UUID(),
             name: uniqueName("New persona", profiles: Settings.shared.profiles),
             systemPrompt: "",
-            creativity: 0.3
+            creativity: 0.3,
+            mode: mode
         )
         presentEditor(for: profile, isNew: true)
     }
@@ -239,7 +260,8 @@ final class PersonaSettingsPageViewController: ControlCenterPageViewController {
                 name: self.uniqueName("\(draft.name) copy", profiles: profiles),
                 systemPrompt: draft.systemPrompt,
                 creativity: draft.creativity,
-                iconName: draft.iconName
+                iconName: draft.iconName,
+                mode: draft.mode
             )
             profiles.append(copy)
             Settings.shared.profiles = profiles
@@ -351,6 +373,7 @@ private final class PersonaLibraryRow: NSView {
             case Profile.SeedID.casual: return "Easygoing words that sound like you."
             case Profile.SeedID.slack: return "Short, direct and ready for the team."
             case Profile.SeedID.codeComment: return "Concise comments that get to the point."
+            case Profile.SeedID.writeForMe: return "Say what you need. Get the email, list or steps."
             default: break
             }
         }
@@ -374,6 +397,10 @@ final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
 
     private let iconButton = NSButton()
     private let nameField = NSTextField()
+    /// What the persona does, chosen when it was created and changeable from the
+    /// actions menu, so the model never has to guess it from the instructions.
+    private var mode: Profile.Mode
+    private let detail = NSTextField(labelWithString: "")
     // AppKit's own scrolling text view: the text view tracks the scroll view's width and
     // grows with its text. A bare NSTextView() as a document view keeps a zero-width text
     // container, so its instructions were invisible and could not be clicked into.
@@ -391,6 +418,7 @@ final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
         self.aiReady = aiReady
         self.canDelete = canDelete
         selectedIconName = profile.iconName
+        mode = profile.mode
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -404,8 +432,8 @@ final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
         let title = NSTextField(labelWithString: isNew ? "Create a persona" : "Make this persona yours")
         title.font = .systemFont(ofSize: 22, weight: .bold)
         title.textColor = .labelColor
-        let detail = NSTextField(labelWithString: "Describe the voice once, then test it before saving.")
         detail.font = .systemFont(ofSize: 11.5)
+        detail.setAccessibilityIdentifier("hush.personaEditor.purpose")
         detail.textColor = .secondaryLabelColor
         let heading = NSStackView(views: [title, detail])
         heading.orientation = .vertical
@@ -562,6 +590,7 @@ final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
         ])
         updateCreativityLabel()
         updateIcon()
+        updatePurpose()
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.nameField.window?.makeFirstResponder(self.nameField)
@@ -583,7 +612,8 @@ final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
             name: name.isEmpty ? original.name : name,
             systemPrompt: promptTextView.string.trimmingCharacters(in: .whitespacesAndNewlines),
             creativity: creativitySlider.doubleValue,
-            iconName: selectedIconName
+            iconName: selectedIconName,
+            mode: mode
         )
     }
 
@@ -654,11 +684,25 @@ final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
         }
     }
 
+    /// The subtitle says what this persona does with a dictation.
+    private func updatePurpose() {
+        detail.stringValue = switch mode {
+        case .compose: "Writes the email, message, list or steps you describe."
+        case .correct: "Cleans up what you say and keeps it in your words."
+        }
+    }
+
     @objc private func showActions(_ sender: NSButton) {
         let menu = NSMenu()
         let duplicate = NSMenuItem(title: "Duplicate Persona", action: #selector(duplicateTapped(_:)), keyEquivalent: "")
         duplicate.target = self
         menu.addItem(duplicate)
+        let purpose = NSMenuItem(
+            title: mode == .compose ? "Clean Up My Words Instead" : "Write What I Describe Instead",
+            action: #selector(switchPurpose(_:)), keyEquivalent: ""
+        )
+        purpose.target = self
+        menu.addItem(purpose)
         menu.addItem(.separator())
         let delete = NSMenuItem(title: "Delete Persona...", action: #selector(deleteTapped(_:)), keyEquivalent: "")
         delete.target = self
@@ -668,6 +712,11 @@ final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
     }
 
     @objc private func duplicateTapped(_ sender: Any?) { onDuplicate?(draft) }
+
+    @objc private func switchPurpose(_ sender: Any?) {
+        mode = mode == .compose ? .correct : .compose
+        updatePurpose()
+    }
 
     @objc private func deleteTapped(_ sender: Any?) {
         guard canDelete, let window = view.window else { return }

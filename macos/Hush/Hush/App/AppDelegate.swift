@@ -49,6 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if showControlCenterPreviewIfRequested() { return }
         #endif
 
+        Settings.shared.addNewBuiltInPersonas()
         let coordinator = DictationCoordinator()
         self.dictationCoordinator = coordinator
         AIModelLibrary.shared.coordinator = coordinator

@@ -53,6 +53,20 @@ protocol HushConversationalEditingSession: AnyObject {
 /// all backends see the same template (XML-tagged style + creativity
 /// + `<output>` envelope). Unsupported legacy thinking-mode switches are
 /// never injected into Qwen 3.5 prompts.
+/// One Qwen model's sampling: its model card's non-thinking settings for general text.
+/// The persona's creativity scales the temperature up to the card's value, so "Faithful"
+/// stays close to greedy decoding and "Creative" samples as the card recommends.
+struct QwenSampling: Equatable, Sendable {
+    let temperature: Float
+    let topP: Float
+    let topK: Int
+    let presencePenalty: Float
+
+    nonisolated func temperature(creativity: Double) -> Float {
+        temperature * Float(min(max(creativity, 0), 1))
+    }
+}
+
 @MainActor
 final class LLMRuntime {
 
@@ -134,6 +148,20 @@ final class LLMRuntime {
         // static `qwenCacheURL(for:)` and `qwenDiskSizeMB(for:)` can
         // call them under Swift 6 strict concurrency without needing a
         // main-actor hop.
+        /// Each model card's recommended non-thinking settings for general text
+        /// (huggingface.co/Qwen/Qwen3.5-2B and Qwen3.5-4B, "Best Practices"),
+        /// without its presence penalty. The cards assume frameworks that penalise
+        /// only generated tokens (vLLM, Transformers); MLX's PresencePenaltyContext
+        /// also loads the prompt, so it penalised every word the user dictated and
+        /// pushed the model to change them ("gestern" became "heute", English turned
+        /// German). Dictation and editing mostly copy the user's words.
+        nonisolated var sampling: QwenSampling {
+            switch self {
+            case .qwen35_2b: return QwenSampling(temperature: 1.0, topP: 1.0, topK: 20, presencePenalty: 0)
+            case .qwen35_4b: return QwenSampling(temperature: 0.7, topP: 0.8, topK: 20, presencePenalty: 0)
+            }
+        }
+
         nonisolated var hfRepoFolder: String {
             switch self {
             case .qwen35_2b: return "models--mlx-community--Qwen3.5-2B-4bit"
@@ -469,14 +497,42 @@ final class LLMRuntime {
         profile: Profile,
         provider: LLMProvider
     ) async throws -> String {
-        let systemPrompt = Profile.buildSystemPrompt(for: profile)
-        let userPrompt = Profile.buildUserPrompt(transcript: transcript)
-        return try await generate(
-            userPrompt: userPrompt,
-            systemPrompt: systemPrompt,
-            profile: profile,
-            provider: provider
+        // Deterministic cleanup around the model (FillerWords, DictationCleanup); each provider
+        // gets the dictation the way its vendor documents (Profile.dictationRules). The app's
+        // path has removed hesitations already; this covers the persona editor's try-it.
+        let spoken = FillerWords.removing(from: transcript)
+        let output = DictationCleanup.finishing(
+            try await generateDictation(transcript: spoken, profile: profile, provider: provider),
+            dictation: spoken
         )
+        if DictationCleanup.isUnusable(output, dictation: spoken, mode: profile.mode) {
+            Self.log.notice("Persona answer unusable (\(output.count) characters for \(spoken.count)); pasting the dictation")
+            return spoken
+        }
+        return output
+    }
+
+    private func generateDictation(transcript: String, profile: Profile, provider: LLMProvider) async throws -> String {
+        switch provider {
+        case .off:
+            throw Error.providerOff
+        case .appleIntelligence:
+            return try await generateAppleDictation(transcript: transcript, profile: profile)
+        case .qwen35_2b, .qwen35_4b:
+            guard let model = QwenModel(provider: provider) else { throw Error.providerOff }
+            #if canImport(MLXLLM) && canImport(MLXLMCommon) && canImport(MLXHuggingFace) && canImport(HuggingFace)
+            let messages = Self.qwenDictationMessages(transcript: transcript, profile: profile)
+            return try await generateQwen(
+                model: model,
+                userPrompt: Profile.buildDictationTurn(transcript: transcript, profile: profile),
+                systemPrompt: Profile.qwenDictationSystemPrompt(for: profile.mode),
+                history: Array(messages.dropFirst().dropLast()),
+                profile: profile
+            )
+            #else
+            throw Error.notCompiled
+            #endif
+        }
     }
 
     /// Applies one explicit conversational edit to the complete current text.
@@ -550,28 +606,104 @@ final class LLMRuntime {
         #endif
     }
 
+    /// How the dictation reaches Apple's on-device model. hush uses `.examplesAsTurns`;
+    /// the others stay for the live evaluation that compares them (PersonaLiveTests).
+    /// Guided generation was measured too and did worst: it lost umlauts and
+    /// corrections, so plain text replies remain.
+    enum AppleDictationStyle: CaseIterable, Sendable {
+        /// Rules as instructions, the mode's examples as earlier prompts and responses in the
+        /// session's transcript, persona and dictation as the prompt.
+        case examplesAsTurns
+        /// Rules and the mode's examples as instructions; persona and dictation as the prompt.
+        case personaInPrompt
+        /// The persona added to the instructions; only language and dictation as the prompt.
+        case personaInInstructions
+        /// As `.personaInPrompt`, without the worked examples.
+        case withoutExamples
+    }
+
+    /// Apple's on-device model: hush's fixed rules and examples as instructions, which the
+    /// model obeys over prompts, and a fresh session per dictation, so an earlier
+    /// dictation never shapes this one.
+    func generateAppleDictation(transcript: String, profile: Profile, style: AppleDictationStyle = .examplesAsTurns) async throws -> String {
+        #if canImport(FoundationModels)
+        if #available(macOS 26, *) {
+            refreshAppleAvailability()
+            switch appleAvailability {
+            case .available:
+                var instructions = Profile.appleDictationInstructions(for: profile.mode, examples: style != .withoutExamples)
+                var prompt = Profile.buildDictationTurn(transcript: transcript, profile: profile)
+                if style == .personaInInstructions {
+                    instructions += "\n\nFor this user:\n<persona>\(profile.personaTask)</persona>\n<creativity>\(profile.creativityHint)</creativity>"
+                    prompt = "<language>\(Profile.dictationLanguage(of: transcript))</language>\n<dictation>\(transcript)</dictation>"
+                }
+                let session: LanguageModelSession
+                if style == .examplesAsTurns {
+                    // Shown as turns the model already answered, so it learns the task without
+                    // treating the examples as text to repeat.
+                    func text(_ content: String) -> [Transcript.Segment] { [.text(Transcript.TextSegment(content: content))] }
+                    var entries: [Transcript.Entry] = [.instructions(Transcript.Instructions(
+                        segments: text(Profile.appleDictationInstructions(for: profile.mode, examples: false)), toolDefinitions: []
+                    ))]
+                    for example in Profile.dictationExamples(for: profile.mode) {
+                        entries.append(.prompt(Transcript.Prompt(segments: text(Profile.buildDictationTurn(
+                            persona: example.persona, creativity: Profile.exampleCreativity,
+                            language: example.language, dictation: example.dictation
+                        )))))
+                        entries.append(.response(Transcript.Response(assetIDs: [], segments: text(example.output))))
+                    }
+                    session = LanguageModelSession(model: SystemLanguageModel.default, transcript: Transcript(entries: entries))
+                } else {
+                    session = LanguageModelSession(model: SystemLanguageModel.default, instructions: instructions)
+                }
+                let options = GenerationOptions(temperature: profile.creativity)
+                let t0 = CFAbsoluteTimeGetCurrent()
+                let text = Self.extractOutput(try await session.respond(to: prompt, options: options).content)
+                Self.log.info("Apple LLM \(CFAbsoluteTimeGetCurrent() - t0, format: .fixed(precision: 2))s · creativity=\(profile.creativity, format: .fixed(precision: 2))")
+                return Self.stripAnswerLabel(text)
+            case .unavailable(let reason): throw Error.appleUnavailable(reason)
+            case .unsupportedOS:           throw Error.appleUnsupportedOS
+            }
+        } else {
+            throw Error.appleUnsupportedOS
+        }
+        #else
+        throw Error.appleUnsupportedOS
+        #endif
+    }
+
+    /// The instructions' examples end in "Answer:"; a model may echo the label.
+    nonisolated static func stripAnswerLabel(_ text: String) -> String {
+        var s = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if s.hasPrefix("Answer:") { s = String(s.dropFirst("Answer:".count)) }
+        return s.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     // MARK: - Qwen call
 
     private func generateQwen(model: QwenModel,
                                userPrompt: String,
                                systemPrompt: String,
+                               history: [Chat.Message] = [],
                                profile: Profile) async throws -> String {
         #if canImport(MLXLLM) && canImport(MLXLMCommon) && canImport(MLXHuggingFace) && canImport(HuggingFace)
         let container = try await requireQwenContainer(model)
 
+        let sampling = model.sampling
         let parameters = GenerateParameters(
             maxTokens: Self.editingOutputTokenBudget(for: userPrompt),
-            temperature: Float(profile.creativity),
-            topP: 0.95,
-            topK: 20,
+            temperature: sampling.temperature(creativity: profile.creativity),
+            topP: sampling.topP,
+            topK: sampling.topK,
             minP: 0,
             repetitionPenalty: 1.0,
-            presencePenalty: 1.5,
+            presencePenalty: sampling.presencePenalty,
             presenceContextSize: 128
         )
         let session = ChatSession(
             container,
             instructions: systemPrompt,
+            history: history,
             generateParameters: parameters,
             additionalContext: ["enable_thinking": false]
         )
@@ -585,6 +717,21 @@ final class LLMRuntime {
     }
 
     #if canImport(MLXLLM) && canImport(MLXLMCommon) && canImport(MLXHuggingFace) && canImport(HuggingFace)
+    /// Everything Qwen sees for one dictation: hush's rules as the system message, the
+    /// examples as earlier turns with their answers, then the user's persona and dictation.
+    nonisolated static func qwenDictationMessages(transcript: String, profile: Profile) -> [Chat.Message] {
+        var messages: [Chat.Message] = [.system(Profile.qwenDictationSystemPrompt(for: profile.mode))]
+        for example in Profile.dictationExamples(for: profile.mode) {
+            messages.append(.user(Profile.buildDictationTurn(
+                persona: example.persona, creativity: Profile.exampleCreativity,
+                language: example.language, dictation: example.dictation
+            )))
+            messages.append(.assistant("<output>\(example.output)</output>"))
+        }
+        messages.append(.user(Profile.buildDictationTurn(transcript: transcript, profile: profile)))
+        return messages
+    }
+
     fileprivate func makeQwenConversation(
         provider: LLMProvider,
         instructions: String,
@@ -1072,23 +1219,28 @@ final class LLMRuntime {
     /// response when the tags are missing. Also strips any leftover
     /// `<think>...</think>` block defensively.
     nonisolated static func extractOutput(_ raw: String) -> String {
-        var s = raw
+        // Reasoning never reaches the user: Qwen's own <think> blocks, and the
+        // <thinking> blocks a small model imitates in plain text.
+        var s = raw.replacingOccurrences(
+            of: "<think(?:ing)?>[\\s\\S]*?</think(?:ing)?>",
+            with: "",
+            options: [.regularExpression, .caseInsensitive]
+        )
 
-        // Remove a leading <think>...</think> if a provider emits one.
-        if let range = s.range(of: "<think>[\\s\\S]*?</think>", options: .regularExpression) {
-            s.removeSubrange(range)
-        }
-
-        // Pull out <output>…</output> if present.
-        if let openRange = s.range(of: "<output>", options: .caseInsensitive) {
-            if let closeRange = s.range(of: "</output>", options: [.backwards, .caseInsensitive]),
-               openRange.upperBound <= closeRange.lowerBound {
-                s = String(s[openRange.upperBound..<closeRange.lowerBound])
+        // The answer is the last <output> block. A model restating its rules can
+        // mention "<output>...</output>" earlier, so never take the first one.
+        if let open = s.range(of: "<output>", options: [.backwards, .caseInsensitive]) {
+            let rest = s[open.upperBound...]
+            if let close = rest.range(of: "</output>", options: .caseInsensitive) {
+                s = String(rest[..<close.lowerBound])
             } else {
                 // Plain post-processing should never expose protocol markup,
                 // even when a provider stops before emitting the closing tag.
-                s = String(s[openRange.upperBound...])
+                s = String(rest)
             }
+        } else if let open = s.range(of: "<think(?:ing)?>", options: [.regularExpression, .caseInsensitive]) {
+            // Reasoning that never closed and no answer: nothing usable after it.
+            s = String(s[..<open.lowerBound])
         }
 
         return s.trimmingCharacters(in: .whitespacesAndNewlines)

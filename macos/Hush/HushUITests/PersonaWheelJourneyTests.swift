@@ -86,8 +86,12 @@ final class PersonaWheelJourneyTests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Make this persona yours"].exists)
 
         for _ in 0..<3 where !addButton.isHittable { scrollView.swipeUp() }
+        // A new persona starts from what it should do.
         addButton.click()
+        XCTAssertTrue(app.menuItems["Clean Up My Words"].waitForExistence(timeout: 2))
+        app.menuItems["Write for Me"].click()
         XCTAssertTrue(app.staticTexts["Create a persona"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["Writes the email, message, list or steps you describe."].exists)
         XCTAssertTrue(app.buttons["Create Persona"].exists)
         app.buttons["Cancel"].click()
     }
