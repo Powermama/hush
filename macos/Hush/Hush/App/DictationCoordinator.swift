@@ -159,7 +159,7 @@ final class DictationCoordinator {
         personaHotkey.stop()
         personaWheel.hide()
         if onboardingPracticeActive {
-            _ = recorder.stop()
+            discardRecording()
             onboardingPracticeActive = false
         }
         onOnboardingPracticeLevel = nil
@@ -201,6 +201,7 @@ final class DictationCoordinator {
         }
         onboardingPracticeActive = false
         let samples = recorder.stop()
+        if let id = recorder.lastRecordingID { recorder.journal.discard(id) }
         hud.show(state: .transcribing)
         let duration = Double(samples.count) / AudioRecorder.targetSampleRate
         guard duration >= 0.4 else {
@@ -227,7 +228,7 @@ final class DictationCoordinator {
 
     func cancelOnboardingPractice() {
         guard onboardingPracticeActive else { return }
-        _ = recorder.stop()
+        discardRecording()
         onboardingPracticeActive = false
         hud.hide()
     }
@@ -450,6 +451,7 @@ final class DictationCoordinator {
                 self.isModelReady = true
                 self.loadedModelID = id
                 self.phase.send(.idle)
+                await self.recoverInterruptedDictations()
             } catch is CancellationError {
                 Self.log.info("Cancelled obsolete model preparation for \(id, privacy: .public)")
             } catch {
@@ -536,7 +538,7 @@ final class DictationCoordinator {
         // Fn can arrive before Control. Discard that partial dictation before
         // opening the assistant; releasing the chord must never paste it.
         if recorder.state == .recording {
-            _ = recorder.stop()
+            discardRecording()
             recordingStartedAt = nil
             recordingPersona = nil
             recordingAssistantSessionID = nil
@@ -565,7 +567,7 @@ final class DictationCoordinator {
     func cancelAssistantRecording() {
         pendingAssistantSessionID = nil
         guard recordingAssistantSessionID != nil else { return }
-        if recorder.state == .recording { _ = recorder.stop() }
+        if recorder.state == .recording { discardRecording() }
         recordingAssistantSessionID = nil
         recordingStartedAt = nil
         recordingPersona = nil
@@ -687,6 +689,58 @@ final class DictationCoordinator {
         }
     }
 
+    /// Stops a recording whose audio is not wanted, and removes its copy on disk.
+    private func discardRecording() {
+        _ = recorder.stop()
+        if let id = recorder.lastRecordingID { recorder.journal.discard(id) }
+    }
+
+    /// R1: dictations interrupted by a crash, sleep or force quit are transcribed at the
+    /// next launch, once the speech model is ready, and kept in History (or copied when
+    /// History is off). They are never inserted: the app they were meant for is unknown.
+    func recoverInterruptedDictations() async {
+        let leftovers = recorder.journal.leftovers()
+        guard !leftovers.isEmpty else { return }
+        var recovered = 0
+        for entry in leftovers {
+            let samples = recorder.journal.samples(of: entry)
+            guard Double(samples.count) / AudioRecorder.targetSampleRate >= 0.4,
+                  let text = try? await transcriber.transcribe(
+                    samples: samples, language: Settings.shared.language,
+                    fallbackCount: Settings.shared.transcriptionQuality.fallbackCount),
+                  !text.isEmpty else {
+                recorder.journal.discard(entry.id)
+                continue
+            }
+            if Settings.shared.historyRetention != .off {
+                ActivityStore.shared.record(
+                    text: text, appName: "Recovered", appBundleIdentifier: nil,
+                    duration: Double(samples.count) / AudioRecorder.targetSampleRate,
+                    modelID: Settings.shared.modelID,
+                    modelName: ModelInfo.info(for: Settings.shared.modelID)?.displayName
+                        ?? ModelInfo.deriveDisplayName(from: Settings.shared.modelID),
+                    personaName: nil, providerName: nil, copiedToClipboard: false
+                )
+            } else {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(text, forType: .string)
+            }
+            recorder.journal.discard(entry.id)
+            recovered += 1
+        }
+        Self.log.notice("Recovered \(recovered) interrupted dictation(s)")
+        guard recovered > 0 else { return }
+        let message: String
+        if Settings.shared.historyRetention == .off {
+            message = "Recovered an interrupted dictation. It is on the clipboard."
+        } else if recovered == 1 {
+            message = "Recovered an interrupted dictation. It is in History."
+        } else {
+            message = "Recovered \(recovered) interrupted dictations. They are in History."
+        }
+        hud.flash(message: message)
+    }
+
     /// R1: a dictation that reaches the recording limit is finished as if the key had been
     /// released, so a stuck key or a lost release never throws away what was said.
     private func recordingLimitReached() {
@@ -700,6 +754,7 @@ final class DictationCoordinator {
         recordingStartedAt = nil
         let reachedLimit = recorder.reachedLimit
         let samples = recorder.stop()
+        let recordingID = recorder.lastRecordingID
         let editorTarget = recordingEditorTarget
         recordingEditorTarget = nil
         let assistantTarget = recordingAssistantSessionID
@@ -749,7 +804,8 @@ final class DictationCoordinator {
                 editorTarget: editorTarget,
                 assistantTarget: assistantTarget,
                 persona: persona,
-                reachedLimit: reachedLimit
+                reachedLimit: reachedLimit,
+                recordingID: recordingID
             )
             self.transcribeTask = nil
         }
@@ -762,11 +818,15 @@ final class DictationCoordinator {
                                    editorTarget: HushEditorRecordingTarget?,
                                    assistantTarget: UUID?,
                                    persona: RecordingPersona?,
-                                   reachedLimit: Bool = false) async {
+                                   reachedLimit: Bool = false,
+                                   recordingID: UUID? = nil) async {
+        // The audio stays on disk until its text is safe; errors keep it for recovery.
+        let releaseRecording = { [recorder] in if let recordingID { recorder.journal.discard(recordingID) } }
         do {
             let transcribeStart = CFAbsoluteTimeGetCurrent()
             guard let raw = try await transcriber.transcribe(samples: samples, language: language, fallbackCount: fallbackCount) else {
                 Self.log.notice("Transcribe returned empty for \(samples.count) samples (lang=\(language, privacy: .public))")
+                releaseRecording()
                 phase.send(.error("No speech detected"))
                 if let assistantTarget {
                     onAssistantCaptureState?(assistantTarget, "I didn't hear speech. Hold ⌃ Fn and try again.")
@@ -784,6 +844,7 @@ final class DictationCoordinator {
                 // Bound command input never enters the insertion, persona, history,
                 // or Verified Messages pipelines. A closed session discards it.
                 onAssistantTranscript?(assistantTarget, raw)
+                releaseRecording()
                 hud.hide()
                 phase.send(.idle)
                 return
@@ -798,6 +859,7 @@ final class DictationCoordinator {
                     captureStartedAt: captureStartedAt,
                     target: editorTarget
                 )
+                releaseRecording()
                 return
             }
 
@@ -888,6 +950,7 @@ final class DictationCoordinator {
             }
             let insertStart = CFAbsoluteTimeGetCurrent()
             let outcome = inserter.insert(verifiedText.insertionContent)
+            releaseRecording()
             let insertSec = CFAbsoluteTimeGetCurrent() - insertStart
             let recentDestination: String
             switch outcome {
