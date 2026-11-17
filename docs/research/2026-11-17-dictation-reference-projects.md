@@ -2,7 +2,7 @@
 
 Reviewed 16-17 November 2026, from each project's own source at the pinned commit below. Every claim links to the file it comes from; "Not found" means the feature was not found in the source read, not that it is proven absent. Measured numbers are the project's own unless the row says "measured by hush".
 
-This is the open-source half of the research behind the Live Write PRD. The study of the closed Wispr Flow client is kept out of this public repository; its findings live in the private PRD (section 3.5). hush takes ideas and measurements from these projects, not code, unless a licence allows it and the file says so (for example `FillerWords.json` credits Handy).
+This is the open-source half of the research behind the Live Write PRD. The study of the closed Wispr Flow client is kept out of this public repository; its findings live in the private PRD (section 3.5). hush takes ideas and measurements from these projects, not code, unless a licence allows it and the file says so.
 
 ## Projects
 
@@ -158,11 +158,13 @@ No released multilingual clean-up model was found. [Mind the Pause (ACL 2026)](h
 
 | Benchmark | Where | First result |
 | --- | --- | --- |
-| Hesitation floor | `macos/Hush/HushTests/FillerWordsBenchmark.swift` | 27/27 required cases, no real word removed, 16 µs median |
 | Fillers per speech engine | `macos/Hush/HushTests/SpeechFillerBenchmark.swift` | German fillers dropped by every engine. English: 12 of 14 left with Parakeet Ultra and Whisper large-v3 turbo, 0 with Bark 3.0 Clean |
 | Personas on real models | `macos/Hush/HushTests/PersonaLiveTests.swift` | Qwen 3.5 4B 33/36, Apple Intelligence 28/36 |
 
 ## What hush takes from this
+
+hush does not remove fillers with a word list in code, not even a language-independent one like Handy's (owner decision, 2026-11-17): fillers are left to the speech model and hush AI, and a multilingual clean-up model is a future project.
+
 
 - **One written target** for what "finished text" means, shared by prompts, training data and tests (phonon).
 - **Writing mode from the target app,** as data with a per-app override, and "prompt" mode for AI apps and terminals (phonon, Flowstate, Amical).
