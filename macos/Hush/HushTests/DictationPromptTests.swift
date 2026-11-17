@@ -98,7 +98,8 @@ struct DictationPromptTests {
         #expect(try JSONDecoder().decode(Profile.self, from: Data(legacy.utf8)).mode == .correct)
         let saved = try JSONDecoder().decode(Profile.self, from: JSONEncoder().encode(persona))
         #expect(saved.mode == .compose)
-        #expect(Profile.seededProfiles.filter { $0.mode == .compose }.map(\.id) == [Profile.SeedID.writeForMe])
+        #expect(Profile.seededProfiles.allSatisfy { $0.mode == .correct }, "Writing is Live Write's own behaviour, not a library persona")
+        #expect(Profile.liveWrite.mode == .compose)
     }
 
     @Test("An empty persona falls back to its mode's plain task")

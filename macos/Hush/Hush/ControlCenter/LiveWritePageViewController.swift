@@ -2,16 +2,21 @@ import AppKit
 import Combine
 
 @MainActor
-final class PersonaSettingsPageViewController: ControlCenterPageViewController {
+final class LiveWritePageViewController: ControlCenterPageViewController {
     private let focusEnableAI: Bool
+    private let feature = AIFeatureSwitchCard(
+        title: "Live Write",
+        description: "Talk naturally. Ask for a text and hush writes it; anything else is cleaned up in your words.",
+        symbol: "text.bubble.fill",
+        colors: AIFeatureIcon.liveWrite,
+        identifier: "hush.livewrite"
+    )
     private let engineDisclosure = NSButton()
     private let engineSummary = NSTextField(labelWithString: "")
     private let engineModels = AIModelControlsView(scope: .personas)
     private var enginesExpanded = false
     private var subscriptions = Set<AnyCancellable>()
     private var isRefreshing = false
-
-    private let enableSwitch = NSSwitch()
     private let personaListStack = NSStackView()
     private var editorController: PersonaEditorSheetController?
 
@@ -24,55 +29,85 @@ final class PersonaSettingsPageViewController: ControlCenterPageViewController {
 
     override func loadView() {
         super.loadView()
-        stack.spacing = 18
-        addFullWidth(AISettingsHeader(title: "Personas", detail: "Your words, with your own finishing touch.", symbol: "sparkles"))
-        buildMasterCard()
-        buildPersonaWorkspace()
-        buildProviders()
+        stack.spacing = 14
+        addFullWidth(aiPageHeader(title: "Live Write", detail: "Say what you want. Get finished text, entirely on this Mac."))
+        stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
+        feature.onToggle = { [weak self] on in self?.setLiveWrite(on) }
+        feature.onAction = { [weak self] in self?.performNextStep() }
+        addFullWidth(feature)
+        buildExamples()
+        buildEngines()
+        buildPersonas()
         bind()
         refresh()
         if focusEnableAI {
-            DispatchQueue.main.async { [weak self] in self?.view.window?.makeFirstResponder(self?.enableSwitch) }
+            enginesExpanded = !LLMRuntime.shared.isReady(provider: Settings.shared.llmProvider) || Settings.shared.llmProvider == .off
+            refreshEngines()
+            DispatchQueue.main.async { [weak self] in self?.view.window?.makeFirstResponder(self?.feature.toggle) }
         }
     }
 
-    private func buildMasterCard() {
-        let icon = NSImageView()
-        icon.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: "Style your dictation")
-        icon.symbolConfiguration = .init(pointSize: 23, weight: .medium)
-        icon.contentTintColor = DesignTokens.brand500
-        icon.translatesAutoresizingMaskIntoConstraints = false
-        icon.widthAnchor.constraint(equalToConstant: 34).isActive = true
-        icon.heightAnchor.constraint(equalToConstant: 34).isActive = true
+    // MARK: Sections
 
-        let title = NSTextField(labelWithString: "Style your dictation")
-        title.font = .systemFont(ofSize: 14, weight: .semibold)
-        title.textColor = .labelColor
-        let detail = NSTextField(wrappingLabelWithString: "Apply your chosen writing style after you speak.")
-        detail.font = .systemFont(ofSize: 12)
-        detail.textColor = .secondaryLabelColor
-        detail.maximumNumberOfLines = 2
-        let labels = NSStackView(views: [title, detail])
-        labels.orientation = .vertical
-        labels.alignment = .leading
-        labels.spacing = 3
-
-        enableSwitch.setAccessibilityLabel("Style your dictation")
-        enableSwitch.setAccessibilityIdentifier("hush.personas.enabled")
-        enableSwitch.target = self
-        enableSwitch.action = #selector(enableChanged(_:))
-
-        let row = NSStackView(views: [icon, labels, NSView(), enableSwitch])
-        row.orientation = .horizontal
-        row.alignment = .centerY
-        row.spacing = 13
-        addFullWidth(makeCard(content: row, insets: .init(top: 14, left: 16, bottom: 14, right: 16)))
+    private func buildExamples() {
+        addFullWidth(sectionHeading("What it does"))
+        let rows = NSStackView()
+        rows.orientation = .vertical
+        rows.alignment = .leading
+        rows.spacing = 0
+        let examples: [(String, String, String)] = [
+            ("envelope", "\u{201C}Write Tom that I\u{2019}m running ten minutes late\u{201D}", "The finished message, greeting and sign-off included"),
+            ("checklist", "\u{201C}To-do: call the bank, finish the slides, book the train\u{201D}", "A clean list, one item per line"),
+            ("waveform", "\u{201C}Um, so I think we should, uh, move it to Monday\u{201D}", "\u{201C}I think we should move it to Monday.\u{201D}"),
+        ]
+        for (index, example) in examples.enumerated() {
+            let icon = NSImageView(image: NSImage(systemSymbolName: example.0, accessibilityDescription: nil)!)
+            icon.symbolConfiguration = .init(pointSize: 14, weight: .medium)
+            icon.contentTintColor = DesignTokens.brand500
+            icon.translatesAutoresizingMaskIntoConstraints = false
+            icon.widthAnchor.constraint(equalToConstant: 22).isActive = true
+            let said = NSTextField(labelWithString: example.1)
+            said.font = .systemFont(ofSize: 13)
+            let arrow = NSImageView(image: NSImage(systemSymbolName: "arrow.turn.down.right", accessibilityDescription: "becomes")!)
+            arrow.contentTintColor = .tertiaryLabelColor
+            arrow.symbolConfiguration = .init(pointSize: 10, weight: .semibold)
+            let result = NSTextField(labelWithString: example.2)
+            result.font = .systemFont(ofSize: 12)
+            result.textColor = .secondaryLabelColor
+            let resultRow = NSStackView(views: [arrow, result]); resultRow.spacing = 6
+            let texts = NSStackView(views: [said, resultRow])
+            texts.orientation = .vertical; texts.alignment = .leading; texts.spacing = 3
+            let line = NSStackView(views: [icon, texts])
+            line.alignment = .top; line.spacing = 10
+            line.translatesAutoresizingMaskIntoConstraints = false
+            let row = NSView()
+            row.translatesAutoresizingMaskIntoConstraints = false
+            row.addSubview(line)
+            NSLayoutConstraint.activate([
+                line.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 16),
+                line.trailingAnchor.constraint(lessThanOrEqualTo: row.trailingAnchor, constant: -16),
+                line.topAnchor.constraint(equalTo: row.topAnchor, constant: 13),
+                line.bottomAnchor.constraint(equalTo: row.bottomAnchor, constant: -13),
+            ])
+            rows.addArrangedSubview(row)
+            row.widthAnchor.constraint(equalTo: rows.widthAnchor).isActive = true
+            if index < examples.count - 1 {
+                let separator = ControlCenterSeparatorView()
+                separator.translatesAutoresizingMaskIntoConstraints = false
+                separator.heightAnchor.constraint(equalToConstant: 1).isActive = true
+                rows.addArrangedSubview(separator)
+                separator.widthAnchor.constraint(equalTo: rows.widthAnchor, constant: -32).isActive = true
+            }
+        }
+        rows.alignment = .centerX
+        addFullWidth(makeCard(content: rows))
     }
 
-    private func buildProviders() {
+    private func buildEngines() {
+        stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
         engineDisclosure.setButtonType(.onOff)
         engineDisclosure.isBordered = false
-        engineDisclosure.font = .systemFont(ofSize: 14, weight: .semibold)
+        engineDisclosure.font = .systemFont(ofSize: 13, weight: .semibold)
         engineDisclosure.imagePosition = .imageLeading
         engineDisclosure.title = "Writing engine"
         engineDisclosure.setAccessibilityLabel("Writing engine")
@@ -86,25 +121,37 @@ final class PersonaSettingsPageViewController: ControlCenterPageViewController {
         heading.widthAnchor.constraint(equalTo: content.widthAnchor).isActive = true
         engineModels.widthAnchor.constraint(equalTo: content.widthAnchor).isActive = true
         addFullWidth(makeCard(content: content, insets: .init(top: 14, left: 16, bottom: 14, right: 16)))
-        addFullWidth(subtitle("Choose an engine for your writing. Downloads stay on this Mac and can also be used by Assistant."))
-        enginesExpanded = focusEnableAI
-        refreshProviders()
+        addFullWidth(subtitle("Qwen 3.5 4B writes best on this Mac in hush\u{2019}s tests. Models stay on this Mac and are shared with Assistant."))
+        refreshEngines()
     }
-    @objc private func toggleEngines() { enginesExpanded.toggle(); refreshProviders() }
 
-    private func buildPersonaWorkspace() {
+    private func buildPersonas() {
+        stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
         let addButton = NSButton(title: "Add Persona", target: self, action: #selector(addPersona(_:)))
         addButton.image = NSImage(systemSymbolName: "plus", accessibilityDescription: nil)
         addButton.imagePosition = .imageLeading
         addButton.bezelStyle = .rounded
-        let header = NSStackView(views: [sectionTitle("Choose your style"), NSView(), addButton])
+        addButton.controlSize = .small
+        let optional = NSTextField(labelWithString: "Optional")
+        optional.font = .systemFont(ofSize: 11, weight: .medium)
+        optional.textColor = .tertiaryLabelColor
+        let title = NSStackView(views: [sectionHeading("Personas"), optional]); title.spacing = 8; title.alignment = .firstBaseline
+        let header = NSStackView(views: [title, NSView(), addButton])
         header.orientation = .horizontal
         header.alignment = .centerY
         addFullWidth(header)
         personaListStack.orientation = .vertical
         personaListStack.alignment = .leading
-        personaListStack.spacing = 10
-        addFullWidth(personaListStack)
+        personaListStack.spacing = 0
+        addFullWidth(makeCard(content: personaListStack))
+        addFullWidth(subtitle("Live Write needs no persona. Add one when you want a set tone or vocabulary on top, such as formal for clients."))
+    }
+
+    private func sectionHeading(_ text: String) -> NSTextField {
+        let label = NSTextField(labelWithString: text)
+        label.font = .systemFont(ofSize: 13, weight: .semibold)
+        label.textColor = .secondaryLabelColor
+        return label
     }
 
     private func bind() {
@@ -114,7 +161,7 @@ final class PersonaSettingsPageViewController: ControlCenterPageViewController {
             .store(in: &subscriptions)
         LLMRuntime.shared.stateChange
             .receive(on: RunLoop.main)
-            .sink { [weak self] in self?.refreshProviders() }
+            .sink { [weak self] in self?.refresh() }
             .store(in: &subscriptions)
     }
 
@@ -122,67 +169,70 @@ final class PersonaSettingsPageViewController: ControlCenterPageViewController {
         guard !isRefreshing else { return }
         isRefreshing = true
         defer { isRefreshing = false }
-
-        let enabled = Settings.shared.llmProvider != .off
-        enableSwitch.state = enabled ? .on : .off
-        refreshProviders()
+        let status = LiveWriteStatus.current()
+        feature.update(isOn: status.isOn, status: status.text, tone: status.tone, action: status.action, progress: status.progress)
+        refreshEngines()
         refreshPersonaList()
     }
 
-    private func refreshProviders() {
+    private func refreshEngines() {
         engineDisclosure.state = enginesExpanded ? .on : .off
         engineDisclosure.image = NSImage(systemSymbolName: enginesExpanded ? "chevron.down" : "chevron.right", accessibilityDescription: nil)
         engineModels.isHidden = !enginesExpanded
         engineSummary.stringValue = Settings.shared.llmProvider == .off ? "Choose an engine" : Settings.shared.llmProvider.displayName
     }
+    @objc private func toggleEngines() { enginesExpanded.toggle(); refreshEngines() }
 
     private func refreshPersonaList() {
         personaListStack.arrangedSubviews.forEach {
             personaListStack.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
+        let personaOn = Settings.shared.dictationPersonaEnabled
         let activeID = Settings.shared.activeProfileID
         let profiles = Settings.shared.profiles
-        for offset in stride(from: 0, to: profiles.count, by: 2) {
-            let pair = NSStackView()
-            pair.orientation = .horizontal
-            pair.distribution = .fillEqually
-            pair.spacing = 10
-            for profile in profiles[offset..<min(offset + 2, profiles.count)] {
-                let row = PersonaLibraryRow(profile: profile, isSelected: profile.id == activeID)
-                row.onSelect = { Settings.shared.activeProfileID = profile.id }
-                row.onEdit = { [weak self] in self?.presentEditor(for: profile, isNew: false) }
-                pair.addArrangedSubview(row)
-            }
-            if pair.arrangedSubviews.count == 1 { pair.addArrangedSubview(NSView()) }
-            personaListStack.addArrangedSubview(pair)
-            pair.widthAnchor.constraint(equalTo: personaListStack.widthAnchor).isActive = true
+        var rows: [PersonaListRow] = [
+            PersonaListRow(
+                name: "None",
+                summary: "Live Write decides on its own. Recommended.",
+                symbol: "sparkles",
+                isSelected: !personaOn,
+                editable: false
+            )
+        ]
+        rows[0].onSelect = { Settings.shared.dictationPersonaEnabled = false }
+        for profile in profiles {
+            let row = PersonaListRow(
+                name: profile.name,
+                summary: PersonaListRow.summary(profile),
+                symbol: PersonaIconResolver.symbol(for: profile),
+                isSelected: personaOn && profile.id == activeID,
+                editable: true
+            )
+            row.onSelect = { Settings.shared.activeProfileID = profile.id }
+            row.onEdit = { [weak self] in self?.presentEditor(for: profile, isNew: false) }
+            rows.append(row)
+        }
+        for (index, row) in rows.enumerated() {
+            row.showsSeparator = index < rows.count - 1
+            personaListStack.addArrangedSubview(row)
+            row.widthAnchor.constraint(equalTo: personaListStack.widthAnchor).isActive = true
         }
     }
 
-    @objc private func enableChanged(_ sender: NSSwitch) {
-        if sender.state == .off {
-            Settings.shared.llmProvider = .off
-            return
+    // MARK: Actions
+
+    private func setLiveWrite(_ on: Bool) {
+        if !LiveWriteStatus.setEnabled(on) { enginesExpanded = true }
+        refresh()
+    }
+
+    /// The card's button: download the recommended engine, or open the engine list.
+    private func performNextStep() {
+        if !LiveWriteStatus.downloadRecommendedEngine() {
+            enginesExpanded = true
+            refreshEngines()
         }
-        LLMRuntime.shared.refreshAppleAvailability()
-        if LLMRuntime.shared.appleAvailability == .available {
-            Settings.shared.llmProvider = .appleIntelligence
-            return
-        }
-        for provider in LLMProvider.localFallbackOrder {
-            guard let model = LLMRuntime.QwenModel(provider: provider) else { continue }
-            switch LLMRuntime.shared.qwenState(for: model) {
-            case .downloaded, .warm:
-                Settings.shared.llmProvider = provider
-                return
-            default:
-                continue
-            }
-        }
-        sender.state = .off
-        enginesExpanded = true
-        refreshProviders()
     }
 
     /// A new persona starts from what it should do: write what you describe, or clean up your words.
@@ -292,95 +342,6 @@ final class PersonaSettingsPageViewController: ControlCenterPageViewController {
 
 }
 
-@MainActor
-private final class PersonaLibraryRow: NSView {
-    var onSelect: (() -> Void)?
-    var onEdit: (() -> Void)?
-    private let selected: Bool
-    private let selectionButton = NSButton()
-
-    init(profile: Profile, isSelected: Bool) {
-        selected = isSelected
-        super.init(frame: .zero)
-        wantsLayer = true
-        layer?.cornerRadius = 14
-        layer?.cornerCurve = .continuous
-        translatesAutoresizingMaskIntoConstraints = false
-        updateColors()
-        let icon = NSImageView()
-        icon.image = NSImage(systemSymbolName: PersonaIconResolver.symbol(for: profile), accessibilityDescription: nil)
-        icon.symbolConfiguration = .init(pointSize: 19, weight: .medium)
-        icon.contentTintColor = isSelected ? DesignTokens.brand500 : .secondaryLabelColor
-        let name = NSTextField(labelWithString: profile.name)
-        name.font = .systemFont(ofSize: 14, weight: .semibold)
-        name.lineBreakMode = .byTruncatingTail
-        let summary = NSTextField(wrappingLabelWithString: Self.summary(profile))
-        summary.font = .systemFont(ofSize: 12)
-        summary.textColor = .secondaryLabelColor
-        summary.maximumNumberOfLines = 2
-        summary.lineBreakMode = .byTruncatingTail
-        summary.toolTip = profile.systemPrompt
-        let edit = NSButton(title: "Edit", target: self, action: #selector(editTapped))
-        edit.bezelStyle = .rounded; edit.controlSize = .small
-        edit.setAccessibilityLabel("Edit \(profile.name)")
-        selectionButton.title = ""
-        selectionButton.isBordered = false
-        selectionButton.target = self; selectionButton.action = #selector(selectTapped)
-        selectionButton.setAccessibilityLabel("Use \(profile.name)")
-        selectionButton.setAccessibilityValue(isSelected ? "Selected" : "Not selected")
-        selectionButton.toolTip = "Use \(profile.name) for dictation"
-        for child in [icon, name, summary, selectionButton, edit] {
-            child.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(child)
-        }
-        NSLayoutConstraint.activate([
-            heightAnchor.constraint(equalToConstant: 108),
-            icon.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            icon.topAnchor.constraint(equalTo: topAnchor, constant: 17),
-            icon.widthAnchor.constraint(equalToConstant: 24), icon.heightAnchor.constraint(equalToConstant: 24),
-            name.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 10),
-            name.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
-            name.trailingAnchor.constraint(lessThanOrEqualTo: edit.leadingAnchor, constant: -8),
-            edit.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            edit.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
-            summary.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            summary.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            summary.topAnchor.constraint(equalTo: icon.bottomAnchor, constant: 11),
-            selectionButton.leadingAnchor.constraint(equalTo: leadingAnchor),
-            selectionButton.trailingAnchor.constraint(equalTo: trailingAnchor),
-            selectionButton.topAnchor.constraint(equalTo: topAnchor),
-            selectionButton.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
-    }
-    required init?(coder: NSCoder) { fatalError() }
-    override func viewDidChangeEffectiveAppearance() { super.viewDidChangeEffectiveAppearance(); updateColors() }
-    @objc private func selectTapped() { onSelect?() }
-    @objc private func editTapped() { onEdit?() }
-    private func updateColors() {
-        effectiveAppearance.performAsCurrentDrawingAppearance {
-            layer?.backgroundColor = selected ? DesignTokens.brand500.withAlphaComponent(0.10).cgColor : ControlCenterStyle.cardBackground.cgColor
-            layer?.borderWidth = selected ? 1.5 : 0
-            layer?.borderColor = DesignTokens.brand500.withAlphaComponent(0.55).cgColor
-        }
-    }
-    private static func summary(_ profile: Profile) -> String {
-        // Only describe an unmodified built-in. Custom instructions remain the
-        // source of truth, even if someone keeps a built-in's name or ID.
-        if let original = Profile.seededProfiles.first(where: { $0.id == profile.id }), original.systemPrompt == profile.systemPrompt {
-            switch profile.id {
-            case Profile.SeedID.polish: return "A lighter touch. Fix grammar and keep your voice."
-            case Profile.SeedID.business: return "Clear, confident and ready for work."
-            case Profile.SeedID.casual: return "Easygoing words that sound like you."
-            case Profile.SeedID.slack: return "Short, direct and ready for the team."
-            case Profile.SeedID.codeComment: return "Concise comments that get to the point."
-            case Profile.SeedID.writeForMe: return "Say what you need. Get the email, list or steps."
-            default: break
-            }
-        }
-        let text = profile.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
-        return text.isEmpty ? "Add your own writing instructions." : text
-    }
-}
 
 @MainActor
 final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
@@ -742,5 +703,162 @@ final class PersonaEditorSheetController: NSViewController, NSTextViewDelegate {
             return
         }
         onSave?(draft)
+    }
+}
+
+/// Where Live Write stands, in one line, for the Live Write page and the hush AI page.
+@MainActor
+struct LiveWriteStatus {
+    let isOn: Bool
+    let text: String
+    let tone: AIFeatureSwitchCard.Tone
+    let action: String?
+    let progress: Double?
+
+    /// The best engine that can write right now. Qwen 3.5 4B first: it wrote best in
+    /// hush's live persona benchmark (33/36 against Apple Intelligence's 28/36).
+    static func bestReadyEngine() -> LLMProvider? {
+        LLMRuntime.shared.refreshAppleAvailability()
+        return [LLMProvider.qwen35_4b, .appleIntelligence, .qwen35_2b].first { LLMRuntime.shared.isReady(provider: $0) }
+    }
+
+    /// Turns Live Write on or off from any page. On picks the best engine that is ready;
+    /// returns false when there is none yet, so the caller can show the engines.
+    @discardableResult
+    static func setEnabled(_ on: Bool) -> Bool {
+        let settings = Settings.shared
+        settings.liveWriteEnabled = on
+        guard on else { return true }
+        if settings.llmProvider != .off, LLMRuntime.shared.isReady(provider: settings.llmProvider) { return true }
+        guard let provider = bestReadyEngine() else { return false }
+        settings.llmProvider = provider
+        return true
+    }
+
+    /// Starts downloading Qwen 3.5 4B and selects it. False when it is already here or on its way.
+    @discardableResult
+    static func downloadRecommendedEngine() -> Bool {
+        guard let model = LLMRuntime.QwenModel(provider: .qwen35_4b),
+              case .notDownloaded = LLMRuntime.shared.qwenState(for: model) else { return false }
+        Settings.shared.llmProvider = .qwen35_4b
+        LLMRuntime.shared.startDownloadQwen(model)
+        return true
+    }
+
+    static func current() -> LiveWriteStatus {
+        let settings = Settings.shared
+        let runtime = LLMRuntime.shared
+        let on = settings.liveWriteEnabled
+        for provider in [LLMProvider.qwen35_4b, .qwen35_2b] {
+            guard let model = LLMRuntime.QwenModel(provider: provider),
+                  case .downloading(let download) = runtime.qwenState(for: model) else { continue }
+            let text = download.phase == .preparing
+                ? "Preparing \(provider.displayName) for this Mac"
+                : "Downloading \(provider.displayName)"
+            return LiveWriteStatus(isOn: on, text: text, tone: .neutral, action: nil, progress: download.fraction ?? 0)
+        }
+        guard on else {
+            return LiveWriteStatus(isOn: false, text: "Off. Your words go in as you say them.", tone: .neutral, action: nil, progress: nil)
+        }
+        let provider = settings.llmProvider
+        if provider != .off, runtime.isReady(provider: provider) {
+            let persona = settings.dictationPersonaEnabled ? " with \(settings.activeProfile.name)" : ""
+            return LiveWriteStatus(isOn: true, text: "Ready on \(provider.displayName)\(persona)", tone: .ready, action: nil, progress: nil)
+        }
+        let size = LLMProvider.qwen35_4b.approxDownloadSize.map { " (\($0))" } ?? ""
+        return LiveWriteStatus(
+            isOn: true,
+            text: "Needs a writing engine. Dictation works as usual until then.",
+            tone: .attention,
+            action: "Download Qwen 3.5 4B\(size)",
+            progress: nil
+        )
+    }
+}
+
+/// One persona in the optional list: a native, selectable row with a checkmark, its icon,
+/// one line of what it does, and Edit.
+@MainActor
+private final class PersonaListRow: NSView {
+    var onSelect: (() -> Void)?
+    var onEdit: (() -> Void)?
+    var showsSeparator = true { didSet { separator.isHidden = !showsSeparator } }
+    private let separator = ControlCenterSeparatorView()
+
+    init(name: String, summary: String, symbol: String, isSelected: Bool, editable: Bool) {
+        super.init(frame: .zero)
+        translatesAutoresizingMaskIntoConstraints = false
+        let check = NSImageView(image: NSImage(systemSymbolName: isSelected ? "checkmark.circle.fill" : "circle", accessibilityDescription: nil)!)
+        check.symbolConfiguration = .init(pointSize: 15, weight: .regular)
+        check.contentTintColor = isSelected ? DesignTokens.brand500 : .tertiaryLabelColor
+        let icon = NSImageView(image: NSImage(systemSymbolName: symbol, accessibilityDescription: nil) ?? NSImage())
+        icon.symbolConfiguration = .init(pointSize: 14, weight: .medium)
+        icon.contentTintColor = .secondaryLabelColor
+        let title = NSTextField(labelWithString: name)
+        title.font = .systemFont(ofSize: 13, weight: .medium)
+        let detail = NSTextField(labelWithString: summary)
+        detail.font = .systemFont(ofSize: 11.5)
+        detail.textColor = .secondaryLabelColor
+        detail.lineBreakMode = .byTruncatingTail
+        detail.toolTip = summary
+        let labels = NSStackView(views: [title, detail])
+        labels.orientation = .vertical; labels.alignment = .leading; labels.spacing = 1
+        labels.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let row = NSStackView(views: [check, icon, labels, NSView()])
+        row.spacing = 10
+        row.alignment = .centerY
+        if editable {
+            let edit = NSButton(title: "Edit", target: self, action: #selector(editTapped))
+            edit.bezelStyle = .rounded; edit.controlSize = .small
+            edit.setAccessibilityLabel("Edit \(name)")
+            row.addArrangedSubview(edit)
+        }
+        row.translatesAutoresizingMaskIntoConstraints = false
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(row)
+        addSubview(separator)
+        NSLayoutConstraint.activate([
+            heightAnchor.constraint(equalToConstant: 52),
+            row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
+            row.centerYAnchor.constraint(equalTo: centerYAnchor),
+            check.widthAnchor.constraint(equalToConstant: 18),
+            icon.widthAnchor.constraint(equalToConstant: 20),
+            separator.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 72),
+            separator.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            separator.bottomAnchor.constraint(equalTo: bottomAnchor),
+            separator.heightAnchor.constraint(equalToConstant: 1),
+        ])
+        setAccessibilityElement(true)
+        setAccessibilityRole(.radioButton)
+        setAccessibilityLabel(name)
+        setAccessibilityValue(isSelected ? "Selected" : "Not selected")
+        setAccessibilityHelp("Use \(name) for dictation")
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func mouseUp(with event: NSEvent) {
+        guard event.clickCount == 1 else { return super.mouseUp(with: event) }
+        onSelect?()
+    }
+    override func accessibilityPerformPress() -> Bool { onSelect?(); return true }
+    @objc private func editTapped() { onEdit?() }
+
+    static func summary(_ profile: Profile) -> String {
+        // Only describe an unmodified built-in. Custom instructions remain the
+        // source of truth, even if someone keeps a built-in's name or ID.
+        if let original = Profile.seededProfiles.first(where: { $0.id == profile.id }), original.systemPrompt == profile.systemPrompt {
+            switch profile.id {
+            case Profile.SeedID.polish: return "A lighter touch. Fix grammar and keep your voice."
+            case Profile.SeedID.business: return "Clear, confident and ready for work."
+            case Profile.SeedID.casual: return "Easygoing words that sound like you."
+            case Profile.SeedID.slack: return "Short, direct and ready for the team."
+            case Profile.SeedID.codeComment: return "Concise comments that get to the point."
+            default: break
+            }
+        }
+        let text = profile.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "\n", with: " ")
+        return text.isEmpty ? "Add your own writing instructions." : text
     }
 }

@@ -104,7 +104,7 @@ extension Profile {
         static let casual      = UUID(uuidString: "00000000-0000-0000-0000-000000000004")!
         static let slack       = UUID(uuidString: "00000000-0000-0000-0000-000000000005")!
         static let codeComment = UUID(uuidString: "00000000-0000-0000-0000-000000000006")!
-        static let writeForMe  = UUID(uuidString: "00000000-0000-0000-0000-000000000007")!
+        static let liveWrite   = UUID(uuidString: "00000000-0000-0000-0000-000000000007")!
     }
 
     /// Default profile applied when `Settings.llmProvider != .off` and no
@@ -148,14 +148,14 @@ extension Profile {
             name: "Code comment",
             systemPrompt: "Rewrite as a terse code comment: no first-person, no filler words, single sentence ending with a period."
         ),
-        writeForMe,
     ]
 
-    /// Turns what you describe into the text: an email, a message, a to-do list or steps.
-    /// Added once to existing libraries too (`Settings.addNewBuiltInPersonas`).
-    static let writeForMe = Profile(
-        id: SeedID.writeForMe,
-        name: "Write for me",
+    /// What Live Write does with no persona on top: a request ("an email to Tom that I'm
+    /// late") becomes the text, an email, a message, a to-do list or steps; anything else
+    /// is cleaned up in the speaker's words. Not part of the persona library.
+    static let liveWrite = Profile(
+        id: SeedID.liveWrite,
+        name: "Live Write",
         systemPrompt: "Write the text I describe, such as an email, a message, a to-do list or steps. Clear, friendly and ready to send.",
         mode: .compose
     )
