@@ -52,9 +52,40 @@ struct AppActivity: Equatable, Identifiable {
 
 struct DailyActivityPoint: Equatable, Identifiable {
     var id: Date { date }
+
     let date: Date
     let words: Int
     let dictations: Int
+}
+
+extension DailyActivityPoint {
+    /// The points in `range`, one per day for 7 and 30 days with empty days filled in. Points
+    /// that fall on one day are added together, so no stored data can break the chart.
+    static func series(_ points: [DailyActivityPoint], range: ActivityRange, now: Date, calendar: Calendar) -> [DailyActivityPoint] {
+        var byDay: [Date: DailyActivityPoint] = [:]
+        for point in points where range.contains(point.date, now: now, calendar: calendar) {
+            let day = calendar.startOfDay(for: point.date)
+            let earlier = byDay[day]
+            byDay[day] = DailyActivityPoint(
+                date: day,
+                words: point.words + (earlier?.words ?? 0),
+                dictations: point.dictations + (earlier?.dictations ?? 0)
+            )
+        }
+
+        let numberOfDays: Int
+        switch range {
+        case .sevenDays: numberOfDays = 7
+        case .thirtyDays: numberOfDays = 30
+        case .today, .allTime: return byDay.values.sorted { $0.date < $1.date }
+        }
+        let end = calendar.startOfDay(for: now)
+        let start = calendar.date(byAdding: .day, value: -(numberOfDays - 1), to: end) ?? end
+        return (0..<numberOfDays).compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: offset, to: start) else { return nil }
+            return byDay[date] ?? DailyActivityPoint(date: date, words: 0, dictations: 0)
+        }
+    }
 }
 
 enum ActivityRange: String, CaseIterable, Hashable {
@@ -72,7 +103,7 @@ enum ActivityRange: String, CaseIterable, Hashable {
         }
     }
 
-    func contains(_ date: Date, now: Date = Date(), calendar: Calendar = .current) -> Bool {
+    func contains(_ date: Date, now: Date = Date(), calendar: Calendar = .autoupdatingCurrent) -> Bool {
         switch self {
         case .today:
             return calendar.isDate(date, inSameDayAs: now)
@@ -151,6 +182,12 @@ final class DailyActivityEntity {
     var estimatedTimeSaved: Double
     var dictations: Int
     var destinationsJSON: Data
+
+    /// The day this summary counts, read from its key. `date` is the start of that day in the
+    /// time zone it was first written in, kept only because stored data has it.
+    var civilDay: CivilDay { CivilDay(key: dayKey) ?? CivilDay(date) }
+
+    func start(in calendar: Calendar = .autoupdatingCurrent) -> Date { civilDay.start(in: calendar) }
 
     init(dayKey: String, date: Date) {
         self.dayKey = dayKey
@@ -348,7 +385,7 @@ final class ActivityStore: ObservableObject {
     func metrics(for range: ActivityRange, now: Date = Date()) -> ActivityMetrics {
         let typingWordsPerMinute = Settings.shared.typingWordsPerMinute
         return fetchDailyEntities()
-            .filter { range.contains($0.date, now: now) }
+            .filter { range.contains($0.start(), now: now) }
             .reduce(into: ActivityMetrics()) { result, entity in
                 result.words += entity.words
                 result.speechDuration += entity.speechDuration
@@ -361,7 +398,7 @@ final class ActivityStore: ObservableObject {
 
     func destinations(for range: ActivityRange, now: Date = Date()) -> [AppActivity] {
         var totals: [DestinationKey: DestinationAggregate] = [:]
-        for entity in fetchDailyEntities() where range.contains(entity.date, now: now) {
+        for entity in fetchDailyEntities() where range.contains(entity.start(), now: now) {
             for (destination, aggregate) in decodeDestinations(entity.destinationsJSON) {
                 totals[destination, default: .zero].merge(aggregate)
             }
@@ -399,26 +436,10 @@ final class ActivityStore: ObservableObject {
     }
 
     func dailyActivity(for range: ActivityRange, now: Date = Date()) -> [DailyActivityPoint] {
+        let calendar = Calendar.autoupdatingCurrent
         let points = fetchDailyEntities()
-            .filter { range.contains($0.date, now: now) }
-            .map { DailyActivityPoint(date: $0.date, words: $0.words, dictations: $0.dictations) }
-            .sorted { $0.date < $1.date }
-
-        let numberOfDays: Int
-        switch range {
-        case .sevenDays: numberOfDays = 7
-        case .thirtyDays: numberOfDays = 30
-        case .today, .allTime: return points
-        }
-
-        let calendar = Calendar.current
-        let end = calendar.startOfDay(for: now)
-        let start = calendar.date(byAdding: .day, value: -(numberOfDays - 1), to: end) ?? end
-        let pointsByDay = Dictionary(uniqueKeysWithValues: points.map { (calendar.startOfDay(for: $0.date), $0) })
-        return (0..<numberOfDays).compactMap { offset in
-            guard let date = calendar.date(byAdding: .day, value: offset, to: start) else { return nil }
-            return pointsByDay[date] ?? DailyActivityPoint(date: date, words: 0, dictations: 0)
-        }
+            .map { DailyActivityPoint(date: $0.start(in: calendar), words: $0.words, dictations: $0.dictations) }
+        return DailyActivityPoint.series(points, range: range, now: now, calendar: calendar)
     }
 
     private func updateDailySummary(
@@ -428,10 +449,9 @@ final class ActivityStore: ObservableObject {
         destinationName: String,
         destinationBundleIdentifier: String?
     ) {
-        let startOfDay = Calendar.current.startOfDay(for: createdAt)
-        let dayKey = Self.dayFormatter.string(from: startOfDay)
-        let entity = fetchDailyEntities().first(where: { $0.dayKey == dayKey })
-            ?? DailyActivityEntity(dayKey: dayKey, date: startOfDay)
+        let day = CivilDay(createdAt)
+        let entity = fetchDailyEntities().first(where: { $0.dayKey == day.key })
+            ?? DailyActivityEntity(dayKey: day.key, date: day.start())
         if entity.modelContext == nil { context.insert(entity) }
 
         let typingDuration = Double(words) / Settings.shared.typingWordsPerMinute * 60
@@ -553,7 +573,7 @@ final class ActivityStore: ObservableObject {
                   let legacy = try? JSONDecoder().decode([DestinationKey: Int].self, from: day.destinationsJSON),
                   !legacy.isEmpty else { continue }
 
-            let records = historyEntities.filter { Calendar.current.isDate($0.createdAt, inSameDayAs: day.date) }
+            let records = historyEntities.filter { CivilDay($0.createdAt) == day.civilDay }
             var exact: [DestinationKey: DestinationAggregate] = [:]
             for record in records {
                 let key = DestinationKey(name: record.appName, bundleIdentifier: record.appBundleIdentifier)
@@ -606,14 +626,6 @@ final class ActivityStore: ObservableObject {
         return result
     }
 
-    private static let dayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = .current
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter
-    }()
 }
 
 private struct LegacyRecentInsert: Codable {

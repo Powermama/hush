@@ -15,7 +15,16 @@ fi
 
 APP_PATH="${HUSH_APP_PATH:-${HUSH_RELEASE_DIRECTORY:-${REPOSITORY_DIRECTORY}/artifacts/release}/export/hush.app}"
 UPDATE_CHANNEL="${HUSH_UPDATE_CHANNEL:-alpha}"
-UPDATE_DIRECTORY="${HUSH_UPDATE_DIRECTORY:-${REPOSITORY_DIRECTORY}/artifacts/updates/${UPDATE_CHANNEL}}"
+RELEASE_DIRECTORY="${HUSH_RELEASE_DIRECTORY:-${REPOSITORY_DIRECTORY}/artifacts/release}"
+# Each publish stages a fresh mirror of the published channel inside its release
+# directory. generate_appcast moves superseded files into old_updates/, so a folder
+# reused across releases carries stale files that collide with the next run.
+if [[ -n "${HUSH_UPDATE_DIRECTORY:-}" ]]; then
+  UPDATE_DIRECTORY="${HUSH_UPDATE_DIRECTORY}"
+else
+  mkdir -p "${RELEASE_DIRECTORY}"
+  UPDATE_DIRECTORY="$(mktemp -d "${RELEASE_DIRECTORY}/updates.XXXXXX")/${UPDATE_CHANNEL}"
+fi
 R2_BUCKET="${HUSH_R2_BUCKET:-hush}"
 R2_ENDPOINT="${HUSH_R2_ENDPOINT:-}"
 DMG_PATH="${HUSH_DMG_PATH:-}"
