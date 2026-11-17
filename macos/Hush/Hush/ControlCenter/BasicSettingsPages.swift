@@ -142,7 +142,7 @@ final class GeneralSettingsPageViewController: ControlCenterPageViewController {
         for row in rows.arrangedSubviews { row.widthAnchor.constraint(equalTo: rows.widthAnchor).isActive = true }
         addFullWidth(sectionTitle("Speed on this Mac"))
         addFullWidth(makeCard(content: rows))
-        addFullWidth(subtitle("Over your last 50 dictations on this Mac. Only the times are kept, never what you said."))
+        addFullWidth(subtitle("Measured over your last 50 dictations and stored only on this Mac. hush keeps only the times, never what you said, and never sends them anywhere."))
     }
 
     static func speedText(_ summary: DictationWaitSummary?) -> String {
