@@ -23,6 +23,64 @@ struct AssistantSetupSnapshot: Equatable {
     }
 }
 
+/// Where the Assistant stands, in one line, for its page and the hush AI page.
+@MainActor
+struct AssistantStatus {
+    let isOn: Bool
+    let text: String
+    let tone: AIFeatureSwitchCard.Tone
+    let action: String?
+    var secondary: String? = nil
+    let progress: Double?
+
+    /// On starts setup when something is missing; off keeps models and permissions.
+    static func setEnabled(_ on: Bool, flow: AssistantSetupFlow = .shared) {
+        Settings.shared.assistantEnabled = on
+        if on, !flow.isReady, !flow.isRunning, !AIModelLibrary.shared.isRemoving { flow.start() }
+    }
+
+    /// The card's button: continue a setup that needs the user, or start one.
+    static func performNextStep(flow: AssistantSetupFlow = .shared) {
+        if case .working(let step) = flow.state, [.microphone, .accessibility, .screen].contains(step) {
+            flow.openPermissionSettings()
+        } else if flow.isRunning {
+            flow.cancel()
+        } else {
+            Settings.shared.assistantEnabled = true
+            if !AIModelLibrary.shared.isRemoving { flow.start() }
+        }
+    }
+
+    static func current(flow: AssistantSetupFlow = .shared) -> AssistantStatus {
+        let on = Settings.shared.assistantEnabled
+        if case .working(let step) = flow.state {
+            let needsUser = [.microphone, .accessibility, .screen].contains(step)
+            var fraction: Double?
+            if step == .voice { fraction = CoworkerVoice.shared.setupProgress.value.fraction }
+            return AssistantStatus(isOn: on, text: "Setting up: \(step.title)", tone: needsUser ? .attention : .neutral,
+                                   action: needsUser ? "Open System Settings" : "Cancel",
+                                   secondary: needsUser ? "Cancel" : nil, progress: fraction)
+        }
+        if flow.state == .cancelling {
+            return AssistantStatus(isOn: on, text: "Stopping setup\u{2026}", tone: .neutral, action: nil, progress: nil)
+        }
+        guard on else {
+            return AssistantStatus(isOn: false, text: "Off. Its shortcut does nothing until you turn it on.", tone: .neutral, action: nil, progress: nil)
+        }
+        if flow.isReady {
+            return AssistantStatus(isOn: true, text: "Ready. Hold Control + Fn in any app to talk.", tone: .ready, action: nil, progress: nil)
+        }
+        switch flow.state {
+        case .failed(let message):
+            return AssistantStatus(isOn: true, text: message, tone: .attention, action: "Retry setup", progress: nil)
+        case .cancelled:
+            return AssistantStatus(isOn: true, text: "Setup paused. Finished downloads and permissions are kept.", tone: .attention, action: "Resume setup", progress: nil)
+        default:
+            return AssistantStatus(isOn: true, text: "Needs a one-time setup: models and permissions, guided.", tone: .attention, action: "Set up Assistant", progress: nil)
+        }
+    }
+}
+
 @MainActor
 final class AssistantSettingsPageViewController: ControlCenterPageViewController {
     private let onNavigate: (HushDestination) -> Void
@@ -30,16 +88,19 @@ final class AssistantSettingsPageViewController: ControlCenterPageViewController
     private let library = AIModelLibrary.shared
     private var subscriptions = Set<AnyCancellable>()
     private var timer: Timer?
-    private let setupTitle = NSTextField(labelWithString: "")
-    private let detail = NSTextField(wrappingLabelWithString: "")
-    private let setup = NSButton(title: "Set up Assistant", target: nil, action: nil)
-    private let cancel = NSButton(title: "Cancel", target: nil, action: nil)
-    private let permission = NSButton(title: "Open Settings", target: nil, action: nil)
-    private let spinner = NSProgressIndicator()
-    private let downloadBar = NSProgressIndicator()
-    private let models = AIModelControlsView(scope: .assistant)
+    private let feature = AIFeatureSwitchCard(
+        title: "Assistant",
+        description: "A voice coworker that sees the window you\u{2019}re in and makes changes with you.",
+        symbol: "cursorarrow.rays",
+        colors: AIFeatureIcon.assistant,
+        badge: "BETA",
+        identifier: "hush.assistant"
+    )
+    private let intelligenceModels = AIModelControlsView(scope: .assistantIntelligence)
+    private let requiredModels = AIModelControlsView(scope: .assistantSupport)
     private var statuses: [AssistantSetupFlow.Step: NSTextField] = [:]
-    private let modelPicker = NSPopUpButton()
+    private let header = aiPageHeader(title: "Assistant", detail: "")
+    private let privacyNote = NSTextField(wrappingLabelWithString: "")
 
     init(coordinator: DictationCoordinator?, onNavigate: @escaping (HushDestination) -> Void) {
         self.onNavigate = onNavigate
@@ -56,51 +117,62 @@ final class AssistantSettingsPageViewController: ControlCenterPageViewController
 
     override func loadView() {
         super.loadView()
-        addFullWidth(AISettingsHeader(title: "Hush Assistant", detail: "Your voice coworker, powered by this Mac.", symbol: "cursorarrow.rays", badge: "Beta"))
-        setupTitle.font = .systemFont(ofSize: 20, weight: .semibold)
-        setupTitle.setAccessibilityIdentifier("hush.assistant.setup.status")
-        detail.font = .systemFont(ofSize: 12); detail.textColor = .secondaryLabelColor
-        detail.maximumNumberOfLines = 0
-        setup.bezelStyle = .rounded; setup.target = self; setup.action = #selector(startSetup)
-        setup.setAccessibilityIdentifier("hush.assistant.setup.start")
-        cancel.bezelStyle = .rounded; cancel.target = self; cancel.action = #selector(cancelSetup)
-        permission.bezelStyle = .rounded; permission.target = self; permission.action = #selector(openPermission)
-        spinner.style = .spinning; spinner.controlSize = .small; spinner.isDisplayedWhenStopped = false
-        let buttons = NSStackView(views: [setup, permission, cancel, spinner]); buttons.spacing = 10
-        downloadBar.style = .bar; downloadBar.isIndeterminate = false; downloadBar.minValue = 0; downloadBar.maxValue = 1
-        downloadBar.widthAnchor.constraint(equalToConstant: 240).isActive = true
-        downloadBar.setAccessibilityIdentifier("hush.assistant.download-progress")
-        let content = NSStackView(views: [setupTitle, detail, downloadBar, buttons])
-        content.orientation = .vertical; content.alignment = .leading; content.spacing = 10
-        addFullWidth(makeCard(content: content, insets: .init(top: 20, left: 20, bottom: 20, right: 20)))
-        addFullWidth(subtitle("Setup downloads missing models and guides you through macOS permissions. Everything you say and show Hush is processed on this Mac. Downloads and websites you open use the internet."))
-        let modelHeading = NSStackView(views: [sectionTitle("On this Mac"), NSView(), modelPicker]); modelHeading.spacing = 12
-        modelPicker.addItems(withTitles: ["Qwen 3.5 4B", "Qwen 3.5 2B"])
-        modelPicker.setAccessibilityLabel("Assistant intelligence model")
-        modelPicker.target = self; modelPicker.action = #selector(changeModel)
-        addFullWidth(modelHeading)
-        addFullWidth(makeCard(content: models))
-        addFullWidth(sectionTitle("Permissions"))
+        stack.spacing = 14
+        addFullWidth(header)
+        stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
+        feature.onToggle = { [weak self] on in
+            guard let self else { return }
+            AssistantStatus.setEnabled(on, flow: self.flow)
+            self.refresh()
+        }
+        feature.onAction = { [weak self] in
+            guard let self else { return }
+            AssistantStatus.performNextStep(flow: self.flow)
+            self.refresh()
+        }
+        feature.onSecondaryAction = { [weak self] in self?.flow.cancel(); self?.refresh() }
+        addFullWidth(feature)
+        let usage = subtitle("Hold Control + Fn in the app you want help with and release to send. Press Escape to stop and start a fresh conversation.")
+        usage.setAccessibilityIdentifier("hush.assistant.local-processing")
+        addFullWidth(usage)
+
+        stack.setCustomSpacing(22, after: usage)
+        addFullWidth(sectionHeading("AI model"))
+        intelligenceModels.setAccessibilityIdentifier("hush.assistant.models.intelligence")
+        addFullWidth(makeCard(content: intelligenceModels))
+        addFullWidth(subtitle("Qwen 3.5 4B understands screens best on this Mac. Models here are shared with Live Write."))
+
+        stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
+        addFullWidth(sectionHeading("Required models"))
+        requiredModels.setAccessibilityIdentifier("hush.assistant.models.required")
+        addFullWidth(makeCard(content: requiredModels))
+
+        let permissionsHeading = sectionHeading("Permissions")
+        stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
+        addFullWidth(permissionsHeading)
         let rows = NSStackView()
         rows.orientation = .vertical; rows.alignment = .leading; rows.spacing = 0
         let entries: [(AssistantSetupFlow.Step, String, String)] = [
             (.microphone, "Microphone", "Hear you while you hold Control + Fn."),
             (.accessibility, "Accessibility", "Read controls and make the edits you ask for."),
-            (.screen, "Screen Recording", "Understand the window you’re working in.")
+            (.screen, "Screen Recording", "Understand the window you\u{2019}re working in.")
         ]
         for (index, entry) in entries.enumerated() {
             let status = NSTextField(labelWithString: "")
-            status.font = .systemFont(ofSize: 12); statuses[entry.0] = status
+            status.font = .systemFont(ofSize: 12, weight: .medium); statuses[entry.0] = status
             status.setAccessibilityIdentifier("hush.assistant.\(entry.0.rawValue).status")
             let row = ControlCenterKeyValueRow(title: entry.1, subtitle: entry.2, trailing: status, showsSeparator: index < entries.count - 1)
             rows.addArrangedSubview(row); row.widthAnchor.constraint(equalTo: rows.widthAnchor).isActive = true
         }
         addFullWidth(makeCard(content: rows))
-        let privacy = subtitle("Hold Control + Fn to talk in any app. Release to submit. Press Escape to stop and start a fresh conversation.")
-        privacy.setAccessibilityIdentifier("hush.assistant.local-processing")
-        addFullWidth(privacy)
+        privacyNote.font = .systemFont(ofSize: 12)
+        privacyNote.textColor = .secondaryLabelColor
+        privacyNote.setAccessibilityIdentifier("hush.assistant.privacy")
+        addFullWidth(privacyNote)
         library.changes.receive(on: RunLoop.main).sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
         flow.changes.receive(on: RunLoop.main).sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
+        Settings.shared.didChange.merge(with: CoworkerModelSettings.changes, ChatGPTAccount.shared.changes)
+            .receive(on: RunLoop.main).sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
         refresh()
     }
     override func viewWillAppear() {
@@ -111,50 +183,32 @@ final class AssistantSettingsPageViewController: ControlCenterPageViewController
     }
     override func viewWillDisappear() { super.viewWillDisappear(); timer?.invalidate(); timer = nil }
 
+    private func sectionHeading(_ text: String) -> NSTextField {
+        let label = NSTextField(labelWithString: text)
+        label.font = .systemFont(ofSize: 13, weight: .semibold)
+        label.textColor = .secondaryLabelColor
+        return label
+    }
+
     private func refresh() {
         guard isViewLoaded else { return }
-        let ready = flow.isReady
-        setupTitle.stringValue = ready ? "Ready when you are" : "Meet your new coworker"
-        detail.stringValue = ready ? "Hold Control + Fn in the app you want help with.\nPress Escape whenever you want to stop." : "One setup, then you’re ready to talk. Existing downloads are reused."
-        setup.title = "Set up Assistant"
-        permission.isHidden = true
-        if case .failed(let message) = flow.state, !ready { detail.stringValue = message; setup.title = "Retry setup" }
-        if case .cancelled = flow.state, !ready { detail.stringValue = "Setup paused. Completed downloads and permissions are kept."; setup.title = "Resume setup" }
-        downloadBar.isHidden = true
-        if case .working(let step) = flow.state {
-            setupTitle.stringValue = "Setting up Assistant"
-            detail.stringValue = step.title
-            if step == .intelligence { detail.stringValue += "\n" + library.detail(.intelligence(CoworkerModelSettings.provider)) }
-            if step == .voice {
-                detail.stringValue = CoworkerVoice.shared.setupProgress.value.label
-                if let fraction = CoworkerVoice.shared.setupProgress.value.fraction {
-                    downloadBar.isHidden = false; downloadBar.doubleValue = fraction
-                }
-            }
-            permission.isHidden = ![.microphone, .accessibility, .screen].contains(step)
-        }
-        setup.isHidden = ready || flow.isRunning
-        setup.isEnabled = !library.isRemoving
-        cancel.isHidden = !flow.isRunning
-        cancel.isEnabled = flow.state != .cancelling
-        if flow.state == .cancelling { detail.stringValue = "Stopping setup…" }
-        if flow.isRunning { spinner.startAnimation(nil) } else { spinner.stopAnimation(nil) }
-        for (step, status) in statuses {
+        let status = AssistantStatus.current(flow: flow)
+        feature.update(isOn: status.isOn, status: status.text, tone: status.tone, action: status.action, secondary: status.secondary,
+                       progress: status.progress, toggleEnabled: flow.state != .cancelling && !library.isRemoving)
+        for (step, label) in statuses {
             let available = flow.ready(step)
-            status.stringValue = available ? "Ready" : "Needs setup"
-            status.textColor = available ? DesignTokens.goodInk : .secondaryLabelColor
-            if case .working(let current) = flow.state, current == step, flow.isRunning { status.stringValue = "Waiting for access…" }
+            label.stringValue = available ? "Allowed" : "Not allowed yet"
+            label.textColor = available ? DesignTokens.goodInk : .secondaryLabelColor
+            if case .working(let current) = flow.state, current == step, flow.isRunning { label.stringValue = "Waiting for you\u{2026}" }
         }
-        modelPicker.selectItem(at: CoworkerModelSettings.provider == .qwen35_4b ? 0 : 1)
-        modelPicker.isEnabled = !flow.isRunning
-    }
-    @objc private func startSetup() { flow.start() }
-    @objc private func cancelSetup() { flow.cancel() }
-    @objc private func openPermission() { flow.openPermissionSettings() }
-    @objc private func changeModel() {
-        CoworkerModelSettings.provider = modelPicker.indexOfSelectedItem == 0 ? .qwen35_4b : .qwen35_2b
-        // Recreate static labels for the chosen configuration through navigation.
-        onNavigate(.assistant)
+        // Never claim everything stays on this Mac while the plan answers.
+        let cloud = CoworkerModelSettings.isCloud
+        header.detail = cloud
+            ? "Talk to hush about what\u{2019}s on your screen, answered with your ChatGPT plan."
+            : "Talk to hush about what\u{2019}s on your screen, entirely on this Mac."
+        privacyNote.stringValue = cloud
+            ? "Setup walks you through each macOS permission. Listening and spoken replies stay on this Mac; what you ask, text from the app you\u{2019}re in and, when it helps, a screenshot of that window are sent to OpenAI."
+            : "Setup downloads what is missing and walks you through each macOS permission. What you say and show hush stays on this Mac; downloads and websites you open use the internet."
     }
 }
 
