@@ -17,6 +17,7 @@ final class ChatGPTAccount {
     }
 
     static let manageUsageURL = URL(string: "https://chatgpt.com/settings/usage")!
+    static let privacyPolicyURL = URL(string: "https://openai.com/policies/privacy-policy/")!
     /// After a usage limit, plan requests pause for this long before hush tries again.
     static let limitPause: TimeInterval = 15 * 60
 
@@ -195,7 +196,9 @@ extension ChatGPTAccount {
         }
 
         var consentText: String {
-            let account = "You sign in on OpenAI\u{2019}s website; hush never sees your password or your ChatGPT chats. Requests count toward your plan\u{2019}s limits and are sent with storage turned off."
+            // As Apple says for its own ChatGPT extension: with the user's own account, OpenAI's
+            // data rules apply. store:false keeps requests out of OpenAI's stored responses only.
+            let account = "You sign in on OpenAI\u{2019}s website; hush never sees your password or your ChatGPT chats. Requests count toward your plan\u{2019}s limits. hush asks OpenAI not to store them; OpenAI\u{2019}s privacy policy and your ChatGPT data controls apply."
             switch self {
             case .liveWrite:
                 return """
@@ -239,6 +242,9 @@ extension ChatGPTAccount {
         alert.informativeText = purpose.consentText
         alert.addButton(withTitle: isConnected ? "Use ChatGPT" : "Continue with ChatGPT")
         alert.addButton(withTitle: "Cancel")
+        // The standard help button opens OpenAI's privacy policy.
+        alert.showsHelp = true
+        alert.delegate = ChatGPTPrivacyHelp.shared
         let proceed: (NSApplication.ModalResponse) -> Void = { [weak self] response in
             guard response == .alertFirstButtonReturn, let self else { return }
             self.grantConsent(purpose)
@@ -268,5 +274,16 @@ extension ChatGPTAccount {
             }
         }
         if let window { confirm.beginSheetModal(for: window, completionHandler: proceed) } else { proceed(confirm.runModal()) }
+    }
+}
+
+/// Opens OpenAI's privacy policy from the help button of the consent alerts.
+@MainActor
+private final class ChatGPTPrivacyHelp: NSObject, NSAlertDelegate {
+    static let shared = ChatGPTPrivacyHelp()
+
+    func alertShowHelp(_ alert: NSAlert) -> Bool {
+        NSWorkspace.shared.open(ChatGPTAccount.privacyPolicyURL)
+        return true
     }
 }
