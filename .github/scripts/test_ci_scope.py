@@ -168,6 +168,14 @@ class GitJourneyTests(unittest.TestCase):
         scope, _ = scope_for_event("push", dict(before=base, after=head), self.repo)
         self.assertEqual(scope, dict(web=False, cms=False, native=True, integration=True))
 
+    def test_merge_group_checks_every_queued_change(self):
+        base = self.git("rev-parse", "HEAD")
+        self.commit("webapp/apps/web/src/main.tsx", "first queued pull request")
+        head = self.commit("macos/Hush/App.swift", "second queued pull request")
+        event = {"merge_group": {"base_sha": base, "head_sha": head}}
+        scope, _ = scope_for_event("merge_group", event, self.repo)
+        self.assertEqual(scope, dict(web=True, cms=False, native=True, integration=True))
+
     def test_pr_uses_merge_base_not_unrelated_base_branch_changes(self):
         self.git("checkout", "-b", "feature")
         head = self.commit("webapp/apps/web/src/main.tsx", "new website")

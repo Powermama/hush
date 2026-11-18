@@ -5,6 +5,8 @@ on:
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   push:
     branches: [main]
+  # GitHub's merge queue tests queued pull requests together before they reach main.
+  merge_group:
   workflow_dispatch:
 
 permissions:

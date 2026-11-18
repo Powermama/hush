@@ -120,6 +120,11 @@ def scope_for_event(event_name, event, cwd=None, workflow="ci"):
     elif event_name == "push":
         base, head = event.get("before", ""), event.get("after", "")
         comparison = f"{base}..{head}"
+    elif event_name == "merge_group":
+        # The queue's temporary branch: the base branch plus every queued pull request.
+        group = event.get("merge_group", {})
+        base, head = group.get("base_sha", ""), group.get("head_sha", "")
+        comparison = f"{base}..{head}"
     else:
         return full_scope(), "Manual or unrecognized event: all checks."
     if not all(isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{40}", sha)

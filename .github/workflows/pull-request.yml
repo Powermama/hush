@@ -3,12 +3,14 @@ name: Pull request
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, ready_for_review]
+  # The title is checked on the pull request; the queue only needs the required check to report.
+  merge_group:
 
 permissions:
   contents: read
 
 concurrency:
-  group: pr-title-${{ github.event.pull_request.number }}
+  group: pr-title-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -18,6 +20,7 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Check the squash-commit title
+        if: github.event_name == 'pull_request'
         run: |
           python3 - <<'PY'
           import json, os, re
