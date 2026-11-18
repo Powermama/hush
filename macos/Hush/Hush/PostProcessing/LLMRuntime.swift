@@ -519,7 +519,7 @@ final class LLMRuntime {
     /// The same rules and examples as on this Mac, as Responses `instructions` and turns.
     /// Falls back to the best engine on this Mac when the plan cannot write this one.
     private func generateChatGPTDictation(transcript: String, profile: Profile) async throws -> String {
-        let messages = Self.qwenDictationMessages(transcript: transcript, profile: profile)
+        let messages = Self.qwenDictationMessages(transcript: transcript, profile: profile, vocabulary: Self.vocabularyTerms)
         let input = messages.dropFirst().map { ChatGPTResponses.Message(role: $0.role == .assistant ? "assistant" : "user", content: $0.content) }
         do {
             let raw = try await ChatGPTAccount.shared.write(
@@ -556,10 +556,10 @@ final class LLMRuntime {
         case .qwen35_2b, .qwen35_4b:
             guard let model = QwenModel(provider: provider) else { throw Error.providerOff }
             #if canImport(MLXLLM) && canImport(MLXLMCommon) && canImport(MLXHuggingFace) && canImport(HuggingFace)
-            let messages = Self.qwenDictationMessages(transcript: transcript, profile: profile)
+            let messages = Self.qwenDictationMessages(transcript: transcript, profile: profile, vocabulary: Self.vocabularyTerms)
             return try await generateQwen(
                 model: model,
-                userPrompt: Profile.buildDictationTurn(transcript: transcript, profile: profile),
+                userPrompt: Profile.buildDictationTurn(transcript: transcript, profile: profile, vocabulary: Self.vocabularyTerms),
                 systemPrompt: Profile.qwenDictationSystemPrompt(for: profile.mode),
                 history: Array(messages.dropFirst().dropLast()),
                 profile: profile
@@ -669,7 +669,7 @@ final class LLMRuntime {
             switch appleAvailability {
             case .available:
                 var instructions = Profile.appleDictationInstructions(for: profile.mode, examples: style != .withoutExamples)
-                var prompt = Profile.buildDictationTurn(transcript: transcript, profile: profile)
+                var prompt = Profile.buildDictationTurn(transcript: transcript, profile: profile, vocabulary: Self.vocabularyTerms)
                 if style == .personaInInstructions {
                     instructions += "\n\nFor this user:\n<persona>\(profile.personaTask)</persona>\n<creativity>\(profile.creativityHint)</creativity>"
                     prompt = "<language>\(Profile.dictationLanguage(of: transcript))</language>\n<dictation>\(transcript)</dictation>"
@@ -756,7 +756,10 @@ final class LLMRuntime {
     #if canImport(MLXLLM) && canImport(MLXLMCommon) && canImport(MLXHuggingFace) && canImport(HuggingFace)
     /// Everything Qwen sees for one dictation: hush's rules as the system message, the
     /// examples as earlier turns with their answers, then the user's persona and dictation.
-    nonisolated static func qwenDictationMessages(transcript: String, profile: Profile) -> [Chat.Message] {
+    /// The user's terms for the writing prompt; read on the main actor, where dictation runs.
+    static var vocabularyTerms: [String] { Settings.shared.vocabulary.map(\.term) }
+
+    nonisolated static func qwenDictationMessages(transcript: String, profile: Profile, vocabulary: [String] = []) -> [Chat.Message] {
         var messages: [Chat.Message] = [.system(Profile.qwenDictationSystemPrompt(for: profile.mode))]
         for example in Profile.dictationExamples(for: profile.mode) {
             messages.append(.user(Profile.buildDictationTurn(
@@ -765,7 +768,7 @@ final class LLMRuntime {
             )))
             messages.append(.assistant("<output>\(example.output)</output>"))
         }
-        messages.append(.user(Profile.buildDictationTurn(transcript: transcript, profile: profile)))
+        messages.append(.user(Profile.buildDictationTurn(transcript: transcript, profile: profile, vocabulary: vocabulary)))
         return messages
     }
 

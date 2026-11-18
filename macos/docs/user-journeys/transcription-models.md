@@ -60,6 +60,17 @@ Given a downloaded model that is neither active nor bundled, when the user choos
 
 Given **About**, then the Speech recognition section credits Parakeet Ultra and Redux (Moondream, from NVIDIA Parakeet TDT v3, CC-BY-4.0), FluidAudio (Apache-2.0), Whisper (MIT) and WhisperKit (MIT) with links.
 
+### TM-011 - Teach hush a word by saying it
+
+Given the speech model is ready, the user opens Settings > Transcription > Vocabulary (`Add Words…` or `Manage…`) and chooses `Add Word`. The flow follows FluidVoice's design:
+
+1. **Type the word** exactly as it should be written, then `Continue`.
+2. **Say it.** hush listens through dictation's own microphone and model, with no HUD, history, recording file or inserted text, and stops by itself when the user pauses. Three tries show what was heard: `Recognised` (green) or `Heard "hash"` (orange). Silence gives a hint and up to three retries; dictation waits meanwhile, and the hotkey shows "hush is learning a word".
+3. **Review** the heard spellings as chips, remove or type more, then `Add to Vocabulary`.
+4. **Try it:** `Try It` records a sentence and shows what hush would write, with the word highlighted, or offers `Teach It More`.
+
+`Type What hush Writes Instead…` skips the recording. From then on every dictation, with or without Live Write, writes the word wherever a learned spelling appears, as a whole word in any case. Live Write also receives the words. Each list row offers `Say it again`, `Edit` and `Remove`. A word learned with another speech model is flagged with "Say it again".
+
 ## Test ownership
 
 | Journey | Automated coverage |
@@ -74,4 +85,5 @@ Given **About**, then the Speech recognition section credits Parakeet Ultra and 
 | TM-008 | `SpeechEngineTests.generalPageLanguageMessage` |
 | TM-009 | Manual control center journey |
 | TM-010 | Manual control center journey |
+| TM-011 | `VocabularyTests` (replacement, heard spellings, model tags, persistence, prompt line), `SpeechEndpointTests` (pause detection); manual voice journey in a team-signed build |
 | Storage | `SpeechEngineTests.parakeetStorage`, `SpeechEngineTests.matchesFluidAudioContract`, `ModelStorageTests.usesApplicationSupport` |

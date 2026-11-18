@@ -34,7 +34,20 @@ struct EverydayTypingSample: Codable, Equatable, Identifiable {
 
 @MainActor
 final class Settings {
-    static let shared = Settings()
+    static let shared = Settings(defaults: sharedDefaults)
+
+    /// The user's preferences, except while hush hosts tests: then a throwaway domain, so no
+    /// test reads or writes what the user set (as the timing store and recording journal do).
+    private static var sharedDefaults: UserDefaults {
+        let environment = ProcessInfo.processInfo.environment
+        guard environment["HUSH_TEST_HOST"] == "1" || environment["XCTestConfigurationFilePath"] != nil else {
+            return .standard
+        }
+        let suite = "hush.tests.shared"
+        let defaults = UserDefaults(suiteName: suite) ?? .standard
+        defaults.removePersistentDomain(forName: suite)
+        return defaults
+    }
 
     private let defaults: UserDefaults
     let didChange = PassthroughSubject<Void, Never>()
@@ -77,6 +90,7 @@ final class Settings {
         static let verifiedMessagesDestinationMode = "verifiedMessages.destinationMode.v1"
         static let liveWriteAppExceptions = "liveWrite.appExceptions.v1"
         static let liveWriteWebsiteExceptions = "liveWrite.websiteExceptions.v1"
+        static let vocabulary = "vocabulary.terms.v1"
         static let verifiedMessagesAppExceptions = "verifiedMessages.appExceptions.v1"
         static let verifiedMessagesWebsiteExceptions = "verifiedMessages.websiteExceptions.v1"
         static let verifiedMessagesSuppressionNotices = "verifiedMessages.suppressionNotices.v1"
@@ -326,6 +340,19 @@ final class Settings {
         }
         set {
             defaults.set(try? JSONEncoder().encode(LiveWriteApps.normalized(newValue)), forKey: Keys.liveWriteAppExceptions)
+            didChange.send()
+        }
+    }
+
+    /// The user's names and terms (PRD R13), applied to every dictation.
+    var vocabulary: [VocabularyTerm] {
+        get {
+            guard let data = defaults.data(forKey: Keys.vocabulary),
+                  let terms = try? JSONDecoder().decode([VocabularyTerm].self, from: data) else { return [] }
+            return terms
+        }
+        set {
+            defaults.set(try? JSONEncoder().encode(Vocabulary.normalized(newValue)), forKey: Keys.vocabulary)
             didChange.send()
         }
     }
