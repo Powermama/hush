@@ -31,8 +31,8 @@ final class PersonaWheelJourneyTests: XCTestCase {
         app.typeKey("p", modifierFlags: .option)
 
         XCTAssertTrue(
-            app.staticTexts["Personas"].waitForExistence(timeout: 5),
-            "The persona shortcut should open the Personas page when Persona AI is off"
+            app.staticTexts["What it does"].waitForExistence(timeout: 5),
+            "The persona shortcut should open the Live Write page when the writing engine is off"
         )
         XCTAssertFalse(
             app.descendants(matching: .any)["hush.personaWheel"].exists,
@@ -50,7 +50,7 @@ final class PersonaWheelJourneyTests: XCTestCase {
         app.activate()
         app.typeKey("p", modifierFlags: .option)
 
-        XCTAssertTrue(app.staticTexts["Choose your style"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["What it does"].waitForExistence(timeout: 5))
         let addButton = app.buttons["Add Persona"]
         let edit = app.buttons.matching(
             NSPredicate(format: "label BEGINSWITH 'Edit '")
@@ -121,8 +121,8 @@ final class PersonaWheelJourneyTests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(
-            app.staticTexts["Personas"].waitForExistence(timeout: 5),
-            "Clicking Persona should open the Personas page while Persona AI is off"
+            app.staticTexts["What it does"].waitForExistence(timeout: 5),
+            "Clicking Persona should open the Live Write page while the writing engine is off"
         )
         XCTAssertFalse(app.descendants(matching: .any)["hush.personaWheel"].exists)
     }
