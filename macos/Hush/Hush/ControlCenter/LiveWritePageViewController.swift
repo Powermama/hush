@@ -15,6 +15,8 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
     private var subscriptions = Set<AnyCancellable>()
     private var isRefreshing = false
     private let personaListStack = NSStackView()
+    private let appsSummary = NSTextField(labelWithString: "")
+    private var appsSheet: NSWindowController?
     private var editorController: PersonaEditorSheetController?
 
     init(focusEnableAI: Bool) {
@@ -34,6 +36,7 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
         addFullWidth(feature)
         buildExamples()
         buildEngines()
+        buildApps()
         buildPersonas()
         bind()
         refresh()
@@ -106,6 +109,41 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
         addFullWidth(subtitle("Qwen 3.5 4B wrote best in hush\u{2019}s tests. Engines on this Mac keep your words here and are shared with Assistant; with ChatGPT, what you dictate is sent to OpenAI."))
     }
 
+    /// Where Live Write steps aside (PRD R4): a standard list the user can change.
+    private func buildApps() {
+        stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
+        addFullWidth(sectionHeading("Apps"))
+        let manage = NSButton(title: "Manage\u{2026}", target: self, action: #selector(manageApps(_:)))
+        manage.bezelStyle = .rounded
+        manage.controlSize = .small
+        manage.setAccessibilityIdentifier("hush.livewrite.apps.manage")
+        appsSummary.setAccessibilityIdentifier("hush.livewrite.apps.summary")
+        let row = ControlCenterKeyValueRow(
+            title: "Off in some apps and websites",
+            subtitle: "Terminals, code editors, AI chats and password managers get your words as spoken.",
+            trailing: NSStackView(views: [appsSummary, manage]),
+            showsSeparator: false
+        )
+        addFullWidth(makeCard(content: row))
+    }
+
+    @objc private func manageApps(_ sender: NSButton) {
+        guard appsSheet == nil, let parent = view.window else { return }
+        let content = LiveWriteAppsViewController()
+        let panel = NSPanel(contentViewController: content)
+        panel.styleMask = [.titled]
+        panel.setContentSize(NSSize(width: 520, height: 560))
+        let controller = NSWindowController(window: panel)
+        appsSheet = controller
+        content.onDone = { [weak self, weak parent, weak panel] in
+            guard let panel else { return }
+            parent?.endSheet(panel)
+            self?.appsSheet = nil
+            self?.refresh()
+        }
+        parent.beginSheet(panel)
+    }
+
     private func buildPersonas() {
         stack.setCustomSpacing(22, after: stack.arrangedSubviews.last!)
         let addButton = NSButton(title: "Add Persona", target: self, action: #selector(addPersona(_:)))
@@ -153,6 +191,14 @@ final class LiveWritePageViewController: ControlCenterPageViewController {
         let status = LiveWriteStatus.current()
         feature.update(isOn: status.isOn, status: status.text, tone: status.tone, action: status.action, progress: status.progress)
         refreshPersonaList()
+        let apps = LiveWriteApps.installed(Settings.shared.liveWriteAppExceptions) {
+            NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) != nil
+        }.count
+        let sites = Settings.shared.liveWriteWebsiteExceptions.count
+        let parts = [apps == 0 ? nil : apps == 1 ? "1 app" : "\(apps) apps",
+                     sites == 0 ? nil : sites == 1 ? "1 website" : "\(sites) websites"].compactMap { $0 }
+        appsSummary.stringValue = parts.isEmpty ? "None" : parts.joined(separator: " \u{00B7} ")
+        appsSummary.textColor = .secondaryLabelColor
     }
 
     private func refreshPersonaList() {
