@@ -60,26 +60,6 @@ jobs:
       - name: Check the article package
         working-directory: webapp/packages/article
         run: bun run lint && bun run test
-      - name: Restore the Playwright browsers
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('webapp/bun.lock') }}
-      # A package mirror can stall for many minutes. apt retries a stalled download itself;
-      # killing the installer from outside would leave apt holding its lock.
-      - name: Let apt retry stalled downloads
-        run: printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-retries
-      - name: Install browsers for the admin journeys
-        run: bunx playwright install --with-deps chromium webkit
-      - name: Admin journeys on desktop, a phone and WebKit
-        run: bun run test:admin
-      # Traces and screenshots of failed admin journeys, as the website's journeys keep them.
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: failure()
-        with:
-          name: cms-admin-failures
-          path: webapp/apps/cms/test-results/
-          retention-days: 7
       - name: Build the production image
         run: docker build --tag hush-cms-build-check --file Dockerfile ../..
       # The API must survive a rolling update without dropping a request, and
@@ -89,3 +69,48 @@ jobs:
       # A backup counts only once it has been restored.
       - name: Back up and restore the database
         run: scripts/backup-drill.sh
+
+  # The admin's browser journeys run in Playwright's image, beside the service job, so
+  # neither waits for the other and no browser packages are downloaded.
+  cms-admin:
+    name: CMS admin journeys
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # Playwright's image carries the browsers and their system packages, so no package
+    # mirror can stall the job (https://playwright.dev/docs/ci#via-containers). Keep the
+    # tag equal to @playwright/test in the lockfile.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+    defaults:
+      run:
+        working-directory: webapp/apps/cms
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: hush_test
+          POSTGRES_USER: hush
+          POSTGRES_PASSWORD: hush-test
+        options: >-
+          --health-cmd "pg_isready -U hush -d hush_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Inside a container job a service is reached by its name.
+      HUSH_TEST_DATABASE_URL: postgresql://hush:hush-test@postgres:5432/hush_test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # setup-bun needs unzip, which the Playwright image does not have.
+      - name: Install Bun
+        run: npm install --global bun@1.3.9
+      - run: bun install --frozen-lockfile
+      - name: Admin journeys on desktop, a phone and WebKit
+        run: bun run test:admin
+      # Traces and screenshots of failed admin journeys, as the website's journeys keep them.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: cms-admin-failures
+          path: webapp/apps/cms/test-results/
+          retention-days: 7
