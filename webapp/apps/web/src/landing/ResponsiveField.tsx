@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { latestEntry } from "../components/latest-entry";
 
 // A quiet, original elastic dot field. Draw only while responding or settling.
 export function ResponsiveField() {
@@ -64,7 +65,8 @@ export function ResponsiveField() {
     function clear() { targetStrength = 0; if (motion.matches) strength = 0; schedule(); }
     function visibility() { if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else { clear(); } }
     const resizeObserver = new ResizeObserver(resize);
-    const intersectionObserver = new IntersectionObserver(([entry]) => {
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      const entry = latestEntry(entries);
       visible = entry.isIntersecting;
       if (visible) schedule(); else { cancelAnimationFrame(frame); frame = 0; targetStrength = strength = 0; }
     });

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from "react";
 import { m } from "../paraglide/messages";
+import { latestEntry } from "../components/latest-entry";
 
 /** Locally served CC0 rose with a vector fallback; never a product control. */
 export function FreedomBloom() {
@@ -11,7 +12,8 @@ export function FreedomBloom() {
     let disposed = false;
     const controller = new AbortController();
     let dispose: (() => void) | undefined;
-    const observer = new IntersectionObserver(([entry]) => {
+    const observer = new IntersectionObserver((entries) => {
+      const entry = latestEntry(entries);
       if (!entry.isIntersecting) return;
       observer.disconnect();
       void import("./FreedomBloomScene").then(async ({ mountFreedomBloom }) => {

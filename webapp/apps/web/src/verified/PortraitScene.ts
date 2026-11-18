@@ -1,5 +1,6 @@
 import { artwork } from "../media/artwork";
 import * as THREE from "three";
+import { latestEntry } from "../components/latest-entry";
 
 /** Ameca photo by Willy Jackson; photo adaptation under CC BY-SA 4.0. See /art/CREDITS.md. */
 export async function mountPortraitScene(host: HTMLElement): Promise<(() => void) | null> {
@@ -104,7 +105,10 @@ export async function mountPortraitScene(host: HTMLElement): Promise<(() => void
   function contextLost(event: Event) { event.preventDefault(); lost = true; cancelAnimationFrame(frame); frame = 0; host.dataset.scene = "fallback"; }
   const size = new ResizeObserver(resize);
   size.observe(host);
-  const viewport = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) request(); else { cancelAnimationFrame(frame); frame = 0; } });
+  const viewport = new IntersectionObserver((entries) => {
+    visible = latestEntry(entries).isIntersecting;
+    if (visible) request(); else { cancelAnimationFrame(frame); frame = 0; }
+  });
   viewport.observe(host);
   host.addEventListener("pointermove", move, { passive: true });
   host.addEventListener("pointerleave", reset);
