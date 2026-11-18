@@ -65,15 +65,12 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('webapp/bun.lock') }}
-      # A package mirror can stall for many minutes; bound each attempt and retry it rather
-      # than lose the whole job.
+      # A package mirror can stall for many minutes. apt retries a stalled download itself;
+      # killing the installer from outside would leave apt holding its lock.
+      - name: Let apt retry stalled downloads
+        run: printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-retries
       - name: Install browsers for the admin journeys
-        run: |
-          for attempt in 1 2 3; do
-            timeout 300 bunx playwright install --with-deps chromium webkit && exit 0
-            echo "Browser install attempt $attempt did not finish; retrying."
-          done
-          exit 1
+        run: bunx playwright install --with-deps chromium webkit
       - name: Admin journeys on desktop, a phone and WebKit
         run: bun run test:admin
       # Traces and screenshots of failed admin journeys, as the website's journeys keep them.
