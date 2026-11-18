@@ -24,6 +24,17 @@ project on a Mac: it runs on pull requests that change native code or the CodeQL
 workflow itself. Other GitHub configuration, such as CI jobs or this selection,
 cannot change what the code analysis finds, so it does not start it.
 
+Each component's checks live in its own reusable workflow
+(`ci-web.yml`, `ci-cms.yml`, `ci-macos.yml`), which `ci.yml` calls when the
+selection finds the component affected; "CI result" in `ci.yml` stays the one
+required check. This is GitHub's recommended layout for required checks with
+path selection: one workflow that always starts, jobs skipped by conditions
+(a skipped job counts as passed) and a final job that requires every selected
+one ([GitHub: troubleshooting required status checks](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks)).
+A change to one component's workflow therefore runs only that component; a
+change to `ci.yml` or the selection itself runs everything. The pull request
+title check and Dependabot's settings select no product checks.
+
 Which apps a shared package affects is read from the workspace manifests
 (`workspace:*` dependencies, including packages that depend on packages), so a
 new package or app needs no CI change to be scoped correctly. A merge-queue run
