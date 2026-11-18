@@ -7,13 +7,14 @@
 
 > **Update 2026-11-18.** hush's default speech engine is now Parakeet (FluidAudio), not WhisperKit, so the recognition hint in this document (WhisperKit prompt tokens) no longer applies to most users. What shipped first, for every engine:
 >
-> - **Manual list:** Settings > Transcription > Vocabulary, a word with optional `Sounds Like` spellings, edited like macOS Text Replacements (journey TM-011).
+> - **Teach by voice:** Settings > Transcription > Vocabulary. Type the word, say it three times; hush stores what the active speech model heard (tagged with that model) and replaces it from then on. The flow follows FluidVoice (GPL-3, design only, own code): the studied apps all make the user type only the correct word and learn the sound by voice or from corrections, never by typing misspellings first (journey TM-011).
 > - **Deterministic correction:** after recognition, and again after Live Write, each `Sounds Like` spelling becomes the word, whole words only, in one pass. This is the guarantee layer of section 1.
 > - **Writing hint:** Live Write receives the words in a `<vocabulary>` line and spells them as listed, as phonon gives its refiner a vocabulary.
 >
 > Still planned:
 >
 > - **Learning from corrections** (sections 1 to 4: notice the edit, ask "Remember?").
+> - **Engine boosts (next PR):** WhisperKit gets the words as a decoder prompt (no download). Parakeet gets FluidAudio's CTC rescoring, which needs a 97.5 MB model: downloaded only after the user accepts, removable, and when Parakeet is active without it the vocabulary screen says the boost is off and offers the download. Both are measured on real clips (quality and p90 latency) before release.
 > - **Acoustic boosting for Parakeet.** FluidAudio's CTC vocabulary boosting (arXiv 2406.07096) needs an extra CTC encoder of about 130 MB for Parakeet 0.6B. It is worth adding once the list is in use, to catch terms the user never wrote a `Sounds Like` for.
 **Product promise:** Correct a distinctive term once. Hush asks before remembering it, then writes it correctly on the next dictation.
 
