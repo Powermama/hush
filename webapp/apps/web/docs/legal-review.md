@@ -84,6 +84,15 @@ Outstanding private contractual/account checks remain explicit; they do not
 justify retaining known-incorrect provider text. Keep legal indexing disabled
 pending those confirmations. A merged PR is not legal clearance.
 
+8. ChatGPT connection (added 18 November 2026, draft): section 7 describes the
+   optional Sign in with ChatGPT path from the app's code and consent dialogs:
+   requests go from the Mac directly to OpenAI under the user's own account with
+   `store: false`; the operator receives nothing. Open for legal review: the roles
+   (the operator as neither controller nor processor of this content, or not), the
+   legal basis the app relies on for asking consent, the US transfer wording, and
+   whether the in-app consent text and this section match. Do not treat the passing
+   build as clearance.
+
 ## Primary sources
 
 - [Section 5 DDG](https://www.gesetze-im-internet.de/ddg/__5.html): provider
