@@ -60,6 +60,10 @@ Given a downloaded model that is neither active nor bundled, when the user choos
 
 Given **About**, then the Speech recognition section credits Parakeet Ultra and Redux (Moondream, from NVIDIA Parakeet TDT v3, CC-BY-4.0), FluidAudio (Apache-2.0), Whisper (MIT) and WhisperKit (MIT) with links.
 
+### TM-011 - Write names and terms the user's way
+
+Given the user opens Settings > Transcription and chooses `Edit…` under Vocabulary, they add a word and, optionally, what hush hears instead (`Sounds Like`, comma separated). Each change saves as it happens. When a later dictation contains a `Sounds Like` spelling as a whole word, in any case and with any spacing, the user's word goes in instead. This holds for every dictation, with or without Live Write, and again after Live Write rewrites the text; Live Write also receives the words and spells them as listed. The row shows how many words are listed; removing a row with `−` stops its replacement.
+
 ## Test ownership
 
 | Journey | Automated coverage |
@@ -74,4 +78,5 @@ Given **About**, then the Speech recognition section credits Parakeet Ultra and 
 | TM-008 | `SpeechEngineTests.generalPageLanguageMessage` |
 | TM-009 | Manual control center journey |
 | TM-010 | Manual control center journey |
+| TM-011 | `VocabularyTests` (whole words, spacing, scripts, single pass, persistence, post-processor, prompt line); visual check of the editor |
 | Storage | `SpeechEngineTests.parakeetStorage`, `SpeechEngineTests.matchesFluidAudioContract`, `ModelStorageTests.usesApplicationSupport` |

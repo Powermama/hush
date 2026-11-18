@@ -341,6 +341,8 @@ private struct TranscriptionOverviewView: View {
                     )
                 }
             }
+
+            VocabularySection()
         }
         .formStyle(.grouped)
         .frame(maxWidth: ControlCenterStyle.contentMaxWidth)
