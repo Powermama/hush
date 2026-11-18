@@ -24,6 +24,11 @@ final class WhisperKitTranscriber: Transcriber, @unchecked Sendable {
     private static let log = Logger(subsystem: "com.decentralfreedom.hush", category: "WhisperKit")
 
     private var pipe: WhisperKit?
+    /// The user's words as Whisper's previous-text prompt (PRD R13), guarded by `queue`.
+    private var vocabularyPrompt = ""
+    /// Whisper's prompt shares the decoder's context with the transcript; a short one
+    /// steers spelling without crowding out the audio.
+    static let maximumPromptTokens = 64
     private var loadedID: String?
     private let queue = DispatchQueue(label: "com.decentralfreedom.hush.whisperkit.state")
 
@@ -128,7 +133,26 @@ final class WhisperKitTranscriber: Transcriber, @unchecked Sendable {
     }
 
     func transcribe(samples: [Float], language: String, fallbackCount: Int) async throws -> String? {
-        let kit = queue.sync { pipe }
+        try await recognize(samples: samples, language: language, fallbackCount: fallbackCount, prompted: true)
+    }
+
+    func transcribeUnaided(samples: [Float], language: String, fallbackCount: Int) async throws -> String? {
+        try await recognize(samples: samples, language: language, fallbackCount: fallbackCount, prompted: false)
+    }
+
+    func setVocabulary(_ terms: [VocabularyTerm]) async {
+        let prompt = Self.prompt(for: terms)
+        queue.sync { vocabularyPrompt = prompt }
+    }
+
+    /// The words as a comma-separated list, the way Whisper's prompt is documented to
+    /// steer the spelling of names.
+    static func prompt(for terms: [VocabularyTerm]) -> String {
+        terms.map(\.term).joined(separator: ", ")
+    }
+
+    private func recognize(samples: [Float], language: String, fallbackCount: Int, prompted: Bool) async throws -> String? {
+        let (kit, prompt) = queue.sync { (pipe, vocabularyPrompt) }
         guard let kit else { throw TranscriberError.modelNotLoaded }
         if samples.isEmpty { throw TranscriberError.empty }
 
@@ -158,6 +182,10 @@ final class WhisperKitTranscriber: Transcriber, @unchecked Sendable {
         options.temperatureFallbackCount = max(0, fallbackCount)
         options.sampleLength = 128
         options.chunkingStrategy = .vad
+        if prompted, !prompt.isEmpty, let tokenizer = kit.tokenizer {
+            let tokens = tokenizer.encode(text: " " + prompt).filter { $0 < tokenizer.specialTokens.specialTokenBegin }
+            options.promptTokens = Array(tokens.prefix(Self.maximumPromptTokens))
+        }
 
         let t0 = CFAbsoluteTimeGetCurrent()
         let results = try await kit.transcribe(audioArray: samples, decodeOptions: options)

@@ -269,7 +269,7 @@ final class DictationCoordinator {
         // lets it through without changing what is heard.
         let minimum = Int(AudioRecorder.targetSampleRate * 1.2)
         if samples.count < minimum { samples += [Float](repeating: 0, count: minimum - samples.count) }
-        return try await transcriber.transcribe(
+        return try await transcriber.transcribeUnaided(
             samples: samples,
             language: Settings.shared.language,
             fallbackCount: Settings.shared.transcriptionQuality.fallbackCount

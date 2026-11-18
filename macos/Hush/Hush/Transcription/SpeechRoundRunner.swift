@@ -77,7 +77,10 @@ final class SpeechRoundRunner {
         let slice = Array(samples[min(range.lowerBound, samples.count) ..< min(range.upperBound, samples.count)])
         do {
             let words = try await transcriber.transcribeWords(samples: slice, language: language, offset: window.start)
-            let text = rounds.transcript(release: words, end: end)
+            let final = rounds.words(release: words, end: end)
+            // The user's words (PRD R13), checked once over the whole recording.
+            let text = await transcriber.boostVocabulary(in: final, samples: samples)
+                ?? final.map(\.text).joined(separator: " ")
             Self.log.info("Release used \(self.completedRounds) rounds; transcribed \(window.end - window.start, format: .fixed(precision: 1)) of \(end, format: .fixed(precision: 1)) s")
             return text.isEmpty ? nil : text
         } catch {
