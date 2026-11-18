@@ -641,7 +641,16 @@ final class DictationCoordinator {
         do {
             recordingEditorTarget = editorTarget
             recordingAssistantSessionID = assistantTarget
-            if recordingEditorTarget == nil, assistantTarget == nil,
+            // Live Write steps aside in terminals, editors, AI chats and other apps the user
+            // listed (PRD R4): the words go in as spoken.
+            let front = NSWorkspace.shared.frontmostApplication
+            let liveWriteExcluded = LiveWriteApps.isExcluded(
+                front?.bundleIdentifier,
+                websiteHost: front.flatMap { FocusedDestinationInspector.context(for: $0).websiteHost },
+                apps: Settings.shared.liveWriteAppExceptions,
+                websites: Settings.shared.liveWriteWebsiteExceptions
+            )
+            if recordingEditorTarget == nil, assistantTarget == nil, !liveWriteExcluded,
                let profile = Settings.shared.activeDictationProfile {
                 recordingPersona = RecordingPersona(
                     profile: profile,
