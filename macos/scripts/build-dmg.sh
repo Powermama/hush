@@ -7,7 +7,6 @@ REPOSITORY_DIRECTORY="$(cd "${SCRIPT_DIRECTORY}/.." && pwd)"
 DERIVED_DATA_DIRECTORY="${HUSH_DERIVED_DATA_PATH:-/tmp/hush-release}"
 RELEASE_DIRECTORY="${HUSH_RELEASE_DIRECTORY:-${REPOSITORY_DIRECTORY}/artifacts/release}"
 TEAM="${HUSH_DEVELOPMENT_TEAM:-3A22UK7C9L}"
-IDENTITY="${HUSH_CODE_SIGN_IDENTITY:-Developer ID Application}"
 APP_PATH="${RELEASE_DIRECTORY}/export/hush.app"
 export HUSH_DEVELOPMENT_TEAM="${TEAM}"
 export HUSH_NOTARY_KEYCHAIN_PROFILE="${HUSH_NOTARY_KEYCHAIN_PROFILE:-HushNotary}"
@@ -29,7 +28,6 @@ cp Hush/Hush.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
   "${RELEASE_DIRECTORY}/reports/Package.resolved"
 cp "${SCRIPT_DIRECTORY}/DeveloperID-ExportOptions.plist" "${RELEASE_DIRECTORY}/ExportOptions.plist"
 /usr/libexec/PlistBuddy -c "Set :teamID ${TEAM}" "${RELEASE_DIRECTORY}/ExportOptions.plist"
-/usr/libexec/PlistBuddy -c "Set :signingCertificate ${IDENTITY}" "${RELEASE_DIRECTORY}/ExportOptions.plist"
 
 RELEASE_ARGUMENTS=()
 [[ -z "${HUSH_RELEASE_CHANNEL:-}" ]] || RELEASE_ARGUMENTS+=(HUSH_RELEASE_CHANNEL="${HUSH_RELEASE_CHANNEL}")
@@ -43,7 +41,8 @@ fi
 xcodebuild -project Hush/Hush.xcodeproj -scheme Hush -configuration Release \
   -destination 'generic/platform=macOS' -derivedDataPath "${DERIVED_DATA_DIRECTORY}" \
   -onlyUsePackageVersionsFromResolvedFile ${TRUST_ARGUMENTS[@]+"${TRUST_ARGUMENTS[@]}"} \
-  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="${IDENTITY}" DEVELOPMENT_TEAM="${TEAM}" \
+  -allowProvisioningUpdates \
+  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM="${TEAM}" CODE_SIGN_ENTITLEMENTS=Hush/Hush-Team.entitlements \
   ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
   HUSH_PROOF_SERVICE_URL="${HUSH_PROOF_SERVICE_URL:-https://behu.sh}" \
   HUSH_PROOF_SHORT_URL="${HUSH_PROOF_SHORT_URL:-https://behu.sh/s/}" \
@@ -51,7 +50,9 @@ xcodebuild -project Hush/Hush.xcodeproj -scheme Hush -configuration Release \
   ${RELEASE_ARGUMENTS[@]+"${RELEASE_ARGUMENTS[@]}"} archive -archivePath "${RELEASE_DIRECTORY}/Hush.xcarchive" \
   2>&1 | tee "${RELEASE_DIRECTORY}/reports/archive.log"
 
-xcodebuild -exportArchive -archivePath "${RELEASE_DIRECTORY}/Hush.xcarchive" \
+# Xcode's direct-distribution export: automatic signing picks the Developer ID certificate
+# and creates or renews the Developer ID provisioning profile the keychain group needs.
+xcodebuild -exportArchive -allowProvisioningUpdates -archivePath "${RELEASE_DIRECTORY}/Hush.xcarchive" \
   -exportOptionsPlist "${RELEASE_DIRECTORY}/ExportOptions.plist" \
   -exportPath "${RELEASE_DIRECTORY}/export" \
   2>&1 | tee "${RELEASE_DIRECTORY}/reports/export.log"
