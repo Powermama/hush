@@ -452,7 +452,7 @@ test("LANDING-006 keeps each locally hosted artwork with its story and credit", 
   expect(companionBox.x).toBeGreaterThanOrEqual(windowBox.x);
   expect(companionBox.x + companionBox.width).toBeLessThanOrEqual(windowBox.x + windowBox.width);
   expect(companionBox.y + companionBox.height).toBeLessThanOrEqual(windowBox.y + windowBox.height);
-  await expect(intelligence.getByRole("link", { name: "Explore the source" })).toHaveAttribute("href", "https://github.com/Powermama/hush");
+  await expect(intelligence.getByRole("link", { name: "Explore the source" })).toHaveAttribute("href", "https://github.com/decentralfreedom/hush");
   await page.getByRole("region", { name: "Think out loud." }).screenshot({ path: testInfo.outputPath("thought-artwork.png") });
   await intelligence.screenshot({ path: testInfo.outputPath("intelligence-artwork.png") });
 });

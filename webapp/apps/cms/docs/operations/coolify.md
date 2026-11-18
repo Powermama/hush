@@ -33,7 +33,7 @@ The database `hush-cms-postgres`: project `hush` → environment `production` �
 The applications `hush-cms-api` and `hush-cms-scheduler`, each:
 
 1. **New Resource** → **Git Repository (with GitHub App)** → server
-   `automation`, destination `hush` → `Powermama/hush`, branch `main`, build
+   `automation`, destination `hush` → `decentralfreedom/hush`, branch `main`, build
    pack **Dockerfile**. Then under **General**: Base Directory `/webapp`,
    Dockerfile Location `/apps/cms/Dockerfile`, port `3100`.
 2. No **Ports Mappings**, no **Custom Container Name** and no custom IP: each

@@ -86,7 +86,7 @@ export function Header({
           <svg viewBox="0 0 24 24" aria-hidden="true">{menuOpen ? <path d="m6 6 12 12M18 6 6 18" /> : <path d="M4 8h16M4 16h16" />}</svg>
         </button>
         <div id={menuId} className="site-header-links" data-open={menuOpen} onClick={event => { if (event.currentTarget.contains(event.target as Node) && (event.target as Element).closest("a")) setMenuOpen(false); }}>
-          <a href="https://github.com/Powermama/hush" target="_blank" rel="noopener noreferrer" className="site-github">
+          <a href="https://github.com/decentralfreedom/hush" target="_blank" rel="noopener noreferrer" className="site-github">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d={siGithub.path} fill="currentColor" /></svg>
             GitHub
           </a>
