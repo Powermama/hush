@@ -7,7 +7,7 @@ This document defines the user-visible contract for previewing and positioning t
 1. The user opens **HUD & Menu** from the control center sidebar.
 2. The user can enable or disable the floating HUD.
 3. The user can select Bottom or Top. The real preview stays in the same scene and moves between its upper and lower regions so the placement change is immediately clear without losing context.
-4. The user can preview Listening, Processing, Signing, and Inserted without starting a recording.
+4. The user can preview Listening, Processing, Writing, Signing, and Inserted without starting a recording. Writing names the engine Live Write uses (a cloud mark for ChatGPT).
 5. The selected state remains visible while the user changes the HUD position.
 
 The menu panel is constant and has no preview on this page. Only configurable behavior receives space in the settings canvas.

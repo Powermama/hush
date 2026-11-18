@@ -12,7 +12,7 @@ struct OnboardingComponentTests {
         #expect(flow.page == .welcome)
         #expect(flow.headlinePhrases == [
             "does the typing.",
-            "ships it with personas.",
+            "writes it for you.",
             "proves its origin.",
         ])
         #expect(flow.primaryTitle == "Continue")

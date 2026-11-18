@@ -8,7 +8,7 @@ import unittest
 
 import json
 
-from ci_scope import classify, full_scope, scope_for_event, workspace_dependents
+from ci_scope import COMPONENT_WORKFLOWS, REPOSITORY, classify, full_scope, scope_for_event, workspace_dependents
 
 
 class ScopeTests(unittest.TestCase):
@@ -69,6 +69,11 @@ class ScopeTests(unittest.TestCase):
         self.assertIn("cms", workspace_dependents()["article"])
         self.assertNotIn("cms-admin", workspace_dependents()["article"])
 
+    def test_encrypted_deployment_secrets_run_no_product_checks(self):
+        for path in ["webapp/.sops.yaml", "webapp/deploy/production/cms.env", "webapp/deploy/README.md"]:
+            with self.subTest(path=path):
+                self.assertEqual(classify([path]), dict(web=False, cms=False, native=False, integration=False))
+
     def test_unknown_apps_and_packages_run_everything(self):
         self.assertEqual(classify(["webapp/apps/new-app/src/index.ts"]), full_scope())
         self.assertEqual(classify(["webapp/packages/new-package/index.ts"], {}), full_scope())
@@ -91,9 +96,29 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual(classify(["macos/Hush/App.swift", "webapp/apps/web/src/main.tsx"]),
                          dict(web=True, cms=False, native=True, integration=True))
 
+    def test_a_component_workflow_runs_only_its_component(self):
+        self.assertEqual(classify([".github/workflows/ci-cms.yml"]), dict(web=False, cms=True, native=False, integration=False))
+        self.assertEqual(classify([".github/workflows/ci-web.yml"]), dict(web=True, cms=False, native=False, integration=False))
+        self.assertEqual(classify([".github/workflows/ci-macos.yml"]), dict(web=False, cms=False, native=True, integration=True))
+        self.assertEqual(classify([".github/workflows/ci-cms.yml", "webapp/apps/web/src/main.tsx"]),
+                         dict(web=True, cms=True, native=False, integration=False))
+
+    def test_configuration_without_a_component_runs_no_product_checks(self):
+        for path in [".github/workflows/pull-request.yml", ".github/dependabot.yml"]:
+            with self.subTest(path=path):
+                self.assertEqual(classify([path]), dict(web=False, cms=False, native=False, integration=False))
+
+    def test_every_component_workflow_exists_and_is_called(self):
+        workflows = REPOSITORY / ".github/workflows"
+        ci = (workflows / "ci.yml").read_text()
+        for path in COMPONENT_WORKFLOWS:
+            with self.subTest(path=path):
+                self.assertTrue((REPOSITORY / path).is_file())
+                self.assertIn(f"uses: ./{path}", ci)
+
     def test_workflow_or_unknown_configuration_runs_everything(self):
         for path in [".github/workflows/ci.yml", ".github/scripts/ci_scope.py",
-                     ".github/dependabot.yml", "future-component/main.rs", "Makefile"]:
+                     ".github/scripts/test_ci_scope.py", "future-component/main.rs", "Makefile"]:
             with self.subTest(path=path):
                 self.assertEqual(classify([path]), full_scope())
 
@@ -142,6 +167,14 @@ class GitJourneyTests(unittest.TestCase):
         head = self.commit("README.md", "docs")
         scope, _ = scope_for_event("push", dict(before=base, after=head), self.repo)
         self.assertEqual(scope, dict(web=False, cms=False, native=True, integration=True))
+
+    def test_merge_group_checks_every_queued_change(self):
+        base = self.git("rev-parse", "HEAD")
+        self.commit("webapp/apps/web/src/main.tsx", "first queued pull request")
+        head = self.commit("macos/Hush/App.swift", "second queued pull request")
+        event = {"merge_group": {"base_sha": base, "head_sha": head}}
+        scope, _ = scope_for_event("merge_group", event, self.repo)
+        self.assertEqual(scope, dict(web=True, cms=False, native=True, integration=True))
 
     def test_pr_uses_merge_base_not_unrelated_base_branch_changes(self):
         self.git("checkout", "-b", "feature")

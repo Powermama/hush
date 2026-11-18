@@ -1,5 +1,6 @@
 import { artwork } from "../media/artwork";
 import { useEffect, useRef } from "react";
+import { latestEntry } from "../components/latest-entry";
 
 export function PortraitSculpture() {
   const host = useRef<HTMLDivElement>(null);
@@ -8,8 +9,8 @@ export function PortraitSculpture() {
     if (!node) return;
     let cancelled = false;
     let dispose: (() => void) | undefined;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!latestEntry(entries).isIntersecting) return;
       observer.disconnect();
       void import("./PortraitScene").then(async ({ mountPortraitScene }) => {
         if (cancelled) return;

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef } from "react";
 import { m } from "../paraglide/messages";
 import "./mascot.css";
+import { latestEntry } from "../components/latest-entry";
 
 export type MascotState = "listening" | "thinking" | "recording" | "sad";
 
@@ -19,7 +20,8 @@ export function HushMascot({ state }: { state: MascotState }) {
     let dispose: (() => void) | null = null;
     const node = host.current;
     if (!node) return;
-    const observer = new IntersectionObserver(([entry]) => {
+    const observer = new IntersectionObserver((entries) => {
+      const entry = latestEntry(entries);
       if (!entry.isIntersecting) return;
       observer.disconnect();
       void import("./MascotScene").then(({ mountMascotScene }) => {

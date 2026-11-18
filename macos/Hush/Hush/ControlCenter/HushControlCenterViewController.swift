@@ -8,7 +8,7 @@ enum HushDestination: Hashable {
     case general
     case transcription
     case transcriptionEngine(SpeechEngine)
-    case personas(focusEnableAI: Bool = false)
+    case liveWrite(focusEnableAI: Bool = false)
     case ai
     case assistant
     case interface
@@ -25,8 +25,8 @@ enum HushDestination: Hashable {
         case .general: return "General"
         case .transcription: return "Transcription"
         case .transcriptionEngine(let engine): return engine.familyName
-        case .personas: return "Personas"
-        case .ai: return "Hush AI"
+        case .liveWrite: return "Live Write"
+        case .ai: return "hush AI"
         case .assistant: return "Assistant"
         case .interface: return "HUD & Menu"
         case .verifiedMessages: return "Verified Messages"
@@ -38,7 +38,7 @@ enum HushDestination: Hashable {
     /// Drill-in pages return to their parent through the header's back button.
     var parent: HushDestination? {
         switch self {
-        case .personas, .assistant: return .ai
+        case .liveWrite, .assistant: return .ai
         case .timeSaved: return .dashboard
         case .transcriptionEngine: return .transcription
         default: return nil
@@ -54,7 +54,7 @@ enum HushDestination: Hashable {
         case .general: return "general"
         case .transcription: return "transcription"
         case .transcriptionEngine: return "transcription-engine"
-        case .personas: return "personas"
+        case .liveWrite: return "live-write"
         case .ai: return "ai"
         case .assistant: return "assistant"
         case .interface: return "interface"
@@ -343,8 +343,8 @@ final class HushControlCenterViewController: NSViewController {
             )
         case .transcriptionEngine(let engine):
             return TranscriptionEngineModelsViewController(engine: engine, coordinator: coordinator)
-        case .personas(let focusEnableAI):
-            return PersonaSettingsPageViewController(focusEnableAI: focusEnableAI)
+        case .liveWrite(let focusEnableAI):
+            return LiveWritePageViewController(focusEnableAI: focusEnableAI)
         case .ai:
             return HushAIPageViewController(coordinator: coordinator, onNavigate: { [weak self] in self?.navigate(to: $0) })
         case .assistant:
@@ -385,7 +385,7 @@ private final class SidebarRowView: NSView {
     private var isHovered = false { didSet { updateBackground() } }
 
     init(title: String, symbol: String, badge: String? = nil) {
-        searchText = (title + " " + (badge ?? "") + (title == "Hush AI" ? " personas assistant beta screen recording models voice" : "")).lowercased()
+        searchText = (title + " " + (badge ?? "") + (title == "hush AI" ? " live write personas assistant beta screen recording models voice" : "")).lowercased()
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true

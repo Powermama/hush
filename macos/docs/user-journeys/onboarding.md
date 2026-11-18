@@ -4,7 +4,7 @@ This document defines the first-run contract for Hush.
 
 ## Product intent
 
-The onboarding is a native four-step product demo, not a settings checklist. It mirrors Hush's visual language and lets a new user experience the complete value chain in under a minute: private local transcription, optional local personas, and optional signed creation proof. Each step has one obvious forward action. System access appears only in context after the user taps the microphone.
+The onboarding is a native four-step product demo, not a settings checklist. It mirrors Hush's visual language and lets a new user experience the complete value chain in under a minute: private local transcription, optional Live Write, and optional signed creation proof. Each step has one obvious forward action. System access appears only in context after the user taps the microphone.
 
 ## Invariants
 
@@ -36,9 +36,9 @@ Given the user reaches `Test your voice`, when they tap the microphone, then Hus
 
 Given permissions and the local model are ready, when the user continues from the permission sheet, then the microphone orb moves through listening and local-processing states while the real floating HUD shows `Listening` and then `Processing`. Hush records the suggested sentence, finishes automatically or when the user taps again, hides the HUD, and presents the persistent `Heard clearly` result. Nothing is inserted or saved.
 
-### OB-004 - Optional local personas
+### OB-004 - Optional Live Write
 
-Given the voice test succeeded, when the user continues, then Hush presents `Enable your local personas` with the Apple Intelligence switch and persona ring. Enabling it configures on-device personas. Leaving it off changes the forward action to Skip and does not block setup.
+Given the voice test succeeded, when the user continues, then Hush presents `Enable your Live Write` with the Apple Intelligence switch and persona ring. Enabling it turns on Live Write with Apple's on-device model and no persona. Leaving it off changes the forward action to Skip and does not block setup.
 
 ### OB-005 - Optional private proof
 
