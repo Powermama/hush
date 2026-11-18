@@ -36,6 +36,15 @@ jobs:
         run: |
           xcodebuild -version
           swift --version
+      # Caches are keyed on the toolchain and the resolved package versions, so a new Xcode
+      # or a dependency change starts clean. Pull requests read the main branch's caches but
+      # can only write their own (GitHub scopes caches by ref).
+      - name: Restore the proof package build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: macos/Packages/HushProvenance/.build
+          key: proof-${{ runner.os }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('macos/Packages/HushProvenance/Package.resolved', 'macos/Packages/HushProvenance/Package.swift') }}-${{ github.sha }}
+          restore-keys: proof-${{ runner.os }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('macos/Packages/HushProvenance/Package.resolved', 'macos/Packages/HushProvenance/Package.swift') }}-
       - name: Test the proof package
         run: swift test --package-path macos/Packages/HushProvenance --force-resolved-versions
       - name: Install the service dependencies
@@ -60,6 +69,15 @@ jobs:
           if [ "$ready" != 1 ]; then cat "$RUNNER_TEMP/hush-service.log"; exit 1; fi
           cd ../../..
           HUSH_PROVENANCE_E2E_BASE_URL=http://127.0.0.1:4300 swift test --package-path macos/Packages/HushProvenance --force-resolved-versions --filter enrollsAndPublishesWithHonoService
+      # Swift packages (MLX, WhisperKit, FluidAudio) and their build products dominate the
+      # build; the newest cache for these resolved versions is restored and the build updates it.
+      - name: Restore the Swift packages and the native build
+        if: inputs.native
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/hush-derived-data
+          key: native-${{ runner.os }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('macos/Hush/Hush.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}-${{ github.sha }}
+          restore-keys: native-${{ runner.os }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('macos/Hush/Hush.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}-
       - name: Compile the native Release configuration
         if: inputs.native
         working-directory: macos
