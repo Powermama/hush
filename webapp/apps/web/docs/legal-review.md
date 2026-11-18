@@ -93,6 +93,26 @@ pending those confirmations. A merged PR is not legal clearance.
    whether the in-app consent text and this section match. Do not treat the passing
    build as clearance.
 
+   Source check on 18 November 2026:
+   - Apple's own disclosure for the same pattern ([ChatGPT Extension & Privacy](https://www.apple.com/legal/privacy/data/en/chatgpt-extension),
+     dated 2026-09-14) says that when signed in, "your ChatGPT account settings and
+     OpenAI's data privacy policies will apply. This means OpenAI may log your
+     request, attachments, and session history, and use this data to train or
+     improve their models." Section 7 and the app's consent text now say the same;
+     `store: false` is described only as keeping requests out of stored API
+     responses.
+   - OpenAI's Europe privacy policy could not be read by automated tools (HTTP 403).
+     Reporting ([TechCrunch](https://techcrunch.com/2024/01/02/openai-dublin-data-controller/),
+     [IAPP](https://iapp.org/news/a/chatgpt-aims-to-consolidate-regulatory-risk-in-eu))
+     names OpenAI Ireland Limited as controller for the EEA and Switzerland since
+     February 2024. A person must read the current policy for the controller, the
+     legal bases, the transfer mechanism (DPF or SCCs) and retention before the
+     section names any of them.
+   - The controller question for hush's operator follows [EDPB Guidelines 07/2020](https://www.edpb.europa.eu/system/files/2021-07/eppb_guidelines_202007_controllerprocessor_final_en.pdf)
+     (version 2.1): the content goes from the user's Mac to OpenAI under the user's
+     contract, and the operator neither receives it nor decides its use; whether
+     that leaves the operator outside both roles is the reviewer's call.
+
 ## Primary sources
 
 - [Section 5 DDG](https://www.gesetze-im-internet.de/ddg/__5.html): provider

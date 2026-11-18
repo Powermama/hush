@@ -328,7 +328,7 @@ test("discloses the confirmed host and processing limits in both languages", asy
     // The optional ChatGPT connection: what leaves the Mac, to whom, and that hush receives none of it.
     await expect(article.getByText(german ? "7. Optionale ChatGPT-Verbindung in der App" : "7. Optional ChatGPT connection in the app")).toBeVisible();
     await expect(article.getByText(german ? /Der Betreiber von hush erhält und speichert diese Inhalte nicht/ : /The operator of hush does not receive or store this content/)).toBeVisible();
-    await expect(article.locator('a[href="https://openai.com/policies/privacy-policy/"]')).toBeVisible();
+    await expect(article.locator('a[href="https://openai.com/policies/eu-privacy-policy/"]')).toBeVisible();
     await expect(article.getByText(/\[Add|\[Hosting|must be documented before publication|vor Veröffentlichung die tatsächlich/)).toHaveCount(0);
     await page.goto(german ? "/de/impressum" : "/impressum");
     await expect(page.getByText(german ? /Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG/ : /VAT identification number under Section 27a/)).toBeVisible();
