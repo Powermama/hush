@@ -245,7 +245,7 @@ private struct RecognitionBoostCard: View {
                 Text("hush keeps fixing the spellings it learned. You can download the boost again at any time.")
             }
         } else {
-            Label("WhisperKit listens for your words. Nothing to download.", systemImage: "ear.badge.checkmark")
+            Label("hush fixes the spellings it learned. The recognition boost works with Parakeet.", systemImage: "info.circle")
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)

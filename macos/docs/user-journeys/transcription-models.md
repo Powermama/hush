@@ -75,7 +75,7 @@ Given the speech model is ready, the user opens Settings > Transcription > Vocab
 
 Given the user has words in Vocabulary:
 
-- **WhisperKit:** the words go to WhisperKit as a short prompt (at most 64 tokens) on every dictation. There is nothing to download, and the Vocabulary screen says so.
+- **WhisperKit:** the learned spellings apply, and the Vocabulary screen says the recognition boost works with Parakeet. There is no WhisperKit prompt: on real speech it emptied most transcripts.
 - **Parakeet, without the boost:** the Vocabulary screen shows "Recognition boost is off", and the Transcription row says the same in orange. The learned spellings still apply.
 - **Download:** `Download…` asks first and names the size (97.5 MB from Hugging Face). The model lands in hush's own model folder. `Remove…` asks first and deletes it.
 - **Parakeet, with the boost:** after recognition, FluidAudio's CTC keyword spotter checks the audio where a written word resembles one of the user's words. With speech rounds, this happens once over the whole recording. When nothing resembles one of the user's words, it is skipped (about 3 ms).
@@ -98,4 +98,4 @@ Given the user has words in Vocabulary:
 | TM-010 | Manual control center journey |
 | TM-011 | `VocabularyTests` (replacement, heard spellings, model tags, persistence, prompt line), `SpeechEndpointTests` (pause detection); manual voice journey in a team-signed build |
 | Storage | `SpeechEngineTests.parakeetStorage`, `SpeechEngineTests.matchesFluidAudioContract`, `ModelStorageTests.usesApplicationSupport` |
-| TM-012 | `VocabularyBoostTests` (prompt, timings, parts, ordinary words); opt-in `VocabularyBoostIntegrationTests` (`HUSH_PARAKEET_E2E=1`, synthetic sentences and decoys) and `VocabularyBoostBenchmark` (`HUSH_VOCAB_BENCH_DIR`, earnings22 real speech) |
+| TM-012 | `VocabularyBoostTests` (timings, parts, ordinary words); opt-in `VocabularyBoostIntegrationTests` (`HUSH_PARAKEET_E2E=1`, synthetic sentences and decoys) and `VocabularyBoostBenchmark` (`HUSH_VOCAB_BENCH_DIR`, earnings22 real speech) |

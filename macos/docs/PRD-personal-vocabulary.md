@@ -15,7 +15,7 @@
 >
 > - **Learning from corrections** (sections 1 to 4: notice the edit, ask "Remember?").
 > - **Engine boosts:**
->   - **WhisperKit** gets the words as a decoder prompt (no download).
+>   - **WhisperKit:** no prompt. Measured on 25 real clips, Whisper large-v3 turbo with the words as `promptTokens` returned empty text for most clips (keyword recall 69.8% to 9.3%, WER 19.7% to 88.4%), as a list or a sentence and with a full token budget. WhisperKit users get the learned spellings and Live Write.
 >   - **Parakeet** gets FluidAudio's CTC keyword spotting and rescoring with FluidAudio's documented short-vocabulary settings (#702, #724). The 97.5 MB model is downloaded only after the user agrees and is removable; when it is missing, the screen says the boost is off.
 >   - **Changes in hush:** a replacement never hits an ordinary word (Natural Language word lists; phonon follows the same rule), and replacements are applied word for word.
 >   - **Measured on 100 real earnings-call clips** (Argmax `contextual-earnings22` dev, 169 spoken keywords):
@@ -30,7 +30,6 @@
 >     | Boost time otherwise | | about 3 ms |
 >
 >   - **FluidAudio's defaults on the same clips** reached 88.8% recall but wrote 18 keywords that were not said ("going" became "Hong") and made 14 clips worse.
->   - **Still to check:** WhisperKit's prompt has no real-speech measurement yet.
 > - **Acoustic boosting for Parakeet.** FluidAudio's CTC vocabulary boosting (arXiv 2406.07096) needs an extra CTC encoder of about 130 MB for Parakeet 0.6B. It is worth adding once the list is in use, to catch terms the user never wrote a `Sounds Like` for.
 **Product promise:** Correct a distinctive term once. Hush asks before remembering it, then writes it correctly on the next dictation.
 

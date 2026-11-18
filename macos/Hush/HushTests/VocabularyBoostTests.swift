@@ -6,14 +6,6 @@ import Testing
 /// PRD R13: the pieces of the engine boosts that need no model.
 @Suite("Vocabulary boost")
 struct VocabularyBoostTests {
-    @Test("WhisperKit gets the words as a short, comma-separated prompt")
-    func whisperPrompt() {
-        let prompt = WhisperKitTranscriber.prompt(for: [VocabularyTerm(term: "Qwen"), VocabularyTerm(term: "Kubernetes")])
-        #expect(prompt == "Qwen, Kubernetes")
-        #expect(WhisperKitTranscriber.prompt(for: []).isEmpty)
-        #expect(WhisperKitTranscriber.maximumPromptTokens <= 112, "Whisper's prompt takes at most half its 224-token context")
-    }
-
     #if canImport(FluidAudio)
     @Test("Timed words become one word token each, ending where the next starts")
     func timings() {
