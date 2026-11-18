@@ -286,12 +286,15 @@ struct CoworkerTests {
         #expect(throws: (any Error).self) { try CoworkerReply.decode(String(injected)) }
     }
 
+    /// Returns as soon as the condition holds. The budget is generous because the whole suite
+    /// runs in parallel and a loaded machine delayed this past two seconds; a met condition
+    /// costs nothing extra.
     private func eventually(_ condition: () -> Bool) async throws {
-        for _ in 0..<100 {
+        for _ in 0..<500 {
             if condition() { return }
             try await Task.sleep(for: .milliseconds(20))
         }
-        Issue.record("Expected asynchronous state was not reached within two seconds")
+        Issue.record("Expected asynchronous state was not reached within ten seconds")
     }
 
     @Test("Exact navigation commands execute directly, but quoted or negated text never does")
