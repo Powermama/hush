@@ -45,7 +45,7 @@ HUSH_COMPOSE_PORT=4300 docker compose up --build
 
 ## 1. Create the service
 
-For a new installation, create the Coolify PostgreSQL database `hush-postgres` and the Dockerfile application `hush-website` from `Powermama/hush`, configured as in [Coolify settings for `hush-web`](#coolify-settings-for-hush-web): base directory `/webapp`, Dockerfile location `/apps/web/Dockerfile`, port `3000`, domain `https://behu.sh`. A Docker Compose resource is not used for the website, because Coolify cannot roll Compose resources over without downtime. For the existing installation, the [migration record](../../../../../docs/monorepo-migration.md) explains how the database, keys and volumes were preserved.
+For a new installation, create the Coolify PostgreSQL database `hush-postgres` and the Dockerfile application `hush-website` from `decentralfreedom/hush`, configured as in [Coolify settings for `hush-web`](#coolify-settings-for-hush-web): base directory `/webapp`, Dockerfile location `/apps/web/Dockerfile`, port `3000`, domain `https://behu.sh`. A Docker Compose resource is not used for the website, because Coolify cannot roll Compose resources over without downtime. For the existing installation, the [migration record](../../../../../docs/monorepo-migration.md) explains how the database, keys and volumes were preserved.
 
 Select `main` and `HEAD` in Git Source. Keep `main` protected by the required
 pull-request checks; merge tested changes before deploying them.
@@ -62,7 +62,7 @@ Automatic deployment is configured in Coolify and its Git integration, not in
 the Compose file. Follow Coolify's
 [automatic-deployment guide](https://coolify.io/docs/applications/deployments/automatic-deployments):
 
-1. Confirm the connected GitHub App can access `Powermama/hush`. A new repository
+1. Confirm the connected GitHub App can access `decentralfreedom/hush`. A new repository
    with an old name still has a new repository identity; recheck its installation
    access after a migration.
 2. In **Advanced > Deployment > Auto deploy**, select **Deploy on push
