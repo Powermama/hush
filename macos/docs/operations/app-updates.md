@@ -265,9 +265,13 @@ export HUSH_NOTARY_KEYCHAIN_PROFILE=HushNotary
 ```
 
 Use the actual version, slug and build number in the filename. For another
-developer team, set `HUSH_DEVELOPMENT_TEAM` and `HUSH_CODE_SIGN_IDENTITY` before
-building. The default is Hush's current team and a Developer ID Application
-certificate selected from Keychain.
+developer team, set `HUSH_DEVELOPMENT_TEAM` before building; the default is hush's
+team. Signing follows Xcode's direct distribution: the archive and the Developer ID
+export use automatic signing with `-allowProvisioningUpdates`, so Xcode picks the
+Developer ID Application certificate and creates or renews the provisioning profile
+that authorises the keychain access group (`Hush/Hush-Team.entitlements`). This needs
+the team's Apple Account signed in under Xcode > Settings > Accounts on the release
+Mac.
 
 Submission IDs, Apple logs and postflight reports stay in
 `artifacts/notarization` (override with `HUSH_NOTARY_REPORTS`). Waiting defaults
