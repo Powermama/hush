@@ -849,7 +849,8 @@ final class DictationCoordinator {
                 phase.send(.idle)
                 return
             }
-            Self.log.info("Transcribe ok: \"\(raw, privacy: .public)\"")
+            // Never the text itself: transcripts stay out of the system log (PRD R2).
+            Self.log.info("Transcribe ok: \(raw.count) characters")
 
             if let editorTarget {
                 await completeComposerVoiceSegment(
