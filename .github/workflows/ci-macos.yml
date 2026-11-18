@@ -36,6 +36,11 @@ jobs:
         run: |
           xcodebuild -version
           swift --version
+      - name: Keep dictated text out of the system log
+        working-directory: macos
+        run: |
+          python3 -m unittest discover -s scripts/tests
+          python3 scripts/check_log_privacy.py Hush/Hush
       # Caches are keyed on the toolchain and the resolved package versions, so a new Xcode
       # or a dependency change starts clean. Pull requests read the main branch's caches but
       # can only write their own (GitHub scopes caches by ref).
@@ -47,9 +52,22 @@ jobs:
           restore-keys: proof-${{ runner.os }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('macos/Packages/HushProvenance/Package.resolved', 'macos/Packages/HushProvenance/Package.swift') }}-
       - name: Test the proof package
         run: swift test --package-path macos/Packages/HushProvenance --force-resolved-versions
+      # Bun's package cache: every run reads it, only main writes it, so a pull
+      # request cannot change what later runs install.
+      - name: Restore the Bun package cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('webapp/bun.lock') }}
       - name: Install the service dependencies
         working-directory: webapp/apps/web
         run: bun install --frozen-lockfile
+      - name: Save the Bun package cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('webapp/bun.lock') }}
       # The service imports the generated blog catalogue, which is not committed.
       - name: Generate the blog
         working-directory: webapp/apps/web

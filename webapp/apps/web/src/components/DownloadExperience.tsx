@@ -5,8 +5,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { siApple } from "simple-icons";
 import {
+  downloadPath,
   latestRelease,
   releasePath,
 } from "../../shared/releases";
@@ -25,6 +27,8 @@ export function DownloadLink({ mobileLabel = m.download_mobile(), ...props }: Do
     /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
   ), false);
+  // The page the button is on, for the blog funnel (server/analytics.ts).
+  const page = useRouterState({ select: (state) => state.location.pathname });
   const [handoffOpen, setHandoffOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const release = latestRelease;
@@ -58,9 +62,10 @@ export function DownloadLink({ mobileLabel = m.download_mobile(), ...props }: Do
   return (
     <ButtonLink
       {...props}
-      href={release.downloadURL}
+      href={downloadPath(page)}
       download={release.downloadName}
       onClick={startDownload}
+      data-umami-event="download-click"
     />
   );
 }

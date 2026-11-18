@@ -75,6 +75,8 @@ final class Settings {
         static let verifiedMessagesAuthorName = "verifiedMessages.authorName.v1"
         static let verifiedMessagesLinkPresentation = "verifiedMessages.linkPresentation.v1"
         static let verifiedMessagesDestinationMode = "verifiedMessages.destinationMode.v1"
+        static let liveWriteAppExceptions = "liveWrite.appExceptions.v1"
+        static let liveWriteWebsiteExceptions = "liveWrite.websiteExceptions.v1"
         static let verifiedMessagesAppExceptions = "verifiedMessages.appExceptions.v1"
         static let verifiedMessagesWebsiteExceptions = "verifiedMessages.websiteExceptions.v1"
         static let verifiedMessagesSuppressionNotices = "verifiedMessages.suppressionNotices.v1"
@@ -312,6 +314,43 @@ final class Settings {
             defaults.set(newValue.rawValue, forKey: Keys.verifiedMessagesDestinationMode)
             didChange.send()
         }
+    }
+
+    /// Apps where Live Write stays off. The standard list until the user changes it.
+    var liveWriteAppExceptions: [LiveWriteAppException] {
+        get {
+            guard let data = defaults.data(forKey: Keys.liveWriteAppExceptions),
+                  let exceptions = try? JSONDecoder().decode([LiveWriteAppException].self, from: data)
+            else { return LiveWriteApps.normalized(LiveWriteApps.standard) }
+            return exceptions
+        }
+        set {
+            defaults.set(try? JSONEncoder().encode(LiveWriteApps.normalized(newValue)), forKey: Keys.liveWriteAppExceptions)
+            didChange.send()
+        }
+    }
+
+    /// Websites where Live Write stays off. The standard list until the user changes it.
+    var liveWriteWebsiteExceptions: [VerifiedMessageWebsiteException] {
+        get {
+            guard let data = defaults.data(forKey: Keys.liveWriteWebsiteExceptions),
+                  let exceptions = try? JSONDecoder().decode([VerifiedMessageWebsiteException].self, from: data)
+            else { return LiveWriteApps.standardWebsites }
+            return exceptions
+        }
+        set {
+            var seen = Set<String>()
+            let unique = newValue.filter { seen.insert($0.host).inserted }.sorted { $0.host < $1.host }
+            defaults.set(try? JSONEncoder().encode(unique), forKey: Keys.liveWriteWebsiteExceptions)
+            didChange.send()
+        }
+    }
+
+    /// Back to the standard apps and websites.
+    func resetLiveWriteAppExceptions() {
+        defaults.removeObject(forKey: Keys.liveWriteAppExceptions)
+        defaults.removeObject(forKey: Keys.liveWriteWebsiteExceptions)
+        didChange.send()
     }
 
     var verifiedMessagesAppExceptions: [VerifiedMessageAppException] {

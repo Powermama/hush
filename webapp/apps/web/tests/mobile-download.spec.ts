@@ -84,6 +84,6 @@ test("iPad desktop browsing offers handoff while narrow Mac windows keep the dow
   await page.addInitScript(() => Object.defineProperty(navigator, "maxTouchPoints", { value: 0, configurable: true }));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.reload();
-  await expect(page.getByRole("link", { name: "Download for Mac" }).first()).toHaveAttribute("href", /\.dmg$/);
+  await expect(page.getByRole("link", { name: "Download for Mac" }).first()).toHaveAttribute("href", /^\/download\?from=/);
   await expect(page.getByRole("button", { name: "Get hush for Mac" })).toHaveCount(0);
 });

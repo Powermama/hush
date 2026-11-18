@@ -22,7 +22,7 @@ struct VerifiedMessageAppException: Codable, Equatable, Hashable, Sendable {
     }
 }
 
-struct VerifiedMessageWebsiteException: Codable, Equatable, Hashable, Sendable {
+nonisolated struct VerifiedMessageWebsiteException: Codable, Equatable, Hashable, Sendable {
     let host: String
 
     init?(host: String) {

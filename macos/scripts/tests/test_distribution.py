@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from check_distribution import check_signature, expected_missing_ticket
+from check_distribution import check_provisioning, check_signature, expected_missing_ticket
 from check_dmg_layout import check_volume
 from notarize_artifact import fingerprint, notarize, save
 
@@ -74,6 +74,22 @@ class InstallerLayoutChecks(unittest.TestCase):
 class SignatureChecks(unittest.TestCase):
     def test_valid_signature(self):
         check_signature(METADATA, {}, "TEAM", True)
+
+    def test_keychain_group_stays_inside_the_team(self):
+        check_signature(METADATA, {"keychain-access-groups": ["TEAM.com.decentralfreedom.hush"]}, "TEAM", True)
+        with self.assertRaises(ValueError):
+            check_signature(METADATA, {"keychain-access-groups": ["OTHER.com.example"]}, "TEAM", True)
+
+    def test_keychain_group_needs_an_embedded_profile(self):
+        with tempfile.TemporaryDirectory() as directory:
+            app = Path(directory, "hush.app")
+            (app / "Contents").mkdir(parents=True)
+            entitlements = {"keychain-access-groups": ["TEAM.com.decentralfreedom.hush"]}
+            with self.assertRaises(ValueError):
+                check_provisioning(app, entitlements)
+            (app / "Contents/embedded.provisionprofile").write_bytes(b"profile")
+            check_provisioning(app, entitlements)
+            check_provisioning(app, {})
 
     def test_rejects_debug_signature(self):
         with self.assertRaisesRegex(ValueError, "Debug"):

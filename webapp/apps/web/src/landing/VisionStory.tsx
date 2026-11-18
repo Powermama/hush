@@ -96,7 +96,7 @@ export function VisionStory() {
         </div>
         <span className="bloom-annotation" aria-hidden="true">{m.intelligence_annotation()}</span>
       </div>
-      <div className="open-source-manifesto"><h3><Lines text={m.manifesto_title()} /></h3><div><p><Lines text={m.manifesto_body()} /></p><a href="https://github.com/Powermama/hush" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 6-6 6 6 6m8-12 6 6-6 6M14 3l-4 18" /></svg>{m.manifesto_link()}</a></div></div>
+      <div className="open-source-manifesto"><h3><Lines text={m.manifesto_title()} /></h3><div><p><Lines text={m.manifesto_body()} /></p><a href="https://github.com/decentralfreedom/hush" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 6-6 6 6 6m8-12 6 6-6 6M14 3l-4 18" /></svg>{m.manifesto_link()}</a></div></div>
     </section>
 
     <ProvenanceStory />

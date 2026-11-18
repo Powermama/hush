@@ -1,12 +1,12 @@
 import Foundation
 
 /// A word and when it starts in the recording, from the speech model's token timings.
-struct TimedWord: Equatable, Sendable {
+nonisolated struct TimedWord: Equatable, Sendable {
     var text: String
     var start: TimeInterval
 }
 
-extension TimedWord {
+nonisolated extension TimedWord {
     /// Groups tokens into words: a token that starts with a space or SentencePiece's "▁"
     /// begins a new word. `offset` places a window's times in the whole recording.
     static func words(from tokens: [(text: String, start: TimeInterval)], offset: TimeInterval = 0) -> [TimedWord] {

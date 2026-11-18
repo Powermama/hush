@@ -1,5 +1,5 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
-import { latestRelease } from "../shared/releases";
+import { downloadPath, latestRelease } from "../shared/releases";
 import type { ReserveProofInput } from "../shared/contracts/proof";
 import {
   canonicalEnrollmentRequest,
@@ -42,8 +42,9 @@ test("verifies and decrypts a complete signed message proof", async ({ page, isM
     await expect(page.locator(".site-header-download")).toBeHidden();
     await expect(page.locator(".proof-download")).toBeVisible();
   } else {
-    await expect(page.locator(".site-header").getByRole("link", { name: "Download", exact: true })).toHaveAttribute("href", latestRelease!.downloadURL);
-    await expect(page.getByRole("link", { name: "Download for Mac", exact: true })).toHaveAttribute("href", latestRelease!.downloadURL);
+    const counted = downloadPath(new URL(page.url()).pathname);
+    await expect(page.locator(".site-header").getByRole("link", { name: "Download", exact: true })).toHaveAttribute("href", counted);
+    await expect(page.getByRole("link", { name: "Download for Mac", exact: true })).toHaveAttribute("href", counted);
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
   await page.screenshot({ path: testInfo.outputPath("recipient-voice.png"), fullPage: true });

@@ -1,7 +1,7 @@
 # Security reports
 
 Please report vulnerabilities through
-[GitHub private reporting](https://github.com/Powermama/hush/security/advisories/new),
+[GitHub private reporting](https://github.com/decentralfreedom/hush/security/advisories/new),
 which is enabled for this public repository. Reports are shared privately with
 the maintainers. You can also email [hello@behu.sh](mailto:hello@behu.sh).
 Do not disclose a vulnerability in a public issue.

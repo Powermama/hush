@@ -29,6 +29,16 @@ def check_signature(metadata, entitlements, team, executable):
         raise ValueError("Debug entitlement get-task-allow is enabled")
     if executable and not re.search(r"flags=0x[0-9a-f]+\([^)]*runtime", metadata):
         raise ValueError("Executable requires hardened runtime")
+    for group in entitlements.get("keychain-access-groups", []):
+        if not group.startswith(f"{team}."):
+            raise ValueError(f"Keychain access group outside the team: {group}")
+
+
+def check_provisioning(app, entitlements):
+    """keychain-access-groups is restricted: without an embedded profile authorising it,
+    macOS refuses to launch the app."""
+    if entitlements.get("keychain-access-groups") and not (app / "Contents/embedded.provisionprofile").is_file():
+        raise ValueError("keychain-access-groups needs an embedded provisioning profile")
 
 
 def expected_missing_ticket(result):
@@ -91,6 +101,9 @@ def check(artifact, team, phase):
                 report["code"].append(inspect_code(path, team, arch, "EXECUTE" in header))
         if not report["code"]:
             raise ValueError("No Mach-O binaries found")
+        main_entitlements = next((code["entitlements"] for code in report["code"]
+                                  if code["path"] == str(main_binary)), {})
+        check_provisioning(artifact, main_entitlements)
         policy = run("/usr/bin/syspolicy_check", "distribution", str(artifact),
                      "--verbose", "--json", required=False)
         report["policy"] = {"exit": policy.returncode, "stdout": policy.stdout, "stderr": policy.stderr}

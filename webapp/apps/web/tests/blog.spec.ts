@@ -56,7 +56,8 @@ test("BLOG-003 offers the right download action for the device", async ({ page, 
     await expect(cta.getByRole("button", { name: "Get hush for Mac" })).toBeVisible();
     await expect(cta.locator('a[href$=".dmg"]')).toHaveCount(0);
   } else {
-    await expect(cta.getByRole("link", { name: "Download for Mac" })).toBeVisible();
+    // Each article's downloads are counted for it (PRD R10).
+    await expect(cta.getByRole("link", { name: "Download for Mac" })).toHaveAttribute("href", `/download?from=${encodeURIComponent(new URL(page.url()).pathname)}`);
   }
 });
 

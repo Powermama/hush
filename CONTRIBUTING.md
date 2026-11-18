@@ -7,7 +7,7 @@ The [native development guide](macos/docs/development.md) and
 ## Your first contribution
 
 Start with a documentation improvement, a reproduced bug or a small accessibility
-fix. Search [existing issues](https://github.com/Powermama/hush/issues) first.
+fix. Search [existing issues](https://github.com/decentralfreedom/hush/issues) first.
 For a substantial feature, describe the user problem and intended result in an
 issue before investing in an implementation. Helpful reports and careful design
 feedback are welcome even if you do not write code.

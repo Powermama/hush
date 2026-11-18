@@ -28,13 +28,13 @@ maintainers join. A green build or enabled scanner is not a security audit.
 An administrator can inspect the live state without changing it:
 
 ```sh
-gh api repos/Powermama/hush/branches/main/protection
-gh api repos/Powermama/hush/private-vulnerability-reporting
-gh api repos/Powermama/hush/vulnerability-alerts --silent
-gh api repos/Powermama/hush/automated-security-fixes
-gh api repos/Powermama/hush/actions/permissions/workflow
-gh api repos/Powermama/hush/actions/permissions/fork-pr-contributor-approval
-gh api repos/Powermama/hush/code-scanning/default-setup
+gh api repos/decentralfreedom/hush/branches/main/protection
+gh api repos/decentralfreedom/hush/private-vulnerability-reporting
+gh api repos/decentralfreedom/hush/vulnerability-alerts --silent
+gh api repos/decentralfreedom/hush/automated-security-fixes
+gh api repos/decentralfreedom/hush/actions/permissions/workflow
+gh api repos/decentralfreedom/hush/actions/permissions/fork-pr-contributor-approval
+gh api repos/decentralfreedom/hush/code-scanning/default-setup
 ```
 
 The vulnerability-alerts check succeeds with an empty response when enabled.
