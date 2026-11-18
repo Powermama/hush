@@ -6,7 +6,7 @@ import Foundation
 /// with PKCE, no client secret, a loopback callback, first-time registration through
 /// `dynamic_agent_client`, and the scopes that let requests use the user's ChatGPT plan.
 /// Everything here is pure, so the protocol is tested without a network.
-enum ChatGPTOAuth {
+nonisolated enum ChatGPTOAuth {
     static let issuer = "https://auth.openai.com"
     static let authorizationEndpoint = URL(string: "https://auth.openai.com/api/accounts/authorize")!
     static let tokenEndpoint = URL(string: "https://auth.openai.com/api/accounts/oauth/token")!
@@ -189,7 +189,7 @@ enum ChatGPTOAuth {
     }
 }
 
-extension Data {
+nonisolated extension Data {
     var base64URLEncoded: String {
         base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
     }

@@ -3,6 +3,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { loadStudioEnvironment } from "./StudioEnvironment";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import roseURL from "./assets/rose.glb?url";
+import { latestEntry } from "../components/latest-entry";
 
 /** CC0 Innerscene rose. Source, licence and preparation are recorded in public/art/CREDITS.md. */
 export async function mountFreedomBloom(host: HTMLElement, signal: AbortSignal): Promise<(() => void) | null> {
@@ -164,7 +165,8 @@ export async function mountFreedomBloom(host: HTMLElement, signal: AbortSignal):
     event.preventDefault(); lost = true; cancelAnimationFrame(frame); frame = 0;
     host.dataset.scene = "fallback";
   }
-  const intersection = new IntersectionObserver(([entry]) => {
+  const intersection = new IntersectionObserver((entries) => {
+    const entry = latestEntry(entries);
     visible = entry.isIntersecting;
     if (visible) { targetBloom = scrollProgress(); schedule(); }
     else { cancelAnimationFrame(frame); frame = 0; lastFrameTime = 0; }

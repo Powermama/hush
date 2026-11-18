@@ -111,7 +111,7 @@ The most complete design, and the closest to Live Write.
 ### Handy
 
 - **Hesitation removal in two tiers:** sounds that are a word in no language are always removed; sounds that are words somewhere only with the language known ([text.rs](https://github.com/cjpais/Handy/blob/aca8985190c3ad7f361d8a80cb30f179513ed690/src-tauri/src/audio_toolkit/text.rs)). It also collapses a word said three or more times in a row.
-- **Recording safety:** each recording is written to disk as a temporary file and renamed when complete, so a crash never loses or half-writes one ([transcription_jobs.rs](https://github.com/cjpais/Handy/blob/aca8985190c3ad7f361d8a80cb30f179513ed690/src-tauri/src/managers/transcription_jobs.rs)).
+- **Recording safety:** an imported audio file is written aside as `.wav.partial` and renamed when complete, so a crash never leaves a half-written one ([transcription_jobs.rs](https://github.com/cjpais/Handy/blob/aca8985190c3ad7f361d8a80cb30f179513ed690/src-tauri/src/managers/transcription_jobs.rs)). Dictation audio stays in memory until capture ends ([audio.rs](https://github.com/cjpais/Handy/blob/aca8985190c3ad7f361d8a80cb30f179513ed690/src-tauri/src/managers/audio.rs)), and nothing recovers interrupted recordings at launch. Failed file jobs keep their audio for a manual retry.
 - **Optional clean-up prompt:** it forbids following instructions in the transcript ([settings.rs](https://github.com/cjpais/Handy/blob/aca8985190c3ad7f361d8a80cb30f179513ed690/src-tauri/src/settings.rs)).
 - **Weakness for hush:** no context and no writing.
 
@@ -175,5 +175,5 @@ hush does not remove fillers with a word list in code, not even a language-indep
 - **Deterministic guard around every model output,** with a fallback to safe text (Flowstate, phonon).
 - **Learning from the user's edits after paste,** with anchors around the inserted text and proposals the user reviews (phonon, VoiceInk).
 - **A stable prompt start kept in the model's cache** (FluidVoice).
-- **Recordings written to disk while recording** (Handy).
+- **Recordings written to disk while recording,** and recovered at the next launch. No project studied does this; Handy comes closest, writing finished files aside and renaming them.
 - **Small fine-tuned models trained on synthetic pairs,** gated by a frozen benchmark (phonon, Flowstate).

@@ -2,7 +2,7 @@ import Foundation
 
 /// What can go wrong with the ChatGPT connection, mapped from OpenAI's documented error
 /// codes (siwc/token-sharing-open-source/errors-and-recovery) to what hush does next.
-enum ChatGPTError: Error, Equatable {
+nonisolated enum ChatGPTError: Error, Equatable {
     /// The plan's limit for this app is reached: pause plan requests, offer Manage usage.
     case usageLimitReached
     /// The account cannot use its plan here: explain, never loop through sign-in.
@@ -45,7 +45,7 @@ enum ChatGPTError: Error, Equatable {
 /// The Responses API on the user's ChatGPT plan: `store: false`, `stream: true`, hush's
 /// rules as `instructions`, no temperature or output limit (both rejected in this flow).
 /// Success only on `response.completed`.
-enum ChatGPTResponses {
+nonisolated enum ChatGPTResponses {
     static let endpoint = URL(string: "https://api.openai.com/v1/responses")!
     static let modelsEndpoint = URL(string: "https://api.openai.com/v1/models")!
 

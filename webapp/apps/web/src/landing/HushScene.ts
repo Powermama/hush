@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { loadStudioEnvironment } from "./StudioEnvironment";
 import { createHeroScene } from "./hero/createHeroScene";
 import { startLandingEntrance } from "./entrance/landingEntrance";
+import { latestEntry } from "../components/latest-entry";
 
 // Original procedural artwork. No downloaded model or texture is required.
 export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
@@ -136,7 +137,8 @@ export async function mountHushScene(host: HTMLElement, signal: AbortSignal) {
     finish();
   }
   const resizeObserver = new ResizeObserver(resize);
-  const intersectionObserver = new IntersectionObserver(([entry]) => {
+  const intersectionObserver = new IntersectionObserver((entries) => {
+    const entry = latestEntry(entries);
     visible = entry.isIntersecting;
     if (!visible) { cancelAnimationFrame(frame); frame = 0; }
     else schedule();

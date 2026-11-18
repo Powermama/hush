@@ -5,12 +5,12 @@ import Security
 /// The registration (issued client ID and account) outlives a sign-out so the next
 /// sign-in to the same account reuses it, as the documentation asks; the session
 /// (tokens) is deleted on sign-out. The host ID is opaque and stable per Mac.
-struct ChatGPTRegistration: Codable, Equatable, Sendable {
+nonisolated struct ChatGPTRegistration: Codable, Equatable, Sendable {
     let clientID: String
     let identity: ChatGPTIdentity
 }
 
-struct ChatGPTSession: Codable, Equatable, Sendable {
+nonisolated struct ChatGPTSession: Codable, Equatable, Sendable {
     var accessToken: String
     var refreshToken: String
     var idToken: String?
@@ -23,7 +23,7 @@ struct ChatGPTSession: Codable, Equatable, Sendable {
     func needsRefresh(now: Date = Date()) -> Bool { expiresAt.timeIntervalSince(now) < 60 }
 }
 
-final class ChatGPTCredentialStore: Sendable {
+nonisolated final class ChatGPTCredentialStore: Sendable {
     private let service: String
 
     init(service: String = "com.decentralfreedom.hush.chatgpt") {

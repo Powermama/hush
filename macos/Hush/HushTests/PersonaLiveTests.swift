@@ -219,8 +219,10 @@ struct PersonaLiveTests {
     func qwenPromptHasThinkingOff() async throws {
         let snapshot = try #require(LLMRuntime.cachedQwenSnapshotURL(for: .qwen35_4b))
         let container = try await VLMModelFactory.shared.loadContainer(from: snapshot, using: #huggingFaceTokenizerLoader())
-        let messages = LLMRuntime.qwenDictationMessages(transcript: "Test", profile: Self.assistant)
+        let profile = Self.assistant
         let rendered = try await container.perform { context in
+            // Chat messages are not Sendable: build them where they are used.
+            let messages = LLMRuntime.qwenDictationMessages(transcript: "Test", profile: profile)
             let input = try await context.processor.prepare(input: UserInput(
                 chat: messages,
                 additionalContext: ["enable_thinking": false]

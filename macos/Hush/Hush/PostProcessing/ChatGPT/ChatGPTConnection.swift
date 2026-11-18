@@ -190,7 +190,7 @@ actor ChatGPTConnection {
 /// A one-shot HTTP listener on 127.0.0.1 for the OAuth callback. It is started before the
 /// browser opens, answers only the callback path, accepts one result, and is stopped
 /// afterwards. It never binds to other interfaces.
-final class ChatGPTLoopbackServer: @unchecked Sendable {
+nonisolated final class ChatGPTLoopbackServer: @unchecked Sendable {
     private(set) var port: UInt16 = 0
     private let listener: NWListener
     private let queue = DispatchQueue(label: "com.decentralfreedom.hush.chatgpt.callback")

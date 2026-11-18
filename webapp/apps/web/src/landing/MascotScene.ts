@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import type { MascotState } from "./HushMascot";
+import { latestEntry } from "../components/latest-entry";
 
 // Small original character scenes, rendered only while responding to the visitor.
 export function mountMascotScene(host: HTMLElement, state: MascotState) {
@@ -338,7 +339,8 @@ export function mountMascotScene(host: HTMLElement, state: MascotState) {
       if (rope) rope.style.opacity = "0";
     }
     const resizes = new ResizeObserver(resize);
-    const intersections = new IntersectionObserver(([entry]) => {
+    const intersections = new IntersectionObserver((entries) => {
+      const entry = latestEntry(entries);
       visible = entry.isIntersecting;
       if (visible) { updateScroll(); schedule(); }
       else { cancelAnimationFrame(frame); frame = 0; gestureStarted = -Infinity; }

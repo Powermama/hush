@@ -6,6 +6,7 @@ import { blogCopy } from "../../shared/blog";
 import { AppleIcon } from "../components/AppleIcon";
 import { DownloadLink } from "../components/DownloadExperience";
 import { HushHud, type HushHudState } from "../components/visuals/HushHud";
+import { latestEntry } from "../components/latest-entry";
 
 // One dictation, as the app shows it: listen, process on the Mac, insert.
 const sequence: Array<{ state: HushHudState; ms: number }> = [
@@ -40,9 +41,10 @@ function useDictationLoop(stage: React.RefObject<HTMLElement | null>, examples: 
         if (visible) run();
       }, sequence[current]!.ms);
     };
-    const observer = new IntersectionObserver(([entry]) => {
+    const observer = new IntersectionObserver((entries) => {
+      const entry = latestEntry(entries);
       const wasVisible = visible;
-      visible = entry!.isIntersecting;
+      visible = entry.isIntersecting;
       if (visible && !wasVisible) run();
       if (!visible) { clearTimeout(timer); clearInterval(clock); }
     });

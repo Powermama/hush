@@ -64,7 +64,7 @@ test("keeps discovery public, preserves private no-store and returns genuine 404
   expect(sitemap).not.toMatch(/\/p\/|\/s\/|\/v1\/|alpha|datenschutz/);
   const llms = await (await request.get("/llms.txt")).text();
   expect(llms).toMatch(/^# hush\n/);
-  expect(llms).toContain("https://github.com/Powermama/hush");
+  expect(llms).toContain("https://github.com/decentralfreedom/hush");
   expect(llms).not.toMatch(/https:\/\/behu.sh\/(p|s|v1)\//);
   for (const path of ["/p/unknown", "/releases/0.1.0-alpha.5", "/impressum"]) {
     const response = await request.get(path);

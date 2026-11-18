@@ -51,6 +51,11 @@ final class AudioRecorder {
     var onLimitReached: (() -> Void)?
     var reachedLimit: Bool { capture.reachedLimit }
 
+    /// Each recording's audio on disk until its text is safe (PRD R1).
+    let journal = RecordingJournal()
+    /// The on-disk copy of the recording that `stop()` returned last.
+    private(set) var lastRecordingID: UUID?
+
     enum State { case idle, recording }
     private(set) var state: State = .idle
 
@@ -99,6 +104,7 @@ final class AudioRecorder {
         }
 
         state = .recording
+        journal.begin()
         let inputFmt = engine.inputNode.outputFormat(forBus: 0)
         Self.log.info("Recording started; engine.isRunning=\(self.engine.isRunning, privacy: .public) inputFormat=\(inputFmt.sampleRate, format: .fixed(precision: 0))Hz/\(inputFmt.channelCount)ch")
     }
@@ -153,6 +159,7 @@ final class AudioRecorder {
         state = .idle
 
         let result = capture.take()
+        lastRecordingID = journal.finish()
         currentLevel = 0
 
         var peak: Float = 0
@@ -268,7 +275,10 @@ final class AudioRecorder {
 
     /// Keeps the frames; at the cap, stops capturing and tells the coordinator once.
     private func record(_ frames: UnsafeBufferPointer<Float>) {
-        guard capture.append(frames) else { return }
+        let before = capture.samples.count
+        let reached = capture.append(frames)
+        journal.append(capture.samples[before...])
+        guard reached else { return }
         haltEngine()
         let seconds = Double(capture.samples.count) / Self.targetSampleRate
         Self.log.notice("Recording reached the \(seconds, format: .fixed(precision: 0)) s limit; keeping its audio")
