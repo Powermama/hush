@@ -218,7 +218,7 @@ test("downloads the notarized alpha and opens its release notes", async ({
   await expect(releasePage.getByText(/xattr|com\.apple\.quarantine|One extra step/)).toHaveCount(0);
   await expect(releasePage.getByRole("button", { name: /copy.*command/i })).toHaveCount(0);
   await expect(releasePage.locator('main a[download], main a[href*="updates.behu.sh/downloads/"], main a[href^="/download"]')).toHaveCount(0);
-  await expect(releasePage.locator(".site-header").getByRole("link", { name: "Download", exact: true })).toHaveAttribute("href", "/download?from=%2Freleases%2F0.1.0-alpha.5");
+  await expect(releasePage.locator(".site-header").getByRole("link", { name: "Download", exact: true })).toHaveAttribute("href", "/download?from=%2Freleases%2F0.1.0-alpha.6");
   expect(await releasePage.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
   )).toBe(false);
