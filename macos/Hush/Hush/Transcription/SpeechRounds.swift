@@ -99,6 +99,11 @@ struct SpeechRounds: Sendable {
 
     /// The final transcript from the release pass's words (times in the recording).
     func transcript(release words: [TimedWord], end: TimeInterval) -> String {
+        self.words(release: words, end: end).map(\.text).joined(separator: " ")
+    }
+
+    /// The final words with their times: committed words, then the release pass.
+    func words(release words: [TimedWord], end: TimeInterval) -> [TimedWord] {
         var result = committed
         // A release pass that starts at the beginning heard everything with full context:
         // it decides every word, exactly as whole-file recognition would.
@@ -114,7 +119,7 @@ struct SpeechRounds: Sendable {
         } else {
             result += words.filter { $0.start >= pending }
         }
-        return result.map(\.text).joined(separator: " ")
+        return result
     }
 
     static func sameWord(_ a: TimedWord, _ b: TimedWord) -> Bool {

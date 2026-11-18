@@ -3,8 +3,14 @@ import SwiftUI
 /// Settings > Transcription > Vocabulary (PRD R13): the row that opens the user's words.
 struct VocabularySection: View {
     let coordinator: DictationCoordinator?
+    @ObservedObject private var boost = VocabularyBoostStore.shared
     @State private var count = Settings.shared.vocabulary.count
     @State private var isOpen = false
+
+    /// Parakeet is listening for the words without its boost.
+    private var boostMissing: Bool {
+        count > 0 && VocabularyBoostStore.appliesToActiveEngine() && !boost.isInstalled
+    }
 
     var body: some View {
         Section {
@@ -19,6 +25,11 @@ struct VocabularySection: View {
                     Text(count == 0 ? "Teach hush names and terms it gets wrong" : count == 1 ? "1 word" : "\(count) words")
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                    if boostMissing {
+                        Label("Recognition boost is off", systemImage: "exclamationmark.circle")
+                            .font(.callout)
+                            .foregroundStyle(.orange)
+                    }
                 }
                 Spacer()
                 Button(count == 0 ? "Add Words\u{2026}" : "Manage\u{2026}") { isOpen = true }
@@ -86,9 +97,14 @@ struct VocabularySheet: View {
                 }
                 .listStyle(.inset)
                 .scrollContentBackground(.hidden)
+                // The inset list draws rows 16 pt in; this lines them up with the title.
+                .padding(.horizontal, 8)
                 .accessibilityIdentifier("hush.vocabulary.list")
             }
 
+            RecognitionBoostCard()
+                .padding(.horizontal, 24)
+                .padding(.bottom, 14)
             Divider()
             HStack {
                 Text("Your words and recordings stay on this Mac.")
@@ -189,6 +205,80 @@ private struct VocabularyRow: View {
             Button("Edit Spellings", action: edit)
             Divider()
             Button("Remove", role: .destructive, action: delete)
+        }
+    }
+}
+
+/// The Parakeet recognition boost: downloaded only after the user agrees, removable, and
+/// named plainly when it is missing.
+private struct RecognitionBoostCard: View {
+    @ObservedObject private var boost = VocabularyBoostStore.shared
+    @State private var confirmingDownload = false
+    @State private var confirmingRemoval = false
+
+    var body: some View {
+        if VocabularyBoostStore.appliesToActiveEngine() {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: boost.isInstalled ? "ear.badge.checkmark" : "ear.badge.waveform")
+                    .font(.system(size: 20))
+                    .foregroundStyle(boost.isInstalled ? AnyShapeStyle(.green) : AnyShapeStyle(.orange))
+                    .frame(width: 26)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title).font(.callout.weight(.semibold))
+                    Text(detail).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                action
+            }
+            .padding(12)
+            .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .confirmationDialog("Download the recognition boost?", isPresented: $confirmingDownload) {
+                Button("Download \(boost.sizeDescription)") { boost.install() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("A \(boost.sizeDescription) speech model from Hugging Face, stored on this Mac. It helps Parakeet hear your words and runs only when a dictation sounds like one. You can remove it at any time.")
+            }
+            .confirmationDialog("Remove the recognition boost?", isPresented: $confirmingRemoval) {
+                Button("Remove", role: .destructive) { boost.remove() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("hush keeps fixing the spellings it learned. You can download the boost again at any time.")
+            }
+        } else {
+            Label("hush fixes the spellings it learned. The recognition boost works with Parakeet.", systemImage: "info.circle")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var title: String {
+        switch boost.state {
+        case .installed: "Recognition boost is on"
+        case .downloading: "Downloading the recognition boost\u{2026}"
+        case .notInstalled, .failed: "Recognition boost is off"
+        }
+    }
+
+    private var detail: String {
+        switch boost.state {
+        case .installed: "Parakeet listens for your words, so it also catches them when it hears them in a new way. \(boost.sizeDescription) on this Mac."
+        case .downloading: "You can keep using hush meanwhile."
+        case .notInstalled: "hush fixes the spellings it learned, but Parakeet does not listen for your words. Download the boost (\(boost.sizeDescription)) to turn it on."
+        case .failed(let message): message
+        }
+    }
+
+    @ViewBuilder private var action: some View {
+        switch boost.state {
+        case .installed:
+            Button("Remove\u{2026}") { confirmingRemoval = true }
+                .accessibilityIdentifier("hush.vocabulary.boost.remove")
+        case .downloading:
+            ProgressView().controlSize(.small)
+        case .notInstalled, .failed:
+            Button("Download\u{2026}") { confirmingDownload = true }
+                .accessibilityIdentifier("hush.vocabulary.boost.download")
         }
     }
 }
