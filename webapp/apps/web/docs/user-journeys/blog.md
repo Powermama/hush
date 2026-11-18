@@ -12,7 +12,7 @@ builds them in at deploy time.
 | --- | --- | --- |
 | BLOG-001 | Read a prerendered article without JavaScript: one H1, the full body, `og:type article` and `BlogPosting` data with timezone-qualified dates and the author as a `Person` identified by their author page. | `tests/blog.spec.ts` BLOG-001 |
 | BLOG-002 | The article hydrates without console or page errors and stays visible. | BLOG-002 |
-| BLOG-003 | Desktop gets the real download; phones and iPads get the "Get hush for Mac" handoff and never a disk image (LANDING-DOWNLOAD-002). | BLOG-003 |
+| BLOG-003 | Desktop gets the real download, counted for the article (`/download?from=<article path>`, DOWNLOAD-004); phones and iPads get the "Get hush for Mac" handoff and never a disk image (LANDING-DOWNLOAD-002). | BLOG-003 |
 | BLOG-004 | Section headings carry anchors, so links into a section land there; the reader continues to a related article from the same cluster. | BLOG-004 |
 | BLOG-005 | Each language lists only its own published articles. Drafts and unknown slugs return 404; the sitemap and the Atom feed list published articles only. | BLOG-005 |
 | BLOG-006 | No horizontal page scrolling (tables scroll in their own box) and no runtime CSS or SVG filters (LANDING-PAINT-001). | BLOG-006 |

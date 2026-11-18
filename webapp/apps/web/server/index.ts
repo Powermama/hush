@@ -1,5 +1,6 @@
 import { serveStatic } from "hono/bun";
 import { mkdir } from "node:fs/promises";
+import { analyticsTag, registerAnalytics, withAnalytics } from "./analytics";
 import { createApp, registerRootProofAlias } from "./app";
 import { loadConfig, loadServiceKey } from "./config";
 import { startProofCleanup } from "./services/proof-cleanup";
@@ -51,6 +52,11 @@ const app = createApp({
 
 const pageFile = Bun.file("./dist-pages/pages.json");
 const renderedPages: Record<string, string> = await pageFile.exists() ? await pageFile.json() : {};
+if (config.analytics) {
+  const tag = analyticsTag(config.analytics, config.publicBaseUrl);
+  for (const path of Object.keys(renderedPages)) renderedPages[path] = withAnalytics(renderedPages[path]!, tag);
+}
+registerAnalytics(app, { analytics: config.analytics, publicBaseUrl: config.publicBaseUrl, downloadURL: latestRelease?.downloadURL });
 for (const [path, metadata] of Object.entries(sitePages)) {
   app.get(path, (context) => {
     const html = renderedPages[path];

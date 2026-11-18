@@ -1,4 +1,4 @@
-import type { MiddlewareHandler } from "hono";
+import type { Context, MiddlewareHandler } from "hono";
 
 type Bucket = { count: number; resetAt: number };
 type Options = { windowMs: number; limit: number; maxEntries?: number; now?: () => number };
@@ -70,14 +70,17 @@ export class RateLimitStore {
   }
 }
 
+/** The client a request counts against: Cloudflare's visitor address, then the proxy's. */
+export function clientKey(context: Context) {
+  return context.req.header("cf-connecting-ip") ??
+    context.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
+    "local";
+}
+
 export function rateLimiter(options: Options): MiddlewareHandler {
   const store = new RateLimitStore(options);
   return async (context, next) => {
-    const key =
-      context.req.header("cf-connecting-ip") ??
-      context.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
-      "local";
-    const result = store.consume(key);
+    const result = store.consume(clientKey(context));
     context.header("RateLimit-Limit", String(options.limit));
     context.header("RateLimit-Remaining", String(result.remaining));
     context.header("RateLimit-Reset", String(Math.ceil(result.resetAt / 1000)));

@@ -63,7 +63,7 @@ test("LANDING-VM-003 follows one message through the illustrated story", async (
     await expect(download).toHaveCSS("color", colors.text);
   }
   if (isMobile) await expect(page.locator(".vm-download").first()).toBeVisible();
-  else await expect(page.getByRole("link", { name: "Download hush", exact: true }).first()).toHaveAttribute("href", "https://updates.behu.sh/downloads/hush-0.1.0-alpha.6-build.15.dmg");
+  else await expect(page.getByRole("link", { name: "Download hush", exact: true }).first()).toHaveAttribute("href", `/download?from=${encodeURIComponent(new URL(page.url()).pathname)}`);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
   expect(externalImages).toEqual([]);
   expect(errors).toEqual([]);

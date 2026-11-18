@@ -11,7 +11,8 @@ test("renders the visual landing page with a clear download", async ({ page, isM
     await expect(download).toHaveText("Get hush for Mac");
     await expect(download).toHaveAttribute("aria-haspopup", "dialog");
   } else {
-    await expect(download).toHaveAttribute("href", "https://updates.behu.sh/downloads/hush-0.1.0-alpha.6-build.15.dmg");
+    // Counted at /download (PRD R10), which redirects to the exact immutable DMG.
+    await expect(download).toHaveAttribute("href", "/download?from=%2F");
     await expect(page.getByRole("link", { name: "Download", exact: true })).toHaveAttribute("href", await download.getAttribute("href") as string);
   }
   await expect(page.getByRole("img", { name: /hush connects your voice/ })).toBeVisible();
@@ -194,7 +195,15 @@ test("downloads the notarized alpha and opens its release notes", async ({
   const releasePagePromise = page.waitForEvent("popup");
   const downloadPromise = browserName === "webkit" ? undefined : page.waitForEvent("download");
   await page.getByRole("link", { name: "Download for Mac" }).first().click();
+  // The button goes through /download, where the website counts the download and
+  // sends the browser to the exact immutable DMG, never from a cache. (The browser's
+  // download manager makes that first request, so the page does not report it.)
+  await expect(page.getByRole("link", { name: "Download for Mac" }).first()).toHaveAttribute("href", "/download?from=%2F");
   await requestPromise;
+  const redirect = await page.request.get("/download?from=%2F", { maxRedirects: 0 });
+  expect(redirect.status()).toBe(302);
+  expect(redirect.headers()["location"]).toBe(downloadURL);
+  expect(redirect.headers()["cache-control"]).toBe("no-store");
   if (downloadPromise) {
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toBe("hush-0.1.0-alpha.6-build.15.dmg");
@@ -208,8 +217,8 @@ test("downloads the notarized alpha and opens its release notes", async ({
   await expect(releasePage.getByText(/Build 15/)).toBeVisible();
   await expect(releasePage.getByText(/xattr|com\.apple\.quarantine|One extra step/)).toHaveCount(0);
   await expect(releasePage.getByRole("button", { name: /copy.*command/i })).toHaveCount(0);
-  await expect(releasePage.locator('main a[download], main a[href*="updates.behu.sh/downloads/"]')).toHaveCount(0);
-  await expect(releasePage.locator(".site-header").getByRole("link", { name: "Download", exact: true })).toHaveAttribute("href", downloadURL);
+  await expect(releasePage.locator('main a[download], main a[href*="updates.behu.sh/downloads/"], main a[href^="/download"]')).toHaveCount(0);
+  await expect(releasePage.locator(".site-header").getByRole("link", { name: "Download", exact: true })).toHaveAttribute("href", "/download?from=%2Freleases%2F0.1.0-alpha.6");
   expect(await releasePage.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
   )).toBe(false);
@@ -222,7 +231,7 @@ test("withdraws old release pages and their Terminal instructions", async ({ pag
     expect(response?.status()).toBe(404);
     await expect(page.getByRole("heading", { name: "Nothing to install here." })).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
-    await expect(page.locator('a[download], a[href*="updates.behu.sh/downloads/"]')).toHaveCount(0);
+    await expect(page.locator('a[download], a[href*="updates.behu.sh/downloads/"], a[href^="/download"]')).toHaveCount(0);
     await expect(page.getByText(/xattr|com\.apple\.quarantine|One extra step/)).toHaveCount(0);
     await page.getByRole("link", { name: "View all releases" }).click();
     await expect(page.getByRole("heading", { name: "Our first notarized alpha." })).toBeVisible();
@@ -470,7 +479,7 @@ test("LANDING-007 keeps the narrative and download usable when artwork fails", a
   await download.scrollIntoViewIfNeeded();
   await expect(download).toBeVisible();
   if (isMobile) await expect(download).toHaveAttribute("aria-haspopup", "dialog");
-  else await expect(download).toHaveAttribute("href", /updates\.behu\.sh\/downloads\//);
+  else await expect(download).toHaveAttribute("href", "/download?from=%2F");
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
 });
 

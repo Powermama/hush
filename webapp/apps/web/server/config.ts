@@ -22,6 +22,12 @@ export type ServerConfig = {
   readOnly: boolean;
   /** How long a stopping instance keeps serving before it closes its listener. */
   shutdownDrainMs: number;
+  /**
+   * Umami (blog funnel, PRD R10), off unless both HUSH_UMAMI_URL and
+   * HUSH_UMAMI_WEBSITE_ID are set. Turning it on also needs the privacy
+   * policy updated after legal review (docs/legal-review.md).
+   */
+  analytics?: { umamiUrl: string; websiteId: string };
   s3?: {
     bucket: string;
     region: string;
@@ -63,8 +69,21 @@ export function loadConfig(env = process.env): ServerConfig {
     servicePrivateJwk: privateJwk,
     readOnly: env.HUSH_READ_ONLY === "1",
     shutdownDrainMs: boundedInteger(env.HUSH_SHUTDOWN_DRAIN_MS, 10_000, 0, 60_000, "HUSH_SHUTDOWN_DRAIN_MS"),
+    analytics: loadAnalytics(env, environment),
     s3,
   };
+}
+
+function loadAnalytics(env: Record<string, string | undefined>, environment: ServerConfig["environment"]): ServerConfig["analytics"] {
+  const umamiUrl = env.HUSH_UMAMI_URL;
+  const websiteId = env.HUSH_UMAMI_WEBSITE_ID;
+  if (!umamiUrl && !websiteId) return undefined;
+  if (!umamiUrl || !websiteId) throw new Error("Set both HUSH_UMAMI_URL and HUSH_UMAMI_WEBSITE_ID, or neither");
+  const url = new URL(umamiUrl);
+  if (environment === "production" && url.protocol !== "https:") throw new Error("HUSH_UMAMI_URL must use HTTPS in production");
+  if (url.username || url.password || url.search || url.hash) throw new Error("HUSH_UMAMI_URL must be a plain origin or path");
+  if (!/^[0-9a-f-]{36}$/i.test(websiteId)) throw new Error("HUSH_UMAMI_WEBSITE_ID must be the website's UUID from Umami");
+  return { umamiUrl: url.toString().replace(/\/$/, ""), websiteId };
 }
 
 function boundedInteger(
