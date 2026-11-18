@@ -11,11 +11,18 @@ nonisolated extension TimedWord {
     /// begins a new word. `offset` places a window's times in the whole recording.
     static func words(from tokens: [(text: String, start: TimeInterval)], offset: TimeInterval = 0) -> [TimedWord] {
         var words: [TimedWord] = []
+        // Parakeet writes some words as a lone "▁" token followed by the word's pieces,
+        // such as "▁", "3" for the "3" in "at 3": the boundary carries over to them.
+        var boundaryPending = false
         for token in tokens {
-            let startsWord = token.text.hasPrefix(" ") || token.text.hasPrefix("\u{2581}")
+            let startsWord = boundaryPending || token.text.hasPrefix(" ") || token.text.hasPrefix("\u{2581}")
             let text = token.text.replacingOccurrences(of: "\u{2581}", with: " ").trimmingCharacters(in: .whitespaces)
+            guard !text.isEmpty else {
+                boundaryPending = boundaryPending || startsWord
+                continue
+            }
+            boundaryPending = false
             if startsWord || words.isEmpty {
-                guard !text.isEmpty else { continue }
                 words.append(TimedWord(text: text, start: offset + token.start))
             } else {
                 words[words.count - 1].text += text

@@ -13,6 +13,13 @@ struct SpeechRoundsTests {
         #expect(TimedWord.words(from: tokens, offset: 10) == words([("Hallo", 10.1), ("Welt", 10.6), ("und.", 11.0)]))
     }
 
+    @Test("A lone word-start marker starts the next word: \"at 3\" stays two words")
+    func loneMarker() {
+        let words = TimedWord.words(from: [("\u{2581}call", 0.0), ("\u{2581}at", 0.4), ("\u{2581}", 0.6), ("3", 0.6), (".", 0.7)])
+        #expect(words.map(\.text) == ["call", "at", "3."])
+        #expect(words[2].start == 0.6)
+    }
+
     @Test("No round yet: release transcribes everything and keeps all of it")
     func noRound() {
         let rounds = SpeechRounds()
