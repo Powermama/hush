@@ -2,6 +2,7 @@ import { artwork } from "../media/artwork";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { HushMascotArtwork } from "../landing/HushMascot";
 import "./message-story.css";
+import { latestEntry } from "../components/latest-entry";
 
 const DURATION = 15_000;
 const STAGES = ["Record", "Share", "Verify"] as const;
@@ -29,7 +30,10 @@ export function MessageStory() {
   useEffect(() => {
     const node = windowRef.current;
     if (!node) return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting && entry.intersectionRatio >= .45), { threshold: [0, .45] });
+    const observer = new IntersectionObserver((entries) => {
+      const entry = latestEntry(entries);
+      setVisible(entry.isIntersecting && entry.intersectionRatio >= .45);
+    }, { threshold: [0, .45] });
     observer.observe(node);
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
     function preference() {

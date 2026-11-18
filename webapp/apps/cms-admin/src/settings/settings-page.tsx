@@ -24,6 +24,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { settingsSections, useSettings, type SettingsSectionId } from "./settings-context";
 import { NoSearchResult, SettingsHeader } from "./settings-nav";
+import { latestEntry } from "@/lib/latest-entry";
 
 /** One card, as Ghost's TopLevelGroup: title, description and buttons, then its content. */
 function SettingsCard({ id, title, description, buttons, children }: {
@@ -36,7 +37,7 @@ function SettingsCard({ id, title, description, buttons, children }: {
     const element = ref.current;
     const scroller = document.getElementById("settings-scroller");
     if (!element || !scroller) return;
-    const observer = new IntersectionObserver(([entry]) => { if (entry?.isIntersecting) setCurrent(id); }, { root: scroller, rootMargin: "0px 0px -70% 0px" });
+    const observer = new IntersectionObserver((entries) => { if (latestEntry(entries).isIntersecting) setCurrent(id); }, { root: scroller, rootMargin: "0px 0px -70% 0px" });
     observer.observe(element);
     return () => observer.disconnect();
   }, [id, setCurrent]);
