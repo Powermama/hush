@@ -1,7 +1,8 @@
 import Foundation
 import Security
 
-/// The ChatGPT connection's records, in the Keychain, readable only on this Mac.
+/// The ChatGPT connection's records, in the data protection keychain (see KeychainItem),
+/// readable only on this Mac.
 /// The registration (issued client ID and account) outlives a sign-out so the next
 /// sign-in to the same account reuses it, as the documentation asks; the session
 /// (tokens) is deleted on sign-out. The host ID is opaque and stable per Mac.
@@ -52,43 +53,22 @@ nonisolated final class ChatGPTCredentialStore: Sendable {
 
     // MARK: Keychain
 
+    private func item(_ account: String) -> KeychainItem { KeychainItem(service: service, account: account) }
+
     private func decode<T: Decodable>(_ account: String) throws -> T? {
         guard let data = try read(account) else { return nil }
         return try JSONDecoder().decode(T.self, from: data)
     }
 
-    private func query(_ account: String) -> [String: Any] {
-        [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-        ]
-    }
-
     private func read(_ account: String) throws -> Data? {
-        var query = query(account)
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status == errSecItemNotFound { return nil }
-        guard status == errSecSuccess, let data = result as? Data else { throw ChatGPTError.keychain(status) }
-        return data
+        do { return try item(account).read() } catch let error as KeychainError { throw ChatGPTError.keychain(error.status) }
     }
 
     private func write(_ account: String, _ data: Data) throws {
-        let update = SecItemUpdate(query(account) as CFDictionary, [kSecValueData as String: data] as CFDictionary)
-        if update == errSecSuccess { return }
-        guard update == errSecItemNotFound else { throw ChatGPTError.keychain(update) }
-        var add = query(account)
-        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        add[kSecValueData as String] = data
-        let status = SecItemAdd(add as CFDictionary, nil)
-        guard status == errSecSuccess else { throw ChatGPTError.keychain(status) }
+        do { try item(account).write(data) } catch let error as KeychainError { throw ChatGPTError.keychain(error.status) }
     }
 
     private func delete(_ account: String) throws {
-        let status = SecItemDelete(query(account) as CFDictionary)
-        guard status == errSecSuccess || status == errSecItemNotFound else { throw ChatGPTError.keychain(status) }
+        do { try item(account).delete() } catch let error as KeychainError { throw ChatGPTError.keychain(error.status) }
     }
 }

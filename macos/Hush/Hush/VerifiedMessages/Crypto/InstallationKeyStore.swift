@@ -49,43 +49,19 @@ final class InstallationKeyStore: Sendable {
         )
     }
 
+    /// In the data protection keychain, so macOS never asks for access (see KeychainItem).
+    private var item: KeychainItem { KeychainItem(service: service, account: account) }
+
     private func read() throws -> StoredKey? {
-        var query = baseQuery
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status == errSecItemNotFound { return nil }
-        guard status == errSecSuccess, let data = result as? Data else {
-            throw KeyStoreError.keychain(status)
-        }
+        let data: Data?
+        do { data = try item.read() } catch let error as KeychainError { throw KeyStoreError.keychain(error.status) }
+        guard let data else { return nil }
         return try JSONDecoder().decode(StoredKey.self, from: data)
     }
 
     private func write(_ value: StoredKey) throws {
         let data = try JSONEncoder().encode(value)
-        let updateStatus = SecItemUpdate(
-            baseQuery as CFDictionary,
-            [kSecValueData as String: data] as CFDictionary
-        )
-        if updateStatus == errSecSuccess { return }
-        guard updateStatus == errSecItemNotFound else {
-            throw KeyStoreError.keychain(updateStatus)
-        }
-
-        var addQuery = baseQuery
-        addQuery[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        addQuery[kSecValueData as String] = data
-        let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
-        guard addStatus == errSecSuccess else { throw KeyStoreError.keychain(addStatus) }
-    }
-
-    private var baseQuery: [String: Any] {
-        [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-        ]
+        do { try item.write(data) } catch let error as KeychainError { throw KeyStoreError.keychain(error.status) }
     }
 }
 
