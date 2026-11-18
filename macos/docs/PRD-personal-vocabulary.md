@@ -14,7 +14,23 @@
 > Still planned:
 >
 > - **Learning from corrections** (sections 1 to 4: notice the edit, ask "Remember?").
-> - **Engine boosts (next PR):** WhisperKit gets the words as a decoder prompt (no download). Parakeet gets FluidAudio's CTC rescoring, which needs a 97.5 MB model: downloaded only after the user accepts, removable, and when Parakeet is active without it the vocabulary screen says the boost is off and offers the download. Both are measured on real clips (quality and p90 latency) before release.
+> - **Engine boosts:**
+>   - **WhisperKit** gets the words as a decoder prompt (no download).
+>   - **Parakeet** gets FluidAudio's CTC keyword spotting and rescoring with FluidAudio's documented short-vocabulary settings (#702, #724). The 97.5 MB model is downloaded only after the user agrees and is removable; when it is missing, the screen says the boost is off.
+>   - **Changes in hush:** a replacement never hits an ordinary word (Natural Language word lists; phonon follows the same rule), and replacements are applied word for word.
+>   - **Measured on 100 real earnings-call clips** (Argmax `contextual-earnings22` dev, 169 spoken keywords):
+>
+>     | | plain | boosted |
+>     |---|---|---|
+>     | Keyword recall | 58.0% | 76.9% |
+>     | Word error rate | 16.9% | 15.9% |
+>     | Clips made worse | | 0 |
+>     | Keywords written that were not said | 0 | 2 |
+>     | Boost time when a word is near | | median 0.29 s, p90 0.37 s |
+>     | Boost time otherwise | | about 3 ms |
+>
+>   - **FluidAudio's defaults on the same clips** reached 88.8% recall but wrote 18 keywords that were not said ("going" became "Hong") and made 14 clips worse.
+>   - **Still to check:** WhisperKit's prompt has no real-speech measurement yet.
 > - **Acoustic boosting for Parakeet.** FluidAudio's CTC vocabulary boosting (arXiv 2406.07096) needs an extra CTC encoder of about 130 MB for Parakeet 0.6B. It is worth adding once the list is in use, to catch terms the user never wrote a `Sounds Like` for.
 **Product promise:** Correct a distinctive term once. Hush asks before remembering it, then writes it correctly on the next dictation.
 

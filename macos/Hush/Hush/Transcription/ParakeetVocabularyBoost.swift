@@ -1,4 +1,5 @@
 import Foundation
+import NaturalLanguage
 import OSLog
 
 #if canImport(FluidAudio)
@@ -63,6 +64,8 @@ actor ParakeetVocabularyBoost {
     private var models: CtcModels?
     private var tokenizer: CtcTokenizer?
     private var session: Session?
+    /// The languages whose ordinary words the boost never replaces.
+    private var languages: [NLLanguage] = [.english]
 
     init(directory: URL = ParakeetVocabularyBoost.defaultDirectory) {
         self.directory = directory
@@ -71,7 +74,8 @@ actor ParakeetVocabularyBoost {
     var isActive: Bool { session != nil }
 
     /// Loads the model once and prepares the user's words; an empty list switches it off.
-    func configure(_ terms: [VocabularyTerm]) async throws {
+    func configure(_ terms: [VocabularyTerm], dictationLanguage: String = "auto") async throws {
+        languages = EverydayWords.languages(dictationLanguage: dictationLanguage)
         guard !terms.isEmpty else {
             session = nil
             return
@@ -109,6 +113,12 @@ actor ParakeetVocabularyBoost {
     /// nothing changed. Timings and audio share one clock: zero is the first sample.
     func rescore(text: String, timings: [TokenTiming], samples: [Float]) async -> String? {
         guard let session, !timings.isEmpty, !samples.isEmpty else { return nil }
+        let minimumSimilarity = max(session.sizeConfig.minSimilarity, session.vocabulary.minSimilarity)
+        // With the acoustic-only rescue off, a dictation can only change where a written
+        // word resembles one of the user's words. A text check finds that without the CTC
+        // pass, so dictations that mention none of them pay nothing.
+        guard session.rescorer.hasCTCRescoringCandidates(
+            transcript: text, tokenTimings: timings, minSimilarity: minimumSimilarity) else { return nil }
         do {
             let start = CFAbsoluteTimeGetCurrent()
             let spot = try await session.spotter.spotKeywordsWithLogProbs(
@@ -121,16 +131,49 @@ actor ParakeetVocabularyBoost {
                 frameDuration: spot.frameDuration,
                 cbw: session.sizeConfig.cbw,
                 marginSeconds: 0.5,
-                minSimilarity: max(session.sizeConfig.minSimilarity, session.vocabulary.minSimilarity)
+                minSimilarity: minimumSimilarity
             )
+            let corrected = output.wasModified ? Self.apply(output.replacements, to: text, languages: languages) : nil
             let seconds = CFAbsoluteTimeGetCurrent() - start
-            Self.log.info("Vocabulary boost: \(seconds, format: .fixed(precision: 3))s for \(Double(samples.count) / 16_000, format: .fixed(precision: 1))s audio, \(output.wasModified ? "changed" : "unchanged", privacy: .public)")
-            return output.wasModified ? output.text : nil
+            Self.log.info("Vocabulary boost: \(seconds, format: .fixed(precision: 3))s for \(Double(samples.count) / 16_000, format: .fixed(precision: 1))s audio, \(corrected == nil ? "unchanged" : "changed", privacy: .public)")
+            return corrected
         } catch {
             // Boosting must never break a dictation.
             Self.log.notice("Vocabulary boost skipped: \(error.localizedDescription, privacy: .public)")
             return nil
         }
+    }
+
+    /// The rescorer's replacements applied to the original text, word for word, so nothing
+    /// else in the sentence moves. A replacement whose original is a real word is skipped:
+    /// on real speech (earnings22) the spotter turned "going" into "Hong" and "April" into
+    /// "Gabriel", while every right fix replaced a misheard non-word such as "Quen" or
+    /// "Cressman". phonon's correction follows the same rule with a word list.
+    static func apply(_ replacements: [VocabularyRescorer.RescoringResult], to text: String, languages: [NLLanguage]) -> String? {
+        var result = text
+        var searchFrom = result.startIndex
+        var changed = false
+        for replacement in replacements where replacement.shouldReplace {
+            guard let word = replacement.replacementWord, !word.isEmpty, word != replacement.originalWord,
+                  !Self.isPart(word, of: replacement.originalWord),
+                  !EverydayWords.containsAny(of: replacement.originalWord, languages: languages) else { continue }
+            let pattern = "(?<![\\p{L}\\p{N}])" + NSRegularExpression.escapedPattern(for: replacement.originalWord)
+                .replacingOccurrences(of: " ", with: "\\s+") + "(?![\\p{L}\\p{N}])"
+            guard let found = result.range(of: pattern, options: [.regularExpression, .caseInsensitive], range: searchFrom..<result.endIndex)
+                    ?? result.range(of: pattern, options: [.regularExpression, .caseInsensitive]) else { continue }
+            result.replaceSubrange(found, with: word)
+            searchFrom = result.index(found.lowerBound, offsetBy: word.count, limitedBy: result.endIndex) ?? result.endIndex
+            changed = true
+        }
+        return changed ? result : nil
+    }
+
+    /// Whether `word` is a shorter piece of `original`, as "Java" is of "XJava": replacing
+    /// it would only drop letters the speaker said.
+    static func isPart(_ word: String, of original: String) -> Bool {
+        func letters(_ text: String) -> String { text.lowercased().filter { $0.isLetter || $0.isNumber } }
+        let piece = letters(word), whole = letters(original)
+        return piece.count < whole.count && whole.contains(piece)
     }
 
     /// Token timings from the timed words speech rounds keep: one "▁word" token per word,

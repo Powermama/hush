@@ -104,8 +104,9 @@ final class FluidAudioTranscriber: Transcriber, @unchecked Sendable {
 
     /// Prepares the boost for the user's words when it is installed; otherwise turns it off.
     func setVocabulary(_ terms: [VocabularyTerm]) async {
+        let language = await MainActor.run { Settings.shared.language }
         do {
-            try await vocabularyBoost.configure(ParakeetVocabularyBoost.isInstalled() ? terms : [])
+            try await vocabularyBoost.configure(ParakeetVocabularyBoost.isInstalled() ? terms : [], dictationLanguage: language)
         } catch {
             Self.log.error("Vocabulary boost unavailable: \(error.localizedDescription, privacy: .public)")
             try? await vocabularyBoost.configure([])

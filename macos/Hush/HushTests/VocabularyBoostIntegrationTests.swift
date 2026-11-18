@@ -74,12 +74,14 @@ struct VocabularyBoostIntegrationTests {
         for sentence in Self.distractors {
             let samples = try Self.speak(sentence)
             let words = try await transcriber.transcribeWords(samples: samples, language: "en")
+            let start = CFAbsoluteTimeGetCurrent()
             let boosted = await boost.rescore(
                 text: words.map(\.text).joined(separator: " "),
                 timings: ParakeetVocabularyBoost.timings(for: words, end: Double(samples.count) / 16_000),
                 samples: samples)
+            let milliseconds = (CFAbsoluteTimeGetCurrent() - start) * 1000
             if let boosted { falsePositives += 1 }
-            print("[boost] distractor \"\(sentence)\" -> \(boosted.map { "\"\($0)\"" } ?? "unchanged")")
+            print("[boost] distractor \"\(sentence)\" -> \(boosted.map { "\"\($0)\"" } ?? "unchanged") | \(String(format: "%.1f", milliseconds))ms")
         }
         print("[boost] false positives \(falsePositives) of \(Self.distractors.count)")
         #expect(falsePositives == 0)
@@ -100,7 +102,8 @@ struct VocabularyBoostIntegrationTests {
     /// Word-level edit distance, ignoring case and punctuation.
     static func wordErrors(reference: String, hypothesis: String) -> Int {
         func words(_ text: String) -> [String] {
-            text.lowercased().components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }
+            text.replacingOccurrences(of: "<unk>", with: " ").lowercased()
+                .components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }
         }
         let r = words(reference), h = words(hypothesis)
         var row = Array(0...h.count)
@@ -125,6 +128,11 @@ struct VocabularyBoostIntegrationTests {
         process.arguments = ["-o", url.path, text]
         try process.run()
         process.waitUntilExit()
+        return try load(url)
+    }
+
+    /// An audio file as 16 kHz mono samples.
+    static func load(_ url: URL) throws -> [Float] {
         let file = try AVAudioFile(forReading: url)
         let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 16_000, channels: 1, interleaved: false)!
         let converter = AVAudioConverter(from: file.processingFormat, to: format)!

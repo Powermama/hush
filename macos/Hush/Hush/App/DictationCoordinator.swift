@@ -88,6 +88,8 @@ final class DictationCoordinator {
     var onOnboardingPracticeLevel: ((Float) -> Void)?
     private var vocabularySampleActive = false
     private var onVocabularySampleLevel: ((Float) -> Void)?
+    /// The words the loaded speech model last received.
+    private var appliedVocabulary: [VocabularyTerm]?
     private var recordingEditorTarget: HushEditorRecordingTarget?
     private var recordingStartedAt: Date?
     private var recordingPersona: RecordingPersona?
@@ -115,6 +117,10 @@ final class DictationCoordinator {
     private func bind() {
         Settings.shared.didChange
             .sink { [weak self] in self?.applySettings() }
+            .store(in: &subscriptions)
+        VocabularyBoostStore.shared.$state
+            .removeDuplicates()
+            .sink { [weak self] _ in Task { @MainActor in self?.refreshVocabulary(force: true) } }
             .store(in: &subscriptions)
 
         hotkey.onPress = { [weak self] in self?.hotkeyPressed() }
@@ -424,6 +430,18 @@ final class DictationCoordinator {
         } else {
             postProcessor = BasicPostProcessor()
         }
+        refreshVocabulary()
+    }
+
+    /// Hands the user's words to the speech model (PRD R13) when the model is ready and the
+    /// list or the boost changed.
+    private func refreshVocabulary(force: Bool = false) {
+        guard isModelReady else { return }
+        let terms = Settings.shared.vocabulary
+        guard force || terms != appliedVocabulary else { return }
+        appliedVocabulary = terms
+        let transcriber = transcriber
+        Task { await transcriber.setVocabulary(terms) }
     }
 
     /// Translate raw Core Audio / AVFoundation errors into something a user can act on.
@@ -500,6 +518,7 @@ final class DictationCoordinator {
                       Settings.shared.modelID == id else { return }
                 self.isModelReady = true
                 self.loadedModelID = id
+                self.refreshVocabulary(force: true)
                 self.phase.send(.idle)
                 await self.recoverInterruptedDictations()
             } catch is CancellationError {
