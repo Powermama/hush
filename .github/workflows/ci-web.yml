@@ -49,7 +49,11 @@ jobs:
       - name: Migrate the test database
         run: DATABASE_URL="$HUSH_TEST_DATABASE_URL" bun run db:migrate
       - name: Check dependency advisories
-        run: bun audit
+        # GHSA-fc5q-39xc-vjpf (picomatch ReDoS, every version through 4.0.7, no fix released):
+        # picomatch is reached only through build tools (Vite, Orval, Paraglide) that match
+        # glob patterns from our own configuration, never input from users. Remove the
+        # exception once a fixed picomatch is published and the lockfile is updated.
+        run: bun audit --ignore=GHSA-fc5q-39xc-vjpf
       # The site catalogue imports the generated blog list; nothing generated is committed.
       - name: Generate the blog
         run: bun run blog:generate

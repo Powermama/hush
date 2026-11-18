@@ -34,6 +34,7 @@ final class GeneralSettingsPageViewController: ControlCenterPageViewController {
         ))
         buildShortcutCard()
         buildBehaviorCard()
+        buildSpeedCard()
         configureControls()
         Settings.shared.didChange
             .receive(on: RunLoop.main)
@@ -116,6 +117,38 @@ final class GeneralSettingsPageViewController: ControlCenterPageViewController {
         #else
         addFullWidth(subtitle("Auto-paste requires Accessibility permission. Clipboard-only output remains available without it."))
         #endif
+    }
+
+    /// R7: the wait from key release to inserted text, measured on this Mac.
+    private func buildSpeedCard() {
+        let rows = NSStackView()
+        rows.orientation = .vertical
+        rows.alignment = .leading
+        rows.spacing = 0
+        let store = DictationTimingStore.shared
+        let entries: [(String, String, DictationWaitSummary?)] = [
+            ("Dictation", "From releasing the key to text in your app.", store.summary(writing: false)),
+            ("With hush AI", "When Live Write or a persona writes the text.", store.summary(writing: true)),
+        ]
+        for (index, entry) in entries.enumerated() {
+            let value = NSTextField(labelWithString: Self.speedText(entry.2))
+            value.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
+            value.textColor = entry.2 == nil ? .tertiaryLabelColor : .labelColor
+            value.setAccessibilityIdentifier("hush.general.speed.\(index)")
+            rows.addArrangedSubview(ControlCenterKeyValueRow(
+                title: entry.0, subtitle: entry.1, trailing: value, showsSeparator: index < entries.count - 1
+            ))
+        }
+        for row in rows.arrangedSubviews { row.widthAnchor.constraint(equalTo: rows.widthAnchor).isActive = true }
+        addFullWidth(sectionTitle("Speed on this Mac"))
+        addFullWidth(makeCard(content: rows))
+        addFullWidth(subtitle("Measured over your last 50 dictations and stored only on this Mac. hush keeps only the times, never what you said, and never sends them anywhere."))
+    }
+
+    static func speedText(_ summary: DictationWaitSummary?) -> String {
+        guard let summary else { return "Not measured yet" }
+        func seconds(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(1))) + " s" }
+        return "\(seconds(summary.median)) typical · 9 in 10 under \(seconds(summary.p90))"
     }
 
     private func configureControls() {
@@ -258,7 +291,7 @@ final class InterfaceSettingsPageViewController: ControlCenterPageViewController
     private let showHUDSwitch = NSSwitch()
     private let positionControl = NSSegmentedControl(labels: ["Bottom", "Top"], trackingMode: .selectOne, target: nil, action: nil)
     private let hudStateControl = NSSegmentedControl(
-        labels: ["Listening", "Processing", "Signing", "Inserted"],
+        labels: ["Listening", "Processing", "Writing", "Signing", "Inserted"],
         trackingMode: .selectOne,
         target: nil,
         action: nil
@@ -326,9 +359,10 @@ final class InterfaceSettingsPageViewController: ControlCenterPageViewController
         refresh()
     }
     @objc private func hudStateChanged(_ sender: NSSegmentedControl) {
-        let states: [HushState] = [.listening, .processing, .signing, .inserted]
+        // Writing is the processing state while Live Write's engine works on the text.
+        let states: [(HushState, Bool)] = [(.listening, false), (.processing, false), (.processing, true), (.signing, false), (.inserted, false)]
         guard states.indices.contains(sender.selectedSegment) else { return }
-        hudPreview.state = states[sender.selectedSegment]
+        (hudPreview.state, hudPreview.isWriting) = states[sender.selectedSegment]
     }
 }
 
@@ -338,6 +372,7 @@ private final class HUDSettingsPreviewView: ControlCenterCardView {
     var isEnabled = true { didSet { updatePreview() } }
     var isVerified = false { didSet { updatePreview() } }
     var state: HushState = .listening { didSet { updatePreview() } }
+    var isWriting = false { didSet { updatePreview() } }
 
     private let model: HUDModel
     private let materialView: HUDNativeMaterialView
@@ -380,12 +415,20 @@ private final class HUDSettingsPreviewView: ControlCenterCardView {
 
     required init?(coder: NSCoder) { fatalError() }
 
+    /// The engine Live Write would use now, so the preview names the real one.
+    private static func writingEngine() -> HUDWriting {
+        let provider = Settings.shared.llmProvider
+        if provider == .off { return HUDWriting(engine: LLMProvider.qwen35_4b.displayName, isCloud: false) }
+        return HUDWriting(engine: provider.displayName, isCloud: provider == .chatGPT)
+    }
+
     private func updatePreview(animated: Bool = true) {
         model.state = state
         model.seconds = 8
         model.wordCount = 34
         model.targetApp = "Mail"
         model.isVerified = isVerified && state == .inserted
+        model.writing = isWriting ? Self.writingEngine() : nil
         model.levels = Self.levels
         materialView.alphaValue = isEnabled ? 1 : 0.42
 

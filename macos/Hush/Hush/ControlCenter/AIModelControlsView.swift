@@ -1,10 +1,19 @@
 import AppKit
 import Combine
 
-/// The same file lifecycle, presented in the workflow that uses each model.
+/// The same file lifecycle, presented in the workflow that uses each model. Engine lists
+/// (Live Write, Assistant's AI model) put the recommended engine first and the user's
+/// ChatGPT plan last; each feature keeps its own choice and its own ChatGPT consent.
 @MainActor
 final class AIModelControlsView: NSStackView {
-    enum Scope { case personas, assistant }
+    enum Scope {
+        /// Live Write's writing engine.
+        case liveWrite
+        /// The model Assistant thinks with.
+        case assistantIntelligence
+        /// What Assistant needs besides its AI model: listening and spoken replies.
+        case assistantSupport
+    }
     private let scope: Scope
     private let library = AIModelLibrary.shared
     private var subscriptions = Set<AnyCancellable>()
@@ -13,7 +22,8 @@ final class AIModelControlsView: NSStackView {
         self.scope = scope
         super.init(frame: .zero)
         orientation = .vertical; alignment = .leading; spacing = 0
-        library.changes.merge(with: AssistantSetupFlow.shared.changes)
+        library.changes.merge(with: AssistantSetupFlow.shared.changes, ChatGPTAccount.shared.changes,
+                              Settings.shared.didChange, LLMRuntime.shared.stateChange, CoworkerModelSettings.changes)
             .throttle(for: .milliseconds(200), scheduler: RunLoop.main, latest: true)
             .sink { [weak self] in self?.refresh() }.store(in: &subscriptions)
         refresh()
@@ -21,78 +31,178 @@ final class AIModelControlsView: NSStackView {
     }
     required init?(coder: NSCoder) { fatalError() }
 
-    func refresh() {
-        arrangedSubviews.forEach { removeArrangedSubview($0); $0.removeFromSuperview() }
-        let items: [LocalAIModel] = scope == .personas
-            ? [.intelligence(.qwen35_4b), .intelligence(.qwen35_2b)]
-            : [.intelligence(CoworkerModelSettings.provider), .speech(Settings.shared.modelID), .voice]
-        if scope == .personas {
-            addRow(title: "Apple Intelligence", detail: "On this Mac · Managed by macOS",
-                   controls: selectionControl(for: .appleIntelligence), separator: true)
-        }
-        for (index, item) in items.enumerated() {
-            let installed = library.installed(item)
-            let busy = library.busy(item)
-            let controls = NSStackView(); controls.spacing = 14; controls.alignment = .centerY
-            if scope == .personas, case .intelligence(let provider) = item, installed, !busy {
-                controls.addArrangedSubview(selectionControl(for: provider))
-            } else if scope == .assistant, installed, !busy {
-                let step: AssistantSetupFlow.Step
-                switch item {
-                case .intelligence: step = .intelligence
-                case .speech: step = .transcription
-                case .voice: step = .voice
-                }
-                let active = AssistantSetupFlow.shared.ready(step) && library.failures[item] == nil
-                controls.addArrangedSubview(modelStatus(active ? "Active" : "Downloaded", name: library.name(item), active: active))
-            }
-            if !library.bundled(item) {
-                let control: NSControl
-                if installed && !busy {
-                    let menu = AIModelMenuButton(modelName: library.name(item))
-                    menu.onRemove = { [weak self] in self?.confirmRemoval(item) }
-                    control = menu
-                } else {
-                    let button = AIModelActionButton(title: busy ? "Cancel" : "Download", inline: true,
-                                                     symbol: busy ? "xmark.circle" : "arrow.down.circle")
-                    button.setAccessibilityLabel("\(busy ? "Cancel" : "Download") \(library.name(item))")
-                    button.onPress = { [weak self] in
-                        guard let self else { return }
-                        if library.busy(item) { library.cancel(item) }
-                        else { library.download(item) }
-                    }
-                    control = button
-                }
-                control.setAccessibilityIdentifier("hush.ai.model.\(item.id)")
-                control.isEnabled = !library.isRemoving && !AssistantSetupFlow.shared.isRunning
-                controls.addArrangedSubview(control)
-            }
-            let purpose: String
-            switch item {
-            case .intelligence: purpose = scope == .personas ? "Writing engine" : "Intelligence & vision"
-            case .speech: purpose = "Listening"
-            case .voice: purpose = "Spoken replies · English"
-            }
-            var detail = purpose
-            if let failure = library.failures[item] { detail = failure }
-            else if busy { detail = library.detail(item) }
-            else if library.bundled(item) { detail += " · Included with Hush" }
-            else if let size = library.sizes[item], installed { detail += " · " + ByteCountFormatter.string(fromByteCount: size, countStyle: .file) }
-            else { detail += installed ? " · On this Mac" : " · Not installed" }
-            addRow(title: library.name(item), detail: detail, controls: controls, separator: index < items.count - 1)
+    // MARK: Which feature's choice this list shows
+
+    private var purpose: ChatGPTAccount.Purpose { scope == .liveWrite ? .liveWrite : .assistant }
+    private var selected: LLMProvider { scope == .liveWrite ? Settings.shared.llmProvider : CoworkerModelSettings.provider }
+
+    private func isReady(_ provider: LLMProvider) -> Bool {
+        scope == .liveWrite ? LLMRuntime.shared.isReady(provider: provider) : CoworkerModelSettings.isReady(provider)
+    }
+
+    private func select(_ provider: LLMProvider) {
+        switch scope {
+        case .liveWrite:
+            Settings.shared.llmProvider = provider
+            if provider == .chatGPT { Settings.shared.liveWriteEnabled = true }
+        case .assistantIntelligence, .assistantSupport:
+            CoworkerModelSettings.select(provider)
         }
     }
 
+    // MARK: Rows
+
+    func refresh() {
+        arrangedSubviews.forEach { removeArrangedSubview($0); $0.removeFromSuperview() }
+        switch scope {
+        case .liveWrite:
+            addEngine(.qwen35_4b, purpose: "Recommended")
+            addSystemEngine()
+            addEngine(.qwen35_2b, purpose: "Faster")
+            addChatGPTRow()
+        case .assistantIntelligence:
+            addEngine(.qwen35_4b, purpose: "Recommended")
+            addEngine(.qwen35_2b, purpose: "Faster")
+            addChatGPTRow()
+        case .assistantSupport:
+            let items: [LocalAIModel] = [.speech(Settings.shared.modelID), .voice]
+            for (index, item) in items.enumerated() {
+                let controls = controlStack()
+                let step: AssistantSetupFlow.Step = item == .voice ? .voice : .transcription
+                if library.installed(item), !library.busy(item) {
+                    let active = AssistantSetupFlow.shared.ready(step) && library.failures[item] == nil
+                    controls.addArrangedSubview(modelStatus(active ? "Active" : "Downloaded", name: library.name(item), active: active))
+                }
+                addFileControl(item, to: controls)
+                addRow(title: library.name(item), detail: detail(for: item, purpose: item == .voice ? "Spoken replies · English" : "Listening"),
+                       controls: controls, separator: index < items.count - 1)
+            }
+        }
+    }
+
+    /// A model on this Mac: Download until it is here, then Use or Active, and its More menu.
+    private func addEngine(_ provider: LLMProvider, purpose: String) {
+        let item = LocalAIModel.intelligence(provider)
+        let controls = controlStack()
+        if library.installed(item), !library.busy(item) { controls.addArrangedSubview(selectionControl(for: provider)) }
+        addFileControl(item, to: controls)
+        addRow(title: library.name(item), detail: detail(for: item, purpose: purpose + " · On this Mac"), controls: controls, separator: true)
+    }
+
+    /// Apple Intelligence is managed by macOS: nothing to download or remove.
+    private func addSystemEngine() {
+        // A menu-width spacer keeps Use in the same column as the rows with a More menu.
+        let spacer = NSView()
+        spacer.widthAnchor.constraint(equalToConstant: 28).isActive = true
+        let controls = controlStack()
+        controls.addArrangedSubview(selectionControl(for: .appleIntelligence))
+        controls.addArrangedSubview(spacer)
+        addRow(title: "Apple Intelligence", detail: "On this Mac · Managed by macOS", controls: controls, separator: true)
+    }
+
+    private func detail(for item: LocalAIModel, purpose: String) -> String {
+        let installed = library.installed(item)
+        if let failure = library.failures[item] { return failure }
+        if library.busy(item) { return library.detail(item) }
+        if library.bundled(item) { return purpose + " · Included with hush" }
+        if let size = library.sizes[item], installed { return purpose + " · " + ByteCountFormatter.string(fromByteCount: size, countStyle: .file) }
+        return purpose + (installed ? "" : " · Not installed")
+    }
+
+    /// Download or Cancel while missing, a More menu with Remove once installed.
+    private func addFileControl(_ item: LocalAIModel, to controls: NSStackView) {
+        guard !library.bundled(item) else { return }
+        let control: NSControl
+        if library.installed(item) && !library.busy(item) {
+            let menu = AIModelMenuButton(modelName: library.name(item))
+            menu.onRemove = { [weak self] in self?.confirmRemoval(item) }
+            control = menu
+        } else {
+            let busy = library.busy(item)
+            let button = AIModelActionButton(title: busy ? "Cancel" : "Download", inline: true,
+                                             symbol: busy ? "xmark.circle" : "arrow.down.circle")
+            button.setAccessibilityLabel("\(busy ? "Cancel" : "Download") \(library.name(item))")
+            button.onPress = { [weak self] in
+                guard let self else { return }
+                if library.busy(item) { library.cancel(item) } else { library.download(item) }
+            }
+            control = button
+        }
+        control.setAccessibilityIdentifier("hush.ai.model.\(item.id)")
+        control.isEnabled = !library.isRemoving && !AssistantSetupFlow.shared.isRunning
+        controls.addArrangedSubview(control)
+    }
+
+    /// The user's ChatGPT plan as the last engine. Choosing it asks for this feature's consent
+    /// first (Assistant shares more than Live Write), then signs in when needed. Connected, its
+    /// More menu holds the model, Manage Usage and Disconnect.
+    private func addChatGPTRow() {
+        let account = ChatGPTAccount.shared
+        let controls = controlStack()
+        let choose = { [weak self] in
+            guard let self else { return }
+            account.withConsent(for: self.purpose, in: self.window) { [weak self] in self?.select(.chatGPT) }
+        }
+        var detail = "Your ChatGPT plan · Sent to OpenAI"
+        switch account.state {
+        case .disconnected, .failed:
+            if case .failed(let message) = account.state { detail = message }
+            let connect = AIModelActionButton(title: "Continue with ChatGPT", inline: true, symbol: "cloud")
+            connect.setAccessibilityIdentifier("hush.ai.model.chatgpt")
+            connect.onPress = choose
+            controls.addArrangedSubview(connect)
+        case .connecting:
+            detail = "Finish signing in in your browser"
+            let cancel = AIModelActionButton(title: "Cancel", inline: true, symbol: "xmark.circle")
+            cancel.onPress = { account.cancelConnect() }
+            controls.addArrangedSubview(cancel)
+        case .connected(let email, let planUsage):
+            if planUsage {
+                let model = account.modelName(Settings.shared.chatGPTModel)
+                let fallback = scope == .liveWrite ? "Writing" : "Answering"
+                detail = account.isLimitPaused ? "Plan limit reached · \(fallback) on this Mac for now" : "\(model) · Your ChatGPT plan"
+                if selected == .chatGPT && account.hasConsent(purpose) {
+                    controls.addArrangedSubview(modelStatus("Active", name: "ChatGPT", active: true))
+                } else {
+                    let use = AIModelActionButton(title: "Use", inline: true)
+                    use.setAccessibilityLabel("Use ChatGPT")
+                    use.setAccessibilityIdentifier("hush.ai.model.chatgpt")
+                    use.isEnabled = !AssistantSetupFlow.shared.isRunning
+                    use.onPress = choose
+                    controls.addArrangedSubview(use)
+                }
+            } else {
+                detail = "\(email ?? "Signed in") · Plan use not allowed yet"
+                let allow = AIModelActionButton(title: "Continue with ChatGPT", inline: true, symbol: "cloud")
+                allow.setAccessibilityIdentifier("hush.ai.model.chatgpt")
+                allow.onPress = { [weak self] in
+                    guard let self else { return }
+                    account.requestConsent(for: self.purpose, in: self.window) { [weak self] in self?.select(.chatGPT) }
+                }
+                controls.addArrangedSubview(allow)
+            }
+            let menu = ChatGPTMenuButton(account: account)
+            menu.onDisconnect = { [weak self] in account.disconnectReporting(in: self?.window) }
+            controls.addArrangedSubview(menu)
+        }
+        addRow(title: "ChatGPT", detail: detail, controls: controls, separator: false)
+    }
+
     private func selectionControl(for provider: LLMProvider) -> NSView {
-        let ready = LLMRuntime.shared.isReady(provider: provider)
-        if Settings.shared.llmProvider == provider && ready {
+        let ready = isReady(provider)
+        if selected == provider && ready {
             return modelStatus("Active", name: provider.displayName, active: true)
         }
         let use = AIModelActionButton(title: "Use", inline: true)
         use.setAccessibilityLabel("Use \(provider.displayName)")
-        use.isEnabled = ready && !library.isRemoving
-        use.onPress = { Settings.shared.llmProvider = provider }
+        use.isEnabled = ready && !library.isRemoving && !AssistantSetupFlow.shared.isRunning
+        use.onPress = { [weak self] in self?.select(provider) }
         return use
+    }
+
+    private func controlStack() -> NSStackView {
+        let controls = NSStackView(); controls.spacing = 14; controls.alignment = .centerY
+        return controls
     }
 
     private func modelStatus(_ title: String, name: String, active: Bool) -> NSTextField {
@@ -192,4 +302,46 @@ private final class AIModelMenuButton: NSPopUpButton {
     }
     required init?(coder: NSCoder) { fatalError() }
     @objc private func removeModel() { onRemove?() }
+}
+
+/// ChatGPT's secondary actions in a standard pull-down: the model, Manage usage, Disconnect.
+@MainActor
+private final class ChatGPTMenuButton: NSPopUpButton {
+    var onDisconnect: (() -> Void)?
+    private let account: ChatGPTAccount
+
+    init(account: ChatGPTAccount) {
+        self.account = account
+        super.init(frame: .zero, pullsDown: true)
+        isBordered = false; controlSize = .small
+        (cell as? NSPopUpButtonCell)?.arrowPosition = .noArrow
+        addItem(withTitle: "")
+        item(at: 0)?.image = NSImage(systemSymbolName: "ellipsis.circle", accessibilityDescription: nil)
+        if !account.models.isEmpty {
+            let models = NSMenuItem(title: "Model", action: nil, keyEquivalent: "")
+            let submenu = NSMenu()
+            for model in account.models {
+                let item = NSMenuItem(title: model.displayName, action: #selector(chooseModel(_:)), keyEquivalent: "")
+                item.representedObject = model.slug
+                item.state = model.slug == Settings.shared.chatGPTModel ? .on : .off
+                item.target = self
+                submenu.addItem(item)
+            }
+            models.submenu = submenu
+            menu?.addItem(models)
+            menu?.addItem(.separator())
+        }
+        let manage = NSMenuItem(title: "Manage Usage\u{2026}", action: #selector(manageUsage), keyEquivalent: "")
+        manage.target = self
+        menu?.addItem(manage)
+        let disconnect = NSMenuItem(title: "Disconnect ChatGPT\u{2026}", action: #selector(disconnect), keyEquivalent: "")
+        disconnect.target = self
+        menu?.addItem(disconnect)
+        setAccessibilityLabel("More options for ChatGPT")
+        NSLayoutConstraint.activate([widthAnchor.constraint(equalToConstant: 28), heightAnchor.constraint(equalToConstant: 26)])
+    }
+    required init?(coder: NSCoder) { fatalError() }
+    @objc private func chooseModel(_ sender: NSMenuItem) { Settings.shared.chatGPTModel = sender.representedObject as? String }
+    @objc private func manageUsage() { NSWorkspace.shared.open(ChatGPTAccount.manageUsageURL) }
+    @objc private func disconnect() { onDisconnect?() }
 }

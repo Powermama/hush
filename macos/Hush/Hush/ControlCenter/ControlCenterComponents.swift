@@ -202,8 +202,9 @@ final class ControlCenterFlippedDocumentView: NSView {
     override var isFlipped: Bool { true }
 }
 
+/// The window background, redrawn when the appearance changes (layer colors do not follow it by themselves).
 @MainActor
-private final class ControlCenterBackgroundView: NSView {
+final class ControlCenterBackgroundView: NSView {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
@@ -217,6 +218,29 @@ private final class ControlCenterBackgroundView: NSView {
     private func updateColor() {
         effectiveAppearance.performAsCurrentDrawingAppearance {
             layer?.backgroundColor = ControlCenterStyle.contentBackground.cgColor
+        }
+    }
+}
+
+/// A rounded soft fill behind a field, such as a text editor, redrawn when the appearance changes.
+@MainActor
+final class ControlCenterFieldBackgroundView: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.cornerRadius = 10
+        layer?.cornerCurve = .continuous
+        layer?.masksToBounds = true
+        updateColor()
+    }
+    required init?(coder: NSCoder) { fatalError() }
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateColor()
+    }
+    private func updateColor() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = ControlCenterStyle.softFill.cgColor
         }
     }
 }
