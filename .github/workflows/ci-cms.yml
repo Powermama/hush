@@ -60,8 +60,20 @@ jobs:
       - name: Check the article package
         working-directory: webapp/packages/article
         run: bun run lint && bun run test
+      - name: Restore the Playwright browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('webapp/bun.lock') }}
+      # A package mirror can stall for many minutes; bound each attempt and retry it rather
+      # than lose the whole job.
       - name: Install browsers for the admin journeys
-        run: bunx playwright install --with-deps chromium webkit
+        run: |
+          for attempt in 1 2 3; do
+            timeout 300 bunx playwright install --with-deps chromium webkit && exit 0
+            echo "Browser install attempt $attempt did not finish; retrying."
+          done
+          exit 1
       - name: Admin journeys on desktop, a phone and WebKit
         run: bun run test:admin
       # Traces and screenshots of failed admin journeys, as the website's journeys keep them.
