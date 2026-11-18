@@ -73,6 +73,31 @@ struct VocabularyTests {
         #expect(!Profile.buildDictationTurn(transcript: "Test", profile: profile).contains("<vocabulary>"))
     }
 
+    @Test("What the model heard is compared without case or sentence punctuation")
+    func heard() {
+        #expect(Vocabulary.cleanHeard(" Kubernetes. ") == "Kubernetes")
+        #expect(Vocabulary.cleanHeard("Cuba  netties?") == "Cuba netties")
+        #expect(Vocabulary.matches("kubernetes.", "Kubernetes"))
+        #expect(!Vocabulary.matches("cuba netties", "Kubernetes"))
+        #expect(Vocabulary.contains("Deploy it to Kubernetes today.", term: "kubernetes"))
+        #expect(!Vocabulary.contains("Kubernetesy", term: "Kubernetes"))
+    }
+
+    @Test("Spellings keep the model that heard them; a new model asks for practice")
+    func spellingsRememberTheirModel() {
+        let term = VocabularyTerm(term: "hush", spellings: [
+            .init(text: "Hash.", modelID: "parakeet-v3"),
+            .init(text: "hash", modelID: "whisper"),
+            .init(text: "Hush", modelID: "parakeet-v3"),
+            .init(text: "husch"),
+        ])
+        #expect(term.soundsLike == ["Hash", "husch"])
+        #expect(!term.needsPractice(with: "parakeet-v3"))
+        #expect(term.needsPractice(with: "whisper-large"))
+        #expect(!term.needsPractice(with: nil))
+        #expect(!VocabularyTerm(term: "Qwen", soundsLike: ["quen"]).needsPractice(with: "whisper-large"), "typed spellings fit every model")
+    }
+
     @Test("The list persists through Settings")
     @MainActor
     func persists() {

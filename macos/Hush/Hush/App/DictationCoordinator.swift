@@ -69,7 +69,7 @@ final class DictationCoordinator {
     private var modelPreparationGeneration = 0
     private var isStarted = false
     var canManageModels: Bool {
-        guard transcribeTask == nil, recorder.state != .recording, !onboardingPracticeActive,
+        guard transcribeTask == nil, recorder.state != .recording, !onboardingPracticeActive, !vocabularySampleActive,
               modelPreparationTask == nil, !selectionEditor.isPresented else { return false }
         return true
     }
@@ -84,6 +84,8 @@ final class DictationCoordinator {
     private var transcribeTask: Task<Void, Never>?
     private var onboardingPracticeActive = false
     var onOnboardingPracticeLevel: ((Float) -> Void)?
+    private var vocabularySampleActive = false
+    private var onVocabularySampleLevel: ((Float) -> Void)?
     private var recordingEditorTarget: HushEditorRecordingTarget?
     private var recordingStartedAt: Date?
     private var recordingPersona: RecordingPersona?
@@ -95,7 +97,7 @@ final class DictationCoordinator {
     var onAssistantCaptureState: ((UUID, String) -> Void)?
     var onAssistantLevel: ((Float) -> Void)?
     var onAssistantTranscript: ((UUID, String) -> Void)?
-    var canOpenAssistant: Bool { !onboardingPracticeActive && transcribeTask == nil && recorder.state != .recording }
+    var canOpenAssistant: Bool { !onboardingPracticeActive && !vocabularySampleActive && transcribeTask == nil && recorder.state != .recording }
 
     private struct RecordingPersona: Sendable {
         let profile: Profile
@@ -129,6 +131,10 @@ final class DictationCoordinator {
         recorder.onLimitReached = { [weak self] in self?.recordingLimitReached() }
         recorder.onLevel = { [weak self] level in
             guard let self else { return }
+            if self.vocabularySampleActive {
+                self.onVocabularySampleLevel?(level)
+                return
+            }
             if self.recordingAssistantSessionID != nil {
                 self.onAssistantLevel?(level)
             } else if self.recordingEditorTarget != nil {
@@ -163,6 +169,7 @@ final class DictationCoordinator {
             onboardingPracticeActive = false
         }
         onOnboardingPracticeLevel = nil
+        cancelVocabularySample()
         transcribeTask?.cancel()
         transcribeTask = nil
         modelPreparationGeneration += 1
@@ -231,6 +238,46 @@ final class DictationCoordinator {
         discardRecording()
         onboardingPracticeActive = false
         hud.hide()
+    }
+
+    /// The model that hears the next vocabulary sample, once it is ready.
+    var vocabularySampleModelID: String? { isModelReady ? loadedModelID : nil }
+
+    /// Records a clip for teaching hush a word (PRD R13): the same recorder and speech model
+    /// as dictation, but no HUD, history, journal or inserted text. Dictation waits meanwhile.
+    func beginVocabularySample(onLevel: @escaping (Float) -> Void) throws {
+        guard transcribeTask == nil, recorder.state != .recording, !onboardingPracticeActive, !vocabularySampleActive else {
+            throw OnboardingPracticeError.busy
+        }
+        guard isModelReady else { throw OnboardingPracticeError.modelNotReady }
+        try recorder.start(journaling: false)
+        vocabularySampleActive = true
+        onVocabularySampleLevel = onLevel
+    }
+
+    /// What the speech model heard, exactly as it heard it: no vocabulary, no clean-up.
+    /// Nil when it recognised nothing.
+    func finishVocabularySample() async throws -> String? {
+        guard vocabularySampleActive, recorder.state == .recording else { throw OnboardingPracticeError.notRecording }
+        onVocabularySampleLevel = nil
+        defer { vocabularySampleActive = false }
+        var samples = recorder.stop()
+        // A single word can be shorter than the model's minimum input; trailing silence
+        // lets it through without changing what is heard.
+        let minimum = Int(AudioRecorder.targetSampleRate * 1.2)
+        if samples.count < minimum { samples += [Float](repeating: 0, count: minimum - samples.count) }
+        return try await transcriber.transcribe(
+            samples: samples,
+            language: Settings.shared.language,
+            fallbackCount: Settings.shared.transcriptionQuality.fallbackCount
+        )
+    }
+
+    func cancelVocabularySample() {
+        guard vocabularySampleActive else { return }
+        onVocabularySampleLevel = nil
+        vocabularySampleActive = false
+        _ = recorder.stop()
     }
 
     func editSelectionWithHush(sourceApplication: NSRunningApplication? = nil) {
@@ -614,6 +661,10 @@ final class DictationCoordinator {
         guard !onboardingPracticeActive else {
             if editorTarget != nil { showComposerVoiceError("Finish the practice recording first") }
             else { hud.flash(message: "Finish the practice recording first") }
+            return
+        }
+        guard !vocabularySampleActive else {
+            hud.flash(message: "hush is learning a word")
             return
         }
         guard transcribeTask == nil else {

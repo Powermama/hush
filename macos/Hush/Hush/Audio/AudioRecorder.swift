@@ -83,7 +83,9 @@ final class AudioRecorder {
 
     // MARK: - Lifecycle
 
-    func start() throws {
+    /// `journaling: false` keeps the clip off disk, for samples that are never dictation,
+    /// such as a word the user teaches hush.
+    func start(journaling: Bool = true) throws {
         guard state == .idle else { return }
 
         // Tear down whatever the previous run left behind. Even if `stop()`
@@ -104,7 +106,7 @@ final class AudioRecorder {
         }
 
         state = .recording
-        journal.begin()
+        if journaling { journal.begin() }
         let inputFmt = engine.inputNode.outputFormat(forBus: 0)
         Self.log.info("Recording started; engine.isRunning=\(self.engine.isRunning, privacy: .public) inputFormat=\(inputFmt.sampleRate, format: .fixed(precision: 0))Hz/\(inputFmt.channelCount)ch")
     }

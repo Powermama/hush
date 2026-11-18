@@ -151,7 +151,7 @@ final class TranscriptionModelsStore: ObservableObject {
     /// Bumped after disk changes (delete) that no publisher reports.
     @Published private(set) var diskRevision = 0
 
-    private weak var coordinator: DictationCoordinator?
+    private(set) weak var coordinator: DictationCoordinator?
     private var subscriptions = Set<AnyCancellable>()
 
     init(coordinator: DictationCoordinator?) {
@@ -342,7 +342,7 @@ private struct TranscriptionOverviewView: View {
                 }
             }
 
-            VocabularySection()
+            VocabularySection(coordinator: store.coordinator)
         }
         .formStyle(.grouped)
         .frame(maxWidth: ControlCenterStyle.contentMaxWidth)
