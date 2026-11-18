@@ -318,8 +318,8 @@ export function PrivacyPolicyPage({
         </p>
         <p>
           {english
-            ? "OpenAI may process data outside the EEA, including in the USA. You can turn ChatGPT off for each feature or disconnect at any time; the app then writes on your Mac again and deletes the sign-in tokens from the keychain."
-            : "OpenAI kann Daten auch außerhalb des EWR verarbeiten, insbesondere in den USA. Du kannst ChatGPT jederzeit für jede Funktion ausschalten oder die Verbindung trennen; die App schreibt dann wieder auf deinem Mac und löscht die Anmeldedaten aus dem Schlüsselbund."}
+            ? "For users in the EEA and Switzerland, OpenAI Ireland Limited, 1st Floor, The Liffey Trust Centre, 117-126 Sheriff Street Upper, Dublin 1, D01 YC43, Ireland, is responsible for this processing under your ChatGPT account. According to its Europe privacy policy, OpenAI processes data outside the EEA, including in the USA, and relies on the European Commission's adequacy decisions or standard contractual clauses for these transfers. You can turn ChatGPT off for each feature or disconnect at any time; the app then writes on your Mac again and deletes the sign-in tokens from the keychain."
+            : "Für Nutzer im EWR und in der Schweiz ist die OpenAI Ireland Limited, 1st Floor, The Liffey Trust Centre, 117-126 Sheriff Street Upper, Dublin 1, D01 YC43, Irland, für diese Verarbeitung im Rahmen deines ChatGPT-Kontos verantwortlich. Laut ihrer europäischen Datenschutzerklärung verarbeitet OpenAI Daten auch außerhalb des EWR, insbesondere in den USA, und stützt diese Übermittlungen auf Angemessenheitsbeschlüsse der Europäischen Kommission oder Standardvertragsklauseln. Du kannst ChatGPT jederzeit für jede Funktion ausschalten oder die Verbindung trennen; die App schreibt dann wieder auf deinem Mac und löscht die Anmeldedaten aus dem Schlüsselbund."}
         </p>
         <p><a className="text-ink underline underline-offset-4" href="https://openai.com/policies/eu-privacy-policy/">{english ? "OpenAI's Europe privacy policy" : "Europäische Datenschutzerklärung von OpenAI"}</a></p>
       </Section>
