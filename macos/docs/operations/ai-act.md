@@ -25,10 +25,16 @@ legal clearance; it says what applies to hush, what is done, and what is still o
 ## Timing
 
 The Omnibus gives systems already on the market before 2 August 2026 until 2 December 2026
-for marking (recital 38). hush's monorepo starts on 11 November 2026 and its first catalog
-release is alpha.4 (4 November 2026), so this record **assumes the obligations apply now**.
-If testers received a build with personas or the assistant before 2 August 2026 (alpha.1
-to alpha.3, in the old repositories), the marking deadline would be 2 December 2026.
+for marking (recital 38). The disclosure duties in Art. 50(1) have no transition.
+
+**Owner's position (19 November 2026):** the owner built and distributed hush before
+August 2026, so hush counts as already on the market and the marking deadline is
+**2 December 2026**. The early builds came from repositories that are not on this machine,
+so the dates cannot be checked here; this rests on the owner's statement.
+
+**Owner's plan:** a lawyer reviews this assessment after the early beta, once traffic grows.
+Until then this record states what the primary sources say, and the gap below stays open
+with its deadline.
 
 ## Per feature
 
@@ -59,6 +65,7 @@ to alpha.3, in the old repositories), the marking deadline would be 2 December 2
 - **Qwen (local, MLX) and Apple Intelligence:** neither Alibaba nor Apple is a signatory.
   Texts over 200 tokens from these engines, such as assistant emails or long Live Write
   texts, are **not watermarked today**.
+- **Deadline:** 2 December 2026, under the owner's position above.
 - **Next step (owner's decision):**
   - A research spike on an inference-time text watermark in hush's MLX sampler (SynthID
     Text style), with the detection mechanism the code also asks for (Commitment 2).
@@ -66,3 +73,13 @@ to alpha.3, in the old repositories), the marking deadline would be 2 December 2
 - **Ruled out:** invisible Unicode or zero-width "marks" in inserted text. They are not the
   watermarking the code means, they are fragile, and they would break the user's emails,
   forms and code.
+
+## Roadmap to 2 December 2026 (PRD R26, milestone M6)
+
+1. **Assistant disclosure:** built in #125.
+2. **Watermark spike:**
+   - A SynthID-Text-style watermark in hush's MLX sampler, plus a detection tool.
+   - Measured on the Live Write test set for writing quality, speed, and detection on texts over 200 tokens.
+3. **Owner decision:** ship the watermark, or keep texts written by local engines under 200 tokens until it is ready.
+4. **alpha.8** released before 2 December 2026 with whatever step 3 decides.
+5. **Lawyer review** after the early beta.
