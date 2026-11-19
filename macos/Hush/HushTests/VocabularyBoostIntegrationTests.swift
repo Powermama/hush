@@ -41,8 +41,14 @@ struct VocabularyBoostIntegrationTests {
         let directory = parent.appendingPathComponent(ParakeetVocabularyBoost.variant.repo.folderName)
         defer { try? FileManager.default.removeItem(at: parent) }
         let downloadStart = CFAbsoluteTimeGetCurrent()
-        try await ParakeetVocabularyBoost.install(at: directory)
-        print("[boost] download \(String(format: "%.1f", CFAbsoluteTimeGetCurrent() - downloadStart))s")
+        let updates = ProgressLog()
+        try await ParakeetVocabularyBoost.install(at: directory) { updates.append($0) }
+        print("[boost] download \(String(format: "%.1f", CFAbsoluteTimeGetCurrent() - downloadStart))s, \(updates.values.count) progress updates")
+        // The card shows a real percentage: progress arrives, never goes back, and ends at 100%.
+        #expect(updates.values.count > 2)
+        #expect(zip(updates.values, updates.values.dropFirst()).allSatisfy { $0 <= $1 })
+        #expect(updates.values.last == 1)
+        #expect(FileManager.default.fileExists(atPath: directory.appendingPathComponent("tokenizer.json").path))
 
         let transcriber = FluidAudioTranscriber()
         try await transcriber.prepare(modelID: ParakeetModel.ultra.id) { _ in }
@@ -153,3 +159,11 @@ struct VocabularyBoostIntegrationTests {
     }
 }
 #endif
+
+/// Progress values from the download callback, which may arrive on any thread.
+final class ProgressLog: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stored: [Double] = []
+    func append(_ value: Double) { lock.lock(); stored.append(value); lock.unlock() }
+    var values: [Double] { lock.lock(); defer { lock.unlock() }; return stored }
+}

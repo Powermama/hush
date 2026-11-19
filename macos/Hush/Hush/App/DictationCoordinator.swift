@@ -118,7 +118,9 @@ final class DictationCoordinator {
         Settings.shared.didChange
             .sink { [weak self] in self?.applySettings() }
             .store(in: &subscriptions)
+        // Only installing or removing the boost matters here, not each percent of a download.
         VocabularyBoostStore.shared.$state
+            .map { $0 == .installed }
             .removeDuplicates()
             .sink { [weak self] _ in Task { @MainActor in self?.refreshVocabulary(force: true) } }
             .store(in: &subscriptions)

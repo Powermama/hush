@@ -29,10 +29,19 @@ actor ParakeetVocabularyBoost {
 
     /// FluidAudio downloads into `<parent>/<repository folder>`, so `directory` must end in
     /// the repository's folder name, as `defaultDirectory` does.
-    nonisolated static func install(at directory: URL = defaultDirectory) async throws {
-        try FileManager.default.createDirectory(at: directory.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try await CtcModels.download(to: directory, variant: variant)
+    /// Downloads through `ModelHub`, which reports progress per file; `CtcModels.download`
+    /// does the same download without a progress callback.
+    nonisolated static func install(
+        at directory: URL = defaultDirectory,
+        progress: @escaping @Sendable (Double) -> Void = { _ in }
+    ) async throws {
+        let parent = directory.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+        try await ModelHub.download(variant.repo, to: parent, progressHandler: { update in
+            progress(min(max(update.fractionCompleted, 0), 1))
+        })
         guard isInstalled(at: directory) else { throw TranscriberError.backendUnavailable }
+        progress(1)
     }
 
     nonisolated static func remove(at directory: URL = defaultDirectory) throws {

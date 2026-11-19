@@ -799,7 +799,7 @@ private struct ModelDetailsPopover: View {
 }
 
 /// App Store style determinate ring, optionally with a stop glyph to cancel.
-private struct ProgressRing: View {
+struct ProgressRing: View {
     let progress: Double
     var showsStop = false
 
