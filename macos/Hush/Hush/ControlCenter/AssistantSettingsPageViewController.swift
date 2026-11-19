@@ -15,11 +15,26 @@ struct AssistantSetupSnapshot: Equatable {
     var remaining: Int { [intelligence, transcription, voice, microphone, accessibility, screen].filter { !$0 }.count }
     var title: String { ready ? "Ready when you are" : "Set up your assistant" }
 
+    /// Whether ⌃ Fn can start the assistant now, or must open its setup instead.
     @MainActor static var modelsInstalled: Bool {
-        guard let model = LLMRuntime.QwenModel(provider: CoworkerModelSettings.provider) else { return false }
-        let voiceEnabled = UserDefaults.standard.object(forKey: "assistant.voiceEnabled") as? Bool ?? true
-        return LLMRuntime.cachedQwenSnapshotURL(for: model) != nil && ModelManager.isAvailable(Settings.shared.modelID)
-            && (!voiceEnabled || CoworkerVoice.hasCachedAssets)
+        let provider = CoworkerModelSettings.provider
+        return modelsInstalled(
+            provider: provider,
+            intelligenceReady: provider == .chatGPT
+                ? CoworkerModelSettings.isReady(.chatGPT)
+                : LLMRuntime.QwenModel(provider: provider).map { LLMRuntime.cachedQwenSnapshotURL(for: $0) != nil } ?? false,
+            speechAvailable: ModelManager.isAvailable(Settings.shared.modelID),
+            voiceEnabled: UserDefaults.standard.object(forKey: "assistant.voiceEnabled") as? Bool ?? true,
+            voiceAvailable: CoworkerVoice.hasCachedAssets
+        )
+    }
+
+    /// With a model on the Mac, its files must be there. With ChatGPT the writing happens in
+    /// the user's account, so the plan must be connected with a model chosen. Either way the
+    /// Mac still recognises the user's speech, and speaks replies when that is on.
+    nonisolated static func modelsInstalled(provider: LLMProvider, intelligenceReady: Bool, speechAvailable: Bool,
+                                            voiceEnabled: Bool, voiceAvailable: Bool) -> Bool {
+        intelligenceReady && speechAvailable && (!voiceEnabled || voiceAvailable)
     }
 }
 
