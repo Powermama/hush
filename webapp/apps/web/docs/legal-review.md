@@ -118,6 +118,43 @@ pending those confirmations. A merged PR is not legal clearance.
      contract, and the operator neither receives it nor decides its use; whether
      that leaves the operator outside both roles is the reviewer's call.
 
+   Role analysis, 19 November 2026 (an engineering analysis of primary sources, not a
+   lawyer's opinion; the owner accepted it to publish section 7):
+   - Processor: no. Nothing is processed by the operator or on its behalf; the
+     request goes from the user's Mac to OpenAI under the user's contract. Compare
+     [CJEU C-683/21](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62021CJ0683),
+     para. 36 (liability covers processing "carried out on its behalf").
+   - Controller: most likely no. A controller "exerts influence over the processing
+     … for his, her or its own purposes" (C-683/21, paras. 30-31) and must decide
+     purposes and means ([EDPB Guidelines 07/2020](https://www.edpb.europa.eu/system/files/documents/2023-10/EDPB_guidelines_202007_controllerprocessor_final_en.pdf),
+     v2.1). The purpose is the user's own writing. EDPB para. 68: "the existence of a
+     mere commercial benefit for the parties involved is not sufficient to qualify as
+     a purpose of processing"; footnote 29: a system provider is a joint controller
+     only if it participates in determining purposes and means.
+   - Fashion ID (C-40/17; EDPB paras. 64-67) is distinguished: there a website
+     operator embedded a plugin in its own site, so its visitors' data went to
+     Facebook in the operator's commercial interest. Here users send their own
+     content, at their own initiative and after per-feature consent, to their own
+     account. Purely personal use falls under Art. 2(2)(c) GDPR; professional users
+     or their employers are the controllers.
+   - Residual risk: a regulator could treat the feature's design (what is sent,
+     including the window screenshot) as co-determining the means of "collection and
+     transmission" by analogy with Fashion ID. Section 7 therefore names a legal
+     basis "insofar as" the operator is responsible: consent under Art. 6(1)(a),
+     given per feature in the app and withdrawable by turning it off. The app
+     already collects that consent before the first request (#100, #122).
+   - Further Art. 13 information: none owed if the operator has no role. Under the
+     residual reading, section 7 already gives purpose, recipient (OpenAI Ireland
+     Limited for the EEA), the transfer safeguards as OpenAI states them, the legal
+     basis and withdrawal; rights and the complaint route are in section 11.
+   - TDDDG § 25 ([text](https://www.gesetze-im-internet.de/ttdsg/__25.html)): reading
+     the current app's text or a screenshot for the assistant serves a service the
+     user expressly requested (Abs. 2 Nr. 2), and consent is collected in addition.
+   - Out of scope here, flagged for a separate check: Article 50 of the EU AI Act
+     (transparency for AI-generated text) applies since 2 August 2026 to providers
+     and deployers of AI systems that generate text; whether hush's Live Write falls
+     under it or under the exemption for assistive editing is not yet assessed.
+
 ## Primary sources
 
 - [Section 5 DDG](https://www.gesetze-im-internet.de/ddg/__5.html): provider
