@@ -196,9 +196,11 @@ extension ChatGPTAccount {
         }
 
         var consentText: String {
-            // As Apple says for its own ChatGPT extension: with the user's own account, OpenAI's
-            // data rules apply. store:false keeps requests out of OpenAI's stored responses only.
-            let account = "You sign in on OpenAI\u{2019}s website; hush never sees your password or your ChatGPT chats. Requests count toward your plan\u{2019}s limits. hush asks OpenAI not to store them; OpenAI\u{2019}s privacy policy and your ChatGPT data controls apply."
+            // As Apple says for its own ChatGPT extension when the user signs in: the account's
+            // settings and OpenAI's policies apply, and OpenAI may keep requests and use them to
+            // train its models. store:false only keeps them out of stored API responses, so the
+            // dialog does not promise more than that.
+            let account = "You sign in on OpenAI\u{2019}s website; hush never sees your password or your ChatGPT chats. Requests count toward your plan\u{2019}s limits. Your ChatGPT settings and OpenAI\u{2019}s privacy policy apply: OpenAI may keep requests and use them to improve its models unless you turn that off in ChatGPT\u{2019}s data controls."
             switch self {
             case .liveWrite:
                 return """

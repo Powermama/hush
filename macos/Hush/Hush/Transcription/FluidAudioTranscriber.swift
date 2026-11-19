@@ -23,6 +23,8 @@ final class FluidAudioTranscriber: Transcriber, @unchecked Sendable {
     static let sampleRate = 16_000
 
     private var manager: AsrManager?
+    /// Listens for the user's words once they install the boost (PRD R13).
+    let vocabularyBoost = ParakeetVocabularyBoost()
     private var loadedID: String?
     private let queue = DispatchQueue(label: "com.decentralfreedom.hush.fluidaudio.state")
 
@@ -93,6 +95,36 @@ final class FluidAudioTranscriber: Transcriber, @unchecked Sendable {
     /// `fallbackCount` is Whisper's temperature-fallback budget; Parakeet's TDT decoder
     /// has no equivalent, so it is ignored.
     func transcribe(samples: [Float], language: String, fallbackCount: Int) async throws -> String? {
+        try await recognize(samples: samples, language: language, boosted: true)
+    }
+
+    func transcribeUnaided(samples: [Float], language: String, fallbackCount: Int) async throws -> String? {
+        try await recognize(samples: samples, language: language, boosted: false)
+    }
+
+    /// Prepares the boost for the user's words when it is installed; otherwise turns it off.
+    func setVocabulary(_ terms: [VocabularyTerm]) async {
+        let language = await MainActor.run { Settings.shared.language }
+        do {
+            try await vocabularyBoost.configure(ParakeetVocabularyBoost.isInstalled() ? terms : [], dictationLanguage: language)
+        } catch {
+            Self.log.error("Vocabulary boost unavailable: \(error.localizedDescription, privacy: .public)")
+            try? await vocabularyBoost.configure([])
+        }
+    }
+
+    /// Speech rounds' final words with the boost applied over the whole recording, or nil
+    /// when it changed nothing.
+    func boostVocabulary(in words: [TimedWord], samples: [Float]) async -> String? {
+        guard !words.isEmpty, await vocabularyBoost.isActive else { return nil }
+        let end = Double(samples.count) / Double(Self.sampleRate)
+        return await vocabularyBoost.rescore(
+            text: words.map(\.text).joined(separator: " "),
+            timings: ParakeetVocabularyBoost.timings(for: words, end: end),
+            samples: samples)
+    }
+
+    private func recognize(samples: [Float], language: String, boosted: Bool) async throws -> String? {
         let asr = queue.sync { manager }
         guard let asr else { throw TranscriberError.modelNotLoaded }
         if samples.isEmpty { throw TranscriberError.empty }
@@ -116,8 +148,27 @@ final class FluidAudioTranscriber: Transcriber, @unchecked Sendable {
         let rtf = audioSec > 0 ? elapsed / audioSec : 0
         Self.log.info("asr.transcribe: \(elapsed, format: .fixed(precision: 2))s for \(audioSec, format: .fixed(precision: 2))s audio (RTF=\(rtf, format: .fixed(precision: 3)))")
 
-        let text = result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        var text = result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if boosted, !text.isEmpty,
+           let boostedText = await vocabularyBoost.rescore(text: text, timings: result.tokenTimings ?? [], samples: samples) {
+            text = boostedText
+        }
         return text.isEmpty ? nil : text
+    }
+
+    /// The words of `samples` with their start times, for recognition while the user
+    /// speaks (SpeechRounds). `offset` is where the samples begin in the recording.
+    func transcribeWords(samples: [Float], language: String, offset: TimeInterval = 0) async throws -> [TimedWord] {
+        let asr = queue.sync { manager }
+        guard let asr else { throw TranscriberError.modelNotLoaded }
+        guard samples.count >= ASRConstants.minimumRequiredSamples(forSampleRate: Self.sampleRate) else { return [] }
+        var state = TdtDecoderState.make()
+        let result = try await asr.transcribe(samples, decoderState: &state, language: Self.languageHint(for: language))
+        guard let timings = result.tokenTimings, !timings.isEmpty else {
+            // No timings: one word list at the window start keeps the text, not the cut.
+            return result.text.split(separator: " ").map { TimedWord(text: String($0), start: offset) }
+        }
+        return TimedWord.words(from: timings.map { ($0.token, $0.startTime) }, offset: offset)
     }
 
     func unload() async {
@@ -129,6 +180,7 @@ final class FluidAudioTranscriber: Transcriber, @unchecked Sendable {
             return manager
         }
         await asr?.cleanup()
+        await vocabularyBoost.unload()
     }
 
     /// Script-aware token filtering hint. `nil` for "auto" and for languages outside

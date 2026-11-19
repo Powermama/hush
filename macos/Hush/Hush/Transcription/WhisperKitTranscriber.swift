@@ -127,6 +127,10 @@ final class WhisperKitTranscriber: Transcriber, @unchecked Sendable {
         await MainActor.run { progress(1.0) }
     }
 
+    // No vocabulary prompt (PRD R13): on 25 real earnings-call clips, Whisper large-v3
+    // turbo with the user's words as `promptTokens` returned empty text for most clips
+    // (WER 19.7% to 88.4%), with a list or a sentence and with a full token budget.
+    // WhisperKit users get the learned spellings and Live Write.
     func transcribe(samples: [Float], language: String, fallbackCount: Int) async throws -> String? {
         let kit = queue.sync { pipe }
         guard let kit else { throw TranscriberError.modelNotLoaded }

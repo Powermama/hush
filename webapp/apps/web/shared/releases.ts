@@ -30,6 +30,75 @@ export type HushRelease = {
 // Older unnotarized builds have been withdrawn from the website.
 export const releases: readonly HushRelease[] = [
   {
+    slug: "0.1.0-alpha.7",
+    version: "0.1.0-alpha.7",
+    displayVersion: "0.1 alpha 7",
+    build: 16,
+    releasedAt: "2026-11-19",
+    displayDate: "19 November 2026",
+    channel: "Private alpha",
+    visibility: "private",
+    title: "Your words, written your way.",
+    summary:
+      "Teach hush the names and terms it gets wrong, keep Live Write out of the apps where your words should go in as spoken, and never lose a long dictation again.",
+    downloadURL:
+      "https://updates.behu.sh/downloads/hush-0.1.0-alpha.7-build.16.dmg",
+    downloadName: "hush-0.1.0-alpha.7-build.16.dmg",
+    systemRequirements: "Apple silicon and macOS 15 or later",
+    sections: [
+      {
+        label: "Added",
+        items: [
+          {
+            title: "Vocabulary you teach by voice",
+            detail:
+              "Type a name or term the way you write it, then say it a few times. hush learns what it hears and writes your word from then on, with or without Live Write. With Parakeet you can add an optional recognition boost (97.5 MB) that helps it hear your words in new ways.",
+          },
+          {
+            title: "Live Write stays out of the way where it should",
+            detail:
+              "In terminals, code editors, AI chats and password managers, your words go in exactly as spoken. The list includes their websites, and you can add, remove or reset apps and sites.",
+          },
+          {
+            title: "Your own ChatGPT plan, if you want it",
+            detail:
+              "Live Write and the assistant write on your Mac by default. You can instead sign in with ChatGPT and turn it on per feature; hush says what is sent before anything leaves your Mac.",
+          },
+        ],
+      },
+      {
+        label: "Improved",
+        items: [
+          {
+            title: "Text appears sooner",
+            detail:
+              "With Parakeet, hush recognises speech while you talk, so less is left to do when you release the key.",
+          },
+          {
+            title: "No more keychain prompts",
+            detail:
+              "Sign-ins and keys now live in the Mac's data protection keychain, so hush no longer asks for your password to use them.",
+          },
+        ],
+      },
+      {
+        label: "Fixed",
+        items: [
+          {
+            title: "Long dictations are kept",
+            detail:
+              "A dictation that reaches the two-minute limit is kept and inserted. If your Mac sleeps or hush quits while you talk, the recording is recovered into History at the next launch.",
+          },
+        ],
+      },
+    ],
+    knownNotes: [
+      "macOS may ask you to approve the first launch and name Safari as the download source. This is a normal security prompt; no Terminal command is needed.",
+      "This is still an early alpha. I'm working toward a full public release, and I'd like to open-source the app in the future.",
+      "Built for Macs with Apple silicon. We recommend 16 GB of memory for the optional assistant; it is not a requirement for core dictation.",
+    ],
+  },
+  {
     slug: "0.1.0-alpha.6",
     version: "0.1.0-alpha.6",
     displayVersion: "0.1 alpha 6",

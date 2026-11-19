@@ -18,6 +18,22 @@ protocol Transcriber: Sendable {
 
     /// Discards loaded model weights and frees memory.
     func unload() async
+
+    /// The user's words (PRD R13), for engines that can listen for them. Applies to every
+    /// later `transcribe` call; an empty list switches it off.
+    func setVocabulary(_ terms: [VocabularyTerm]) async
+
+    /// Like `transcribe`, but exactly as the model hears: without the user's vocabulary.
+    /// Teaching a word shows this, so hush learns what it really hears.
+    func transcribeUnaided(samples: [Float], language: String, fallbackCount: Int) async throws -> String?
+}
+
+extension Transcriber {
+    func setVocabulary(_ terms: [VocabularyTerm]) async {}
+
+    func transcribeUnaided(samples: [Float], language: String, fallbackCount: Int) async throws -> String? {
+        try await transcribe(samples: samples, language: language, fallbackCount: fallbackCount)
+    }
 }
 
 enum TranscriberError: Error, LocalizedError {

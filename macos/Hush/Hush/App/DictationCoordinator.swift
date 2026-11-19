@@ -44,6 +44,8 @@ final class DictationCoordinator {
     let composeHotkey = HotkeyManager()
     let personaHotkey = HotkeyManager()
     let recorder = AudioRecorder()
+    /// Recognition while the user speaks, for the dictation being recorded.
+    private var speechRounds: SpeechRoundRunner?
     let inserter = TextInserter()
     let hud = RecordingHUDController()
     let personaWheel = PersonaWheelController()
@@ -86,6 +88,8 @@ final class DictationCoordinator {
     var onOnboardingPracticeLevel: ((Float) -> Void)?
     private var vocabularySampleActive = false
     private var onVocabularySampleLevel: ((Float) -> Void)?
+    /// The words the loaded speech model last received.
+    private var appliedVocabulary: [VocabularyTerm]?
     private var recordingEditorTarget: HushEditorRecordingTarget?
     private var recordingStartedAt: Date?
     private var recordingPersona: RecordingPersona?
@@ -113,6 +117,10 @@ final class DictationCoordinator {
     private func bind() {
         Settings.shared.didChange
             .sink { [weak self] in self?.applySettings() }
+            .store(in: &subscriptions)
+        VocabularyBoostStore.shared.$state
+            .removeDuplicates()
+            .sink { [weak self] _ in Task { @MainActor in self?.refreshVocabulary(force: true) } }
             .store(in: &subscriptions)
 
         hotkey.onPress = { [weak self] in self?.hotkeyPressed() }
@@ -165,6 +173,7 @@ final class DictationCoordinator {
         personaHotkey.stop()
         personaWheel.hide()
         if onboardingPracticeActive {
+            discardSpeechRounds()
             discardRecording()
             onboardingPracticeActive = false
         }
@@ -266,7 +275,7 @@ final class DictationCoordinator {
         // lets it through without changing what is heard.
         let minimum = Int(AudioRecorder.targetSampleRate * 1.2)
         if samples.count < minimum { samples += [Float](repeating: 0, count: minimum - samples.count) }
-        return try await transcriber.transcribe(
+        return try await transcriber.transcribeUnaided(
             samples: samples,
             language: Settings.shared.language,
             fallbackCount: Settings.shared.transcriptionQuality.fallbackCount
@@ -421,6 +430,18 @@ final class DictationCoordinator {
         } else {
             postProcessor = BasicPostProcessor()
         }
+        refreshVocabulary()
+    }
+
+    /// Hands the user's words to the speech model (PRD R13) when the model is ready and the
+    /// list or the boost changed.
+    private func refreshVocabulary(force: Bool = false) {
+        guard isModelReady else { return }
+        let terms = Settings.shared.vocabulary
+        guard force || terms != appliedVocabulary else { return }
+        appliedVocabulary = terms
+        let transcriber = transcriber
+        Task { await transcriber.setVocabulary(terms) }
     }
 
     /// Translate raw Core Audio / AVFoundation errors into something a user can act on.
@@ -497,6 +518,7 @@ final class DictationCoordinator {
                       Settings.shared.modelID == id else { return }
                 self.isModelReady = true
                 self.loadedModelID = id
+                self.refreshVocabulary(force: true)
                 self.phase.send(.idle)
                 await self.recoverInterruptedDictations()
             } catch is CancellationError {
@@ -585,6 +607,7 @@ final class DictationCoordinator {
         // Fn can arrive before Control. Discard that partial dictation before
         // opening the assistant; releasing the chord must never paste it.
         if recorder.state == .recording {
+            discardSpeechRounds()
             discardRecording()
             recordingStartedAt = nil
             recordingPersona = nil
@@ -614,6 +637,7 @@ final class DictationCoordinator {
     func cancelAssistantRecording() {
         pendingAssistantSessionID = nil
         guard recordingAssistantSessionID != nil else { return }
+        discardSpeechRounds()
         if recorder.state == .recording { discardRecording() }
         recordingAssistantSessionID = nil
         recordingStartedAt = nil
@@ -712,6 +736,8 @@ final class DictationCoordinator {
             }
             try recorder.start()
             recordingStartedAt = Date()
+            speechRounds = SpeechRoundRunner(transcriber: transcriber, language: Settings.shared.language, recorder: recorder)
+            speechRounds?.start()
             // Go straight to "Listening" — the first audible buffer typically arrives
             // <100 ms after `engine.start()` on built-in / wired mics, and showing an
             // intermediate "Connecting…" state for that window felt sluggish next to
@@ -747,6 +773,12 @@ final class DictationCoordinator {
             }
             phase.send(.idle)
         }
+    }
+
+    /// A recording that is thrown away needs no more rounds.
+    private func discardSpeechRounds() {
+        speechRounds?.cancel()
+        speechRounds = nil
     }
 
     /// Stops a recording whose audio is not wanted, and removes its copy on disk.
@@ -814,6 +846,9 @@ final class DictationCoordinator {
         recordingStartedAt = nil
         let reachedLimit = recorder.reachedLimit
         let samples = recorder.stop()
+        let rounds = speechRounds
+        speechRounds = nil
+        rounds?.cancel()
         let recordingID = recorder.lastRecordingID
         let editorTarget = recordingEditorTarget
         recordingEditorTarget = nil
@@ -865,6 +900,7 @@ final class DictationCoordinator {
                 assistantTarget: assistantTarget,
                 persona: persona,
                 reachedLimit: reachedLimit,
+                rounds: rounds,
                 recordingID: recordingID
             )
             self.transcribeTask = nil
@@ -879,12 +915,18 @@ final class DictationCoordinator {
                                    assistantTarget: UUID?,
                                    persona: RecordingPersona?,
                                    reachedLimit: Bool = false,
+                                   rounds: SpeechRoundRunner? = nil,
                                    recordingID: UUID? = nil) async {
         // The audio stays on disk until its text is safe; errors keep it for recovery.
         let releaseRecording = { [recorder] in if let recordingID { recorder.journal.discard(recordingID) } }
         do {
             let transcribeStart = CFAbsoluteTimeGetCurrent()
-            guard let raw = try await transcriber.transcribe(samples: samples, language: language, fallbackCount: fallbackCount) else {
+            let streamed = await rounds?.finish(samples: samples)
+            let recognized: String?
+            if let streamed { recognized = streamed } else {
+                recognized = try await transcriber.transcribe(samples: samples, language: language, fallbackCount: fallbackCount)
+            }
+            guard let raw = recognized else {
                 Self.log.notice("Transcribe returned empty for \(samples.count) samples (lang=\(language, privacy: .public))")
                 releaseRecording()
                 phase.send(.error("No speech detected"))
