@@ -49,6 +49,10 @@ Given the Assistant page, the user sees an `AI model` list (Qwen 3.5 4B recommen
 
 Given Live Write is on, when the user dictates into a terminal, a code editor, an AI chat (app or website) or a password manager, then the words go in as spoken, without Live Write or a persona. The standard list covers Terminal, iTerm2, Ghostty, Warp, kitty, WezTerm, Alacritty, Xcode, Visual Studio Code, Cursor, Zed, Sublime Text, IntelliJ IDEA, ChatGPT, Claude, Perplexity, 1Password and Bitwarden, and the websites chatgpt.com, claude.ai, perplexity.ai and gemini.google.com. On the Live Write page, `Apps` shows how many apps on this Mac and websites are listed, and `Manage…` opens a sheet that lists only apps on this Mac. The user adds apps with `Add Apps…`, adds websites by name, removes any entry, and `Reset to Standard` restores the standard lists.
 
+### AI-008 - The assistant says it is AI
+
+Given the assistant's companion is on screen, its status shows a persistent `AI` label, and its microphone control reads "Talk to hush's AI assistant" to sight and VoiceOver. When spoken replies are on, the first spoken reply of each conversation starts with "This is hush's AI assistant." New conversations, and conversations resumed after 15 idle minutes, say it again. The draft window's subtitle reads "hush's AI assistant, right here." This meets EU AI Act Art. 50(1); see `docs/operations/ai-act.md`.
+
 ## Test ownership
 
 | Journey | Automated coverage |
@@ -60,3 +64,4 @@ Given Live Write is on, when the user dictates into a terminal, a code editor, a
 | AI-005 | `ChatGPTConnectionTests` (protocol, tokens, errors, Keychain, callback), `PermissionJourneyTests.testLiveWriteUsesSharedModelsAndKeepsOptionalPersonas` (ChatGPT row); live sign-in is manual |
 | AI-006 | `AssistantChatGPTTests` (consent per feature, withdrawal, readiness, image part, JSON extraction, image rejection, error text), `PermissionJourneyTests.testLandingShowsWorkflowsAndModelsStayInContext` (layout); live sign-in is manual |
 | AI-007 | `LiveWriteAppsTests` (standard apps and websites, edit and reset, normalisation, installed-only listing); visual check of the sheet |
+| AI-008 | `CoworkerTests` (spoken disclosure first, once per conversation); visual check of the companion label |
