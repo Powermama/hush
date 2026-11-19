@@ -77,7 +77,7 @@ Given the user has words in Vocabulary:
 
 - **WhisperKit:** the learned spellings apply, and the Vocabulary screen says the recognition boost works with Parakeet. There is no WhisperKit prompt: on real speech it emptied most transcripts.
 - **Parakeet, without the boost:** the Vocabulary screen shows "Recognition boost is off", and the Transcription row says the same in orange. The learned spellings still apply.
-- **Download:** `Download…` asks first and names the size (97.5 MB from Hugging Face). The model lands in hush's own model folder. `Remove…` asks first and deletes it.
+- **Download:** `Download…` asks first and names the size (97.5 MB from Hugging Face). While it downloads, the card shows the percentage and the megabytes received ("42% · 41 MB of 97.5 MB") with the same progress ring as the speech models; the ring's stop button cancels and removes the partial download. The model lands in hush's own model folder. `Remove…` asks first and deletes it.
 - **Parakeet, with the boost:** after recognition, FluidAudio's CTC keyword spotter checks the audio where a written word resembles one of the user's words. With speech rounds, this happens once over the whole recording. When nothing resembles one of the user's words, it is skipped (about 3 ms).
 - **Protection:** the boost never replaces an ordinary word of English or the user's languages (Natural Language word lists), never drops letters ("XJava" stays), and never moves other words.
 - **Teaching:** samples are always transcribed without the boost or the prompt, so hush learns what it really hears.

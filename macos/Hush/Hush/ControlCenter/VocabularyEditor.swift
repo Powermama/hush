@@ -255,7 +255,7 @@ private struct RecognitionBoostCard: View {
     private var title: String {
         switch boost.state {
         case .installed: "Recognition boost is on"
-        case .downloading: "Downloading the recognition boost\u{2026}"
+        case .downloading(let fraction): "Downloading the recognition boost \u{00B7} \(Int((fraction * 100).rounded()))%"
         case .notInstalled, .failed: "Recognition boost is off"
         }
     }
@@ -263,10 +263,20 @@ private struct RecognitionBoostCard: View {
     private var detail: String {
         switch boost.state {
         case .installed: "Parakeet listens for your words, so it also catches them when it hears them in a new way. \(boost.sizeDescription) on this Mac."
-        case .downloading: "You can keep using hush meanwhile."
+        case .downloading(let fraction): "\(downloadedDescription(fraction)) of \(boost.sizeDescription). You can keep using hush meanwhile."
         case .notInstalled: "hush fixes the spellings it learned, but Parakeet does not listen for your words. Download the boost (\(boost.sizeDescription)) to turn it on."
         case .failed(let message): message
         }
+    }
+
+    /// How much has arrived, in the same unit as the download size, such as "41 MB".
+    private func downloadedDescription(_ fraction: Double) -> String {
+        #if canImport(FluidAudio)
+        let done = Measurement(value: ParakeetVocabularyBoost.downloadSize.value * fraction, unit: UnitInformationStorage.megabytes)
+        return done.formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
+        #else
+        return ""
+        #endif
     }
 
     @ViewBuilder private var action: some View {
@@ -274,8 +284,13 @@ private struct RecognitionBoostCard: View {
         case .installed:
             Button("Remove\u{2026}") { confirmingRemoval = true }
                 .accessibilityIdentifier("hush.vocabulary.boost.remove")
-        case .downloading:
-            ProgressView().controlSize(.small)
+        case .downloading(let fraction):
+            Button { boost.cancelDownload() } label: { ProgressRing(progress: fraction, showsStop: true) }
+                .buttonStyle(.borderless)
+                .help("Stop downloading and remove the partial download")
+                .accessibilityLabel("Cancel downloading the recognition boost")
+                .accessibilityValue("\(Int((fraction * 100).rounded())) percent")
+                .accessibilityIdentifier("hush.vocabulary.boost.cancel")
         case .notInstalled, .failed:
             Button("Download\u{2026}") { confirmingDownload = true }
                 .accessibilityIdentifier("hush.vocabulary.boost.download")

@@ -8,7 +8,8 @@ import Foundation
 final class VocabularyBoostStore: ObservableObject {
     enum State: Equatable {
         case notInstalled
-        case downloading
+        /// Fraction downloaded, 0 to 1.
+        case downloading(Double)
         case installed
         case failed(String)
     }
@@ -16,6 +17,7 @@ final class VocabularyBoostStore: ObservableObject {
     static let shared = VocabularyBoostStore()
 
     @Published private(set) var state: State
+    private var download: Task<Void, Never>?
 
     private init() {
         #if canImport(FluidAudio)
@@ -41,19 +43,49 @@ final class VocabularyBoostStore: ObservableObject {
         SpeechEngine.engine(for: Settings.shared.modelID) == .fluidAudio
     }
 
+    var isDownloading: Bool {
+        if case .downloading = state { return true }
+        return false
+    }
+
     func install() {
-        guard state != .downloading, state != .installed else { return }
-        state = .downloading
-        Task {
+        guard !isDownloading, state != .installed else { return }
+        state = .downloading(0)
+        download = Task {
             do {
                 #if canImport(FluidAudio)
-                try await ParakeetVocabularyBoost.install()
+                try await ParakeetVocabularyBoost.install { fraction in
+                    Task { @MainActor [weak self] in
+                        // FluidAudio reports thousands of updates; the card shows whole percents.
+                        guard let self, case .downloading(let shown) = self.state,
+                              Int(fraction * 100) > Int(shown * 100) else { return }
+                        self.state = .downloading(fraction)
+                    }
+                }
                 #endif
+                try Task.checkCancellation()
                 state = .installed
             } catch {
+                guard !Task.isCancelled else { return }
                 state = .failed("The download did not finish. Check your connection and try again.")
             }
         }
+    }
+
+    #if DEBUG
+    /// Shows a state without downloading, for previews and visual checks only.
+    func showForPreview(_ state: State) { self.state = state }
+    #endif
+
+    /// Stops the download and removes what arrived, like a speech model's download.
+    func cancelDownload() {
+        guard isDownloading else { return }
+        download?.cancel()
+        download = nil
+        #if canImport(FluidAudio)
+        try? ParakeetVocabularyBoost.remove()
+        #endif
+        state = .notInstalled
     }
 
     func remove() {
