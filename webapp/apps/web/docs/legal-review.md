@@ -84,6 +84,77 @@ Outstanding private contractual/account checks remain explicit; they do not
 justify retaining known-incorrect provider text. Keep legal indexing disabled
 pending those confirmations. A merged PR is not legal clearance.
 
+8. ChatGPT connection (added 18 November 2026, draft): section 7 describes the
+   optional Sign in with ChatGPT path from the app's code and consent dialogs:
+   requests go from the Mac directly to OpenAI under the user's own account with
+   `store: false`; the operator receives nothing. Open for legal review: the roles
+   (the operator as neither controller nor processor of this content, or not), the
+   legal basis the app relies on for asking consent, the US transfer wording, and
+   whether the in-app consent text and this section match. Do not treat the passing
+   build as clearance.
+
+   Source check on 18 November 2026:
+   - Apple's own disclosure for the same pattern ([ChatGPT Extension & Privacy](https://www.apple.com/legal/privacy/data/en/chatgpt-extension),
+     dated 2026-09-14) says that when signed in, "your ChatGPT account settings and
+     OpenAI's data privacy policies will apply. This means OpenAI may log your
+     request, attachments, and session history, and use this data to train or
+     improve their models." Section 7 and the app's consent text now say the same;
+     `store: false` is described only as keeping requests out of stored API
+     responses.
+   - [OpenAI's Europe privacy policy](https://openai.com/policies/eu-privacy-policy/),
+     "Updated: 24 August 2026", read in full in a browser on 18 November 2026 (it
+     refuses automated fetches). Section 12: for the EEA and Switzerland "OpenAI
+     Ireland Limited, with its registered office at 1st Floor, The Liffey Trust
+     Centre, 117-126 Sheriff Street Upper, Dublin 1, D01 YC43, Ireland, is the
+     controller". Section 10: processing "outside of the EEA … in the United States",
+     relying on adequacy decisions (Art. 45) and otherwise SCCs (Art. 46(2)(c)).
+     Sections 2 and 5: Content may be used "to train the models that power ChatGPT";
+     users "can easily choose whether your Content can be used to improve and train
+     our models". Section 9: prompts are processed "where necessary to perform a
+     contract with you". Section 7 of hush's policy now names the controller and the
+     transfer mechanisms as OpenAI states them.
+   - The controller question for hush's operator follows [EDPB Guidelines 07/2020](https://www.edpb.europa.eu/system/files/2021-07/eppb_guidelines_202007_controllerprocessor_final_en.pdf)
+     (version 2.1): the content goes from the user's Mac to OpenAI under the user's
+     contract, and the operator neither receives it nor decides its use; whether
+     that leaves the operator outside both roles is the reviewer's call.
+
+   Role analysis, 19 November 2026 (an engineering analysis of primary sources, not a
+   lawyer's opinion; the owner accepted it to publish section 7):
+   - Processor: no. Nothing is processed by the operator or on its behalf; the
+     request goes from the user's Mac to OpenAI under the user's contract. Compare
+     [CJEU C-683/21](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62021CJ0683),
+     para. 36 (liability covers processing "carried out on its behalf").
+   - Controller: most likely no. A controller "exerts influence over the processing
+     … for his, her or its own purposes" (C-683/21, paras. 30-31) and must decide
+     purposes and means ([EDPB Guidelines 07/2020](https://www.edpb.europa.eu/system/files/documents/2023-10/EDPB_guidelines_202007_controllerprocessor_final_en.pdf),
+     v2.1). The purpose is the user's own writing. EDPB para. 68: "the existence of a
+     mere commercial benefit for the parties involved is not sufficient to qualify as
+     a purpose of processing"; footnote 29: a system provider is a joint controller
+     only if it participates in determining purposes and means.
+   - Fashion ID (C-40/17; EDPB paras. 64-67) is distinguished: there a website
+     operator embedded a plugin in its own site, so its visitors' data went to
+     Facebook in the operator's commercial interest. Here users send their own
+     content, at their own initiative and after per-feature consent, to their own
+     account. Purely personal use falls under Art. 2(2)(c) GDPR; professional users
+     or their employers are the controllers.
+   - Residual risk: a regulator could treat the feature's design (what is sent,
+     including the window screenshot) as co-determining the means of "collection and
+     transmission" by analogy with Fashion ID. Section 7 therefore names a legal
+     basis "insofar as" the operator is responsible: consent under Art. 6(1)(a),
+     given per feature in the app and withdrawable by turning it off. The app
+     already collects that consent before the first request (#100, #122).
+   - Further Art. 13 information: none owed if the operator has no role. Under the
+     residual reading, section 7 already gives purpose, recipient (OpenAI Ireland
+     Limited for the EEA), the transfer safeguards as OpenAI states them, the legal
+     basis and withdrawal; rights and the complaint route are in section 11.
+   - TDDDG § 25 ([text](https://www.gesetze-im-internet.de/ttdsg/__25.html)): reading
+     the current app's text or a screenshot for the assistant serves a service the
+     user expressly requested (Abs. 2 Nr. 2), and consent is collected in addition.
+   - Out of scope here, flagged for a separate check: Article 50 of the EU AI Act
+     (transparency for AI-generated text) applies since 2 August 2026 to providers
+     and deployers of AI systems that generate text; whether hush's Live Write falls
+     under it or under the exemption for assistive editing is not yet assessed.
+
 ## Primary sources
 
 - [Section 5 DDG](https://www.gesetze-im-internet.de/ddg/__5.html): provider

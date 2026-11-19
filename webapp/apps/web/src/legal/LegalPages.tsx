@@ -202,7 +202,7 @@ export function PrivacyPolicyPage({
           ? "How hush handles data on the website, during downloads and for optional Verified Messages."
           : "Wie hush auf der Website, beim Download und bei optionalen Verified Messages mit Daten umgeht."
       }
-      updatedAt={english ? "13 November 2026" : "13. November 2026"}
+      updatedAt={english ? "18 November 2026" : "18. November 2026"}
     >
       <Section title={english ? "1. Controller" : "1. Verantwortlicher"}>
         <Contact language={language} />
@@ -305,7 +305,26 @@ export function PrivacyPolicyPage({
         <p><a className="text-ink underline underline-offset-4" href="https://huggingface.co/privacy">{english ? "Hugging Face privacy information" : "Datenschutzhinweise von Hugging Face"}</a></p>
       </Section>
 
-      <Section title={english ? "7. Contact by email" : "7. Kontakt per E-Mail"}>
+      <Section title={english ? "7. Optional ChatGPT connection in the app" : "7. Optionale ChatGPT-Verbindung in der App"}>
+        <p>
+          {english
+            ? "Live Write and the assistant write on your Mac by default. You can instead connect your own ChatGPT plan and turn it on separately for each feature. Before anything is sent, the app asks for your consent and says what will be sent. You sign in on OpenAI's website; the app never receives your OpenAI password or your ChatGPT chats. The sign-in tokens are kept in your Mac's keychain."
+            : "Live Write und der Assistent schreiben standardmäßig auf deinem Mac. Du kannst stattdessen deinen eigenen ChatGPT-Tarif verbinden und ihn für jede Funktion einzeln einschalten. Bevor etwas gesendet wird, bittet die App um deine Einwilligung und nennt, was gesendet wird. Die Anmeldung erfolgt auf der Website von OpenAI; die App erhält weder dein OpenAI-Passwort noch deine ChatGPT-Chats. Die Anmeldedaten werden im Schlüsselbund deines Macs gespeichert."}
+        </p>
+        <p>
+          {english
+            ? "When it is on, the app sends requests directly from your Mac to OpenAI under your own account, not through a hush server. For Live Write this is the text you dictated; your screen is not sent. For the assistant it is your request, text the assistant reads from the app you are working in and, when it helps, a screenshot of that window. The app asks OpenAI not to keep them as stored API responses (store: false). Because you use your own account, your ChatGPT account settings and OpenAI's privacy policy apply: depending on your ChatGPT data controls, OpenAI may keep your requests and use them to improve its models. You can turn model improvement off in ChatGPT's data controls. Requests count toward your plan's limits. The operator of hush does not receive or store this content. Insofar as the operator of hush is responsible for sending it to OpenAI at all, the legal basis is your consent under Article 6(1)(a) GDPR, which you give separately for each feature in the app and can withdraw at any time by turning that feature off or disconnecting."
+            : "Ist die Verbindung eingeschaltet, sendet die App Anfragen direkt von deinem Mac an OpenAI, unter deinem eigenen Konto und nicht über einen hush-Server. Bei Live Write ist das der diktierte Text; dein Bildschirm wird nicht gesendet. Beim Assistenten sind es deine Anfrage, Text, den der Assistent aus der App liest, in der du arbeitest, und, wenn es hilft, ein Bildschirmfoto dieses Fensters. Die App bittet OpenAI, sie nicht als gespeicherte API-Antworten aufzubewahren (store: false). Da du dein eigenes Konto nutzt, gelten die Einstellungen deines ChatGPT-Kontos und die Datenschutzerklärung von OpenAI: Je nach deinen ChatGPT-Datenkontrollen kann OpenAI deine Anfragen aufbewahren und zur Verbesserung seiner Modelle nutzen. Die Modellverbesserung kannst du in den Datenkontrollen von ChatGPT ausschalten. Anfragen zählen zu den Limits deines Tarifs. Der Betreiber von hush erhält und speichert diese Inhalte nicht. Soweit der Betreiber von hush für die Übermittlung an OpenAI überhaupt verantwortlich ist, ist Rechtsgrundlage deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du in der App für jede Funktion einzeln erteilst und jederzeit widerrufen kannst, indem du die Funktion ausschaltest oder die Verbindung trennst."}
+        </p>
+        <p>
+          {english
+            ? "For users in the EEA and Switzerland, OpenAI Ireland Limited, 1st Floor, The Liffey Trust Centre, 117-126 Sheriff Street Upper, Dublin 1, D01 YC43, Ireland, is responsible for this processing under your ChatGPT account. According to its Europe privacy policy, OpenAI processes data outside the EEA, including in the USA, and relies on the European Commission's adequacy decisions or standard contractual clauses for these transfers. You can turn ChatGPT off for each feature or disconnect at any time; the app then writes on your Mac again and deletes the sign-in tokens from the keychain."
+            : "Für Nutzer im EWR und in der Schweiz ist die OpenAI Ireland Limited, 1st Floor, The Liffey Trust Centre, 117-126 Sheriff Street Upper, Dublin 1, D01 YC43, Irland, für diese Verarbeitung im Rahmen deines ChatGPT-Kontos verantwortlich. Laut ihrer europäischen Datenschutzerklärung verarbeitet OpenAI Daten auch außerhalb des EWR, insbesondere in den USA, und stützt diese Übermittlungen auf Angemessenheitsbeschlüsse der Europäischen Kommission oder Standardvertragsklauseln. Du kannst ChatGPT jederzeit für jede Funktion ausschalten oder die Verbindung trennen; die App schreibt dann wieder auf deinem Mac und löscht die Anmeldedaten aus dem Schlüsselbund."}
+        </p>
+        <p><a className="text-ink underline underline-offset-4" href="https://openai.com/policies/eu-privacy-policy/">{english ? "OpenAI's Europe privacy policy" : "Europäische Datenschutzerklärung von OpenAI"}</a></p>
+      </Section>
+
+      <Section title={english ? "8. Contact by email" : "8. Kontakt per E-Mail"}>
         <p>
           {english
             ? "Email for hello@behu.sh is handled by Apple's iCloud Mail. Cloudflare manages the domain's DNS records; it is not the mailbox provider. Apple Mail is the app used to access the mailbox. Apple processes the email content and associated transmission data to deliver and store correspondence. Processing may also take place outside the EEA, including in the USA; Apple's privacy information explains the applicable entities and transfer safeguards."
@@ -319,7 +338,7 @@ export function PrivacyPolicyPage({
         </p>
       </Section>
 
-      <Section title={english ? "8. Cookies, local storage and analytics" : "8. Cookies, lokale Speicherung und Analyse"}>
+      <Section title={english ? "9. Cookies, local storage and analytics" : "9. Cookies, lokale Speicherung und Analyse"}>
         <p>
           {english
             ? "The public website currently uses no advertising or audience analytics and sets no non-essential cookies. Any future analytics, marketing or sponsorship technology will be introduced only after legal and technical review and, where required, valid consent."
@@ -327,15 +346,15 @@ export function PrivacyPolicyPage({
         </p>
       </Section>
 
-      <Section title={english ? "9. Recipients and processors" : "9. Empfänger und Auftragsverarbeiter"}>
+      <Section title={english ? "10. Recipients and processors" : "10. Empfänger und Auftragsverarbeiter"}>
         <p>
           {english
-            ? "Only parties required to operate and provide the service receive data. These include the hosting provider named above, Cloudflare for delivery, and Apple for email correspondence. Data is not disclosed to sponsors for advertising, analytics or profiling."
-            : "Daten erhalten nur Stellen, die für Betrieb und Bereitstellung erforderlich sind. Dazu gehören der oben genannte Hosting-Anbieter, Cloudflare für die Auslieferung und Apple für E-Mail-Korrespondenz. Eine Weitergabe an Sponsoren zu Werbe-, Analyse- oder Profilbildungszwecken findet nicht statt."}
+            ? "Only parties required to operate and provide the service receive data. These include the hosting provider named above, Cloudflare for delivery, and Apple for email correspondence. If you connect ChatGPT (section 7), your Mac sends the content described there directly to OpenAI under your own account. Data is not disclosed to sponsors for advertising, analytics or profiling."
+            : "Daten erhalten nur Stellen, die für Betrieb und Bereitstellung erforderlich sind. Dazu gehören der oben genannte Hosting-Anbieter, Cloudflare für die Auslieferung und Apple für E-Mail-Korrespondenz. Verbindest du ChatGPT (Ziffer 7), sendet dein Mac die dort beschriebenen Inhalte direkt an OpenAI, unter deinem eigenen Konto. Eine Weitergabe an Sponsoren zu Werbe-, Analyse- oder Profilbildungszwecken findet nicht statt."}
         </p>
       </Section>
 
-      <Section title={english ? "10. Data subject rights" : "10. Rechte betroffener Personen"}>
+      <Section title={english ? "11. Data subject rights" : "11. Rechte betroffener Personen"}>
         <p>
           {english
             ? `Under the GDPR, data subjects may have rights to access, rectification, erasure, restriction, portability and objection. Consent can be withdrawn for the future. Requests can be sent to ${operator.email}.`
@@ -353,7 +372,7 @@ export function PrivacyPolicyPage({
         </p>
       </Section>
 
-      <Section title={english ? "11. Changes to this policy" : "11. Änderungen dieser Erklärung"}>
+      <Section title={english ? "12. Changes to this policy" : "12. Änderungen dieser Erklärung"}>
         <p>
           {english
             ? "This policy will be updated if features, providers, retention periods, legal bases or future funding change. The version published on this page applies."
