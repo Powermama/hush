@@ -2,6 +2,7 @@ import AVFoundation
 import AppKit
 import FluidAudio
 import Foundation
+import NaturalLanguage
 import Testing
 @testable import Hush
 
@@ -45,6 +46,22 @@ struct CoworkerLiveTests {
         #expect(ambiguous.action == .answer)
         #expect(ambiguous.message.contains("?"))
         #expect(!ambiguous.more)
+    }
+
+    @Test("A German request gets an English message and a German email (PRD R27)")
+    func germanRequestEnglishMessage() async throws {
+        var observation = CoworkerObservation(application: "Mail", window: "New Message", selectedText: "",
+            visibleText: "New Message", elements: [], editable: true, limitation: nil)
+        observation.mailDraft = .init(subject: "", body: "")
+        let request = "Schreib eine E-Mail an meine Mutter und lade sie morgen um fünf Uhr zum Abendessen in Bremen ein."
+        let reply = try await LLMRuntime.shared.generateCoworkerReply(.init(text: request, observation: observation,
+            history: [], now: Date(), timeZone: .current), provider: .qwen35_4b)
+        let messageLanguage = NLLanguageRecognizer.dominantLanguage(for: reply.message)
+        let contentLanguage = NLLanguageRecognizer.dominantLanguage(for: reply.content)
+        print("[coworker-live] message (\(messageLanguage?.rawValue ?? "?")): \(reply.message)")
+        print("[coworker-live] content (\(contentLanguage?.rawValue ?? "?")): \(reply.content.prefix(120))")
+        #expect(messageLanguage == .english, "the assistant talks in English")
+        #expect(contentLanguage == .german, "the email keeps the language the user asked in")
     }
 
     @Test("Mail follow-ups return one body and a separate subject with the installed small model")
