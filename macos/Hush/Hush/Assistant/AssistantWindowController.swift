@@ -118,7 +118,8 @@ private struct AssistantView: View {
                 Image(systemName: "cursorarrow.rays").font(.system(size: 23, weight: .medium)).foregroundStyle(Color(nsColor: DesignTokens.brand500))
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Hey Hush").font(.system(size: 21, weight: .semibold))
-                    Text("A little help, right here.").font(.system(size: 12)).foregroundStyle(.secondary)
+                    Text("hush\u{2019}s AI assistant, right here.").font(.system(size: 12)).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("hush.assistant.ai-disclosure")
                 }
                 Spacer()
                 Text("PREVIEW").font(.system(size: 9, weight: .semibold, design: .monospaced)).foregroundStyle(.secondary)

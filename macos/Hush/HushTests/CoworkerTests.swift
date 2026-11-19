@@ -89,7 +89,8 @@ struct CoworkerTests {
         let first = try #require(controller.beginListening(from: nil))
         controller.receiveTranscript("Help me reply", sessionID: first)
         try await eventually { controller.waitingForInput }
-        #expect(voice.spoken == ["What tone would you like?"])
+        // EU AI Act Art. 50(1): the conversation's first spoken reply starts with the AI disclosure.
+        #expect(voice.spoken == [AssistantCompanionController.spokenDisclosure, "What tone would you like?"])
         #expect(!controller.expanded)
         let second = try #require(controller.beginListening(from: nil))
         controller.receiveTranscript("Warm and brief", sessionID: second)
@@ -97,6 +98,8 @@ struct CoworkerTests {
         #expect(generator.requests.last?.history.first?.response == "What tone would you like?")
         #expect(generator.requests.last?.text == "Warm and brief")
         #expect(voice.spoken.last == "Understood. Warm and brief.")
+        #expect(voice.spoken.filter { $0 == AssistantCompanionController.spokenDisclosure }.count == 1,
+                "the disclosure is said once per conversation, not before every reply")
     }
 
     @Test("Escape clears conversation state and the next voice turn starts with fresh context")
@@ -218,7 +221,7 @@ struct CoworkerTests {
         let id = try #require(controller.beginListening(from: nil))
         controller.receiveTranscript("Write a reply", sessionID: id)
         try await eventually { !voice.spoken.isEmpty }
-        #expect(voice.spoken == [CoworkerError.unsupportedEditor.localizedDescription])
+        #expect(voice.spoken == [AssistantCompanionController.spokenDisclosure, CoworkerError.unsupportedEditor.localizedDescription])
         #expect(!controller.response.contains("destination changed"))
         #expect(!controller.response.contains("updated"))
     }

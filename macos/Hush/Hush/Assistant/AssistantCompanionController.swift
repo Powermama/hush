@@ -39,6 +39,13 @@ final class AssistantCompanionController: NSObject, ObservableObject {
     private var followTask: Task<Void, Never>?
     private var operationID = UUID()
     private var conversationID = UUID()
+    /// The conversation whose first spoken reply already said that hush is an AI assistant.
+    private var disclosedConversation: UUID?
+
+    /// EU AI Act Art. 50(1): a voice assistant says it is AI when a conversation starts
+    /// (Commission guidelines C(2026) 5054, para. 36: "a voice assistant that says at the
+    /// beginning of a session that it is powered by AI"). The cursor's AI label covers sight.
+    static let spokenDisclosure = "This is hush\u{2019}s AI assistant."
     private var lastInteraction = Date.distantPast
     private var panel: CompanionPanel?
     private var pointer: NSPanel?
@@ -287,7 +294,7 @@ final class AssistantCompanionController: NSObject, ObservableObject {
                     #if DEBUG
                     trace?.event("voice.started")
                     #endif
-                    do { try await voice.speak(response) }
+                    do { try await speakReply(response) }
                     catch is CancellationError { return }
                     catch {
                         voiceStatus = error.localizedDescription; expanded = true
@@ -317,7 +324,7 @@ final class AssistantCompanionController: NSObject, ObservableObject {
                 expanded = true
                 if voiceEnabled {
                     phase = .speaking
-                    do { try await voice.speak(response) } catch { }
+                    do { try await speakReply(response) } catch { }
                     guard operationID == operation else { return }
                     phase = Task.isCancelled ? .stopped : .ready
                 }
@@ -481,7 +488,7 @@ final class AssistantCompanionController: NSObject, ObservableObject {
                 }
                 if voiceEnabled, !Task.isCancelled {
                     phase = .speaking
-                    do { try await voice.speak(outcome) }
+                    do { try await speakReply(outcome) }
                     catch is CancellationError { }
                     catch {
                         voiceStatus = error.localizedDescription; expanded = true
@@ -517,7 +524,7 @@ final class AssistantCompanionController: NSObject, ObservableObject {
                 expanded = waitingForInput
                 if voiceEnabled, !cancelled {
                     phase = .speaking
-                    do { try await voice.speak(response) }
+                    do { try await speakReply(response) }
                     catch { /* The visible error remains available if speech fails. */ }
                     guard operationID == operation else { return }
                     phase = Task.isCancelled ? .stopped : .ready
@@ -567,7 +574,7 @@ final class AssistantCompanionController: NSObject, ObservableObject {
         else if !response.isEmpty {
             task = Task { [weak self] in
                 guard let self else { return }
-                do { try await voice.speak(response) } catch { voiceStatus = error.localizedDescription }
+                do { try await speakReply(response) } catch { voiceStatus = error.localizedDescription }
             }
         }
     }
@@ -613,6 +620,15 @@ final class AssistantCompanionController: NSObject, ObservableObject {
         // Fading the cursor does not end a conversation. Keep Escape available
         // until the user explicitly ends it, even while the surface is hidden.
         if history.isEmpty { removeMonitors() }
+    }
+
+    /// Speaks a reply, after the AI disclosure when this is the conversation's first one.
+    private func speakReply(_ text: String) async throws {
+        if disclosedConversation != conversationID {
+            disclosedConversation = conversationID
+            try await voice.speak(Self.spokenDisclosure)
+        }
+        try await voice.speak(text)
     }
 
     func newConversation() {
@@ -871,8 +887,8 @@ private struct CompanionCursorView: View {
                     .frame(width: 33, height: 37)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain).help("Talk to Hush · Control + Fn")
-            .accessibilityLabel("Talk to Hush").accessibilityIdentifier("hush.companion.microphone")
+            .buttonStyle(.plain).help("Talk to hush\u{2019}s AI assistant · Control + Fn")
+            .accessibilityLabel("Talk to hush\u{2019}s AI assistant").accessibilityIdentifier("hush.companion.microphone")
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
@@ -889,6 +905,16 @@ private struct CompanionCursorView: View {
                             }
                             Text(controller.status).font(.system(size: 12, weight: .medium))
                                 .lineLimit(1).accessibilityIdentifier("hush.companion.status")
+                            // A persistent AI label (EU AI Act Art. 50(1); the guidelines recommend
+                            // recognisable "AI" symbols beside the interaction).
+                            Text("AI")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 4).padding(.vertical, 1)
+                                .overlay(RoundedRectangle(cornerRadius: 3).stroke(.secondary.opacity(0.6), lineWidth: 0.75))
+                                .help("hush\u{2019}s assistant is AI and can make mistakes.")
+                                .accessibilityLabel("AI assistant")
+                                .accessibilityIdentifier("hush.companion.ai-label")
                     }
                     Rectangle().fill(.primary.opacity(0.10)).frame(width: 1, height: 13)
                     CompanionEscapeButton { controller.stop() }
