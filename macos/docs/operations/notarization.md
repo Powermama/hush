@@ -215,3 +215,36 @@ makes the persona editor follow Light and Dark mode (#88).
 - A clean-Mac offline installation remains untested.
 
 Reports are in `artifacts/release-alpha6/reports` and `artifacts/notarization`.
+
+## Alpha.7 distribution record
+
+Published 2026-11-19 as `0.1.0-alpha.7 (16)` from clean source revision
+`2bdb3a2fc5a1eac121797a182a621387bb1585ab` (main after #121, no local changes),
+built with Xcode 26.6 (17F113). It adds vocabulary taught by voice with an optional
+Parakeet recognition boost (#118, #119), Live Write's app list (#117), the optional
+ChatGPT plan (#100, #101, #122), speech rounds (#105), recording safety (#102,
+#106) and the data protection keychain (#115, #116).
+
+- The first archive stopped at Xcode's interactive package-plugin validation. All 29
+  `Package.resolved` pins were compared with alpha.6's revision and found identical
+  in version and revision, so the build reran with `HUSH_TRUST_PINNED_BUILD_TOOLS=1`
+  into a fresh `artifacts/release-alpha7-b`.
+- Preflight: Developer ID Application (team `3A22UK7C9L`), secure timestamp, hardened
+  runtime, `keychain-access-groups` = `3A22UK7C9L.com.decentralfreedom.hush`, no
+  `get-task-allow`; `syspolicy_check` reported only the expected missing ticket.
+- Only submission: DMG `2b082548-f1cd-4bdb-8e1a-9fe1995fcab9`, Accepted, "Ready for
+  distribution", no issues, 39 files in the ticket. The exported app was stapled
+  from that ticket; postflight passed.
+- Finder layout reviewed visually on the candidate and on the final DMG.
+- Public DMG SHA-256:
+  `1fafcd24589617bde3b210e1d307f1a5e583e433bc2801f4b4c4c8eece647abc`.
+  The versioned download and `hush-latest.dmg` match the accepted artifact byte for
+  byte; the downloaded copy passes Gatekeeper (`Notarized Developer ID`) and staple
+  validation. `verify-update-feed.sh` passed; the feed offers build 16 for arm64,
+  macOS 15 or later.
+- Pre-release checks: 257 app unit tests, the opt-in real-speech vocabulary
+  benchmark (earnings22, 100 clips) and the Parakeet integration tests passed on
+  the merged branches.
+- A clean-Mac offline installation remains untested.
+
+Reports are in `artifacts/release-alpha7-b/reports` and `artifacts/notarization`.

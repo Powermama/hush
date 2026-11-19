@@ -168,10 +168,11 @@ labels and a DMG whose filename disagrees with the embedded bundle identity.
 This prevents retries or parallel release work from replacing an immutable
 tester build.
 
-The current public alpha is `0.1.0-alpha.6 (15)`, which makes the persona
-editor follow Light and Dark mode. Alpha.5 restored the Finder layout; alpha.4
-was the first notarized download. The next tester release must use a build
-number greater than 15.
+The current public alpha is `0.1.0-alpha.7 (16)`, which adds vocabulary taught
+by voice, Live Write's app list and the optional ChatGPT plan. Alpha.6 made the
+persona editor follow Light and Dark mode; alpha.5 restored the Finder layout;
+alpha.4 was the first notarized download. The next tester release must use a
+build number greater than 16.
 
 Build a signed candidate app and DMG for local review. This does not submit to
 Apple or publish anything:
