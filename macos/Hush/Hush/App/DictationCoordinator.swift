@@ -708,7 +708,7 @@ final class DictationCoordinator {
             Task {
                 let ok = await PermissionsChecker.requestMicrophone()
                 if ok { self.beginRecording(assistantID: assistantID) }
-                else if let assistantTarget { self.onAssistantCaptureState?(assistantTarget, "Allow microphone access in System Settings to talk to Hush.") }
+                else if let assistantTarget { self.onAssistantCaptureState?(assistantTarget, "Allow microphone access in System Settings to talk to hush.") }
                 else if editorTarget != nil { self.showComposerVoiceError("Microphone access is required") }
                 else { self.hud.flash(message: "Microphone access denied") }
             }

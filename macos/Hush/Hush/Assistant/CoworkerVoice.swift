@@ -89,7 +89,7 @@ final class CoworkerVoice: CoworkerSpeaking {
         } catch {
             preparation = nil
             setupState.send(error is CancellationError ? .unchecked : .failed(error.localizedDescription))
-            onStatus?("Voice unavailable. Ask Hush again to retry.")
+            onStatus?("Voice unavailable. Ask hush again to retry.")
             throw error
         }
     }

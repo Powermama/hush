@@ -128,13 +128,13 @@ enum AssistantFailure: LocalizedError, Equatable {
         case .invalidRequest: return "Describe a short email or select a shorter passage to revise."
         case .invalidProposal: return "The model did not produce a complete draft. Try a shorter, more specific request."
         case .changedFacts: return "The draft changed a number or link from your request. Please revise the request and try again."
-        case .contextChanged: return "The destination changed. Reopen Hush from the email body to bind it again."
-        case .unsupportedDestination: return "Place the caret in an Apple Mail compose body, then open Hey Hush again."
-        case .modelSetup: return "Choose and download Qwen 3.5 2B or 4B in Hush settings first."
+        case .contextChanged: return "The destination changed. Reopen hush from the email body to bind it again."
+        case .unsupportedDestination: return "Place the caret in an Apple Mail compose body, then open hush again."
+        case .modelSetup: return "Choose and download Qwen 3.5 2B or 4B in hush settings first."
         case .contextTooLarge: return "This request is too long for the local assistant. Select a shorter passage."
         case .timedOut: return "This request took too long. Try a shorter email."
         case .busy: return "Finish the current recording or transcription first."
-        case .permissionRequired: return "Allow Accessibility access in Hush settings to bind the email body."
+        case .permissionRequired: return "Allow Accessibility access in hush settings to bind the email body."
         }
     }
 }

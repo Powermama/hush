@@ -232,7 +232,7 @@ final class AIModelControlsView: NSStackView {
         switch item {
         case .voice: effect = "Assistant will need voice setup again."
         case .intelligence: effect = "Any personas using this model will be turned off. Assistant will ask for setup if it needs this model."
-        case .speech: effect = "If this is your active transcription model, Hush will switch to the model included with the app."
+        case .speech: effect = "If this is your active transcription model, hush will switch to the model included with the app."
         }
         alert.informativeText = "\(effect) Your styles and settings are kept. You can download the model again from this page."
         alert.addButton(withTitle: "Remove"); alert.addButton(withTitle: "Cancel")
