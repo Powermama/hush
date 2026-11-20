@@ -30,6 +30,65 @@ export type HushRelease = {
 // Older unnotarized builds have been withdrawn from the website.
 export const releases: readonly HushRelease[] = [
   {
+    slug: "0.1.0-alpha.8",
+    version: "0.1.0-alpha.8",
+    displayVersion: "0.1 alpha 8",
+    build: 17,
+    releasedAt: "2026-11-20",
+    displayDate: "20 November 2026",
+    channel: "Private alpha",
+    visibility: "private",
+    title: "An honest assistant.",
+    summary:
+      "The assistant now tells you it is an AI and talks in English, ⌃ Fn works when it uses your ChatGPT plan, and the recognition boost shows how far its download is.",
+    downloadURL:
+      "https://updates.behu.sh/downloads/hush-0.1.0-alpha.8-build.17.dmg",
+    downloadName: "hush-0.1.0-alpha.8-build.17.dmg",
+    systemRequirements: "Apple silicon and macOS 15 or later",
+    sections: [
+      {
+        label: "Added",
+        items: [
+          {
+            title: "The assistant says it is an AI",
+            detail:
+              "An AI label sits next to its status, VoiceOver names it as hush's AI assistant, and the first spoken reply of each conversation says so.",
+          },
+          {
+            title: "Download progress for the recognition boost",
+            detail:
+              "The boost download shows its progress in percent and megabytes, and you can stop it.",
+          },
+        ],
+      },
+      {
+        label: "Improved",
+        items: [
+          {
+            title: "The assistant talks in English",
+            detail:
+              "Its voice speaks English, so its replies are in English too. Text it writes into your apps keeps the language you ask for.",
+          },
+        ],
+      },
+      {
+        label: "Fixed",
+        items: [
+          {
+            title: "⌃ Fn with ChatGPT",
+            detail:
+              "With ChatGPT chosen as the assistant's AI model, ⌃ Fn starts the assistant instead of opening its settings.",
+          },
+        ],
+      },
+    ],
+    knownNotes: [
+      "macOS may ask you to approve the first launch and name Safari as the download source. This is a normal security prompt; no Terminal command is needed.",
+      "This is still an early alpha. I'm working toward a full public release, and I'd like to open-source the app in the future.",
+      "Built for Macs with Apple silicon. We recommend 16 GB of memory for the optional assistant; it is not a requirement for core dictation.",
+    ],
+  },
+  {
     slug: "0.1.0-alpha.7",
     version: "0.1.0-alpha.7",
     displayVersion: "0.1 alpha 7",
