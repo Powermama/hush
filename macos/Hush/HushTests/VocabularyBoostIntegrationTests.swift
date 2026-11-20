@@ -86,7 +86,7 @@ struct VocabularyBoostIntegrationTests {
                 timings: ParakeetVocabularyBoost.timings(for: words, end: Double(samples.count) / 16_000),
                 samples: samples)
             let milliseconds = (CFAbsoluteTimeGetCurrent() - start) * 1000
-            if let boosted { falsePositives += 1 }
+            if boosted != nil { falsePositives += 1 }
             print("[boost] distractor \"\(sentence)\" -> \(boosted.map { "\"\($0)\"" } ?? "unchanged") | \(String(format: "%.1f", milliseconds))ms")
         }
         print("[boost] false positives \(falsePositives) of \(Self.distractors.count)")
@@ -161,7 +161,7 @@ struct VocabularyBoostIntegrationTests {
 #endif
 
 /// Progress values from the download callback, which may arrive on any thread.
-final class ProgressLog: @unchecked Sendable {
+nonisolated final class ProgressLog: @unchecked Sendable {
     private let lock = NSLock()
     private var stored: [Double] = []
     func append(_ value: Double) { lock.lock(); stored.append(value); lock.unlock() }

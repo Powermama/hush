@@ -13,7 +13,7 @@ import Testing
        .enabled(if: ProcessInfo.processInfo.environment["HUSH_PERSONA_LIVE"] == "1"))
 @MainActor
 struct PersonaLiveTests {
-    static let providers: [LLMProvider] = [.qwen35_4b, .qwen35_2b, .appleIntelligence]
+    nonisolated static let providers: [LLMProvider] = [.qwen35_4b, .qwen35_2b, .appleIntelligence]
     /// Runs per case: HUSH_PERSONA_RUNS, 3 by default; more to tell close variants apart.
     static let runs = Int(ProcessInfo.processInfo.environment["HUSH_PERSONA_RUNS"] ?? "") ?? 3
 
