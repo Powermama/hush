@@ -248,3 +248,30 @@ ChatGPT plan (#100, #101, #122), speech rounds (#105), recording safety (#102,
 - A clean-Mac offline installation remains untested.
 
 Reports are in `artifacts/release-alpha7-b/reports` and `artifacts/notarization`.
+
+## Alpha.8 distribution record
+
+Published 2026-11-20 as `0.1.0-alpha.8 (17)` from clean source revision
+`710558e0a22eb6773edf81928c740b3bada047ae` (main after #130, no local changes),
+built with Xcode 26.6. The assistant says it is an AI (#125) and talks in English
+(#129), ⌃ Fn starts it with the ChatGPT plan (#128), and the recognition boost
+download shows its progress (#127).
+
+- `Package.resolved` is unchanged since alpha.7, so the build used
+  `HUSH_TRUST_PINNED_BUILD_TOOLS=1` into `artifacts/release-alpha8`.
+- Preflight: Developer ID Application (team `3A22UK7C9L`), secure timestamp,
+  hardened runtime, `keychain-access-groups`, no `get-task-allow`.
+- Only submission: DMG `7be0a512-4119-435e-b032-009cdcefa9a9`, Accepted, "Ready
+  for distribution", no issues, 39 files in the ticket. The exported app was
+  stapled from that ticket; postflight passed.
+- Finder layout reviewed visually on the candidate DMG.
+- Public DMG SHA-256:
+  `0beb2039263b5f4a76c792fceb318d1c5798706eb4abe90f0b7f674634899ff9`.
+  The versioned download and `hush-latest.dmg` match the accepted artifact byte
+  for byte; the downloaded copy passes Gatekeeper (`Notarized Developer ID`) and
+  staple validation. `verify-update-feed.sh` passed; the feed offers build 17 for
+  arm64, macOS 15 or later, with release notes.
+- Pre-release checks: 278 app unit tests passed on the release revision.
+- A clean-Mac offline installation remains untested.
+
+Reports are in `artifacts/release-alpha8/reports` and `artifacts/notarization`.
