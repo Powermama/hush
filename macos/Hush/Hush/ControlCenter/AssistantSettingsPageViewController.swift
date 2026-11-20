@@ -1,6 +1,17 @@
 import AppKit
 import Combine
 
+/// What the assistant shortcut does: nothing but a notice while the Assistant is off,
+/// its setup while something is missing, otherwise it starts.
+enum AssistantEntry: Equatable {
+    case off, setup, start
+
+    nonisolated static func decide(enabled: Bool, ready: Bool) -> AssistantEntry {
+        guard enabled else { return .off }
+        return ready ? .start : .setup
+    }
+}
+
 /// Setup reflects independent components. Missing screen access never blocks
 /// dictation, and changing the assistant model never changes the persona engine.
 struct AssistantSetupSnapshot: Equatable {

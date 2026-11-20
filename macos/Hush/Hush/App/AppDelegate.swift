@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lastExternalApplication: NSRunningApplication?
     private lazy var updateManager = HushUpdateManager()
     private let assistantWindowController = AssistantCompanionController()
+    private var aiSwitches: Set<AnyCancellable> = []
     #if DEBUG
     private var previewWindowController: NSWindowController?
     private var glassDebugJourneyController: HUDGlassDebugJourneyController?
@@ -56,9 +57,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         AIModelLibrary.shared.assistantIsWorking = { [weak self] in self?.assistantWindowController.isWorking == true }
         coordinator.onBeginAssistant = { [weak self] in
             guard let self else { return nil }
-            guard self.assistantModelsInstalled() else { return nil }
+            guard self.assistantCanStart() else { return nil }
             return self.assistantWindowController.beginListening(from: self.currentExternalApplication())
         }
+        // Turning the Assistant off ends its conversation, and any AI switch frees models it no longer needs.
+        Settings.shared.didChange.map { Settings.shared.assistantEnabled }.removeDuplicates().dropFirst()
+            .filter { !$0 }
+            .sink { [weak self] _ in self?.assistantWindowController.dismiss() }
+            .store(in: &aiSwitches)
+        Settings.shared.didChange.sink { ModelResidency.releaseUnused() }.store(in: &aiSwitches)
         coordinator.onAssistantCaptureState = { [weak self] id, state in
             self?.assistantWindowController.captureState(state, turnID: id)
         }
@@ -100,7 +107,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // a prompt if the user opens Edit with AI immediately.
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(750))
-            LLMRuntime.shared.preload()
+            if Settings.shared.activeDictationProfile != nil { LLMRuntime.shared.preload() }
         }
         TypingActivityMonitor.shared.startObservingSettings()
         // Apple may deliver a service request as soon as this is assigned, so register
@@ -126,25 +133,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showAssistant() {
-        guard Settings.shared.assistantEnabled else {
-            dictationCoordinator?.hud.flash(message: "Assistant is off. Turn it on in hush AI.")
-            return
-        }
+        guard Settings.shared.assistantEnabled else { return assistantIsOff() }
         guard dictationCoordinator?.canOpenAssistant == true else {
             dictationCoordinator?.hud.flash(message: "Finish the current recording first")
             return
         }
-        guard assistantModelsInstalled() else { return }
+        guard assistantCanStart() else { return }
         assistantWindowController.open(from: currentExternalApplication())
     }
 
-    private func assistantModelsInstalled() -> Bool {
-        guard !AIModelLibrary.shared.isRemoving, !AssistantSetupFlow.shared.isRunning,
-              AssistantSetupSnapshot.modelsInstalled else {
-            showHush(destination: .assistant)
-            return false
+    /// The one gate for every way into the assistant: ⌃ Fn, its microphone button and the menu.
+    private func assistantCanStart() -> Bool {
+        let ready = !AIModelLibrary.shared.isRemoving && !AssistantSetupFlow.shared.isRunning
+            && AssistantSetupSnapshot.modelsInstalled
+        switch AssistantEntry.decide(enabled: Settings.shared.assistantEnabled, ready: ready) {
+        case .start: return true
+        case .setup: showHush(destination: .assistant); return false
+        case .off: assistantIsOff(); return false
         }
-        return true
+    }
+
+    private func assistantIsOff() {
+        dictationCoordinator?.hud.flash(message: "Assistant is off. Turn it on in hush AI.")
     }
 
     func applicationWillTerminate(_ notification: Notification) {

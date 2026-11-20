@@ -28,3 +28,19 @@ struct AssistantReadinessTests {
         }
     }
 }
+
+/// Reported 2026-11-20: with the Assistant switched off, ⌃ Fn still started it and it answered.
+@Suite("Assistant switch")
+struct AssistantSwitchTests {
+    @Test("Switched off, ⌃ Fn never starts the assistant, even when every model is ready")
+    func offNeverStarts() {
+        #expect(AssistantEntry.decide(enabled: false, ready: true) == .off)
+        #expect(AssistantEntry.decide(enabled: false, ready: false) == .off)
+    }
+
+    @Test("Switched on, ⌃ Fn starts when ready and opens setup otherwise")
+    func onStartsOrSetsUp() {
+        #expect(AssistantEntry.decide(enabled: true, ready: true) == .start)
+        #expect(AssistantEntry.decide(enabled: true, ready: false) == .setup)
+    }
+}
