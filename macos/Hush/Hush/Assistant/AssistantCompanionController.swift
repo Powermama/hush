@@ -91,8 +91,8 @@ final class AssistantCompanionController: NSObject, ObservableObject {
     var canRecordRequest: Bool { !mutationInFlight }
     var isWorking: Bool { [.listening, .transcribing, .thinking, .speaking, .acting].contains(phase) }
     func progressCaption(at now: Date) -> String {
-        guard isWorking else { return "Hush · hold ⌃ Fn to talk" }
-        var parts = ["Hush", sourceName]
+        guard isWorking else { return "hush · hold ⌃ Fn to talk" }
+        var parts = ["hush", sourceName]
         if [.thinking, .acting].contains(phase), let progress, !progress.checkpoints.isEmpty {
             parts.append("Step \(progress.checkpoints.count + 1)")
         }
@@ -947,7 +947,7 @@ private struct CompanionCursorView: View {
             Button(controller.voiceEnabled ? "Mute spoken replies" : "Enable spoken replies") { controller.toggleVoice() }
             Button("New conversation") { controller.newConversation() }
             Divider()
-            Button("Hush settings") { controller.onSettings?() }
+            Button("hush settings") { controller.onSettings?() }
             Button("Dismiss Hush") { controller.dismiss() }
         }
     }
@@ -1012,7 +1012,7 @@ enum CoworkerCalendarDraft {
         return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Hush//Calendar Draft//EN", "BEGIN:VEVENT",
                 "UID:\(id.uuidString)@hush.local", "DTSTAMP:\(formatter.string(from: now))",
                 "DTSTART:\(formatter.string(from: start))", "DTEND:\(formatter.string(from: start.addingTimeInterval(Double(reply.minutes * 60))))",
-                "SUMMARY:\(title)", "DESCRIPTION:Prepared by Hush. Review before adding. No invitations sent.",
+                "SUMMARY:\(title)", "DESCRIPTION:Prepared by hush. Review before adding. No invitations sent.",
                 "END:VEVENT", "END:VCALENDAR", ""].joined(separator: "\r\n")
     }
 

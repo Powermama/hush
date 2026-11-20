@@ -63,5 +63,5 @@ enum CoworkerScreenObserver {
 
 private enum ScreenError: LocalizedError {
     case permission
-    var errorDescription: String? { "Allow Hush in System Settings > Privacy & Security > Screen Recording so I can see this window." }
+    var errorDescription: String? { "Allow hush in System Settings > Privacy & Security > Screen Recording so I can see this window." }
 }

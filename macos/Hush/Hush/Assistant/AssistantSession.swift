@@ -101,7 +101,7 @@ final class AssistantSession: ObservableObject {
                 phase = result == .verified ? .complete : .paused
                 status = result == .verified
                     ? "Inserted and checked in Mail. Ready for you to review and send."
-                    : "Paste was requested, but Hush could not confirm it. Check Mail before trying again."
+                    : "Paste was requested, but hush could not confirm it. Check Mail before trying again."
             } catch {
                 pause(error)
             }

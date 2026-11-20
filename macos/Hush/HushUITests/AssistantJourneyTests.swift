@@ -314,7 +314,7 @@ final class AssistantJourneyTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["hush.assistant.draft"].waitForExistence(timeout: 5))
         app.buttons["hush.assistant.fixture.change"].click()
         app.buttons["hush.assistant.insert"].click()
-        XCTAssertTrue(waitForStatus("The destination changed. Reopen Hush from the email body to bind it again.", in: app))
+        XCTAssertTrue(waitForStatus("The destination changed. Reopen hush from the email body to bind it again.", in: app))
         XCTAssertEqual(app.textViews["hush.assistant.fixture.body"].value as? String, "A newer draft typed by the user.")
         screenshot("Hey Hush Dark - Changed destination")
     }

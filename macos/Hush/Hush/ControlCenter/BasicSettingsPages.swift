@@ -499,7 +499,7 @@ final class PermissionsSettingsPageViewController: ControlCenterPageViewControll
         ))
         overallStatus.font = .systemFont(ofSize: 22, weight: .semibold)
         overallStatus.textColor = .labelColor
-        let overallDetail = subtitle("Your microphone captures dictation. Accessibility lets Hush insert it into other apps. Screen access for Assistant Beta is managed in Hush AI > Assistant.")
+        let overallDetail = subtitle("Your microphone captures dictation. Accessibility lets hush insert it into other apps. Screen access for Assistant Beta is managed in hush AI > Assistant.")
         let overallStack = NSStackView(views: [overallStatus, overallDetail])
         overallStack.orientation = .vertical
         overallStack.alignment = .leading
