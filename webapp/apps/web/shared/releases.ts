@@ -30,6 +30,54 @@ export type HushRelease = {
 // Older unnotarized builds have been withdrawn from the website.
 export const releases: readonly HushRelease[] = [
   {
+    slug: "0.1.0-alpha.9",
+    version: "0.1.0-alpha.9",
+    displayVersion: "0.1 alpha 9",
+    build: 18,
+    releasedAt: "2026-11-21",
+    displayDate: "21 November 2026",
+    channel: "Private alpha",
+    visibility: "private",
+    title: "Off means off.",
+    summary:
+      "When you switch the assistant off, ⌃ Fn no longer starts it, and local AI models leave your Mac's memory while nothing switched on uses them.",
+    downloadURL:
+      "https://updates.behu.sh/downloads/hush-0.1.0-alpha.9-build.18.dmg",
+    downloadName: "hush-0.1.0-alpha.9-build.18.dmg",
+    systemRequirements: "Apple silicon and macOS 15 or later",
+    sections: [
+      {
+        label: "Improved",
+        items: [
+          {
+            title: "hush uses less memory",
+            detail:
+              "A local AI model stays loaded only while Live Write or the assistant uses it, and the assistant's voice is released when you switch the assistant off.",
+          },
+        ],
+      },
+      {
+        label: "Fixed",
+        items: [
+          {
+            title: "The assistant switch",
+            detail:
+              "With the assistant switched off, ⌃ Fn shows that it is off instead of starting it, and switching it off ends a conversation that is still running.",
+          },
+          {
+            title: "hush in lowercase",
+            detail: "The app writes its name as hush everywhere.",
+          },
+        ],
+      },
+    ],
+    knownNotes: [
+      "macOS may ask you to approve the first launch and name Safari as the download source. This is a normal security prompt; no Terminal command is needed.",
+      "This is still an early alpha. I'm working toward a full public release, and I'd like to open-source the app in the future.",
+      "Built for Macs with Apple silicon. We recommend 16 GB of memory for the optional assistant; it is not a requirement for core dictation.",
+    ],
+  },
+  {
     slug: "0.1.0-alpha.8",
     version: "0.1.0-alpha.8",
     displayVersion: "0.1 alpha 8",
