@@ -168,11 +168,23 @@ labels and a DMG whose filename disagrees with the embedded bundle identity.
 This prevents retries or parallel release work from replacing an immutable
 tester build.
 
-The current public alpha is `0.1.0-alpha.7 (16)`, which adds vocabulary taught
-by voice, Live Write's app list and the optional ChatGPT plan. Alpha.6 made the
-persona editor follow Light and Dark mode; alpha.5 restored the Finder layout;
-alpha.4 was the first notarized download. The next tester release must use a
-build number greater than 16.
+The current public alpha is `0.1.0-alpha.8 (17)`, in which the assistant says it
+is an AI, talks in English and starts with ⌃ Fn on the ChatGPT plan. Alpha.7
+added vocabulary taught by voice, Live Write's app list and the optional ChatGPT
+plan; alpha.6 made the persona editor follow Light and Dark mode; alpha.5
+restored the Finder layout; alpha.4 was the first notarized download. The next
+tester release must use a build number greater than 17.
+
+Release notes for the update dialog are a Markdown file passed as
+`HUSH_RELEASE_NOTES_FILE`; Sparkle shows them before the user installs. Alpha.8
+is the first release with them.
+
+If downloading the existing channel from R2 fails with `IncompleteRead`, the
+AWS CLI's parallel ranged downloads broke on a slow line. Nothing is uploaded
+before that step, so rerun with a release-only config instead of changing
+`~/.aws`: `AWS_CONFIG_FILE` pointing at a file whose `[default]` section sets
+`s3 = max_concurrent_requests = 2, multipart_chunksize = 32MB`, plus
+`AWS_RETRY_MODE=standard AWS_MAX_ATTEMPTS=10`. Alpha.8 published this way.
 
 Build a signed candidate app and DMG for local review. This does not submit to
 Apple or publish anything:
