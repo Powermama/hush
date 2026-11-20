@@ -491,6 +491,7 @@ enum CoworkerModelSettings {
         set {
             guard choices.contains(newValue) else { return assertionFailure("Assistant can't use \(newValue)") }
             defaults.set(newValue.rawValue, forKey: modelKey)
+            ModelResidency.releaseUnused()
         }
     }
 

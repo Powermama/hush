@@ -447,6 +447,28 @@ final class LLMRuntime {
         try Task.checkCancellation()
     }
 
+    /// The Qwen variant held in memory, if any.
+    var warmQwenModel: QwenModel? {
+        #if canImport(MLXLLM) && canImport(MLXLMCommon) && canImport(MLXHuggingFace) && canImport(HuggingFace)
+        qwenContainerModel
+        #else
+        nil
+        #endif
+    }
+
+    /// Frees the loaded Qwen's memory. Its files stay, so a feature that needs it loads it again.
+    /// A generation already running keeps its own reference and finishes first.
+    func unloadQwen() {
+        #if canImport(MLXLLM) && canImport(MLXLMCommon) && canImport(MLXHuggingFace) && canImport(HuggingFace)
+        guard let model = qwenContainerModel, qwenWarmTasks[model] == nil else { return }
+        qwenContainer = nil
+        qwenContainerModel = nil
+        Memory.clearCache()
+        if case .warm = qwenStates[model] ?? .notDownloaded { qwenStates[model] = .downloaded }
+        notifyStateChange()
+        #endif
+    }
+
     /// Hotkey-press pre-warm: kick off a load for the active Qwen variant
     /// if it's on disk but not yet in RAM. No-op for Apple Intelligence /
     /// Off / a Qwen variant that's still downloading.

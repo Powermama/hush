@@ -145,6 +145,19 @@ final class CoworkerVoice: CoworkerSpeaking {
 
     func cancelPreparation() { preparation?.cancel() }
 
+    /// Frees Kokoro's memory and keeps its files; the next reply loads it again.
+    func release() async {
+        guard !removing, prepared || preparation != nil else { return }
+        let pendingPreparation = preparation
+        stop()
+        pendingPreparation?.cancel()
+        _ = try? await pendingPreparation?.value
+        await manager.cleanup()
+        prepared = false
+        preparation = nil
+        manager = KokoroAneManager(defaultVoice: "af_heart", directory: AIModelStorage.fluidAudioRoot, version: .v3)
+    }
+
     func removeModel() async throws {
         guard !removing else { throw AIModelLibrary.LibraryError.busy }
         removing = true
