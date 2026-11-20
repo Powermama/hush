@@ -275,3 +275,32 @@ download shows its progress (#127).
 - A clean-Mac offline installation remains untested.
 
 Reports are in `artifacts/release-alpha8/reports` and `artifacts/notarization`.
+
+## Alpha.9 distribution record
+
+Published 2026-11-20 (UTC) as `0.1.0-alpha.9 (18)` from clean source revision
+`1c567d57725dcda71c852ff07a23789a4319f92b` (main after #136, no local changes),
+built with Xcode 26.6. The assistant switch stops ⌃ Fn and ends a running
+conversation, local models leave memory while unused (#133), and the app writes
+hush in lowercase (#134).
+
+- `Package.resolved` is unchanged since alpha.8, so the build used
+  `HUSH_TRUST_PINNED_BUILD_TOOLS=1` into `artifacts/release-alpha9`.
+- Preflight and postflight passed.
+- Only submission: DMG `bdaa5138-14f3-4e04-8c50-5129d277bf3f`, Accepted, "Ready
+  for distribution", no issues, 39 files in the ticket. The DMG and the exported
+  app are stapled.
+- Finder layout: the screen was locked, so it was compared with alpha.8 instead of
+  viewed. The background is byte-identical and the stored icon positions and
+  window settings match.
+- Public DMG SHA-256:
+  `e9b50fbe39da3c6aae9378ba4d6eec39dda567622d2fef03e0eef0f61666afae`.
+  The versioned download and `hush-latest.dmg` match the accepted artifact byte
+  for byte; the downloaded copy passes Gatekeeper (`Notarized Developer ID`) and
+  staple validation. `verify-update-feed.sh` passed; the feed offers build 18 for
+  arm64, macOS 15 or later, with release notes and deltas from builds 15 to 17.
+- Pre-release checks: 283 app unit tests passed on the release revision. Before
+  release, a build of #133 was checked in the running app: with the assistant off,
+  ⌃ Fn only showed the notice, and launch memory was 32 MB with Live Write off
+  against 3.1 GB with it on (Qwen 3.5 4B).
+- A clean-Mac offline installation remains untested.
